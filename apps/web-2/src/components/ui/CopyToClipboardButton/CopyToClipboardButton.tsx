@@ -38,7 +38,7 @@ export const CopyToClipboardButton: React.FC<React.PropsWithChildren<Props>> = (
         />
     );
     return (
-        <Tooltip title='コピーしました!' visible={subscriptionCount >= 1}>
+        <Tooltip title="コピーしました!" visible={subscriptionCount >= 1}>
             {button}
         </Tooltip>
     );

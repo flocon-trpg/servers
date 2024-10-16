@@ -85,22 +85,22 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = ({});
+export const Default: Story = {};
 
-export const DefaultMultiline: Story = ({
+export const DefaultMultiline: Story = {
     args: {
         multiline: true,
-    }
-});
+    },
+};
 
-export const Short: Story = ({
+export const Short: Story = {
     args: {
-    bufferDuration: 'short',
-    }
-});
+        bufferDuration: 'short',
+    },
+};
 
-export const NoBuffer: Story = ({
+export const NoBuffer: Story = {
     args: {
-    bufferDuration: null,
-    }
-});
+        bufferDuration: null,
+    },
+};

@@ -109,7 +109,7 @@ const backgroundActiveBoardProps: Props = {
 const meta = {
     title: 'models/room/Room/Board',
     component: Default,
-    args: { myParticipantRole: 'Player', boardProps: boardEditorProps, removeActiveBoard: true  },
+    args: { myParticipantRole: 'Player', boardProps: boardEditorProps, removeActiveBoard: true },
     parameters: {
         chromatic: { delay: 1000 },
     },
@@ -119,35 +119,35 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Spectator: Story = ({
+export const Spectator: Story = {
     args: {
         ...meta.args,
-    myParticipantRole: 'Spectator',
-    }
-});
+        myParticipantRole: 'Spectator',
+    },
+};
 
-export const ActiveBoard: Story = ({
+export const ActiveBoard: Story = {
     args: {
-    boardProps: activeBoardProps,
-    }
-});
+        boardProps: activeBoardProps,
+    },
+};
 
-export const BackgroundActiveBoard: Story = ({
+export const BackgroundActiveBoard: Story = {
     args: {
-    boardProps: backgroundActiveBoardProps,
-    }
-});
+        boardProps: backgroundActiveBoardProps,
+    },
+};
 
-export const ActiveBoardNotFound: Story = ({
+export const ActiveBoardNotFound: Story = {
     args: {
-    boardProps: activeBoardProps,
-    removeActiveBoard: true,
-    }
-});
+        boardProps: activeBoardProps,
+        removeActiveBoard: true,
+    },
+};
 
-export const BackgroundActiveBoardNotFound: Story = ({
+export const BackgroundActiveBoardNotFound: Story = {
     args: {
-    boardProps: backgroundActiveBoardProps,
-    removeActiveBoard: true,
-    }
-});
+        boardProps: backgroundActiveBoardProps,
+        removeActiveBoard: true,
+    },
+};

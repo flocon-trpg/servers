@@ -161,7 +161,7 @@ export const useDicePieceEditor = ({
                             label={`ダイス${key}`}
                         >
                             <InputDie
-                                size='small'
+                                size="small"
                                 state={die ?? null}
                                 onChange={e => {
                                     updateState(pieceValue => {
@@ -243,7 +243,7 @@ export const useDicePieceEditor = ({
 
                 <PieceEditorIdRow pieceId={updateModeProp?.pieceId} />
 
-                <TableRow label='所有者'>
+                <TableRow label="所有者">
                     <MyCharactersSelect
                         selectedCharacterId={
                             createModeProp == null ? state.ownerCharacterId : activeCharacter?.id

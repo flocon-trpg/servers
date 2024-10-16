@@ -5,12 +5,12 @@ import 'firebase/auth';
 import 'firebase/storage';
 
 import { enableMapSet } from 'immer';
-import { PropsWithChildren, StrictMode } from 'react'
-import ReactDOM from 'react-dom/client'
-import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { PropsWithChildren, StrictMode } from 'react';
+import ReactDOM from 'react-dom/client';
+import { RouterProvider, createRouter } from '@tanstack/react-router';
 
 // Import the generated route tree
-import { routeTree } from './routeTree.gen'
+import { routeTree } from './routeTree.gen';
 import { AllContextProvider } from './components/behaviors/AllContextProvider';
 import { loggerRef } from '@flocon-trpg/utils';
 import React from 'react';
@@ -21,13 +21,13 @@ import { App as AntdApp, Layout } from 'antd';
 enableMapSet();
 
 // Create a new router instance
-const router = createRouter({ routeTree })
+const router = createRouter({ routeTree });
 
 // Register the router instance for type safety
 declare module '@tanstack/react-router' {
-  interface Register {
-    router: typeof router
-  }
+    interface Register {
+        router: typeof router;
+    }
 }
 
 const ThemedDiv: React.FC<PropsWithChildren<{ style?: React.CSSProperties }>> = ({
@@ -47,7 +47,7 @@ const ThemedDiv: React.FC<PropsWithChildren<{ style?: React.CSSProperties }>> = 
     );
 };
 
-const App = ({children}: PropsWithChildren) => {
+const App = ({ children }: PropsWithChildren) => {
     const { config, authNotFoundState, urqlClient, reactQueryClient, clientId, httpUri, wsUri } =
         useSetupApp();
 
@@ -94,26 +94,26 @@ const App = ({children}: PropsWithChildren) => {
         );
     }
     return (
-            <AllContextProvider
-                clientId={clientId}
-                urqlClient={urqlClient}
-                reactQueryClient={reactQueryClient}
-                roomClient={null}
-            >
-              {children}
-            </AllContextProvider>
+        <AllContextProvider
+            clientId={clientId}
+            urqlClient={urqlClient}
+            reactQueryClient={reactQueryClient}
+            roomClient={null}
+        >
+            {children}
+        </AllContextProvider>
     );
 };
 
 // Render the app
-const rootElement = document.getElementById('root')!
+const rootElement = document.getElementById('root')!;
 if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement)
-  root.render(
-    <StrictMode>
-      <App>
-      <RouterProvider router={router} />
-      </App>
-    </StrictMode>,
-  )
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(
+        <StrictMode>
+            <App>
+                <RouterProvider router={router} />
+            </App>
+        </StrictMode>,
+    );
 }

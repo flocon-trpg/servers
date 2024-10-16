@@ -128,7 +128,7 @@ const ActiveBoardPanel: React.FC = React.memo(function ActiveBoardPanel() {
 
     return (
         <DraggableCard
-            header='ボードビュアー'
+            header="ボードビュアー"
             onDragStop={onDragStop}
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
@@ -143,7 +143,7 @@ const ActiveBoardPanel: React.FC = React.memo(function ActiveBoardPanel() {
             <Board
                 canvasWidth={config.width}
                 canvasHeight={config.height}
-                type='activeBoard'
+                type="activeBoard"
                 isBackground={false}
                 config={config}
             />
@@ -217,7 +217,7 @@ const BoardEditorPanel: React.FC<ConfigAndKeyProps<BoardEditorPanelConfig>> = Re
         return (
             <DraggableCard
                 key={keyName}
-                header='ボードエディター'
+                header="ボードエディター"
                 onDragStop={onDragStop}
                 onResizeStop={onResizeStop}
                 onMoveToFront={onMoveToFront}
@@ -232,7 +232,7 @@ const BoardEditorPanel: React.FC<ConfigAndKeyProps<BoardEditorPanelConfig>> = Re
                 <Board
                     canvasWidth={config.width}
                     canvasHeight={config.height}
-                    type='boardEditor'
+                    type="boardEditor"
                     boardEditorPanelId={keyName}
                     config={config}
                 />
@@ -323,7 +323,7 @@ const ChatPalettePanel: React.FC<ConfigAndKeyProps<ChatPalettePanelConfig>> = Re
         return (
             <DraggableCard
                 key={keyName}
-                header='チャットパレット'
+                header="チャットパレット"
                 onDragStop={onDragStop}
                 onResizeStop={onResizeStop}
                 onMoveToFront={onMoveToFront}
@@ -408,7 +408,7 @@ const CharacterPanel: React.FC = React.memo(function CharacterPanel() {
 
     return (
         <DraggableCard
-            header='キャラクター'
+            header="キャラクター"
             onDragStop={onDragStop}
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
@@ -476,7 +476,7 @@ const GameEffectPanel: React.FC = React.memo(function GameEffectPanel() {
 
     return (
         <DraggableCard
-            header='SE, BGM'
+            header="SE, BGM"
             onDragStop={onDragStop}
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
@@ -575,7 +575,7 @@ const MemoPanel: React.FC<ConfigAndKeyProps<MemoPanelConfig>> = React.memo(funct
     return (
         <DraggableCard
             key={keyName}
-            header='共有メモ（部屋）'
+            header="共有メモ（部屋）"
             onDragStop={onDragStop}
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
@@ -665,7 +665,7 @@ const ParticipantPanel: React.FC = () => {
 
     return (
         <DraggableCard
-            header='入室者'
+            header="入室者"
             onDragStop={onDragStop}
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
@@ -734,7 +734,7 @@ const PieceValuePanel: React.FC = () => {
 
     return (
         <DraggableCard
-            header='コマ(仮)'
+            header="コマ(仮)"
             onDragStop={onDragStop}
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
@@ -808,7 +808,7 @@ const RollCallPanel: React.FC = () => {
 
     return (
         <DraggableCard
-            header='点呼'
+            header="点呼"
             onDragStop={onDragStop}
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
@@ -902,7 +902,7 @@ const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.
         return (
             <DraggableCard
                 key={keyName}
-                header='メッセージ'
+                header="メッセージ"
                 onDragStop={onDragStop}
                 onResizeStop={onResizeStop}
                 onMoveToFront={onMoveToFront}
@@ -970,7 +970,7 @@ export const Room: React.FC<Props> = ({ debug }) => {
         roomIdOfRoomConfig !== roomId ||
         activeBoardBackgroundConfig == null
     ) {
-        return <LoadingResult title='個人設定のデータをブラウザから読み込んでいます…' />;
+        return <LoadingResult title="個人設定のデータをブラウザから読み込んでいます…" />;
     }
 
     if (myUserUid == null) {
@@ -978,8 +978,8 @@ export const Room: React.FC<Props> = ({ debug }) => {
             <AntdLayout>
                 <AntdLayout.Content>
                     <Result
-                        status='warning'
-                        title='ログインしていないか、Participantの取得に失敗しました。'
+                        status="warning"
+                        title="ログインしていないか、Participantの取得に失敗しました。"
                     />
                 </AntdLayout.Content>
             </AntdLayout>
@@ -999,7 +999,7 @@ export const Room: React.FC<Props> = ({ debug }) => {
                                 (debug?.window?.innerHeight ?? innerHeight) -
                                 40 /* TODO: 40という値は適当 */
                             }
-                            type='activeBoard'
+                            type="activeBoard"
                             isBackground={true}
                             config={activeBoardBackgroundConfig}
                         />

@@ -185,9 +185,9 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
             width={700}
             closable={false}
             maskClosable={!isDownloading}
-            title='ログのダウンロード'
+            title="ログのダウンロード"
             okButtonProps={{ style: { display: 'none' } }}
-            cancelText='閉じる'
+            cancelText="閉じる"
             cancelButtonProps={{ disabled: isDownloading }}
             onCancel={() => onClose()}
         >
@@ -238,7 +238,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                 )}
                 <Button
                     style={{ alignSelf: 'start', marginTop: 8 }}
-                    type='primary'
+                    type="primary"
                     disabled={isDownloading}
                     onClick={() => setIsDownloading(true)}
                 >

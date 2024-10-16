@@ -12,10 +12,12 @@ export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myPar
             myParticipantRole,
         },
     });
-const mockUrqlClient = React.useRef(createMockUrqlClient());
+    const mockUrqlClient = React.useRef(createMockUrqlClient());
     return (
-        <StorybookProvider compact roomClientContextValue={roomClientContextValue}
-        urqlClient={mockUrqlClient.current}
+        <StorybookProvider
+            compact
+            roomClientContextValue={roomClientContextValue}
+            urqlClient={mockUrqlClient.current}
         >
             <SoundPlayerPanelContent />
         </StorybookProvider>
@@ -26,7 +28,7 @@ const meta = {
     title: 'models/room/Room/SoundPlayerPanelContent',
     component: Player,
     args: { myParticipantRole: 'Player' },
-} satisfies Meta<typeof Player>
+} satisfies Meta<typeof Player>;
 
 export default meta;
 
@@ -35,5 +37,5 @@ type Story = StoryObj<typeof meta>;
 export const Spectator: Story = {
     args: {
         myParticipantRole: 'Spectator',
-    }
-}
+    },
+};

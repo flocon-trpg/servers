@@ -21,8 +21,8 @@ export const CharacterVarInput: React.FC<Props> = ({
         <TomlInput
             style={style}
             className={className}
-            size='small'
-            bufferDuration='default'
+            size="small"
+            bufferDuration="default"
             disabled={character == null}
             value={character?.privateVarToml ?? ''}
             onChange={e => {

@@ -197,10 +197,11 @@ export type MockUrqlClientParams = {
 export const createMockUrqlClient = (args?: MockUrqlClientParams): Client => {
     // https://formidable.com/open-source/urql/docs/advanced/testing/ では executeQuery と executeMutation と executeSubscription のみからなるオブジェクトを作る例を紹介しているが、query メソッドなども利用することがあるので Client インスタンスを作ってからメソッドを差し替える方法をとっている。
 
-    const result = createClient({ 
+    const result = createClient({
         // 適当な URL
         url: 'https://localhost/mock-urql-client',
-        exchanges: [] });
+        exchanges: [],
+    });
     result.executeQuery = query => {
         if (args?.mockQuery == null) {
             throw new Error('mockQuery is not implemented.');

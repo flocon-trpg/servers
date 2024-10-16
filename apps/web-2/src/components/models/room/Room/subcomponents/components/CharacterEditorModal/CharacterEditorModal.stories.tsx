@@ -46,20 +46,20 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Spectator: Story = ({
+export const Spectator: Story = {
     args: {
-    myParticipantRole: 'Spectator',
-    }
-});
+        myParticipantRole: 'Spectator',
+    },
+};
 
-export const SimpleCharacter: Story = ({
+export const SimpleCharacter: Story = {
     args: {
-    characterStateId: mySimpleCharacterId,
-    }
-});
+        characterStateId: mySimpleCharacterId,
+    },
+};
 
-export const AnotherPlayerCharacter: Story = ({
+export const AnotherPlayerCharacter: Story = {
     args: {
-    characterStateId: anotherPlayerCharacterId1,
-    }
-});
+        characterStateId: anotherPlayerCharacterId1,
+    },
+};

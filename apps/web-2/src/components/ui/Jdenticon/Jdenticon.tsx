@@ -44,7 +44,7 @@ export const Jdenticon: React.FC<Props> = ({ hashOrValue, size, tooltipMode }: P
     }
     return (
         <Popover
-            trigger='hover'
+            trigger="hover"
             content={
                 <div className={classNames(flex, flexColumn)}>
                     <img src={src} width={70} height={70} />

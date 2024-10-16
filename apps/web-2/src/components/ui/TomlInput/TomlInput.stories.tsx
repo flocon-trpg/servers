@@ -70,33 +70,32 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-
-export const Multiline: Story = ({
+export const Multiline: Story = {
     args: {
         multiline: true,
-    }
-});
+    },
+};
 
-export const ValidToml: Story = ({
+export const ValidToml: Story = {
     args: {
-    initText: 'n = 1',
-    }
-});
+        initText: 'n = 1',
+    },
+};
 
-export const InvalidToml: Story = ({
+export const InvalidToml: Story = {
     args: {
-    initText: 'this is invalid text!',
-    }
-});
+        initText: 'this is invalid text!',
+    },
+};
 
-export const Short: Story = ({
+export const Short: Story = {
     args: {
-    bufferDuration: 'short',
-    }
-});
+        bufferDuration: 'short',
+    },
+};
 
-export const NoBuffer: Story = ({
+export const NoBuffer: Story = {
     args: {
-    bufferDuration: null,
-    }
-});
+        bufferDuration: null,
+    },
+};

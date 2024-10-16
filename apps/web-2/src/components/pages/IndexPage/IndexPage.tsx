@@ -36,9 +36,9 @@ export const IndexPage: React.FC = () => {
         } else {
             alert = (
                 <Alert
-                    type='error'
+                    type="error"
                     showIcon
-                    message='APIサーバーとWebサーバーの間に互換性がありません。APIサーバーとWebサーバーのいずれかもしくは両方をアップデートすることを推奨します。'
+                    message="APIサーバーとWebサーバーの間に互換性がありません。APIサーバーとWebサーバーのいずれかもしくは両方をアップデートすることを推奨します。"
                 />
             );
         }
@@ -46,7 +46,7 @@ export const IndexPage: React.FC = () => {
             <div className={classNames(flex, flexColumn)}>
                 {alert}
                 <Collapse ghost>
-                    <Collapse.Panel header='詳細' key='version-info-detais-panel'>
+                    <Collapse.Panel header="詳細" key="version-info-detais-panel">
                         <div className={classNames(flex, flexColumn)}>
                             <div>{`このWebサーバーが対応しているAPIサーバーのバージョン範囲: ${supportedApiServersAsString}`}</div>
                             <div>
@@ -67,9 +67,9 @@ export const IndexPage: React.FC = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', width: 300 }}>
                     <Button
                         style={{ margin: '0 0 4px 0' }}
-                        type='primary'
-                        size='large'
-                        onClick={() => router({to:'/rooms'})}
+                        type="primary"
+                        size="large"
+                        onClick={() => router({ to: '/rooms' })}
                     >
                         部屋一覧
                     </Button>
@@ -140,33 +140,33 @@ export const IndexPage: React.FC = () => {
                 <Typography.Title level={3}>利用規約・プライバシーポリシー</Typography.Title>
                 <ul>
                     <li>
-                        <Link to='/tos'>利用規約</Link>
+                        <Link to="/tos">利用規約</Link>
                     </li>
                     <li>
-                        <Link to='/privacy_policy'>プライバシーポリシー</Link>
+                        <Link to="/privacy_policy">プライバシーポリシー</Link>
                     </li>
                 </ul>
                 <Typography.Title level={3}>外部リンク</Typography.Title>
                 <ul>
                     <li>
-                        <a href='https://flocon.app' target='_blank' rel='noopener noreferrer'>
+                        <a href="https://flocon.app" target="_blank" rel="noopener noreferrer">
                             公式サイト
                         </a>
                     </li>
                     <li>
                         <a
-                            href='https://github.com/flocon-trpg/servers'
-                            target='_blank'
-                            rel='noopener noreferrer'
+                            href="https://github.com/flocon-trpg/servers"
+                            target="_blank"
+                            rel="noopener noreferrer"
                         >
                             ソースコード
                         </a>
                     </li>
                     <li>
                         <a
-                            href='https://github.com/flocon-trpg/servers/releases'
-                            target='_blank'
-                            rel='noopener noreferrer'
+                            href="https://github.com/flocon-trpg/servers/releases"
+                            target="_blank"
+                            rel="noopener noreferrer"
                         >
                             更新履歴
                         </a>
@@ -175,7 +175,7 @@ export const IndexPage: React.FC = () => {
                 <Typography.Title level={3}>その他</Typography.Title>
                 <ul>
                     <li>
-                        <Link to='/licenses'>使用している素材とライブラリのライセンス</Link>
+                        <Link to="/licenses">使用している素材とライブラリのライセンス</Link>
                     </li>
                 </ul>
             </div>

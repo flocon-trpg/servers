@@ -52,7 +52,7 @@ const useLoginWithAuthProvider = (): ((provider: AuthProvider) => Promise<void>)
                     .then(() => {
                         setError(undefined);
                         // CONSIDER: await されていない。これで問題ないか？
-                        router({to: '/' });
+                        router({ to: '/' });
                     })
                     .catch((error: FirebaseError) => {
                         setError(error);
@@ -65,7 +65,7 @@ const useLoginWithAuthProvider = (): ((provider: AuthProvider) => Promise<void>)
                     // なお、result.operationType、result.user.metadataを用いて判定する方法はうまくいかなかった。
 
                     setError(undefined);
-                    await router({to: '/' });
+                    await router({ to: '/' });
                 })
                 .catch((error: FirebaseError) => {
                     setError(error);
@@ -97,7 +97,7 @@ const Email: React.FC = () => {
         setEmail('');
         setPassword('');
         setEmailMode(false);
-        await router({to: '/' });
+        await router({ to: '/' });
     }, [router, setEmailMode, setError]);
 
     if (auth == null) {
@@ -106,15 +106,15 @@ const Email: React.FC = () => {
 
     return (
         <Form
-            name='mailForm'
+            name="mailForm"
             labelCol={{ span: labelCol }}
             wrapperCol={{ span: wrapperCol }}
             initialValues={{ remember: true }}
             style={{ width: formWidth }}
         >
-            <Form.Item label='メールアドレス' name='email'>
+            <Form.Item label="メールアドレス" name="email">
                 <Input
-                    name='emailInput'
+                    name="emailInput"
                     value={email}
                     onChange={e => {
                         setEmail(e.target.value);
@@ -122,7 +122,7 @@ const Email: React.FC = () => {
                 />
             </Form.Item>
 
-            <Form.Item label='パスワード' name='password'>
+            <Form.Item label="パスワード" name="password">
                 <Input.Password value={password} onChange={e => setPassword(e.target.value)} />
             </Form.Item>
 
@@ -328,7 +328,7 @@ const SignInContent: React.FC = () => {
             <>
                 <a
                     style={{ marginBottom: 12, alignSelf: 'start' }}
-                    onClick={() => router({to: '/' })}
+                    onClick={() => router({ to: '/' })}
                 >
                     {'< トップページに戻る'}
                 </a>
@@ -380,7 +380,7 @@ const SignInContent: React.FC = () => {
                     </Button>
                 )}
                 {(areProvidersEmptyValue || authProviders.includes(anonymous)) && (
-                    <Tooltip title='アカウントを作成せずに匿名でログインします。匿名ユーザーのデータは消失しやすいため、あくまでお試しとして使うことを推奨します。非匿名アカウントに後からアップグレードすることもできます。'>
+                    <Tooltip title="アカウントを作成せずに匿名でログインします。匿名ユーザーのデータは消失しやすいため、あくまでお試しとして使うことを推奨します。非匿名アカウントに後からアップグレードすることもできます。">
                         <Button
                             style={{ margin }}
                             onClick={() => {
@@ -391,7 +391,7 @@ const SignInContent: React.FC = () => {
                                             photoURL: null,
                                         });
                                         setError(undefined);
-                                        await router({to: '/' });
+                                        await router({ to: '/' });
                                     })
                                     .catch((error: FirebaseError) => {
                                         setError(error);

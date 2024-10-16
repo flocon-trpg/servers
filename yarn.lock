@@ -4070,6 +4070,7 @@ __metadata:
     "@emotion/styled": ^11.9.3
     "@eslint/js": ^9.11.1
     "@flocon-trpg/core": "workspace:^"
+    "@flocon-trpg/prettier-config": "workspace:^"
     "@flocon-trpg/sdk": "workspace:^"
     "@flocon-trpg/sdk-react": "workspace:^"
     "@flocon-trpg/sdk-urql": "workspace:^"
@@ -4145,6 +4146,7 @@ __metadata:
     monaco-editor: 0.52.0
     npm-run-all2: ^5.0.0
     pino: ^9.4.0
+    prettier: 3.3.3
     quill: ^1.3.7
     re-resizable: ^6.9.1
     react: ^18.3.1

@@ -22,23 +22,23 @@ const config: StorybookConfig = {
         name: getAbsolutePath('@storybook/react-vite'),
         options: {},
     },
-typescript: {
-    /*
+    typescript: {
+        /*
     reactDocgen を有効化すると下のエラーが出て storybook を利用できないため、無効化している。
     TODO: reactDocgen を有効化する
 
     Internal server error: Argument must be Identifier, Literal, QualifiedTypeIdentifier or TSQualifiedName. Received 'PrivateName'
     Plugin: storybook:react-docgen-plugin
     */
-    reactDocgen: false,
-  },
-    webpackFinal: async (config) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@': path.resolve(__dirname, "../src"),
-    };
+        reactDocgen: false,
+    },
+    webpackFinal: async config => {
+        config.resolve.alias = {
+            ...config.resolve.alias,
+            '@': path.resolve(__dirname, '../src'),
+        };
 
-    return config;
-  }
+        return config;
+    },
 };
 export default config;

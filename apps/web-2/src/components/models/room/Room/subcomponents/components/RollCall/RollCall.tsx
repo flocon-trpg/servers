@@ -44,8 +44,8 @@ const Help: React.FC = () => {
         </div>
     );
     return (
-        <Tooltip title={title} trigger='click'>
-            <Button size='small'>説明書を見る</Button>
+        <Tooltip title={title} trigger="click">
+            <Button size="small">説明書を見る</Button>
         </Tooltip>
     );
 };
@@ -105,7 +105,7 @@ const RollCallResult: React.FC<RollCallResultProps> = ({
                 button = (
                     <Button
                         style={{ marginLeft: 4 }}
-                        size='small'
+                        size="small"
                         type={checked ? undefined : 'primary'}
                         onClick={() => {
                             answerRollCall({
@@ -139,7 +139,7 @@ const RollCallResult: React.FC<RollCallResultProps> = ({
                         <div>{p.participantName ?? '(不明な名前)'}</div>
                         {button}
                     </div>
-                    {p.isMe && failureType && <Alert type='warning' message={failureType} />}
+                    {p.isMe && failureType && <Alert type="warning" message={failureType} />}
                 </div>
             );
         });
@@ -175,12 +175,12 @@ const RollCallResult: React.FC<RollCallResultProps> = ({
     return (
         <Table>
             <TableHeader>{tableHeader}</TableHeader>
-            <TableRow label='開始日時'>{elapesedText}</TableRow>
-            <TableRow label='返事した人数'>{`${joined
+            <TableRow label="開始日時">{elapesedText}</TableRow>
+            <TableRow label="返事した人数">{`${joined
                 .filter(p => p.answered != null)
                 .reduce(seed => seed + 1, 0)} / ${joined.length}`}</TableRow>
-            <TableRow label='返事の状況'>{participantsElement}</TableRow>
-            <TableRow label='説明書'>
+            <TableRow label="返事の状況">{participantsElement}</TableRow>
+            <TableRow label="説明書">
                 <Help />
             </TableRow>
         </Table>
@@ -206,19 +206,19 @@ const HasOpenRollCall: React.FC<{
                     onClick={() => {
                         setShowModal(true);
                     }}
-                    size='small'
+                    size="small"
                     disabled={disableClose}
                 >
                     点呼を終了
                 </Button>
             </div>
-            {failureType && <Alert type='warning' message={failureType} />}
+            {failureType && <Alert type="warning" message={failureType} />}
             <div style={{ height: 12 }} />
             <RollCallResult
                 rollCall={rollCall}
                 rollCallId={rollCallId}
                 isOpen
-                tableHeader='点呼の状況'
+                tableHeader="点呼の状況"
                 mockDate={mockDate}
             />
             <Modal
@@ -275,21 +275,21 @@ const NoOpenRollCall: React.FC<{ mockDate?: () => Date }> = ({ mockDate }) => {
                             },
                         });
                     }}
-                    type='primary'
-                    size='small'
+                    type="primary"
+                    size="small"
                     disabled={performRollCallResult.fetching}
                 >
                     点呼を開始
                 </Button>
             </div>
-            {failureType && <Alert type='warning' message={failureType} />}
+            {failureType && <Alert type="warning" message={failureType} />}
             <div style={{ height: 12 }} />
             {latestRollCall && (
                 <RollCallResult
                     rollCall={latestRollCall.value}
                     rollCallId={latestRollCall.key}
                     isOpen={false}
-                    tableHeader='最後に行われた点呼の結果'
+                    tableHeader="最後に行われた点呼の結果"
                     mockDate={mockDate}
                 />
             )}

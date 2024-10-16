@@ -90,12 +90,12 @@ export const ImportCharacterModal: React.FC = () => {
                     onChange={e => {
                         setValue(e.currentValue);
                     }}
-                    bufferDuration='short'
-                    placeholder='ここにJSONをペーストしてください。'
+                    bufferDuration="short"
+                    placeholder="ここにJSONをペーストしてください。"
                 />
                 <div>
                     {parsed?.error != null && (
-                        <Alert type='error' showIcon message={parsed.error} />
+                        <Alert type="error" showIcon message={parsed.error} />
                     )}
                 </div>
             </div>

@@ -94,35 +94,35 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Loading: Story ={
-args: {
-    version: 'never',
-}
-}; 
-
-export const GraphQLError : Story ={
-args: {
-    version: 'error',
-}
-}; 
-
-export const Prerelease : Story ={
-args: {
-    version: {
-        major: 0,
-        minor: 7,
-        patch: 100,
-        prerelease: { type: Doc.PrereleaseType.Alpha, version: 1 },
-    },
-}
-}; 
-
-export const OutOfRange: Story ={
+export const Loading: Story = {
     args: {
-    version: {
-        major: 1000,
-        minor: 0,
-        patch: 0,
+        version: 'never',
     },
-    }
+};
+
+export const GraphQLError: Story = {
+    args: {
+        version: 'error',
+    },
+};
+
+export const Prerelease: Story = {
+    args: {
+        version: {
+            major: 0,
+            minor: 7,
+            patch: 100,
+            prerelease: { type: Doc.PrereleaseType.Alpha, version: 1 },
+        },
+    },
+};
+
+export const OutOfRange: Story = {
+    args: {
+        version: {
+            major: 1000,
+            minor: 0,
+            patch: 0,
+        },
+    },
 };
