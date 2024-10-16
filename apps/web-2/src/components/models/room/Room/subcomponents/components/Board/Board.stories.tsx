@@ -1,11 +1,11 @@
 import { ParticipantRole, State as S, roomTemplate } from '@flocon-trpg/core';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import { Board, Props } from './Board';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { defaultBoardId } from '@/mocks';
 import { createMockUrqlClientForLayout } from '@/mocks/createMockUrqlClientForLayout';
+import { Meta, StoryObj } from '@storybook/react';
 
 type RoomState = S<typeof roomTemplate>;
 
@@ -106,40 +106,48 @@ const backgroundActiveBoardProps: Props = {
     isBackground: true,
 };
 
-export default {
+const meta = {
     title: 'models/room/Room/Board',
     component: Default,
-    args: { myParticipantRole: 'Player', boardProps: boardEditorProps, setActiveBoard: false },
+    args: { myParticipantRole: 'Player', boardProps: boardEditorProps, removeActiveBoard: true  },
     parameters: {
         chromatic: { delay: 1000 },
     },
-} as ComponentMeta<typeof Default>;
+} satisfies Meta<typeof Default>;
 
-const Template: ComponentStory<typeof Default> = args => <Default {...args} />;
+export default meta;
 
-export const Spectator = Template.bind({});
-Spectator.args = {
+type Story = StoryObj<typeof meta>;
+
+export const Spectator: Story = ({
+    args: {
+        ...meta.args,
     myParticipantRole: 'Spectator',
-};
+    }
+});
 
-export const ActiveBoard = Template.bind({});
-ActiveBoard.args = {
+export const ActiveBoard: Story = ({
+    args: {
     boardProps: activeBoardProps,
-};
+    }
+});
 
-export const BackgroundActiveBoard = Template.bind({});
-BackgroundActiveBoard.args = {
+export const BackgroundActiveBoard: Story = ({
+    args: {
     boardProps: backgroundActiveBoardProps,
-};
+    }
+});
 
-export const ActiveBoardNotFound = Template.bind({});
-ActiveBoardNotFound.args = {
+export const ActiveBoardNotFound: Story = ({
+    args: {
     boardProps: activeBoardProps,
     removeActiveBoard: true,
-};
+    }
+});
 
-export const BackgroundActiveBoardNotFound = Template.bind({});
-BackgroundActiveBoardNotFound.args = {
+export const BackgroundActiveBoardNotFound: Story = ({
+    args: {
     boardProps: backgroundActiveBoardProps,
     removeActiveBoard: true,
-};
+    }
+});

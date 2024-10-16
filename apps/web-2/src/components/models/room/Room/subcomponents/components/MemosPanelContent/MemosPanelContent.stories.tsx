@@ -1,8 +1,8 @@
-import { ComponentMeta } from '@storybook/react';
 import React from 'react';
 import { MemosPanelContent } from './MemosPanelContent';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
+import { Meta } from '@storybook/react';
 
 export const Default: React.FC<{ width?: number }> = ({ width }) => {
     const { roomClientContextValue } = useSetupStorybook({
@@ -28,7 +28,9 @@ export const Default: React.FC<{ width?: number }> = ({ width }) => {
     );
 };
 
-export default {
+const meta = {
     title: 'models/room/Room/MemosPanelContent',
     component: Default,
-} as ComponentMeta<typeof Default>;
+} satisfies Meta<typeof Default>;
+
+export default meta;

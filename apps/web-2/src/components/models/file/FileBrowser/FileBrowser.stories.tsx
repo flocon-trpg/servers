@@ -1,6 +1,5 @@
 import { both, delay, groupJoinArray, loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { createStore } from 'jotai/vanilla';
 import React from 'react';
 import useConstant from 'use-constant';
@@ -13,6 +12,7 @@ import {
     sound,
 } from './FileBrowser';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
+import { Meta, StoryObj } from '@storybook/react';
 
 type FileSource =
     | {
@@ -220,7 +220,7 @@ export const Default: React.FC<Props> = ({
     );
 };
 
-export default {
+const meta = {
     title: 'models/file/FileBrowser',
     component: Default,
     args: {
@@ -302,27 +302,32 @@ export default {
             },
         ],
     },
-} as ComponentMeta<typeof Default>;
+} satisfies Meta<typeof Default>;
 
-const Template: ComponentStory<typeof Default> = args => <Default {...args} />;
+export default meta;
 
-export const Filtered = Template.bind({});
-Filtered.args = {
+type Story = StoryObj<typeof meta>;
+
+export const Filtered: Story = ({
+    args: {
     defaultFileTypeFilter: others,
-};
+    }
+});
 
-export const Empty = Template.bind({});
-Empty.args = {
+export const Empty: Story = ({
+    args: {
     filesSource: undefined,
     files: [],
     ensuredFolderPaths: [],
-};
+    }
+});
 
-export const EmptyButEnsured = Template.bind({});
-EmptyButEnsured.args = {
+export const EmptyButEnsured: Story = ({
+    args: {
     filesSource: undefined,
     files: [],
-};
+    }
+});
 
 const success = async () => {
     await delay(1000);
@@ -333,8 +338,8 @@ const fail = async () => {
     return Promise.reject(new Error('(Fake error)'));
 };
 
-export const ManyFiles = Template.bind({});
-ManyFiles.args = {
+export const ManyFiles: Story = ({
+    args: {
     filesSource: undefined,
     files: [...Array(200)].map((_, i) => {
         const filename = `file${(i + 1).toString().padStart(3, '0')}.dll`;
@@ -347,4 +352,5 @@ ManyFiles.args = {
             id: undefined,
         };
     }),
-};
+    }
+});
