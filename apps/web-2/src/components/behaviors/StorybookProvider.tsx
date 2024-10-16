@@ -7,6 +7,8 @@ import { Client, Provider } from 'urql';
 import { RoomGlobalStyle } from '../globalStyles/RoomGlobalStyle';
 import { AntdThemeConfigProvider } from './AntdThemeConfigProvider';
 import { RoomClientContext, RoomClientContextValue } from '@/contexts/RoomClientContext';
+import { createRouter, getRouterContext } from '@tanstack/react-router';
+import { routeTree } from '@/routeTree.gen';
 
 /** Storybookに表示するコンポーネント用のProviderです。Storybookやデバッグ以外で用いることは避けてください。 */
 export const StorybookProvider: React.FC<{
@@ -15,6 +17,8 @@ export const StorybookProvider: React.FC<{
     roomClientContextValue: RoomClientContextValue | null;
     compact: boolean;
 }> = ({ children, urqlClient, roomClientContextValue, compact }) => {
+    const routerRef = React.useRef(createRouter({routeTree}));
+    const routerContextRef = React.useRef(getRouterContext());
     const queryClientRef = React.useRef(new QueryClient());
     const childrenWithRoomClient =
         roomClientContextValue == null ? (
@@ -26,6 +30,8 @@ export const StorybookProvider: React.FC<{
         );
 
     let result = (
+        // このように RouterContext に router を設定しないと useNavigate() があるコンポーネントで失敗する
+        <routerContextRef.current.Provider value={routerRef.current}>
         <QueryClientProvider client={queryClientRef.current}>
             <DndProvider backend={HTML5Backend}>
                 <AntdThemeConfigProvider compact={compact}>
@@ -36,6 +42,7 @@ export const StorybookProvider: React.FC<{
                 </AntdThemeConfigProvider>
             </DndProvider>
         </QueryClientProvider>
+        </routerContextRef.current.Provider>
     );
     if (urqlClient != null) {
         result = <Provider value={urqlClient}>{result}</Provider>;
