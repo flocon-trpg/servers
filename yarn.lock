@@ -3013,6 +3013,7 @@ __metadata:
     react-rnd: ^10.3.7
     react-use: ^17.3.1
     react-virtuoso: ^4.0.0
+    rollup-plugin-license: ^3.5.3
     rxjs: ^7.5.6
     sass: ^1.42.1
     storybook: 8.3.5
@@ -7924,6 +7925,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"array-find-index@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "array-find-index@npm:1.0.2"
+  checksum: aac128bf369e1ac6c06ff0bb330788371c0e256f71279fb92d745e26fb4b9db8920e485b4ec25e841c93146bf71a34dcdbcefa115e7e0f96927a214d237b7081
+  languageName: node
+  linkType: hard
+
 "array-flatten@npm:1.1.1":
   version: 1.1.1
   resolution: "array-flatten@npm:1.1.1"
@@ -9141,6 +9149,13 @@ __metadata:
   version: 4.1.1
   resolution: "commander@npm:4.1.1"
   checksum: d7b9913ff92cae20cb577a4ac6fcc121bd6223319e54a40f51a14740a681ad5c574fd29a57da478a5f234a6fa6c52cbf0b7c641353e03c648b1ae85ba670b977
+  languageName: node
+  linkType: hard
+
+"commenting@npm:~1.1.0":
+  version: 1.1.0
+  resolution: "commenting@npm:1.1.0"
+  checksum: e172a2b6234c089ae826a1ff7c42811b88e8cf7166ebde461ad0b6cddd3822c16996b8175ce1d3c1a49d1475b1c1d8acdc906c18d3126cb4b0432df29529f232
   languageName: node
   linkType: hard
 
@@ -11246,6 +11261,18 @@ __metadata:
     setimmediate: ^1.0.5
     ua-parser-js: ^0.7.30
   checksum: bc9d698769f4795b970b0723ec4393b01715ef902ffab8a0b4f0de4d9862b5896014ed6de6b773c0ed35fca616692a25e5a43a266816d77241a454cda79a1560
+  languageName: node
+  linkType: hard
+
+"fdir@npm:6.3.0":
+  version: 6.3.0
+  resolution: "fdir@npm:6.3.0"
+  peerDependencies:
+    picomatch: ^3 || ^4
+  peerDependenciesMeta:
+    picomatch:
+      optional: true
+  checksum: c0fe6ddd4aa0a315a55401d468974b582b1880908c8f7b1b1c40db4cd2feb2c04402d2fbdbd6ad049f6261e0d7cd6e629cc5ae678f8883f245ebc1f94b6ff9e6
   languageName: node
   linkType: hard
 
@@ -14448,7 +14475,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:4.17.21, lodash@npm:^4.17.15, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:~4.17.0":
+"lodash@npm:4.17.21, lodash@npm:^4.17.15, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:~4.17.0, lodash@npm:~4.17.21":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: eb835a2e51d381e561e508ce932ea50a8e5a68f4ebdd771ea240d3048244a8d13658acbd502cd4829768c56f2e16bdd4340b9ea141297d472517b83868e677f7
@@ -14610,7 +14637,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"magic-string@npm:^0.30.0, magic-string@npm:^0.30.11":
+"magic-string@npm:^0.30.0, magic-string@npm:^0.30.11, magic-string@npm:~0.30.0":
   version: 0.30.12
   resolution: "magic-string@npm:0.30.12"
   dependencies:
@@ -15297,7 +15324,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moment@npm:^2.29.1":
+"moment@npm:^2.29.1, moment@npm:~2.30.1":
   version: 2.30.1
   resolution: "moment@npm:2.30.1"
   checksum: 859236bab1e88c3e5802afcf797fc801acdbd0ee509d34ea3df6eea21eb6bcc2abd4ae4e4e64aa7c986aa6cba563c6e62806218e6412a765010712e5fa121ba6
@@ -15986,6 +16013,13 @@ __metadata:
   version: 1.0.1
   resolution: "package-json-from-dist@npm:1.0.1"
   checksum: 58ee9538f2f762988433da00e26acc788036914d57c71c246bf0be1b60cdbd77dd60b6a3e1a30465f0b248aeb80079e0b34cb6050b1dfa18c06953bb1cbc7602
+  languageName: node
+  linkType: hard
+
+"package-name-regex@npm:~2.0.6":
+  version: 2.0.6
+  resolution: "package-name-regex@npm:2.0.6"
+  checksum: a889d52cdd860dd4feafebb3b9a2fed47d36408fd62bfab07f6386a80395d66e89f9c913bc8ea8ff62108f23d6e6470e5342e20e660a2743465cd4c45f676d4e
   languageName: node
   linkType: hard
 
@@ -18066,6 +18100,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rollup-plugin-license@npm:^3.5.3":
+  version: 3.5.3
+  resolution: "rollup-plugin-license@npm:3.5.3"
+  dependencies:
+    commenting: ~1.1.0
+    fdir: 6.3.0
+    lodash: ~4.17.21
+    magic-string: ~0.30.0
+    moment: ~2.30.1
+    package-name-regex: ~2.0.6
+    spdx-expression-validate: ~2.0.0
+    spdx-satisfies: ~5.0.1
+  peerDependencies:
+    rollup: ^1.0.0 || ^2.0.0 || ^3.0.0 || ^4.0.0
+  checksum: ba851cd84050ac7a0f4d175f40996a4943611ae44c6f09ea363bde0f473b137671abe2f05aa5a0391ab6aff32ca190916c2304997e22d5bd405fd8577b5c0616
+  languageName: node
+  linkType: hard
+
 "rollup-plugin-multi-input@npm:^1.3.1":
   version: 1.5.0
   resolution: "rollup-plugin-multi-input@npm:1.5.0"
@@ -18854,6 +18906,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"spdx-compare@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "spdx-compare@npm:1.0.0"
+  dependencies:
+    array-find-index: ^1.0.2
+    spdx-expression-parse: ^3.0.0
+    spdx-ranges: ^2.0.0
+  checksum: 7d8b55b31163ba8e7abeaf69d8d7accba5aee324dd55e22a796a685ec4d5e3c3cbc2683b9a2edff5543ee6f6242f4ec22c15dc2e493eb807690fb65e1051e5eb
+  languageName: node
+  linkType: hard
+
 "spdx-correct@npm:^3.0.0":
   version: 3.1.1
   resolution: "spdx-correct@npm:3.1.1"
@@ -18881,10 +18944,37 @@ __metadata:
   languageName: node
   linkType: hard
 
+"spdx-expression-validate@npm:~2.0.0":
+  version: 2.0.0
+  resolution: "spdx-expression-validate@npm:2.0.0"
+  dependencies:
+    spdx-expression-parse: ^3.0.0
+  checksum: c100f949afeb529b3b519a70b86d64c3c35be8bf1ef30db32e48936f0c52a0339b3c88c283c97c55f372ea3c347165c9360aae7905cd8f303b817cfef49032c1
+  languageName: node
+  linkType: hard
+
 "spdx-license-ids@npm:^3.0.0":
   version: 3.0.10
   resolution: "spdx-license-ids@npm:3.0.10"
   checksum: 94fde6f558941f82c737433000e20678eccad448fe5e87cbb98ba1d811a120ddf7fbc4a7a3ebfcd2f49c8c4541ba6537af07750ca5cb54900a064d53f68b888d
+  languageName: node
+  linkType: hard
+
+"spdx-ranges@npm:^2.0.0":
+  version: 2.1.1
+  resolution: "spdx-ranges@npm:2.1.1"
+  checksum: f807bd915aa2975bcebd9c4b4805661f248efcd4953ee62557626452fcd2933183f5b1a307d65507d8be6b9519b4e46dce05b61db0fbd5fce253b8f6d69bbbad
+  languageName: node
+  linkType: hard
+
+"spdx-satisfies@npm:~5.0.1":
+  version: 5.0.1
+  resolution: "spdx-satisfies@npm:5.0.1"
+  dependencies:
+    spdx-compare: ^1.0.0
+    spdx-expression-parse: ^3.0.0
+    spdx-ranges: ^2.0.0
+  checksum: 7f28a6ac492afbfc4794602b5d43957451b7afdd42506dc52dbeeed875d9b5f5b94f8f3deab1da4e2815111f57f916d135c7bd24f40245be6dab5dda09d41e91
   languageName: node
   linkType: hard
 
