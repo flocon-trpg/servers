@@ -1,8 +1,0 @@
-# https://nextjs.org/docs/basic-features/environment-variables#default-environment-variables
-/.env.local
-/.env.*.local
-
-/.next/
-/out/
-/tsconfig.tsbuildinfo
-/storybook-static
