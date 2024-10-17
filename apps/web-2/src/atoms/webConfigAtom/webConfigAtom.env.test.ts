@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { fakeFirebaseConfig1 } from '@flocon-trpg/core';
 import { act, renderHook } from '@testing-library/react';
 import { useAtom, useSetAtom } from 'jotai';
@@ -11,6 +13,7 @@ import {
     google,
 } from '../../env';
 import { fakeEnvText } from './fakeEnvText';
+import { it, expect, describe } from 'vitest';
 
 const fakeEnvFile = {
     [NEXT_PUBLIC_API_HTTP]: 'https://processenv.example.com/',
