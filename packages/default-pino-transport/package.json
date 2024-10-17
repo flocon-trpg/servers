@@ -3,6 +3,7 @@
     "version": "0.9.2",
     "license": "MIT",
     "author": "kizahasi",
+    "private": true,
     "main": "dist/cjs/index.js",
     "module": "dist/esm/index.js",
     "files": [

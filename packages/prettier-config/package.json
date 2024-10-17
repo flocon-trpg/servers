@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "license": "MIT",
     "author": "kizahasi",
+    "private": true,
     "peerDependencies": {
         "prettier": "^3.0.0"
     }

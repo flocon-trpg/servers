@@ -4,6 +4,7 @@
     "license": "MIT",
     "author": "kizahasi",
     "main": "dist/cjs/index.js",
+    "private": true,
     "module": "dist/esm/index.js",
     "files": [
         "dist"
