@@ -1,4 +1,5 @@
 import { moveElement } from './moveElement';
+import { it, expect, describe } from 'vitest';
 
 const numberToString = (source: number): string => {
     switch (source) {

@@ -1,4 +1,5 @@
 import { KeySorter } from './keySorter';
+import { it, expect, describe } from 'vitest';
 
 describe('keySorter', () => {
     it.each`

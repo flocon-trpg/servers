@@ -1,5 +1,6 @@
 import { SemVer, alpha } from '@flocon-trpg/utils';
 import { apiServerSatisfies } from './apiServerSatisfies';
+import { test, expect, describe } from 'vitest';
 
 describe.each(['^', '~'] as const)('apiServerSatisfies', range => {
     test.each`

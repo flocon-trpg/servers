@@ -1,7 +1,12 @@
+// @vitest-environment jsdom
+
+// このファイルのテストは、Flocon の設定が書かれた .env ファイルなどが存在すると失敗します。
+
 import { act, renderHook } from '@testing-library/react';
 import { useAtom } from 'jotai';
 import { fakeEnvText, fakeEnvTextSource } from './fakeEnvText';
 import { publicEnvTxtAtom, webConfigAtom } from './webConfigAtom';
+import { it, expect, describe } from 'vitest';
 
 describe('webConfigAtom (process.env does not exist)', () => {
     it('tests env.txt is not fetched', () => {

@@ -1,4 +1,5 @@
 import { analyzeUrl } from './analyzeUrl';
+import { it, expect, describe } from 'vitest';
 
 describe('analyzeUrl', () => {
     it('tests dropbox', () => {

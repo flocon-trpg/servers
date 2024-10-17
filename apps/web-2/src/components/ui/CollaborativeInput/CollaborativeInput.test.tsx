@@ -1,7 +1,10 @@
+// @vitest-environment jsdom
+
 import { act, render } from '@testing-library/react';
 import Quill from 'quill';
 import React from 'react';
 import { CollaborativeInput, OnChangeParams } from './CollaborativeInput';
+import { expect, describe, test, vi } from 'vitest';
 
 const delayTime = 1100;
 
@@ -24,7 +27,7 @@ describe('CollaborativeInput', () => {
         ${1000}               | ${true}       | ${false}
         ${1000}               | ${true}       | ${true}
     `('テキスト変更直後のonChange', async ({ bufferDuration, invokeUpdate1, invokeUpdate2 }) => {
-        const onChange = jest.fn<void, [OnChangeParams]>();
+        const onChange = vi.fn<(_: OnChangeParams) => void>();
         let quill: Quill | undefined;
         const onGetQuill = (newQuill: Quill | undefined) => {
             quill = newQuill;
