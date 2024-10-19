@@ -31,6 +31,7 @@ import { firebaseUserAtom } from '@/hooks/useSetupApp';
 import { useSignOut } from '@/hooks/useSignOut';
 import { authNotFound, loading, notSignIn } from '@/utils/firebase/firebaseUserState';
 import { Link, useNavigate } from '@tanstack/react-router';
+import { AwaitableButton } from '../AwaitableButton/AwaitableButton';
 
 const { Header, Content } = AntdLayout;
 
@@ -53,9 +54,10 @@ const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormC
                 if (isSubmitting || isFinishedSuccessfully) {
                     return;
                 }
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
                 const password: string = e[passwordName];
                 setIsSubmitting(true);
-                entryToServer({ password }).then(r => {
+                void entryToServer({ password }).then(r => {
                     const resultType = r.data?.result.type;
                     if (resultType == null) {
                         return;
@@ -263,9 +265,12 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                                     </div>
                                 )}
                                 {typeof firebaseUser === 'string' ? (
-                                    <Button key="2" onClick={() => router({ to: '/signin' })}>
+                                    <AwaitableButton
+                                        key="2"
+                                        onClick={() => router({ to: '/signin' })}
+                                    >
                                         ログイン/ユーザー登録
-                                    </Button>
+                                    </AwaitableButton>
                                 ) : (
                                     <>
                                         <Button
@@ -277,16 +282,19 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                                             ユーザー名を変更する
                                         </Button>
                                         {isAnonymous && (
-                                            <Button
+                                            <AwaitableButton
                                                 key="2"
                                                 onClick={() => router({ to: '/signin' })}
                                             >
                                                 非匿名アカウントに変換する
-                                            </Button>
+                                            </AwaitableButton>
                                         )}
-                                        <Button key="3" onClick={() => signOut()}>
+                                        <AwaitableButton
+                                            key="3"
+                                            onClick={() => signOut().then(() => undefined)}
+                                        >
                                             ログアウト
-                                        </Button>
+                                        </AwaitableButton>
                                     </>
                                 )}
                             </Space>

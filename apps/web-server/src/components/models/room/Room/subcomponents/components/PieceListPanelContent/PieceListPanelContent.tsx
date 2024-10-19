@@ -48,7 +48,6 @@ export const PieceListPanelContent: React.FC<Props> = ({ boardId }: Props) => {
         {
             title: '',
             key: 'menu',
-            // eslint-disable-next-line react/display-name
             render: (_: unknown, dataSource: DataSource) => {
                 return (
                     <Tooltip title="編集">
@@ -81,7 +80,6 @@ export const PieceListPanelContent: React.FC<Props> = ({ boardId }: Props) => {
         {
             title: '種類',
             key: '種類',
-            // eslint-disable-next-line react/display-name
             render: (_: unknown, dataSource: DataSource) => {
                 return (
                     <div
@@ -99,7 +97,6 @@ export const PieceListPanelContent: React.FC<Props> = ({ boardId }: Props) => {
         {
             title: 'ID',
             key: 'ID',
-            // eslint-disable-next-line react/display-name
             render: (_: unknown, dataSource: DataSource) => {
                 return (
                     <div
@@ -117,7 +114,6 @@ export const PieceListPanelContent: React.FC<Props> = ({ boardId }: Props) => {
         {
             title: '値',
             key: 'value',
-            // eslint-disable-next-line react/display-name
             render: (_: unknown, dataSource: DataSource) => {
                 if (dataSource.type === 'dice') {
                     return <DicePieceValue.images state={dataSource.piece} size={22} />;
@@ -128,7 +124,6 @@ export const PieceListPanelContent: React.FC<Props> = ({ boardId }: Props) => {
         {
             key: '作成者',
             title: '作成者',
-            // eslint-disable-next-line react/display-name
             render: (_: unknown, dataSource: DataSource) => {
                 const createdBy = dataSource.piece.ownerCharacterId;
                 return (

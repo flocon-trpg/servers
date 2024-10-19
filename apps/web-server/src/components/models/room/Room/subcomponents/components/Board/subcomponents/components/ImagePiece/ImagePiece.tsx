@@ -287,7 +287,7 @@ export const ImagePiece: React.FC<Props> = props => {
                           : undefined
                 }
                 onBalloonChange={balloonExists => {
-                    setOpacitySpringProps.start({
+                    void setOpacitySpringProps.start({
                         opacity: balloonExists ? 1 : (props.opacity ?? 1),
                     });
                 }}

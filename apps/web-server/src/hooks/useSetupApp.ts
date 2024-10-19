@@ -86,7 +86,7 @@ const useUserConfig = (userUid: string | null): void => {
             }
             setUserConfig(userConfig);
         };
-        main();
+        void main();
         return () => {
             unmounted = true;
         };
@@ -182,7 +182,7 @@ export const useSetupApp = () => {
             const envTxt = await envTxtObj.text();
             setPublicEnvTxt({ fetched: true, value: envTxt });
         };
-        main();
+        void main();
     }, [setPublicEnvTxt]);
 
     const config = useWebConfig();

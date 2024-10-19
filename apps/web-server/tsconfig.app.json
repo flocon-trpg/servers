@@ -15,5 +15,6 @@
         "noEmit": true,
         "jsx": "react-jsx"
     },
-    "include": ["src"]
+    // "./.storybook/*" は eslint の対象にするのが目的で含めている
+    "include": ["src", "./.storybook/*"]
 }

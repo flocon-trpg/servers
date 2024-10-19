@@ -106,7 +106,7 @@ const PingPong: React.FC = () => {
                 value={postValue}
                 onChange={value => (typeof value === 'number' ? setPostValue(value) : undefined)}
             />
-            <Button onClick={() => pingMutation({ value: postValue })} type="primary">
+            <Button onClick={() => void pingMutation({ value: postValue })} type="primary">
                 Ping
             </Button>
             <h3>ping response (mutation)</h3>

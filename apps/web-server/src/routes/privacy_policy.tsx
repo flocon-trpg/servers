@@ -25,7 +25,7 @@ const PrivacyPolicyContent: React.FC = () => {
             const envTxt = await envTxtObj.text();
             setText({ fetched: true, value: envTxt });
         };
-        main();
+        void main();
     }, []);
     if (!text.fetched) {
         return <div style={{ padding }}>プライバシーポリシーを取得しています…</div>;

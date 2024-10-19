@@ -271,8 +271,7 @@ const SeModal: React.FC<SeModalProps> = ({ visible, onClose }) => {
                 <FileSelector
                     uploaderFileBrowserHeight={null}
                     onSelect={newValue => {
-                        // Promiseの結果を待たずに処理を続行している
-                        writeRoomSoundEffect({
+                        void writeRoomSoundEffect({
                             roomId,
                             file: FilePathModule.toGraphQL(newValue),
                             volume: volumeInput,

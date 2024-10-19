@@ -21,6 +21,7 @@ import { defaultLibSource } from '@/monaco/defaultLibSource';
 import { flex, flexRow } from '@/styles/className';
 import { characterUpdateOperation } from '@/utils/character/characterUpdateOperation';
 import { testCommand } from '@/utils/character/command';
+import { MarkerSeverity } from 'monaco-editor';
 
 const privateCommandsDiff = diff(createRecordValueTemplate(commandTemplate));
 const privateCommandsUpOperation = toUpOperation(createRecordValueTemplate(commandTemplate));
@@ -106,7 +107,7 @@ const Editor: React.FC<EditorProps> = ({ script, onChange, extraLib }: EditorPro
                     onChange(newValue);
                 }}
                 onValidate={markers => {
-                    setErrorMarkers(markers.filter(m => m.severity >= 8));
+                    setErrorMarkers(markers.filter(m => m.severity >= MarkerSeverity.Error));
                 }}
             />
             {isSkipping ? <div>編集中…</div> : bottomElement}

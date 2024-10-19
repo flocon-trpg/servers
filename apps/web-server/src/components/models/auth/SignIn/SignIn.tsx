@@ -29,6 +29,7 @@ import { firebaseAuthAtom } from '@/hooks/useSetupApp';
 import { useWebConfig } from '@/hooks/useWebConfig';
 import { flex, flexColumn, flexRow } from '@/styles/className';
 import { useNavigate } from '@tanstack/react-router';
+import { AwaitableButton } from '@/components/ui/AwaitableButton/AwaitableButton';
 
 const displayName = 'new user';
 const formWidth = 400;
@@ -52,7 +53,7 @@ const useLoginWithAuthProvider = (): ((provider: AuthProvider) => Promise<void>)
                     .then(() => {
                         setError(undefined);
                         // CONSIDER: await されていない。これで問題ないか？
-                        router({ to: '/' });
+                        void router({ to: '/' });
                     })
                     .catch((error: FirebaseError) => {
                         setError(error);
@@ -75,6 +76,7 @@ const useLoginWithAuthProvider = (): ((provider: AuthProvider) => Promise<void>)
     );
     if (isStorybook) {
         return () => {
+            // CONSIDER: 永遠に resolve も reject もしないようになっているが問題ないのか？
             return new Promise<void>(() => undefined);
         };
     }
@@ -129,7 +131,7 @@ const Email: React.FC = () => {
             <Form.Item wrapperCol={{ offset: labelCol, span: wrapperCol }}>
                 <div className={classNames(flex, flexRow)}>
                     {auth.currentUser?.isAnonymous === true ? (
-                        <Button
+                        <AwaitableButton
                             onClick={async () => {
                                 if (auth.currentUser == null) {
                                     return;
@@ -148,10 +150,10 @@ const Email: React.FC = () => {
                             }}
                         >
                             非匿名アカウントに変換
-                        </Button>
+                        </AwaitableButton>
                     ) : (
                         <>
-                            <Button
+                            <AwaitableButton
                                 disabled={isSubmitting}
                                 onClick={async () => {
                                     setIsSubmitting(true);
@@ -173,8 +175,8 @@ const Email: React.FC = () => {
                                 }}
                             >
                                 アカウント作成
-                            </Button>
-                            <Button
+                            </AwaitableButton>
+                            <AwaitableButton
                                 disabled={isSubmitting}
                                 onClick={async () => {
                                     setIsSubmitting(true);
@@ -192,7 +194,7 @@ const Email: React.FC = () => {
                                             .then(async () => {
                                                 await onSuccess();
                                             })
-                                            .catch(async (err: FirebaseError) => {
+                                            .catch((err: FirebaseError) => {
                                                 setError(err);
 
                                                 if (signInMethods == null) {
@@ -234,7 +236,7 @@ const Email: React.FC = () => {
                                 }}
                             >
                                 ログイン
-                            </Button>
+                            </AwaitableButton>
                         </>
                     )}
                 </div>
@@ -328,7 +330,7 @@ const SignInContent: React.FC = () => {
             <>
                 <a
                     style={{ marginBottom: 12, alignSelf: 'start' }}
-                    onClick={() => router({ to: '/' })}
+                    onClick={() => void router({ to: '/' })}
                 >
                     {'< トップページに戻る'}
                 </a>
@@ -338,46 +340,48 @@ const SignInContent: React.FC = () => {
                     </Button>
                 )}
                 {(areProvidersEmptyValue || authProviders.includes(google)) && (
-                    <Button
+                    <AwaitableButton
                         style={{ margin }}
                         onClick={() => loginWithAuthProvider(googleProvider)}
                     >
                         {`Googleアカウント${suffix}`}
-                    </Button>
+                    </AwaitableButton>
                 )}
                 {(areProvidersEmptyValue || authProviders.includes(twitter)) && (
-                    <Button
+                    <AwaitableButton
                         style={{ margin }}
                         onClick={() => loginWithAuthProvider(twitterProvider)}
                     >
                         {`Twitterアカウント${suffix}`}
-                    </Button>
+                    </AwaitableButton>
                 )}
                 {(areProvidersEmptyValue || authProviders.includes(facebook)) && (
-                    <Button
+                    <AwaitableButton
                         style={{ margin }}
                         onClick={() => loginWithAuthProvider(facebookProvider)}
                     >
                         {`Facebookアカウント${suffix}`}
-                    </Button>
+                    </AwaitableButton>
                 )}
                 {(areProvidersEmptyValue || authProviders.includes(github)) && (
-                    <Button
+                    <AwaitableButton
                         style={{ margin }}
                         onClick={() => loginWithAuthProvider(githubProvider)}
                     >
                         {`GitHubアカウント${suffix}`}
-                    </Button>
+                    </AwaitableButton>
                 )}
                 {(areProvidersEmptyValue || authProviders.includes(phone)) && (
-                    <Button
+                    <AwaitableButton
                         style={{ margin }}
-                        onClick={() =>
-                            phoneProvider == null ? undefined : loginWithAuthProvider(phoneProvider)
+                        onClick={async () =>
+                            phoneProvider == null
+                                ? undefined
+                                : await loginWithAuthProvider(phoneProvider)
                         }
                     >
                         {`電話認証${suffix}`}
-                    </Button>
+                    </AwaitableButton>
                 )}
                 {(areProvidersEmptyValue || authProviders.includes(anonymous)) && (
                     <Tooltip title="アカウントを作成せずに匿名でログインします。匿名ユーザーのデータは消失しやすいため、あくまでお試しとして使うことを推奨します。非匿名アカウントに後からアップグレードすることもできます。">

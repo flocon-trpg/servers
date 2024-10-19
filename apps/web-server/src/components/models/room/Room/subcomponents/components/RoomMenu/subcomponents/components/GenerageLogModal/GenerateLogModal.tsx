@@ -149,7 +149,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                 storage: firebaseStorageRef.current,
                 getIdToken,
                 onProgressChange: p => setProgress(p.percent),
-            }).catch(err => {
+            }).catch((err: Error) => {
                 setErrorMessage(err.message);
                 return null;
             });
@@ -163,7 +163,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
             );
             setIsDownloading(false);
         };
-        main();
+        void main();
     }, [
         isDownloading,
         clientRef,
@@ -194,7 +194,13 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
             <div className={classNames(flex, flexColumn)}>
                 <p>
                     <div>ログ生成モード</div>
-                    <Radio.Group value={logMode} onChange={e => setLogMode(e.target.value)}>
+                    <Radio.Group
+                        value={logMode}
+                        onChange={e =>
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                            setLogMode(e.target.value)
+                        }
+                    >
                         <Radio value={rich}>リッチ</Radio>
                         <Radio value={simple}>シンプル</Radio>
                     </Radio.Group>

@@ -15,7 +15,7 @@ export function useSignOut() {
         }
         await auth.signOut();
         // ユーザーに依存しないキャッシュは削除しなくても構わないが、コードを単純にするため全て削除している。
-        queryClient.resetQueries();
+        await queryClient.resetQueries();
         hideAllOverlay();
         return true;
     }, [auth, hideAllOverlay, queryClient]);

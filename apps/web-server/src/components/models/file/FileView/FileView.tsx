@@ -57,7 +57,7 @@ const FloconUploaderLink: React.FC<{
         return <span>{filename}</span>;
     }
 
-    return <a onClick={() => open(fileItem)}>{fileName(fileItem.screenname)}</a>;
+    return <a onClick={() => open?.(fileItem)}>{fileName(fileItem.screenname)}</a>;
 };
 
 type OnPathChange = (newValue: FilePath | FilePathState | null) => void;
@@ -154,7 +154,7 @@ export const FileView: React.FC<Props> = props => {
                     {filePath != null && (
                         <Button
                             onClick={() => {
-                                onPathChange && onPathChange(null);
+                                onPathChange?.(null);
                             }}
                         >
                             クリア
@@ -164,7 +164,7 @@ export const FileView: React.FC<Props> = props => {
                         visible={modalVisible}
                         onClose={() => setModalVisible(false)}
                         onSelect={newValue => {
-                            onPathChange && onPathChange(newValue);
+                            onPathChange?.(newValue);
                             setModalVisible(false);
                         }}
                         defaultFileTypeFilter={defaultFileTypeFilter}

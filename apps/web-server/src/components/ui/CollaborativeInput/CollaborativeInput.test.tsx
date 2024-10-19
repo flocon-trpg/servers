@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // @vitest-environment jsdom
 
 import { act, render } from '@testing-library/react';
@@ -26,7 +28,7 @@ describe('CollaborativeInput', () => {
         ${1000}               | ${false}      | ${false}
         ${1000}               | ${true}       | ${false}
         ${1000}               | ${true}       | ${true}
-    `('テキスト変更直後のonChange', async ({ bufferDuration, invokeUpdate1, invokeUpdate2 }) => {
+    `('テキスト変更直後のonChange', ({ bufferDuration, invokeUpdate1, invokeUpdate2 }) => {
         const onChange = vi.fn<(_: OnChangeParams) => void>();
         let quill: Quill | undefined;
         const onGetQuill = (newQuill: Quill | undefined) => {

@@ -1,10 +1,10 @@
 /** @jsxImportSource @emotion/react */
+import { useSingleExecuteAsync1 } from '@/hooks/useSingleExecuteAsync';
 import { css } from '@emotion/react';
 import { Button, ButtonProps, Tooltip } from 'antd';
 import { SizeType } from 'antd/lib/config-provider/SizeContext';
 import React from 'react';
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 type Props = {
     checkedChildren?: React.ReactNode;
     checkedIcon?: React.ReactNode;
@@ -17,7 +17,7 @@ type Props = {
     showAsTextWhenDisabled?: boolean;
     hideWhenDisabled?: boolean;
     checked: boolean;
-    onChange: (checked: boolean) => void;
+    onChange: (checked: boolean) => PromiseLike<unknown>;
     size?: SizeType;
     shape?: ButtonProps['shape'];
     defaultType?: ButtonProps['type'];
@@ -39,6 +39,7 @@ export const ToggleButton: React.FC<Props> = ({
     shape,
     defaultType,
 }: Props) => {
+    const { isExecuting, execute } = useSingleExecuteAsync1(onChange);
     const disabled = typeof disabledCore === 'string' ? true : disabledCore;
     let button: JSX.Element;
     if (disabled && hideWhenDisabled) {
@@ -60,8 +61,8 @@ export const ToggleButton: React.FC<Props> = ({
                 type={disabled && showAsTextWhenDisabled === true ? 'text' : defaultType}
                 icon={checked ? checkedIcon : unCheckedIcon}
                 shape={shape}
-                onClick={() => onChange(!checked)}
-                disabled={disabled}
+                onClick={() => execute?.(!checked)}
+                disabled={isExecuting || disabled}
                 loading={loading}
                 size={size}
             >

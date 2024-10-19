@@ -11,6 +11,7 @@ import { flex, flexColumn } from '@/styles/className';
 import { apiServerSatisfies } from '@/versioning/apiServerSatisfies';
 import { semVerRangeToString } from '@/versioning/semVerRange';
 import { Link, useNavigate } from '@tanstack/react-router';
+import { AwaitableButton } from '@/components/ui/AwaitableButton/AwaitableButton';
 
 export const IndexPage: React.FC = () => {
     const [fileSelectorModalVisible, setFileSelectorModalVisible] = React.useState(false);
@@ -65,14 +66,14 @@ export const IndexPage: React.FC = () => {
         <Layout>
             <div style={{ padding: 32 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', width: 300 }}>
-                    <Button
+                    <AwaitableButton
                         style={{ margin: '0 0 4px 0' }}
                         type="primary"
                         size="large"
                         onClick={() => router({ to: '/rooms' })}
                     >
                         部屋一覧
-                    </Button>
+                    </AwaitableButton>
                     <Button
                         style={{ margin: '0 0 8px 0' }}
                         onClick={() => setFileSelectorModalVisible(true)}

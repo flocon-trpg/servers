@@ -40,10 +40,12 @@ export const RoomCreatePage: React.FC = () => {
                 if (isSubmitting) {
                     return;
                 }
+                /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
                 const roomNameValue: string = e[roomName] ?? '';
                 const participantNameValue: string = e[participantName] ?? '';
                 const playerPasswordValue: string = e[playerPassword] ?? '';
                 const spectatorPasswordValue: string = e[spectatorPassword] ?? '';
+                /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
                 const input: CreateRoomInput = {
                     roomName: roomNameValue,
                     participantName: participantNameValue,
@@ -53,10 +55,13 @@ export const RoomCreatePage: React.FC = () => {
                         : undefined,
                 };
                 setIsSubmitting(true);
-                createRoom({ input }).then(r => {
+                void createRoom({ input }).then(r => {
                     switch (r.data?.result.__typename) {
                         case 'CreateRoomSuccessResult': {
-                            router({ to: `/rooms/$id`, params: { id: r.data.result.id } });
+                            void router({
+                                to: `/rooms/$id`,
+                                params: { id: r.data.result.id },
+                            }).finally(() => setIsSubmitting(false));
                             return;
                         }
                         case 'CreateRoomFailureResult': {

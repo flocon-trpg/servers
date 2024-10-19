@@ -31,6 +31,13 @@ type Envs = {
     publicEnvTxt: Env | undefined;
 };
 
+const tryToString = (value: unknown): string | undefined => {
+    if (typeof value === 'string') {
+        return value;
+    }
+    return undefined;
+};
+
 const parseConfig = (env: DotenvParseOutput | undefined): Result<Env> => {
     // TODO: ↓のコメントはNext.jsの話で、Viteだとどうなるかわからないので調査して修正する
     /* 
@@ -63,7 +70,7 @@ const parseConfig = (env: DotenvParseOutput | undefined): Result<Env> => {
 
     const isUnlistedFirebaseStorageEnabled = parseStringToBoolean(
         env == null
-            ? importMetaEnv.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED
+            ? tryToString(importMetaEnv.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED)
             : env.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED,
     );
     if (isUnlistedFirebaseStorageEnabled.error) {
@@ -72,24 +79,35 @@ const parseConfig = (env: DotenvParseOutput | undefined): Result<Env> => {
                 isUnlistedFirebaseStorageEnabled.error.ja,
         );
     }
+
+    // https://vite.dev/guide/env-and-mode#env-files によると、import.meta.env の値が number や boolean になることはないため、tryToString を使うことで値が抜け落ちることはない。
+
     const result: Env = {
-        http: env == null ? importMetaEnv.NEXT_PUBLIC_API_HTTP : env.NEXT_PUBLIC_API_HTTP,
-        ws: env == null ? importMetaEnv.NEXT_PUBLIC_API_WS : env.NEXT_PUBLIC_API_WS,
-        logLevel: env == null ? importMetaEnv.NEXT_PUBLIC_LOG_LEVEL : env.NEXT_PUBLIC_LOG_LEVEL,
+        http:
+            env == null
+                ? tryToString(importMetaEnv.NEXT_PUBLIC_API_HTTP)
+                : env.NEXT_PUBLIC_API_HTTP,
+        ws: env == null ? tryToString(importMetaEnv.NEXT_PUBLIC_API_WS) : env.NEXT_PUBLIC_API_WS,
+        logLevel:
+            env == null
+                ? tryToString(importMetaEnv.NEXT_PUBLIC_LOG_LEVEL)
+                : env.NEXT_PUBLIC_LOG_LEVEL,
         authProviders:
             parseEnvListValue(
                 env == null
-                    ? importMetaEnv.NEXT_PUBLIC_AUTH_PROVIDERS
+                    ? tryToString(importMetaEnv.NEXT_PUBLIC_AUTH_PROVIDERS)
                     : env.NEXT_PUBLIC_AUTH_PROVIDERS,
             ) ?? undefined,
         isUnlistedFirebaseStorageEnabled: isUnlistedFirebaseStorageEnabled.value,
     };
 
     const firebaseFile =
-        env == null ? importMetaEnv.NEXT_PUBLIC_FIREBASE_CONFIG : env.NEXT_PUBLIC_FIREBASE_CONFIG;
+        env == null
+            ? tryToString(importMetaEnv.NEXT_PUBLIC_FIREBASE_CONFIG)
+            : env.NEXT_PUBLIC_FIREBASE_CONFIG;
 
     if (firebaseFile != null) {
-        const firebaseJson = JSON.parse(firebaseFile.toString());
+        const firebaseJson: unknown = JSON.parse(firebaseFile.toString());
         // jsonファイルを直接importしても動くが、jsonファイルにミスがあるときに出るエラーメッセージをわかりやすくするため、zodを用いている。
         const firebaseConfigObject = firebaseConfig.safeParse(firebaseJson);
         if (!firebaseConfigObject.success) {

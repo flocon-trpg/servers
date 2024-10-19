@@ -28,7 +28,12 @@ export const ImportBoardModal: React.FC = () => {
         try {
             json = JSON.parse(value);
         } catch (e) {
-            setParsed(Result.error(`JSONをパースできませんでした - ${e}`));
+            if (e instanceof Error) {
+                setParsed(Result.error(`JSONをパースできませんでした - ${e.message}`));
+            } else {
+                // 通常ここには来ないはず
+                setParsed(Result.error(`JSONをパースできませんでした`));
+            }
             return;
         }
         const decoded = boardState.safeParse(json);

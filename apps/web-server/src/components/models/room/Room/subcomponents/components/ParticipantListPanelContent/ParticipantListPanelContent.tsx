@@ -51,7 +51,6 @@ export const ParticipantListPanelContent: React.FC = () => {
                 title: '',
                 key: 'identicon',
                 width: 30,
-                // eslint-disable-next-line react/display-name
                 render: (_: unknown, { participant }: DataSource) => (
                     <Jdenticon
                         hashOrValue={participant.userUid}
@@ -66,7 +65,6 @@ export const ParticipantListPanelContent: React.FC = () => {
             {
                 title: '名前',
                 key: '名前',
-                // eslint-disable-next-line react/display-name
                 render: (_: unknown, { participant }: DataSource) => (
                     <span>{participant.state.name}</span>
                 ),
@@ -74,7 +72,6 @@ export const ParticipantListPanelContent: React.FC = () => {
             {
                 title: 'ロール',
                 key: 'ロール',
-                // eslint-disable-next-line react/display-name
                 render: (_: unknown, { participant }: DataSource) => {
                     switch (participant.state.role) {
                         case ParticipantRole.Master:
