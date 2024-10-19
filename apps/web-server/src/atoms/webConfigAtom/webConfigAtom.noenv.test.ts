@@ -3,19 +3,32 @@
 // このファイルのテストは、Flocon の設定が書かれた .env ファイルなどが存在すると失敗します。
 
 import { act, renderHook } from '@testing-library/react';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { fakeEnvText, fakeEnvTextSource } from './fakeEnvText';
-import { publicEnvTxtAtom, webConfigAtom } from './webConfigAtom';
+import { mockProcessEnvAtom, publicEnvTxtAtom, webConfigAtom } from './webConfigAtom';
 import { it, expect, describe } from 'vitest';
+
+// これを実行しないと、OSに設定されている環境変数や .env ファイルが読み込まれてしまう。実行するタイミングはどこでも構わないはず。
+const preventUsingProcessEnv = () => {
+    const { result: setMockProcessEnv } = renderHook(() => useSetAtom(mockProcessEnvAtom));
+
+    act(() => {
+        setMockProcessEnv.current({});
+    });
+};
 
 describe('webConfigAtom (process.env does not exist)', () => {
     it('tests env.txt is not fetched', () => {
+        preventUsingProcessEnv();
+
         const { result: webConfigAtomResult } = renderHook(() => useAtom(webConfigAtom));
 
         expect(webConfigAtomResult.current[0]?.value).toBeUndefined();
     });
 
     it('tests with empty env.txt', () => {
+        preventUsingProcessEnv();
+
         const { result: webConfigAtomResult } = renderHook(() => useAtom(webConfigAtom));
         const { result: publicEnvTxtAtomResult } = renderHook(() => useAtom(publicEnvTxtAtom));
 
@@ -27,6 +40,8 @@ describe('webConfigAtom (process.env does not exist)', () => {
     });
 
     it('tests with non-empty env.txt', () => {
+        preventUsingProcessEnv();
+
         const { result: webConfigAtomResult } = renderHook(() => useAtom(webConfigAtom));
         const { result: publicEnvTxtAtomResult } = renderHook(() => useAtom(publicEnvTxtAtom));
 
