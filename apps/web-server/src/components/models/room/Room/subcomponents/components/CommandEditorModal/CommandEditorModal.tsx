@@ -21,7 +21,6 @@ import { defaultLibSource } from '@/monaco/defaultLibSource';
 import { flex, flexRow } from '@/styles/className';
 import { characterUpdateOperation } from '@/utils/character/characterUpdateOperation';
 import { testCommand } from '@/utils/character/command';
-import { MarkerSeverity } from 'monaco-editor';
 
 const privateCommandsDiff = diff(createRecordValueTemplate(commandTemplate));
 const privateCommandsUpOperation = toUpOperation(createRecordValueTemplate(commandTemplate));
@@ -107,7 +106,10 @@ const Editor: React.FC<EditorProps> = ({ script, onChange, extraLib }: EditorPro
                     onChange(newValue);
                 }}
                 onValidate={markers => {
-                    setErrorMarkers(markers.filter(m => m.severity >= MarkerSeverity.Error));
+                    setErrorMarkers(markers.filter(m => 
+                        // もし lint に従って修正するならば 'monaco-editor' を import することになるが、そうすると tree shaking がうまく働かず JavaScript のサイズが肥大化することを確認したため、この問題が解決するまでは import はできない。そのため lint を無効化して数値を直書きしている。
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+                        m.severity >= 8));
                 }}
             />
             {isSkipping ? <div>編集中…</div> : bottomElement}
