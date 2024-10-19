@@ -40,11 +40,10 @@ import {
     success,
     useFirebaseStorageListAllQuery,
 } from '@/hooks/useFirebaseStorageListAllQuery';
-import { useGetIdToken } from '@/hooks/useGetIdToken';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useOpenFirebaseStorageFile } from '@/hooks/useOpenFirebaseStorageFile';
 import { useOpenFloconUploaderFile } from '@/hooks/useOpenFloconUploaderFile';
-import { firebaseStorageAtom, firebaseUserAtom } from '@/hooks/useSetupApp';
+import { firebaseStorageAtom, firebaseUserAtom, getIdTokenResultAtom } from '@/hooks/useSetupApp';
 import { useWebConfig } from '@/hooks/useWebConfig';
 import { $public, Path, StorageType, unlisted } from '@/utils/file/firebaseStorage';
 import { thumbs } from '@/utils/file/getFloconUploaderFile';
@@ -321,7 +320,7 @@ const FloconUploader: React.FC<FloconUploaderProps> = ({
     folderPath,
     webConfig,
 }) => {
-    const { getIdToken } = useGetIdToken();
+    const { getIdToken } = useAtomValue(getIdTokenResultAtom);
     const { execute, isExecuting } = useSingleExecuteAsync1(
         async (options: Parameters<NonNullable<UploadProps<any>['customRequest']>>[0]) => {
             if (typeof options.file === 'string' || !('name' in options.file)) {

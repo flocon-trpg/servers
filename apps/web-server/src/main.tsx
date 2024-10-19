@@ -14,9 +14,11 @@ import { routeTree } from './routeTree.gen';
 import { AllContextProvider } from './components/behaviors/AllContextProvider';
 import { loggerRef } from '@flocon-trpg/utils';
 import React from 'react';
-import { useSetupApp } from './hooks/useSetupApp';
+import { firebaseAppAtom, useSetupApp } from './hooks/useSetupApp';
 import { AntdThemeConfigProvider } from './components/behaviors/AntdThemeConfigProvider';
 import { App as AntdApp, Layout } from 'antd';
+import { usePreviousDistinct } from 'react-use';
+import { useAtomValue } from 'jotai';
 
 enableMapSet();
 
@@ -47,10 +49,23 @@ const ThemedDiv: React.FC<PropsWithChildren<{ style?: React.CSSProperties }>> = 
     );
 };
 
+const useLogFirebaseAppMultipleInitialization = () => {
+    const app = useAtomValue(firebaseAppAtom);
+    const prevApp = usePreviousDistinct(app);
+
+    React.useEffect(() => {
+        if (prevApp == null) {
+            return;
+        }
+        loggerRef.warn('Firebase app is initialized multiple times');
+    }, [prevApp]);
+};
+
 const App = ({ children }: PropsWithChildren) => {
     const { config, authNotFoundState, urqlClient, reactQueryClient, clientId, httpUri, wsUri } =
         useSetupApp();
 
+    useLogFirebaseAppMultipleInitialization();
     React.useEffect(() => {
         if (httpUri == null) {
             return;

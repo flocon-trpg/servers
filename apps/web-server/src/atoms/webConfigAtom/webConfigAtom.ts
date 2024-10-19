@@ -13,9 +13,9 @@ import {
     NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED,
     NEXT_PUBLIC_LOG_LEVEL,
 } from '../../env';
-import { FetchTextState } from '../../utils/types';
 import { storybookAtom } from '../storybookAtom/storybookAtom';
 import { DotenvParseOutput, parse } from '@/utils/dotEnvParse';
+import { Option } from '@kizahasi/option';
 
 type Env = {
     firebaseConfig?: FirebaseConfig;
@@ -123,22 +123,32 @@ const processEnv = parseConfig(undefined);
 
 export const mockProcessEnvAtom = atom<DotenvParseOutput | null>(null);
 
-export const publicEnvTxtAtom = atom<FetchTextState>({ fetched: false });
+// もし fetch に失敗した状態でキャッシュされると再び fetch しに行くことはないので、atomWithCache は使っていない
+const publicEnvTxtAtom = atom(async () => {
+    // chromeなどではfetchできないと `http://localhost:3000/env.txt 404 (Not Found)` などといったエラーメッセージが表示されるが、実際は問題ない
+    const envTxtObj = await fetch('/env.txt').catch(() => null);
+    if (envTxtObj == null || !envTxtObj.ok) {
+        // 正常に取得できなかったときはnullを返す
+        return null;
+    }
+    return await envTxtObj.text();
+});
 
-export const envsAtom = atom<Result<Envs> | null>(get => {
+export const mockPublicEnvTxtAtom = atom<Option<string | null>>(Option.none());
+
+export const envsAtom = atom<Promise<Result<Envs>>>(async get => {
     const mockProcessEnv = get(mockProcessEnvAtom);
     const $processEnv = mockProcessEnv == null ? processEnv : parseConfig(mockProcessEnv);
     if ($processEnv.isError) {
         return $processEnv;
     }
-    const publicEnvTxt = get(publicEnvTxtAtom);
-    if (!publicEnvTxt.fetched) {
-        return null;
-    }
-    if (publicEnvTxt.value == null) {
+    const publicEnvTxt = await get(publicEnvTxtAtom);
+    const mockPublicEnvTxt = get(mockPublicEnvTxtAtom);
+    const $publicEnvTxt = mockPublicEnvTxt.isNone ? publicEnvTxt : mockPublicEnvTxt.value;
+    if ($publicEnvTxt == null) {
         return Result.ok({ processEnv: $processEnv.value, publicEnvTxt: undefined });
     }
-    const publicEnvTxtObject = parse(publicEnvTxt.value);
+    const publicEnvTxtObject = parse($publicEnvTxt);
     const publicEnvTxtResult = parseConfig(publicEnvTxtObject);
     if (publicEnvTxtResult.isError) {
         return publicEnvTxtResult;
@@ -173,9 +183,9 @@ const mergeEnv = (envs: Envs): Env => {
     return result;
 };
 
-export const webConfigAtom = atom<Result<WebConfig> | null>(get => {
+export const webConfigAtom = atom<Promise<Result<WebConfig> | null>>(async get => {
     const storybook = get(storybookAtom);
-    const envs = get(envsAtom);
+    const envs = await get(envsAtom);
     if (storybook.mock?.webConfig != null) {
         return storybook.mock.webConfig;
     }

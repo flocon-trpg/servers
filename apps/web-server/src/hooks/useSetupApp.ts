@@ -4,13 +4,13 @@ import { createDefaultLogger, loggerRef } from '@flocon-trpg/utils';
 import { loader } from '@monaco-editor/react';
 import { QueryClient } from '@tanstack/react-query';
 import { devtoolsExchange } from '@urql/devtools';
-import { FirebaseApp, initializeApp } from 'firebase/app';
-import { Auth, getAuth } from 'firebase/auth';
-import { FirebaseStorage, getStorage } from 'firebase/storage';
-import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getStorage } from 'firebase/storage';
+import { atom, useAtomValue, useSetAtom } from 'jotai';
 import pino from 'pino';
 import React from 'react';
-import { useAsync, useDebounce } from 'react-use';
+import { useAsync, useDebounce, useLatest } from 'react-use';
 import urljoin from 'url-join';
 import useConstant from 'use-constant';
 import { roomConfigAtom } from '../atoms/roomConfigAtom/roomConfigAtom';
@@ -18,8 +18,7 @@ import { RoomConfig } from '../atoms/roomConfigAtom/types/roomConfig';
 import { storybookAtom } from '../atoms/storybookAtom/storybookAtom';
 import { UserConfig } from '../atoms/userConfigAtom/types';
 import { userConfigAtom } from '../atoms/userConfigAtom/userConfigAtom';
-import { getHttpUri, getWsUri, publicEnvTxtAtom } from '../atoms/webConfigAtom/webConfigAtom';
-import { useGetIdTokenResult } from '@/hooks/useGetIdTokenResult';
+import { getHttpUri, getWsUri, webConfigAtom } from '../atoms/webConfigAtom/webConfigAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useWebConfig } from '@/hooks/useWebConfig';
 import {
@@ -30,44 +29,119 @@ import {
 } from '@/utils/firebase/firebaseUserState';
 import { setRoomConfig } from '@/utils/localStorage/roomConfig';
 import { getUserConfig, setUserConfig } from '@/utils/localStorage/userConfig';
+import { atomWithObservable } from 'jotai/utils';
+import { from, Observable, switchAll } from 'rxjs';
 
-const firebaseAppCoreAtom = atom<FirebaseApp | undefined>(undefined);
-export const firebaseAppAtom = atom(get => get(firebaseAppCoreAtom));
+export const firebaseAppAtom = atom(async get => {
+    const config = await get(webConfigAtom);
 
-const firebaseAuthCoreAtom = atom<Auth | undefined>(undefined);
-export const firebaseAuthAtom = atom(get => {
+    if (config?.value == null) {
+        return undefined;
+    }
+    return initializeApp(config.value.firebaseConfig);
+});
+
+const httpUriAtom = atom(async get => {
+    const config = await get(webConfigAtom);
+    if (config?.value == null) {
+        return undefined;
+    }
+    return urljoin(getHttpUri(config.value), 'graphql');
+});
+
+const wsUriAtom = atom(async get => {
+    const config = await get(webConfigAtom);
+    if (config?.value == null) {
+        return undefined;
+    }
+    return urljoin(getWsUri(config.value), 'graphql');
+});
+
+/**
+ * @returns 戻り値の `Auth` のインスタンスの名前を `auth` とすると、Firebase の仕様で、`auth` が変わらなくても `auth.currentUser` が変わることがある。もし `auth.currentUser` の変更を検知したい場合は `firebaseUserAtom` 等を利用する。
+ */
+export const firebaseAuthAtom = atom(async get => {
     const mock = get(storybookAtom).mock?.auth;
     if (mock != null) {
         return mock;
     }
-    return get(firebaseAuthCoreAtom);
+    const app = await get(firebaseAppAtom);
+    if (app == null) {
+        return null;
+    }
+    return getAuth(app);
 });
 
-const firebaseStorageCoreAtom = atom<FirebaseStorage | undefined>(undefined);
-export const firebaseStorageAtom = atom(get => {
+export const firebaseStorageAtom = atom(async get => {
     const mock = get(storybookAtom).mock?.storage;
     if (mock != null) {
         return mock;
     }
-    return get(firebaseStorageCoreAtom);
+    const app = await get(firebaseAppAtom);
+    if (app == null) {
+        return null;
+    }
+    return getStorage(app);
 });
 
-const firebaseUserCoreAtom = atom<FirebaseUserState>(loading);
-export const firebaseUserAtom = atom(get => {
-    const mock = get(storybookAtom).mock?.user;
-    if (mock != null) {
-        return mock;
-    }
-    return get(firebaseUserCoreAtom);
+export const firebaseUserAtom = atomWithObservable(get => {
+    const authPromise = get(firebaseAuthAtom);
+    const result = authPromise.then(
+        auth =>
+            new Observable<FirebaseUserState>(observer => {
+                if (auth == null) {
+                    observer.next(authNotFound);
+                    return;
+                }
+                // authは最初はnullで、その後非同期でenv.txtが読み込まれてからnon-nullになるため、サイトを開いたときは正常の場合でも上のコードによりまずauthNotFoundがセットされる。
+                // そのためこのようにloadingをセットしないと、onAuthStateChangedでuserを受信するまでauthNotFoundエラーがブラウザ画面に表示されてしまう。
+                observer.next(loading);
+
+                const unsubscribe = auth.onAuthStateChanged(user => {
+                    observer.next(user == null ? notSignIn : user);
+                });
+                return () => {
+                    unsubscribe();
+                };
+            }),
+    );
+    return from(result).pipe(switchAll()) satisfies Observable<FirebaseUserState>;
 });
-export const firebaseUserValueAtom = atom(get => {
-    const user = get(firebaseUserCoreAtom);
+
+export const firebaseUserValueAtom = atom(async get => {
+    const user = await get(firebaseUserAtom);
     if (typeof user === 'string') {
         return null;
     }
     return user;
 });
 
+/** @returns getIdTokenResultを実行したときにnon-nullishな値が返ってくると予想される場合は、canGetIdTokenResultはtrueとなる。 */
+export const getIdTokenResultAtom = atom(async get => {
+    const user = await get(firebaseUserValueAtom);
+    const canGetIdToken = user != null && typeof user !== 'string';
+    const getIdTokenResult = async () => {
+        if (user == null) {
+            return null;
+        }
+        return user.getIdTokenResult().catch(err => {
+            loggerRef.autoDetectObj.error(err, 'failed at getIdToken');
+            return null;
+        });
+    };
+
+    const getIdToken = async () => {
+        const idTokenResult = await getIdTokenResult();
+        if (idTokenResult == null) {
+            return idTokenResult;
+        }
+        return idTokenResult.token;
+    };
+
+    return { getIdTokenResult, getIdToken, canGetIdToken };
+});
+
+// アプリ内で1回のみ呼ばれることを想定。
 // localForageを用いてRoomConfigを読み込み、jotaiのatomと紐付ける。
 // Userが変わるたびに、useUserConfigが更新される必要がある。_app.tsxなどどこか一箇所でuseUserConfigを呼び出すだけでよい。
 const useUserConfig = (userUid: string | null): void => {
@@ -93,7 +167,7 @@ const useUserConfig = (userUid: string | null): void => {
     }, [userUid, setUserConfig]);
 };
 
-// _app.tsxもしくはrootのlayout.tsxで1回のみ呼ばれることを想定。
+// アプリ内で1回のみ呼ばれることを想定。
 const useAutoSaveUserConfig = () => {
     const throttleTimespan = 500;
     const userConfig = useAtomValue(userConfigAtom);
@@ -119,6 +193,7 @@ const useAutoSaveUserConfig = () => {
     }, [debouncedUserConfig]);
 };
 
+// アプリ内で1回のみ呼ばれることを想定。
 const useAutoSaveRoomConfig = () => {
     const throttleTimespan = 500;
     const roomConfig = useAtomValue(roomConfigAtom);
@@ -144,47 +219,9 @@ const useAutoSaveRoomConfig = () => {
     }, [debouncedRoomConfig]);
 };
 
-// _app.tsxもしくはrootのlayout.tsxで1回のみ呼ばれることを想定。
-const useSubscribeFirebaseUser = (): void => {
-    const auth = useAtomValue(firebaseAuthAtom);
-    const setUser = useSetAtom(firebaseUserCoreAtom);
-    React.useEffect(() => {
-        if (auth == null) {
-            setUser(authNotFound);
-            return;
-        }
-
-        // authは最初はnullで、その後非同期でenv.txtが読み込まれてからnon-nullになるため、サイトを開いたときは正常の場合でも上のコードによりまずauthNotFoundがセットされる。
-        // そのためこのようにloadingをセットしないと、onAuthStateChangedでuserを受信するまでauthNotFoundエラーがブラウザ画面に表示されてしまう。
-        setUser(loading);
-
-        const unsubscribe = auth.onAuthStateChanged(user => {
-            setUser(user == null ? notSignIn : user);
-        });
-        return () => {
-            unsubscribe();
-        };
-    }, [auth, setUser]);
-};
-
-// _app.tsxもしくはrootのlayout.tsxで1回のみ呼ばれることを想定。
+// アプリ内で1回のみ呼ばれることを想定。
 export const useSetupApp = () => {
-    const setPublicEnvTxt = useSetAtom(publicEnvTxtAtom);
     const storybook = useAtomValue(storybookAtom);
-    React.useEffect(() => {
-        const main = async () => {
-            // chromeなどではfetchできないと `http://localhost:3000/env.txt 404 (Not Found)` などといったエラーメッセージが表示されるが、実際は問題ない
-            const envTxtObj = await fetch('/env.txt');
-            if (!envTxtObj.ok) {
-                setPublicEnvTxt({ fetched: true, value: null });
-                return;
-            }
-            const envTxt = await envTxtObj.text();
-            setPublicEnvTxt({ fetched: true, value: envTxt });
-        };
-        void main();
-    }, [setPublicEnvTxt]);
-
     const config = useWebConfig();
     React.useEffect(() => {
         const defaultLevel = 'info';
@@ -193,49 +230,13 @@ export const useSetupApp = () => {
             : createDefaultLogger({ logLevel: config?.value?.logLevel ?? defaultLevel });
     }, [config?.value?.logLevel, storybook.isStorybook]);
 
-    const [firebaseApp, setFirebaseApp] = useAtom(firebaseAppCoreAtom);
-    React.useEffect(() => {
-        if (config?.value == null) {
-            setFirebaseApp(undefined);
-            return;
-        }
-        setFirebaseApp(prevValue => {
-            if (prevValue != null) {
-                loggerRef.warn('Firebase app is initialized multiple times');
-            }
-            return initializeApp(config.value.firebaseConfig);
-        });
-    }, [config, setFirebaseApp]);
-
-    const setFirebaseAuth = useSetAtom(firebaseAuthCoreAtom);
-    const setFirebaseStorage = useSetAtom(firebaseStorageCoreAtom);
-    React.useEffect(() => {
-        setFirebaseAuth(firebaseApp == null ? undefined : getAuth(firebaseApp));
-        setFirebaseStorage(firebaseApp == null ? undefined : getStorage(firebaseApp));
-    }, [firebaseApp, setFirebaseAuth, setFirebaseStorage]);
-
-    const [httpUri, setHttpUri] = React.useState<string>();
-    const [wsUri, setWsUri] = React.useState<string>();
-    React.useEffect(() => {
-        if (config?.value == null) {
-            setHttpUri(undefined);
-            return;
-        }
-        setHttpUri(urljoin(getHttpUri(config.value), 'graphql'));
-    }, [config]);
-    React.useEffect(() => {
-        if (config?.value == null) {
-            setWsUri(undefined);
-            return;
-        }
-        setWsUri(urljoin(getWsUri(config.value), 'graphql'));
-    }, [config]);
-
-    useSubscribeFirebaseUser();
     const user = useAtomValue(firebaseUserAtom);
     const userValue = useAtomValue(firebaseUserValueAtom);
     const myUserUid = useMyUserUid();
-    const { getIdTokenResult, canGetIdTokenResult } = useGetIdTokenResult();
+    const httpUri = useAtomValue(httpUriAtom);
+    const wsUri = useAtomValue(wsUriAtom);
+    const { getIdTokenResult, canGetIdToken } = useAtomValue(getIdTokenResultAtom);
+    const getIdTokenResultRef = useLatest(getIdTokenResult);
 
     useUserConfig(myUserUid ?? null);
     useAutoSaveRoomConfig();
@@ -246,13 +247,13 @@ export const useSetupApp = () => {
         if (httpUri == null || wsUri == null) {
             return;
         }
-        if (canGetIdTokenResult) {
+        if (canGetIdToken) {
             setUrqlClient(
                 createUrqlClient({
                     httpUrl: httpUri,
                     wsUrl: wsUri,
                     authorization: true,
-                    getUserIdTokenResult: getIdTokenResult,
+                    getUserIdTokenResult: getIdTokenResultRef.current,
                     exchanges: defaultExchanges => [devtoolsExchange, ...defaultExchanges],
                 }),
             );
@@ -269,8 +270,8 @@ export const useSetupApp = () => {
     }, [
         httpUri,
         wsUri,
-        getIdTokenResult,
-        canGetIdTokenResult,
+        getIdTokenResultRef,
+        canGetIdToken,
         /*
         # userValueをdepsに加えている理由
         
@@ -293,11 +294,7 @@ export const useSetupApp = () => {
         userValue,
     ]);
 
-    const [authNotFoundState, setAuthNotFoundState] = React.useState(false);
-    React.useEffect(() => {
-        setAuthNotFoundState(user === 'authNotFound');
-    }, [user]);
-
+    const authNotFoundState = user === 'authNotFound';
     const clientId = useConstant(() => simpleId());
 
     React.useEffect(() => {
