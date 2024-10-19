@@ -446,7 +446,8 @@ export const CharacterEditorModal: React.FC = () => {
                                                   isCreate,
                                               })
                                     }
-                                    onChange={newValue =>
+                                    // eslint-disable-next-line @typescript-eslint/require-await
+                                    onChange={async newValue =>
                                         updateCharacter(character => {
                                             if (character == null) {
                                                 return;
@@ -774,13 +775,13 @@ export const CharacterEditorModal: React.FC = () => {
 
                             <div>
                                 <CopyToClipboardButton
-                                    clipboardText={async () => {
+                                    clipboardText={() => {
                                         const characterToExport: typeof character = {
                                             ...character,
                                             pieces: {},
                                             portraitPieces: {},
                                         };
-                                        return JSON.stringify(characterToExport);
+                                        return Promise.resolve(JSON.stringify(characterToExport));
                                     }}
                                 >
                                     クリップボードにエクスポート

@@ -11,22 +11,24 @@ interface LogFn {
     (obj: Error | Record<string, unknown>, msg?: string, ...args: readonly unknown[]): void;
 }
 
-const toLogFn = (
+type PinoMethodName = 'debug' | 'error' | 'fatal' | 'info' | 'warn' | 'silent' | 'trace';
+
+const printFn = (
     logger: Logger,
-    pinoLevel: 'debug' | 'error' | 'fatal' | 'info' | 'warn' | 'silent' | 'trace',
+    methodName: PinoMethodName,
 ): LogFn => {
-    function print(msg: string, ...args: readonly unknown[]): void;
-    function print(
+    function result(msg: string, ...args: readonly unknown[]): void;
+    function result(
         obj: Error | Record<string, unknown>,
         msg?: string,
         ...args: readonly unknown[]
     ): void;
-    function print(
+    function result(
         arg1: string | Error | Record<string, unknown>,
         ...arg2: readonly unknown[]
     ): void {
         if (typeof arg1 === 'string') {
-            logger[pinoLevel](arg1, ...arg2);
+            logger[methodName](arg1, ...arg2);
             return;
         }
         const [msg, ...args] = [...arg2];
@@ -36,24 +38,34 @@ const toLogFn = (
                 'When the first argument is an object, the second argument must be a string.',
             );
         }
-        logger[pinoLevel](arg1, msg, ...args);
+        logger[methodName](arg1, msg, ...args);
     }
 
-    return print;
+    return result;
 };
 
-type Type = {
-    /** pino のインスタンスを get もしくは set できます。 */
-    value: Logger;
-    debug: LogFn;
-    error: LogFn;
-    fatal: LogFn;
-    info: LogFn;
-    infoAsNotice: (msg: string) => void;
-    warn: LogFn;
-    silent: LogFn;
-    trace: LogFn;
-};
+// Promise の catch で受け取った値は型が不明なので、それをログに含めるときに便利な関数。
+// もし msg を optional にすると、obj == null かつ msg === undefined のときに出力するエラーメッセージがないのと、msg を空にすることは通常はないので、msg は optional にしていない。printFn の msg のほうも optional でなくするのもいいかもしれない。 
+const autoDetectObjFn = (logger: Logger,
+    methodName: PinoMethodName) => (obj: unknown, msg: string, ...args: readonly unknown[]) => {
+    if (obj instanceof Error) {
+        printFn(logger, methodName)(obj, msg, ...args);
+        return;
+    }
+    if (typeof obj === 'string') {
+        if (msg == null) {
+        printFn(logger, methodName)(obj, ...args);
+        return;
+        }
+        printFn(logger, methodName)(`${msg} (Error: ${obj})`, ...args);
+        return
+    }
+    if (obj == null) {
+        printFn(logger, methodName)(msg, ...args);
+        return;
+    }
+        printFn(logger, methodName)(`${msg} (not supported obj type. typeof obj is ${typeof obj})`, ...args);
+}
 
 export const createDefaultLogger = (args?: { logLevel?: PinoLogLevel; isBrowser?: boolean }) => {
     return (args?.isBrowser ?? isBrowser)
@@ -67,38 +79,51 @@ export const createDefaultLogger = (args?: { logLevel?: PinoLogLevel; isBrowser?
 let currentLogger: Logger | null = null;
 
 /** pino のロガーを取得もしくは変更できます。 */
-export const loggerRef: Type = {
+export const loggerRef = {
+    /** pino のインスタンスを get もしくは set できます。 */
     get value() {
         if (currentLogger == null) {
             currentLogger = createDefaultLogger();
         }
         return currentLogger;
     },
+    /** pino のインスタンスを get もしくは set できます。 */
     set value(value: Logger) {
         currentLogger = value;
     },
     get debug() {
-        return toLogFn(this.value, 'debug');
+        return printFn(this.value, 'debug');
     },
     get error() {
-        return toLogFn(this.value, 'error');
+        return printFn(this.value, 'error');
     },
     get fatal() {
-        return toLogFn(this.value, 'fatal');
+        return printFn(this.value, 'fatal');
     },
     get info() {
-        return toLogFn(this.value, 'info');
+        return printFn(this.value, 'info');
     },
-    infoAsNotice(msg) {
+    infoAsNotice(msg: string) {
         return this.info({ [notice]: true }, msg);
     },
     get warn() {
-        return toLogFn(this.value, 'warn');
+        return printFn(this.value, 'warn');
     },
     get silent() {
-        return toLogFn(this.value, 'silent');
+        return printFn(this.value, 'silent');
     },
     get trace() {
-        return toLogFn(this.value, 'trace');
+        return printFn(this.value, 'trace');
     },
+    get autoDetectObj() {
+        return {
+            debug: autoDetectObjFn(this.value, 'debug'),
+            error: autoDetectObjFn(this.value, 'error'),
+            fatal: autoDetectObjFn(this.value, 'fatal'),
+            info: autoDetectObjFn(this.value, 'info'),
+            warn: autoDetectObjFn(this.value, 'warn'),
+            silent: autoDetectObjFn(this.value, 'silent'),
+            trace: autoDetectObjFn(this.value, 'trace'),
+        }
+    }
 };

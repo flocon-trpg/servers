@@ -28,7 +28,7 @@ export const Jdenticon: React.FC<Props> = ({ hashOrValue, size, tooltipMode }: P
 
     const content = <img src={src} width={size} height={size} />;
 
-    if (tooltipMode?.type === 'none') {
+    if (tooltipMode?.type === none) {
         return content;
     }
 

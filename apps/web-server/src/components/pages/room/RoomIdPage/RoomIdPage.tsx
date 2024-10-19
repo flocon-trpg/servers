@@ -9,7 +9,7 @@ import {
     RoomAsListItemFragment,
     WritingMessageStatusInputType,
 } from '@flocon-trpg/typed-document-node';
-import { Alert, Button, Card, Input, Result, Spin } from 'antd';
+import { Alert, Card, Input, Result, Spin } from 'antd';
 import classNames from 'classnames';
 import { produce } from 'immer';
 import { useAtomValue, useSetAtom } from 'jotai/react';
@@ -42,6 +42,7 @@ import { firebaseUserValueAtom } from '@/hooks/useSetupApp';
 import { flex, flexColumn, itemsCenter } from '@/styles/className';
 import { getRoomConfig } from '@/utils/localStorage/roomConfig';
 import { Link } from '@tanstack/react-router';
+import { AwaitableButton } from '@/components/ui/AwaitableButton/AwaitableButton';
 
 const debouncedWindowInnerWidthAtomCore = atom(0);
 const debouncedWindowInnerHeightAtomCore = atom(0);
@@ -215,13 +216,13 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                         (参加パスワードなしで入室できます)
                     </div>
                 )}
-                <Button
+                <AwaitableButton
                     style={{ gridColumn: 3, gridRow: 3 }}
                     type="primary"
                     onClick={onJoinAsPlayerButtonClick}
                 >
                     入室
-                </Button>
+                </AwaitableButton>
                 <div style={{ gridColumn: 1, gridRow: 4, marginRight: 8, justifySelf: 'right' }}>
                     観戦者として入室
                 </div>
@@ -237,13 +238,13 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                         (観戦パスワードなしで入室できます)
                     </div>
                 )}
-                <Button
+                <AwaitableButton
                     style={{ gridColumn: 3, gridRow: 4 }}
                     type="primary"
                     onClick={onJoinAsSpectatorButtonClick}
                 >
                     入室
-                </Button>
+                </AwaitableButton>
             </div>
         </Spin>
     );
@@ -269,7 +270,7 @@ const useRoomConfig = (roomId: string): boolean => {
             );
             setResult(true);
         };
-        main();
+        void main();
         return () => {
             unmounted = true;
         };

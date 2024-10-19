@@ -128,6 +128,9 @@ const Practical: React.FC<PracticalProps> = ({
                 onRename={() => {
                     setFilesState(toFilePath(filesSourceRef));
                 }}
+                onFileCreate={() => {
+                    setFilesState(toFilePath(filesSourceRef));
+                }}
                 // TODO: canMoveを用いたstoryも作成する
                 canMove={() => Result.ok(undefined)}
                 // TODO: canRenameを用いたstoryも作成する
@@ -159,7 +162,6 @@ const Practical: React.FC<PracticalProps> = ({
                     ],
                 }}
                 isProtected={() => false}
-                onFileCreate={() => Promise.resolve(true)}
                 ensuredFolderPaths={ensuredFolderPaths}
                 // TODO: overridingElementsを用いたstoryも作成する
                 overridingElements={[]}
@@ -209,7 +211,6 @@ export const Default: React.FC<Props> = ({
                 searchPlaceholder="😀検索🤖"
                 files={files}
                 isProtected={() => false}
-                onFileCreate={() => Promise.resolve(true)}
                 ensuredFolderPaths={ensuredFolderPaths}
                 overridingElements={[]}
                 canMove={() => Result.error('fake error')}
@@ -341,7 +342,7 @@ const fail = async () => {
 export const ManyFiles: Story = {
     args: {
         filesSource: undefined,
-        files: [...Array(200)].map((_, i) => {
+        files: [...Array(200).keys()].map(i => {
             const filename = `file${(i + 1).toString().padStart(3, '0')}.dll`;
             return {
                 key: filename,

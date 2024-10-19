@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { KeySorter } from './keySorter';
 import { it, expect, describe } from 'vitest';
 

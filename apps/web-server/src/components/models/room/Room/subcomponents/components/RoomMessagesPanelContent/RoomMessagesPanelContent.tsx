@@ -80,6 +80,7 @@ import { cancelRnd, flex, flexColumn, flexNone, flexRow, itemsCenter } from '@/s
 import { moveElement } from '@/utils/moveElement';
 import { AntdTab } from '@/utils/types';
 import { defaultTriggerSubMenuAction } from '@/utils/variables';
+import { useSingleExecuteAsync1 } from '@/hooks/useSingleExecuteAsync';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -421,8 +422,40 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
 
     const firebaseUser = useAtomValue(firebaseUserValueAtom);
     const [, editMessageMutation] = useMutation(EditMessageDocument);
+    const editMessageAwaited = useSingleExecuteAsync1(
+        async ({
+            text,
+            messageId,
+            onResolve,
+        }: {
+            text: string;
+            messageId: string;
+            onResolve: () => void;
+        }) => {
+            if (roomId == null) {
+                return;
+            }
+            await editMessageMutation({
+                messageId,
+                roomId,
+                text,
+            }).then(() => onResolve());
+        },
+    );
     const [, deleteMessageMutation] = useMutation(DeleteMessageDocument);
+    const deleteMessageAwaited = useSingleExecuteAsync1(async (messageId: string) => {
+        if (roomId == null) {
+            return;
+        }
+        await deleteMessageMutation({ messageId, roomId });
+    });
     const [, makeMessageNotSecret] = useMutation(MakeMessageNotSecretDocument);
+    const makeMessageNotSecretAwaited = useSingleExecuteAsync1(async (messageId: string) => {
+        if (roomId == null) {
+            return;
+        }
+        await makeMessageNotSecret({ messageId, roomId });
+    });
     const [isEditModalVisible, setIsEditModalVisible] = React.useState(false);
     const roomId = useRoomId();
     const roomMessagesFontSizeDelta = useAtomValue(roomMessageFontSizeDeltaAtom);
@@ -522,11 +555,12 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
             ? {
                   key: '公開@RoomMessageComponent',
                   label: '公開',
+                  disabled: makeMessageNotSecretAwaited.isExecuting,
                   onClick: () => {
-                      if (roomId == null) {
+                      if (makeMessageNotSecretAwaited.execute == null) {
                           return;
                       }
-                      makeMessageNotSecret({ messageId: userMessage.messageId, roomId });
+                      makeMessageNotSecretAwaited.execute(userMessage.messageId);
                   },
               }
             : null;
@@ -543,11 +577,12 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
             ? {
                   key: '削除@RoomMessageComponent',
                   label: '削除',
+                  disabled: deleteMessageAwaited.isExecuting,
                   onClick: () => {
-                      if (roomId == null) {
+                      if (deleteMessageAwaited.execute == null) {
                           return;
                       }
-                      deleteMessageMutation({ messageId: userMessage.messageId, roomId });
+                      deleteMessageAwaited.execute(userMessage.messageId);
                   },
               }
             : null;
@@ -657,17 +692,21 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                 title="メッセージの編集"
                 visible={isEditModalVisible}
                 isTextArea={true}
+                disabled={() => editMessageAwaited.isExecuting}
                 onOk={(value, setValue) => {
-                    if (userMessage == null || roomId == null) {
+                    if (editMessageAwaited.execute == null) {
                         return;
                     }
-                    editMessageMutation({
-                        messageId: userMessage.messageId,
-                        roomId,
+                    if (userMessage == null) {
+                        return;
+                    }
+                    editMessageAwaited.execute({
                         text: value,
-                    }).then(() => {
-                        setIsEditModalVisible(false);
-                        setValue('');
+                        messageId: userMessage.messageId,
+                        onResolve: () => {
+                            setIsEditModalVisible(false);
+                            setValue('');
+                        },
                     });
                 }}
                 onClose={setValue => {

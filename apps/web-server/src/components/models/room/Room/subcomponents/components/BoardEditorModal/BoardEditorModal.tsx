@@ -300,8 +300,8 @@ export const BoardEditorModal: React.FC = () => {
                 </Table>
                 <Divider dashed />
                 <CopyToClipboardButton
-                    clipboardText={async () => {
-                        return JSON.stringify(board);
+                    clipboardText={() => {
+                        return Promise.resolve(JSON.stringify(board));
                     }}
                 >
                     クリップボードにエクスポート

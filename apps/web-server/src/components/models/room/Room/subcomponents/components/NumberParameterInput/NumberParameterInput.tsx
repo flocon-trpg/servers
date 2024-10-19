@@ -213,7 +213,8 @@ export const NumberParameterInput: React.FC<Props> = ({
                 checkedChildren={<EyeOutlined />}
                 unCheckedChildren={<EyeInvisibleOutlined />}
                 size="small"
-                onChange={e => {
+                // eslint-disable-next-line @typescript-eslint/require-await
+                onChange={async e => {
                     const operation: CharacterUpOperation = {
                         $v: 2,
                         $r: 1,
@@ -319,6 +320,7 @@ export const NumberParameterInput: React.FC<Props> = ({
                         },
                     };
                     onOperate(apply(operation));
+                    return Promise.resolve();
                 }}
                 shape="circle"
                 defaultType="dashed"

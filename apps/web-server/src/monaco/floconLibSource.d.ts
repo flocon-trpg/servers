@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 declare type Index5 = 1 | 2 | 3 | 4 | 5;
 
 declare type Index20 =

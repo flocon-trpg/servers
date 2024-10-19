@@ -15,8 +15,7 @@ export namespace StringPieceValue {
     };
 
     export const stringify = (source: StringPieceState): string => {
-        const range = null;
-        return `${source.value ?? '？'} ${range == null ? '' : `(${range})`} ${
+        return `${source.value ?? '？'}} ${
             source.value != null && source.isValuePrivate ? '(値は非公開)' : ''
         }`;
     };

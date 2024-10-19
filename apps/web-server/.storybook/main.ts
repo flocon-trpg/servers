@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import type { StorybookConfig } from '@storybook/react-vite';
 
 import path, { join, dirname } from 'path';
@@ -32,7 +35,9 @@ const config: StorybookConfig = {
     */
         reactDocgen: false,
     },
-    webpackFinal: async config => {
+    // @ts-expect-error - webpackFinal is not defined in the StorybookConfig type
+    // eslint-disable-next-line @typescript-eslint/require-await
+    webpackFinal: async (config: any) => {
         config.resolve.alias = {
             ...config.resolve.alias,
             '@': path.resolve(__dirname, '../src'),

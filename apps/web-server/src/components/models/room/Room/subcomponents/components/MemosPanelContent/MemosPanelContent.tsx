@@ -59,6 +59,7 @@ const MemoBrowserModal: React.FC<{
                 onOpen: () => {
                     onClose(memoId);
                 },
+                // eslint-disable-next-line @typescript-eslint/require-await
                 onMoveOrRename: async ({ newPath }) =>
                     setRoomState(roomState => {
                         const memo = roomState.memos?.[memoId];

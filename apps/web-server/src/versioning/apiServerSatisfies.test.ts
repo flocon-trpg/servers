@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { SemVer, alpha } from '@flocon-trpg/utils';
 import { apiServerSatisfies } from './apiServerSatisfies';
 import { test, expect, describe } from 'vitest';

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { moveElement } from './moveElement';
 import { it, expect, describe } from 'vitest';
 

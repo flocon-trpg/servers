@@ -14,7 +14,7 @@ import {
 } from '@flocon-trpg/typed-document-node';
 import { loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
-import { App, Modal, Upload } from 'antd';
+import { App, Modal, Upload, UploadProps } from 'antd';
 import copy from 'clipboard-copy';
 import { StorageReference, deleteObject, ref, uploadBytes } from 'firebase/storage';
 import { useAtomValue } from 'jotai/react';
@@ -50,6 +50,8 @@ import { $public, Path, StorageType, unlisted } from '@/utils/file/firebaseStora
 import { thumbs } from '@/utils/file/getFloconUploaderFile';
 import { FileType, guessFileType, image, others, sound } from '@/utils/fileType';
 import { fileName } from '@/utils/filename';
+import { useSingleExecuteAsync1 } from '@/hooks/useSingleExecuteAsync';
+import { WebConfig } from '@/configType';
 
 type FilePathState = State<typeof filePathTemplate>;
 
@@ -115,9 +117,9 @@ const useFirebaseStorageFiles = (onSelect: OnSelect | null) => {
                         await deleteObject(file.storageReference);
                     },
                     onSelect: onClick,
-                    onOpen: () => open(file.storageReference),
+                    onOpen: () => open?.(file.storageReference),
                     onClipboard: () => {
-                        copy(file.storageReference.fullPath).then(() => {
+                        void copy(file.storageReference.fullPath).then(() => {
                             notification.success({
                                 message: 'クリップボードにコピーしました。',
                                 placement: 'bottomRight',
@@ -193,9 +195,9 @@ const useFloconUploaderFiles = (onSelect: OnSelect | null, pause: boolean) => {
                     await deleteFilesMutation({ filenames: file.filename });
                 },
                 onSelect: onClick,
-                onOpen: async () => open(file),
+                onOpen: () => open?.(file),
                 onClipboard: () => {
-                    copy(file.filename).then(() => {
+                    void copy(file.filename).then(() => {
                         notification.success({
                             message: 'クリップボードにコピーしました。',
                             placement: 'bottomRight',
@@ -284,13 +286,17 @@ const FirebaseStorageUploader: React.FC<UploaderProps> = ({
                         }
                         onUploaded();
                     })
-                    .catch(err => {
+                    .catch((err: unknown) => {
                         if (options.onError != null) {
+                            // CONSIDER: err が string になることはあるのだろうか？
                             if (typeof err === 'string') {
                                 options.onError(new Error(err));
                                 return;
                             }
-                            options.onError(err);
+                            if (err instanceof Error) {
+                                options.onError(err);
+                                return;
+                            }
                         }
                     });
             }}
@@ -306,15 +312,68 @@ type FloconUploaderProps = {
     storageType: StorageType;
     /** フォルダのパスを表します。ルートにある特殊フォルダや、ファイルの名前は含めないでください。 */
     folderPath: readonly string[];
+    webConfig: WebConfig;
 };
 
-const FloconUploader: React.FC<FloconUploaderProps> = ({ onUploaded, storageType, folderPath }) => {
-    const config = useWebConfig();
+const FloconUploader: React.FC<FloconUploaderProps> = ({
+    onUploaded,
+    storageType,
+    folderPath,
+    webConfig,
+}) => {
     const { getIdToken } = useGetIdToken();
+    const { execute, isExecuting } = useSingleExecuteAsync1(
+        async (options: Parameters<NonNullable<UploadProps<any>['customRequest']>>[0]) => {
+            if (typeof options.file === 'string' || !('name' in options.file)) {
+                return;
+            }
+            const idToken = await getIdToken();
+            if (idToken == null) {
+                return;
+            }
+            const formData = new FormData();
+            formData.append('file', options.file, joinPath(folderPath, options.file.name).string);
+            const result = await fetch(
+                urljoin(
+                    getHttpUri(webConfig),
+                    'uploader',
+                    'upload',
+                    storageType === $public ? 'public' : 'unlisted',
+                ),
+                {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${idToken}`,
+                    },
+                    body: formData,
+                },
+            )
+                .then(() => true)
+                .catch(
+                    (
+                        // CONSIDER: err が string になることはあるのだろうか？
+                        err: string | Error,
+                    ) => err,
+                );
 
-    if (config?.value == null || getIdToken == null) {
-        return null;
-    }
+            if (result === true) {
+                if (options.onSuccess != null) {
+                    options.onSuccess({}, new XMLHttpRequest());
+                }
+                onUploaded();
+            } else {
+                if (options.onError != null) {
+                    if (typeof result === 'string') {
+                        options.onError(new Error(result));
+                        return;
+                    }
+                    if (result instanceof Error) {
+                        options.onError(result);
+                    }
+                }
+            }
+        },
+    );
 
     // TODO: antdのUploaderでアップロードが完了したとき、そのログを消すメッセージが「remove file」でアイコンがゴミ箱なのは紛らわしいと思うので直したい。
     // TODO: 同一ファイル名のファイルをアップロードすると上書きされるので、そのときは失敗させるかダイアログを出したほうが親切か。
@@ -322,56 +381,8 @@ const FloconUploader: React.FC<FloconUploaderProps> = ({ onUploaded, storageType
         <Upload.Dragger
             height={draggerHeight}
             accept={accept}
-            customRequest={options => {
-                const main = async () => {
-                    if (typeof options.file === 'string' || !('name' in options.file)) {
-                        return;
-                    }
-                    const idToken = await getIdToken();
-                    if (idToken == null) {
-                        return;
-                    }
-                    const formData = new FormData();
-                    formData.append(
-                        'file',
-                        options.file,
-                        joinPath(folderPath, options.file.name).string,
-                    );
-                    const result = await fetch(
-                        urljoin(
-                            getHttpUri(config.value),
-                            'uploader',
-                            'upload',
-                            storageType === $public ? 'public' : 'unlisted',
-                        ),
-                        {
-                            method: 'POST',
-                            headers: {
-                                Authorization: `Bearer ${idToken}`,
-                            },
-                            body: formData,
-                        },
-                    )
-                        .then(() => true)
-                        .catch(err => err);
-
-                    if (result === true) {
-                        if (options.onSuccess != null) {
-                            options.onSuccess({}, new XMLHttpRequest());
-                        }
-                        onUploaded();
-                    } else {
-                        if (options.onError != null) {
-                            if (typeof result === 'string') {
-                                options.onError(new Error(result));
-                                return;
-                            }
-                            options.onError(result);
-                        }
-                    }
-                };
-                main();
-            }}
+            disabled={isExecuting}
+            customRequest={execute}
             multiple
         >
             アップロードしたいファイルをここにドラッグするか、クリックしてください
@@ -414,6 +425,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
         pause: true,
     });
     const firebaseUser = useAtomValue(firebaseUserAtom);
+    const webConfig = useWebConfig();
 
     const files = React.useMemo(() => {
         const result: FilePath[] = [];
@@ -681,7 +693,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                                 file.path[0] === uploaderTypeFolderName.unlistedFirebaseStorage,
                         )
                     ) {
-                        refetchFirebaseStorage();
+                        void refetchFirebaseStorage();
                     }
                     if (
                         deletedFiles.some(
@@ -703,7 +715,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                                     uploaderTypeFolderName.unlistedFirebaseStorage,
                         )
                     ) {
-                        refetchFirebaseStorage();
+                        void refetchFirebaseStorage();
                     }
                     if (
                         renamedFiles.some(
@@ -749,13 +761,13 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                         storageType={firebaseStorageUploaderModalState.storageType}
                         onUploaded={() => {
                             setFirebaseStorageUploaderModalState(undefined);
-                            refetchFirebaseStorage();
+                            void refetchFirebaseStorage();
                         }}
                         folderPath={firebaseStorageUploaderModalState.folderPath}
                     />
                 </Modal>
             )}
-            {floconUploaderModalState && (
+            {floconUploaderModalState && webConfig?.value != null && (
                 <Modal
                     title="ファイルのアップロード"
                     open
@@ -776,6 +788,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                             refetchFloconUploader({ requestPolicy: 'network-only' });
                         }}
                         folderPath={floconUploaderModalState.folderPath}
+                        webConfig={webConfig.value}
                     />
                 </Modal>
             )}

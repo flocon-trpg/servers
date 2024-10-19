@@ -108,7 +108,7 @@ const RollCallResult: React.FC<RollCallResultProps> = ({
                         size="small"
                         type={checked ? undefined : 'primary'}
                         onClick={() => {
-                            answerRollCall({
+                            void answerRollCall({
                                 answer: !checked,
                                 roomId,
                                 rollCallId: rollCallId,
@@ -230,8 +230,8 @@ const HasOpenRollCall: React.FC<{
                         destroy={{
                             textType: 'end',
                             onClick: () => {
-                                closeRollCall({ roomId, rollCallId });
-                                () => setShowModal(false);
+                                void closeRollCall({ roomId, rollCallId });
+                                setShowModal(false);
                             },
                             disabled: disableClose,
                         }}
@@ -263,7 +263,7 @@ const NoOpenRollCall: React.FC<{ mockDate?: () => Date }> = ({ mockDate }) => {
                 {'現在行われている点呼はありません。'}
                 <Button
                     onClick={() => {
-                        performRollCall({
+                        void performRollCall({
                             input: {
                                 roomId,
                                 soundEffectFile: {

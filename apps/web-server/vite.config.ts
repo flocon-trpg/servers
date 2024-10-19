@@ -41,5 +41,5 @@ export default defineConfig({
         banner: '/*! licenses: ../licenses-npm-package.txt */',
         // licenses-npm-package.txt にライセンス一覧が出力されるため、ライセンスのコメントを出力しないことで JavaScript のファイルサイズを減らしている。
         legalComments: 'none',
-    }
+    },
 });

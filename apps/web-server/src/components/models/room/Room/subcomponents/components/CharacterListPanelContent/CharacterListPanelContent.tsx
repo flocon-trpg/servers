@@ -108,7 +108,6 @@ const createBooleanParameterColumn = ({
         sorter: (x, y, sortOrder) =>
             booleanToNumber(x.character.state.boolParams?.[key]?.value, sortOrder) -
             booleanToNumber(y.character.state.boolParams?.[key]?.value, sortOrder),
-        // eslint-disable-next-line react/display-name
         render: (_: unknown, { character, onOperateCharacter }: DataSource) => {
             return (
                 <div className={classNames(flex, flexRow)}>
@@ -170,7 +169,6 @@ const createNumberParameterColumn = ({
             );
         },
         sortDirections: ['descend', 'ascend'],
-        // eslint-disable-next-line react/display-name
         render: (_: unknown, { character, onOperateCharacter }: DataSource) => {
             return (
                 <div className={classNames(flex, flexRow)}>
@@ -231,7 +229,6 @@ const createStringParameterColumn = ({
             const yValue = y.character.state.strParams?.[key]?.value ?? '';
             return xValue.localeCompare(yValue);
         },
-        // eslint-disable-next-line react/display-name
         render: (_: unknown, { character, onOperateCharacter }: DataSource) => {
             return (
                 <div className={classNames(flex, flexRow)}>
@@ -292,6 +289,7 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
             type,
             end: (_, monitor) => {
                 const dropResult = monitor.getDropResult();
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 const draggedItemRowKey = (dropResult as any)?.[dndItemKey] as string | undefined;
                 if (draggedItemRowKey == null) {
                     return;
@@ -412,7 +410,6 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                             title: <TableHeaderCell title={null} rowKey={rowKey} />,
                             key: 'menu',
                             width: 36,
-                            // eslint-disable-next-line react/display-name
                             render: (_: unknown, { character }: DataSource) => (
                                 <Tooltip title="編集">
                                     <Button
@@ -437,7 +434,6 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                             key: 'name',
                             sorter: (x, y) =>
                                 x.character.state.name.localeCompare(y.character.state.name),
-                            // eslint-disable-next-line react/display-name
                             render: (_: unknown, { character }: DataSource) => (
                                 <div className={classNames(flex, flexRow, itemsCenter)}>
                                     {character.state.image == null ? (
@@ -476,7 +472,6 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                                 (x.character.state.isPrivate ? 1 : 0) -
                                 (y.character.state.isPrivate ? 1 : 0),
                             width: 36,
-                            // eslint-disable-next-line react/display-name
                             render: (_: unknown, { character }: DataSource) => (
                                 <ToggleButton
                                     size="small"
@@ -494,7 +489,8 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                                             ? characterIsPrivate({ isCreate: false })
                                             : characterIsNotPrivate({ isCreate: false })
                                     }
-                                    onChange={newValue => {
+                                    // eslint-disable-next-line @typescript-eslint/require-await
+                                    onChange={async newValue => {
                                         setRoomState(roomState => {
                                             const targetCharacter =
                                                 roomState.characters?.[character.stateId];
@@ -736,7 +732,7 @@ const CharacterListPanelWithPanelId: React.FC<{
                                                 icon: <Icon.DeleteOutlined />,
                                                 label: '削除',
                                                 onClick: () =>
-                                                    modal.warning({
+                                                    void modal.warning({
                                                         onOk: () => {
                                                             setRoomConfig(roomConfig => {
                                                                 if (roomConfig == null) {

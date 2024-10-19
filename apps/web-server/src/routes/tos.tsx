@@ -25,7 +25,7 @@ const TosContent: React.FC = () => {
             const envTxt = await envTxtObj.text();
             setText({ fetched: true, value: envTxt });
         };
-        main();
+        void main();
     }, []);
     if (!text.fetched) {
         return <div style={{ padding }}>利用規約を取得しています…</div>;
