@@ -34,11 +34,10 @@ import { Layout, loginAndEntry, success } from '@/components/ui/Layout/Layout';
 import { LoadingResult } from '@/components/ui/LoadingResult/LoadingResult';
 import { RoomClientContext, RoomClientContextValue } from '@/contexts/RoomClientContext';
 import { useRoomClient } from '@/hooks/roomClientHooks';
-import { useGetIdToken } from '@/hooks/useGetIdToken';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomGraphQLStatus } from '@/hooks/useRoomGraphQLStatus';
 import { useRoomState } from '@/hooks/useRoomState';
-import { firebaseUserValueAtom } from '@/hooks/useSetupApp';
+import { firebaseUserValueAtom, getIdTokenResultAtom } from '@/hooks/useSetupApp';
 import { flex, flexColumn, itemsCenter } from '@/styles/className';
 import { getRoomConfig } from '@/utils/localStorage/roomConfig';
 import { Link } from '@tanstack/react-router';
@@ -421,7 +420,7 @@ const useCreateRoomClientForContext = ({
 }): RoomClientContextValue | null => {
     const urqlClient = useClient();
     const userUid = useMyUserUid();
-    const { canGetIdToken } = useGetIdToken();
+    const { canGetIdToken } = useAtomValue(getIdTokenResultAtom);
     const client = useMemoOne(() => {
         return createGraphQLClientForRoomClient(urqlClient);
     }, [urqlClient]);

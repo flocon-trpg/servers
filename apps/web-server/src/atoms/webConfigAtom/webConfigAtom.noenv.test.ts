@@ -5,8 +5,10 @@
 import { act, renderHook } from '@testing-library/react';
 import { useAtom, useSetAtom } from 'jotai';
 import { fakeEnvText, fakeEnvTextSource } from './fakeEnvText';
-import { mockProcessEnvAtom, publicEnvTxtAtom, webConfigAtom } from './webConfigAtom';
+import { mockProcessEnvAtom, mockPublicEnvTxtAtom, webConfigAtom } from './webConfigAtom';
 import { it, expect, describe } from 'vitest';
+import { Option } from '@kizahasi/option';
+import { delay } from '@flocon-trpg/utils';
 
 // これを実行しないと、OSに設定されている環境変数や .env ファイルが読み込まれてしまう。実行するタイミングはどこでも構わないはず。
 const preventUsingProcessEnv = () => {
@@ -17,37 +19,38 @@ const preventUsingProcessEnv = () => {
     });
 };
 
+// webConfigAtom は async に値を取得する atom であるため、少し待つ必要がある。
+const waitForWebConfig = async () => await delay(100);
+
 describe('webConfigAtom (process.env does not exist)', () => {
-    it('tests env.txt is not fetched', () => {
+    it('tests with empty env.txt', async () => {
         preventUsingProcessEnv();
 
         const { result: webConfigAtomResult } = renderHook(() => useAtom(webConfigAtom));
+        const { result: setMockPublicEnvTxtAtom } = renderHook(() =>
+            useSetAtom(mockPublicEnvTxtAtom),
+        );
+
+        act(() => {
+            setMockPublicEnvTxtAtom.current(Option.some(null));
+        });
+        await waitForWebConfig();
 
         expect(webConfigAtomResult.current[0]?.value).toBeUndefined();
     });
 
-    it('tests with empty env.txt', () => {
+    it('tests with non-empty env.txt', async () => {
         preventUsingProcessEnv();
 
         const { result: webConfigAtomResult } = renderHook(() => useAtom(webConfigAtom));
-        const { result: publicEnvTxtAtomResult } = renderHook(() => useAtom(publicEnvTxtAtom));
+        const { result: setMockPublicEnvTxtAtom } = renderHook(() =>
+            useSetAtom(mockPublicEnvTxtAtom),
+        );
 
         act(() => {
-            publicEnvTxtAtomResult.current[1]({ fetched: true, value: null });
+            setMockPublicEnvTxtAtom.current(Option.some(fakeEnvText));
         });
-
-        expect(webConfigAtomResult.current[0]?.value).toBeUndefined();
-    });
-
-    it('tests with non-empty env.txt', () => {
-        preventUsingProcessEnv();
-
-        const { result: webConfigAtomResult } = renderHook(() => useAtom(webConfigAtom));
-        const { result: publicEnvTxtAtomResult } = renderHook(() => useAtom(publicEnvTxtAtom));
-
-        act(() => {
-            publicEnvTxtAtomResult.current[1]({ fetched: true, value: fakeEnvText });
-        });
+        await waitForWebConfig();
 
         expect(webConfigAtomResult.current[0]?.value?.http).toEqual(
             fakeEnvTextSource.NEXT_PUBLIC_API_HTTP,

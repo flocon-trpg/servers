@@ -19,8 +19,7 @@ import {
     ChannelsFilter,
     ChannelsFilterOptions,
 } from './subcomponents/components/ChannelsFilter/ChannelsFilter';
-import { useGetIdToken } from '@/hooks/useGetIdToken';
-import { firebaseStorageAtom } from '@/hooks/useSetupApp';
+import { firebaseStorageAtom, getIdTokenResultAtom } from '@/hooks/useSetupApp';
 import { useWebConfig } from '@/hooks/useWebConfig';
 import { flex, flexColumn } from '@/styles/className';
 
@@ -43,7 +42,8 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
     const configRef = useLatest(config);
     const firebaseStorage = useAtomValue(firebaseStorageAtom);
     const firebaseStorageRef = useLatest(firebaseStorage);
-    const { getIdToken } = useGetIdToken();
+    const { getIdToken } = useAtomValue(getIdTokenResultAtom);
+    const getIdTokenRef = useLatest(getIdToken);
     const publicChannelNames = usePublicChannelNames();
     const publicChannelNamesRef = useLatest(publicChannelNames);
     const participants = useParticipants();
@@ -147,7 +147,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                 },
                 config: configRef.current.value,
                 storage: firebaseStorageRef.current,
-                getIdToken,
+                getIdToken: getIdTokenRef.current,
                 onProgressChange: p => setProgress(p.percent),
             }).catch((err: Error) => {
                 setErrorMessage(err.message);
@@ -169,7 +169,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
         clientRef,
         publicChannelNamesRef,
         participantsRef,
-        getIdToken,
+        getIdTokenRef,
         roomIdRef,
         logModeRef,
         channelsFilterOptionsRef,

@@ -25,9 +25,8 @@ import { useClient, useMutation } from 'urql';
 import { Center } from '../Center/Center';
 import { LoadingResult } from '../LoadingResult/LoadingResult';
 import { NotSignInResult } from '../NotSignInResult/NotSignInResult';
-import { useGetIdToken } from '@/hooks/useGetIdToken';
 import { useGetMyRoles } from '@/hooks/useGetMyRoles';
-import { firebaseUserAtom } from '@/hooks/useSetupApp';
+import { firebaseUserAtom, getIdTokenResultAtom } from '@/hooks/useSetupApp';
 import { useSignOut } from '@/hooks/useSignOut';
 import { authNotFound, loading, notSignIn } from '@/utils/firebase/firebaseUserState';
 import { Link, useNavigate } from '@tanstack/react-router';
@@ -134,7 +133,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
     const [isEntry, setIsEntry] = React.useState<
         'notRequired' | 'loading' | { type: 'error'; error: Error } | boolean
     >('loading');
-    const { canGetIdToken } = useGetIdToken();
+    const { canGetIdToken } = useAtomValue(getIdTokenResultAtom);
     const requiresEntry = requires === loginAndEntry;
     React.useEffect(() => {
         if (requiresEntry && myUserUid != null) {
