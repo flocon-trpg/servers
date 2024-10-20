@@ -5,7 +5,7 @@ import React from 'react';
 import { Center } from '../../ui/Center/Center';
 import { Layout, login } from '../../ui/Layout/Layout';
 import { HelpMessageTooltip } from '@/components/ui/HelpMessageTooltip/HelpMessageTooltip';
-import { firebaseUserValueAtom } from '@/pages/_app';
+import { firebaseUserValueAtom } from '@/hooks/useSetupApp';
 
 const labelCol = 10;
 const wrapperCol = 24 - labelCol;
