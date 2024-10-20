@@ -145,7 +145,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
             customNameVariable = undefined;
         }
         setIsPostingState({ isPosting: true, focus: false });
-        writePrivateMessage({
+        void writePrivateMessage({
             roomId,
             text,
             textColor: config.selectedTextColor,
@@ -302,7 +302,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
         }
 
         setIsPostingState({ isPosting: true, focus: false });
-        writePublicMessage({
+        void writePublicMessage({
             roomId,
             text,
             textColor: config.selectedTextColor,

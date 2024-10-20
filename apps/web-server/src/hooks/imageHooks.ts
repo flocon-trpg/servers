@@ -103,7 +103,9 @@ export function useImage(
             setState({ type: loading });
             img.addEventListener('load', onload);
             img.addEventListener('error', onerror);
-            crossOrigin && (img.crossOrigin = crossOrigin);
+            if (crossOrigin) {
+                img.crossOrigin = crossOrigin;
+            }
             if (skipAnalyzeUrl) {
                 img.src = src;
             } else {

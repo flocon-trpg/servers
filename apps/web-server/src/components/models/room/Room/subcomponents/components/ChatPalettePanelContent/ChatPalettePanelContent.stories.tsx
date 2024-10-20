@@ -1,6 +1,6 @@
 import { ParticipantRole } from '@flocon-trpg/core';
 import { getExactlyOneKey } from '@flocon-trpg/utils';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { ChatPalettePanelContent } from './ChatPalettePanelContent';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
@@ -30,17 +30,20 @@ export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myPar
     );
 };
 
-export default {
+const meta = {
     title: 'models/room/Room/ChatPalettePanelContent',
     component: Player,
     args: {
         myParticipantRole: 'Player',
     },
-} as ComponentMeta<typeof Player>;
+} satisfies Meta<typeof Player>;
 
-const Template: ComponentStory<typeof Player> = args => <Player {...args} />;
+export default meta;
 
-export const Spectator = Template.bind({});
-Spectator.args = {
-    myParticipantRole: 'Spectator',
+type Story = StoryObj<typeof meta>;
+
+export const Spectator: Story = {
+    args: {
+        myParticipantRole: 'Spectator',
+    },
 };

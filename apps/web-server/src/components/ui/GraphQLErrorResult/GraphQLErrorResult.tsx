@@ -10,7 +10,7 @@ export type Props = {
 
 export const GraphQLErrorResult: React.FC<Props> = ({ title, error }) => {
     const onCombinedError = (error: CombinedError) => {
-        return <Result status='error' title={title} subTitle={error.message} />;
+        return <Result status="error" title={title} subTitle={error.message} />;
     };
     if (error instanceof CombinedError) {
         return onCombinedError(error);
@@ -20,5 +20,5 @@ export const GraphQLErrorResult: React.FC<Props> = ({ title, error }) => {
     }
 
     const message = error.value instanceof Error ? error.value.message : '不明なエラー';
-    return <Result status='error' title={title} subTitle={message} />;
+    return <Result status="error" title={title} subTitle={message} />;
 };

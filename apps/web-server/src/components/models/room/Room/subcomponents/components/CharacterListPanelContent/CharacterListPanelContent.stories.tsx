@@ -1,5 +1,5 @@
 import { ParticipantRole, State as S, roomTemplate } from '@flocon-trpg/core';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { CharacterListPanelContent } from './CharacterListPanelContent';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
@@ -38,20 +38,24 @@ export const Default: React.FC<{ stateType: StateType; myParticipantRole: Partic
     );
 };
 
-export default {
+const meta = {
     title: 'models/room/Room/CharacterListPanelContent',
     component: Default,
     args: { myParticipantRole: 'Player', stateType: 'default' },
-} as ComponentMeta<typeof Default>;
+} satisfies Meta<typeof Default>;
 
-const Template: ComponentStory<typeof Default> = args => <Default {...args} />;
+export default meta;
 
-export const Empty = Template.bind({});
-Empty.args = {
-    stateType: 'none',
+type Story = StoryObj<typeof meta>;
+
+export const Empty: Story = {
+    args: {
+        stateType: 'none',
+    },
 };
 
-export const Spectator = Template.bind({});
-Spectator.args = {
-    myParticipantRole: 'Spectator',
+export const Spectator: Story = {
+    args: {
+        myParticipantRole: 'Spectator',
+    },
 };

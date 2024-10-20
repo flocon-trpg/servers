@@ -32,7 +32,8 @@ export const createMockUrqlClientForRoomMessage = () => {
                     };
                     return withPromise(
                         fromValue({
-                            data: res,
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                            data: res as any,
                             operation: createDummyUrqlOperation(),
                             stale: false,
                             hasNext: false,
@@ -46,7 +47,7 @@ export const createMockUrqlClientForRoomMessage = () => {
                     };
                     return withPromise(
                         fromValue({
-                            data: res as any,
+                            data: res,
                             operation: createDummyUrqlOperation(),
                             stale: false,
                             hasNext: false,

@@ -10,6 +10,7 @@ export function maskKeys(source: unknown, keys: readonly string[]): unknown {
         if (keys.includes(key)) {
             continue;
         }
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const value: unknown = (source as any)[key];
         result[key] = maskKeys(value, keys);
     }

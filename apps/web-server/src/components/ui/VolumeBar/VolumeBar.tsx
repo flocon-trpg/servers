@@ -7,7 +7,6 @@ import { flex, flexRow, itemsCenter } from '@/styles/className';
 // '0-100'の場合、Props.valueの値の範囲が0～100だとみなされる。VolumeBarはProps.valueの値をそのまま表示する。
 type InputNumberType = '0-1' | '0-100';
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 type Props = {
     value: number;
     minValue?: number;
@@ -48,7 +47,7 @@ export const VolumeBar: React.FC<Props> = ({
                 <Typography.Text style={textStyle}>{value}</Typography.Text>
             ) : (
                 <InputNumber
-                    size='small'
+                    size="small"
                     min={minValue ?? 0}
                     max={100}
                     step={1}

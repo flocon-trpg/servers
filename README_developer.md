@@ -159,12 +159,6 @@ Redis を使用したテストは`./packages/cache`パッケージにのみ存�
 
 リレーショナルデータベースを使用したテストは [api-server](./apps/api-server) パッケージにのみ存在します。このパッケージをテストしない場合は`MYSQL_TEST`、`POSTGRESQL_TEST`、`SQLITE_TEST`の値は利用されません。
 
-## licenses-npm-package.txt の生成に関して
-
-[licenses-npm-package.txt](./apps/web-server/public/licenses-npm-package.txt) は `yarn run generate-disclaimer` で生成できます。
-
-これに使われている yarn プラグインの [plugin-licenses.cjs](./.yarn/plugins/@yarnpkg/plugin-licenses.cjs) は、[yarn-plugin-licenses](https://github.com/mhassan1/yarn-plugin-licenses) から fork した独自のプラグインです。ソースコードは [https://github.com/flocon-trpg/yarn-plugin-licenses](https://github.com/flocon-trpg/yarn-plugin-licenses) にあります。
-
 ## ブランチ名について
 
 ※ 現在採用しているフローおよびブランチ名は暫定です。

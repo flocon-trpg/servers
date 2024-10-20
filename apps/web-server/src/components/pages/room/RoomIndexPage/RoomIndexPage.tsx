@@ -1,12 +1,13 @@
 import * as Icons from '@ant-design/icons';
 import * as Doc from '@flocon-trpg/typed-document-node';
+import { useNavigate } from '@tanstack/react-router';
 import { App, Button, Dropdown, Menu, Table, Tooltip } from 'antd';
 import classNames from 'classnames';
 import moment from 'moment';
-import { useRouter } from 'next/router';
 import React from 'react';
 import { Subscription } from 'rxjs';
 import { useMutation, useQuery } from 'urql';
+import { AwaitableButton } from '@/components/ui/AwaitableButton/AwaitableButton';
 import { GraphQLResult } from '@/components/ui/GraphQLResult/GraphQLResult';
 import { Layout, loginAndEntry } from '@/components/ui/Layout/Layout';
 import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
@@ -27,7 +28,7 @@ const BookmarkButton: React.FC<{ data: Data }> = ({ data }) => {
         <ToggleButton
             unCheckedIcon={<Icons.StarOutlined />}
             checkedIcon={<Icons.StarFilled />}
-            defaultType='text'
+            defaultType="text"
             checked={checked}
             loading={loading}
             onChange={async checked => {
@@ -63,7 +64,7 @@ const BookmarkButton: React.FC<{ data: Data }> = ({ data }) => {
 
 const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
     const { modal } = App.useApp();
-    const router = useRouter();
+    const router = useNavigate();
     const [, deleteRoomAsAdmin] = useMutation(Doc.DeleteRoomAsAdminDocument);
     const [, getRooms] = useQuery({
         query: Doc.GetRoomsListDocument,
@@ -108,7 +109,10 @@ const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
             />
         );
     }, [getMyRolesQueryResult.data?.result.admin, modal, deleteRoomAsAdmin, roomId, getRooms]);
-    const join = React.useCallback(() => router.push(`/rooms/${roomId}`), [roomId, router]);
+    const join = React.useCallback(
+        () => void router({ to: `/rooms/$id`, params: { id: roomId } }),
+        [roomId, router],
+    );
 
     const joinText = '入室';
 
@@ -129,15 +133,14 @@ const bookmarkColumn = {
     title: '',
     dataIndex: 'isBookmarked',
     sorter: (x: Data, y: Data) => (x.isBookmarked ? 1 : 0) - (y.isBookmarked ? 1 : 0),
-    render: (_: any, record: Data) => <BookmarkButton data={record} />,
+    render: (_: unknown, record: Data) => <BookmarkButton data={record} />,
     width: 60,
 };
 const nameColumn = {
     title: '名前',
     dataIndex: 'name',
     sorter: (x: Data, y: Data) => x.name.localeCompare(y.name),
-    // eslint-disable-next-line react/display-name
-    render: (_: any, record: Data) => (
+    render: (_: unknown, record: Data) => (
         <div className={classNames(flex, flexRow)}>
             <Tooltip title={record.name}>
                 <div
@@ -158,16 +161,14 @@ const createdAtColumn = {
     title: '作成日時',
     dataIndex: 'createdAt',
     sorter: (x: Data, y: Data) => (x.createdAt ?? -1) - (y.createdAt ?? -1),
-    // eslint-disable-next-line react/display-name
-    render: (_: any, record: Data) =>
+    render: (_: unknown, record: Data) =>
         record.createdAt == null ? '?' : dateToString(record.createdAt),
 };
 const updatedAtColumn = {
     title: '最終更新日時',
     dataIndex: 'updatedAt',
     sorter: (x: Data, y: Data) => (x.updatedAt ?? -1) - (y.updatedAt ?? -1),
-    // eslint-disable-next-line react/display-name
-    render: (_: any, record: Data) =>
+    render: (_: unknown, record: Data) =>
         record.updatedAt == null ? '?' : dateToString(record.updatedAt),
 };
 const roleColumn = {
@@ -188,8 +189,7 @@ const roleColumn = {
         };
         return toNumber(x.role) - toNumber(y.role);
     },
-    // eslint-disable-next-line react/display-name
-    render: (_: any, record: Data) => {
+    render: (_: unknown, record: Data) => {
         switch (record.role) {
             case null:
             case undefined:
@@ -206,8 +206,7 @@ const actionColumn = {
     title: 'Action',
     dataIndex: '',
     key: 'Action',
-    // eslint-disable-next-line react/display-name
-    render: (_: any, record: Data) => <RoomButton roomId={record.id} />,
+    render: (_: unknown, record: Data) => <RoomButton roomId={record.id} />,
 };
 
 const columns = [
@@ -220,7 +219,7 @@ const columns = [
 ];
 
 const RoomsTable: React.FC<{ rooms: readonly Data[] }> = ({ rooms }) => {
-    return <Table rowKey='id' style={{ flex: 'auto' }} columns={columns} dataSource={rooms} />;
+    return <Table rowKey="id" style={{ flex: 'auto' }} columns={columns} dataSource={rooms} />;
 };
 
 type RoomsListComponentProps = {
@@ -233,18 +232,18 @@ const RoomsListComponent: React.FC<RoomsListComponentProps> = ({
     onReload,
 }: RoomsListComponentProps) => {
     const { notification } = App.useApp();
-    const router = useRouter();
+    const router = useNavigate();
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', padding: 10 }}>
             <div className={classNames(flex, flexNone)}>
                 <div className={classNames(flexNone)}>
-                    <Button
+                    <AwaitableButton
                         icon={<Icons.PlusOutlined />}
-                        onClick={() => router.push('rooms/create')}
+                        onClick={() => router({ to: '/rooms/create' })}
                     >
                         部屋を作成
-                    </Button>
+                    </AwaitableButton>
                 </div>
                 <div style={{ paddingLeft: 4 }} className={classNames(flexNone)}>
                     <Button

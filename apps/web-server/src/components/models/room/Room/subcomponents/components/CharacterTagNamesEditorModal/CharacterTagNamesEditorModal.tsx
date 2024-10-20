@@ -26,10 +26,10 @@ export const CharacterTagNamesEditorModal: React.FC = () => {
                     <div style={{ width: 60 }}>{`タグ${index}`}</div>
                     <CollaborativeInput
                         style={{ width: 150 }}
-                        size='small'
+                        size="small"
                         disabled={characterTagName == null}
                         value={characterTagName ?? ''}
-                        bufferDuration='default'
+                        bufferDuration="default"
                         onChange={({ currentValue }) => {
                             setRoomState(roomState => {
                                 roomState[`characterTag${index}Name`] = currentValue;
@@ -37,7 +37,7 @@ export const CharacterTagNamesEditorModal: React.FC = () => {
                         }}
                     />
                     <Button
-                        size='small'
+                        size="small"
                         onClick={() => {
                             setRoomState(roomState => {
                                 roomState[`characterTag${index}Name`] =
@@ -57,7 +57,7 @@ export const CharacterTagNamesEditorModal: React.FC = () => {
 
         return (
             <Modal
-                title='キャラクターのタグの追加・編集・削除'
+                title="キャラクターのタグの追加・編集・削除"
                 width={600}
                 open={editorVisibility}
                 closable

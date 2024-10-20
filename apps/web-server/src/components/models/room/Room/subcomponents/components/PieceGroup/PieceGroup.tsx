@@ -107,11 +107,11 @@ export const PieceGroup: React.FC<PropsWithChildren<PieceGroupProps>> = ({
         draggable,
         onClick: e => {
             e.cancelBubble = true;
-            onClick == null ? undefined : onClick();
+            onClick?.();
         },
         onDblClick: e => {
             e.cancelBubble = true;
-            onDblClick == null ? undefined : onDblClick(e);
+            onDblClick?.(e);
         },
         onDragStart: () => onDragStart(),
         onDragEnd: e => onDragEnd(e),

@@ -35,8 +35,8 @@ export const OverriddenParameterNameEditor: React.FC<Props> = ({
     if (overriddenParameterName == null) {
         if (restProps.type === 'editor') {
             overriddenParameterNameArea = (
-                <Tooltip title='クリックすることで、このキャラクターにのみ代わりに用いられる変数名を設定できます。'>
-                    <Button size='small' onClick={() => onOverriddenParameterNameChange('')}>
+                <Tooltip title="クリックすることで、このキャラクターにのみ代わりに用いられる変数名を設定できます。">
+                    <Button size="small" onClick={() => onOverriddenParameterNameChange('')}>
                         <Icons.EditOutlined />
                     </Button>
                 </Tooltip>
@@ -47,19 +47,19 @@ export const OverriddenParameterNameEditor: React.FC<Props> = ({
     } else {
         overriddenParameterNameArea = (
             <>
-                <Tooltip title='このキャラクターにのみ代わりに用いられている変数名です。'>
+                <Tooltip title="このキャラクターにのみ代わりに用いられている変数名です。">
                     <CollaborativeInput
                         style={{ maxWidth: 80 }}
-                        size='small'
+                        size="small"
                         value={overriddenParameterName ?? ''}
-                        bufferDuration='default'
+                        bufferDuration="default"
                         onChange={({ currentValue }) => {
                             onOverriddenParameterNameChange(currentValue);
                         }}
                     />
                 </Tooltip>
                 {restProps.type === 'editor' && (
-                    <Button size='small' onClick={() => onOverriddenParameterNameChange(undefined)}>
+                    <Button size="small" onClick={() => onOverriddenParameterNameChange(undefined)}>
                         <Icons.DeleteOutlined />
                     </Button>
                 )}

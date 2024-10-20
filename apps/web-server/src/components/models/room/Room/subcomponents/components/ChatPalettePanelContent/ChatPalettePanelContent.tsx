@@ -71,8 +71,8 @@ const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
                 className={className}
                 style={{ overflow: 'auto' }}
                 multiline
-                size='small'
-                bufferDuration='default'
+                size="small"
+                bufferDuration="default"
                 value={chatPaletteText ?? ''}
                 onChange={e => onChange(e.currentValue)}
             />
@@ -183,7 +183,7 @@ export const ChatPalettePanelContent: React.FC<ChatPalettePanelContentProps> = (
                 <div style={descriptionStyle}>キャラクター</div>
                 <Select
                     style={{ flex: 1, maxWidth: miniInputMaxWidth }}
-                    placeholder='キャラクター'
+                    placeholder="キャラクター"
                     value={config.selectedCharacterId}
                     onChange={value => {
                         if (value == null) {
@@ -283,7 +283,7 @@ export const ChatPalettePanelContent: React.FC<ChatPalettePanelContentProps> = (
                 onSelectedChannelTypeChange={setSelectedChannelType}
                 config={config}
                 onConfigUpdate={onConfigUpdate}
-                selectedCharacterType='some'
+                selectedCharacterType="some"
                 autoSubmitter={subject}
             />
         </div>

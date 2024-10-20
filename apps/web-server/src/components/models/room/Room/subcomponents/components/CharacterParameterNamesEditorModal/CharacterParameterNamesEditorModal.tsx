@@ -94,7 +94,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
             >
                 <Space>
                     <CollaborativeInput
-                        size='small'
+                        size="small"
                         value={state.name}
                         bufferDuration={200}
                         onChange={e => {
@@ -111,7 +111,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                         }}
                     />
                     <Button
-                        size='small'
+                        size="small"
                         onClick={() => {
                             const operation: UpOperation = {
                                 $v: 2,
@@ -149,7 +149,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
             >
                 <Space>
                     <CollaborativeInput
-                        size='small'
+                        size="small"
                         value={state.name}
                         bufferDuration={200}
                         onChange={e => {
@@ -166,7 +166,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                         }}
                     />
                     <Button
-                        size='small'
+                        size="small"
                         onClick={() => {
                             const operation: UpOperation = {
                                 $v: 2,
@@ -204,7 +204,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
             >
                 <Space>
                     <CollaborativeInput
-                        size='small'
+                        size="small"
                         value={state.name}
                         bufferDuration={200}
                         onChange={e => {
@@ -221,7 +221,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                         }}
                     />
                     <Button
-                        size='small'
+                        size="small"
                         onClick={() => {
                             const operation: UpOperation = {
                                 $v: 2,
@@ -247,7 +247,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
 
     return (
         <Modal
-            title='キャラクターのパラメーター名の追加・編集・削除'
+            title="キャラクターのパラメーター名の追加・編集・削除"
             width={600}
             open={editorVisibility}
             closable
@@ -263,7 +263,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
         >
             <Form>
                 <Collapse defaultActiveKey={['num', 'str', 'bool']}>
-                    <Collapse.Panel header='数値パラメーター' key='num'>
+                    <Collapse.Panel header="数値パラメーター" key="num">
                         {strIndex20Array.map(createNumParamName)}
                         {strIndex20Array.some(key => numParamNamesMap.has(key)) ? (
                             <div style={{ padding: 6 }} />
@@ -271,7 +271,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                         <div className={classNames(flex, flexRow)}>
                             <Select
                                 style={{ minWidth: 150 }}
-                                size='small'
+                                size="small"
                                 value={addNumParamSelector}
                                 onChange={newValue => {
                                     setAddNumParamSelector(newValue);
@@ -294,7 +294,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                                 })}
                             </Select>
                             <Button
-                                size='small'
+                                size="small"
                                 disabled={addNumParamSelector == null}
                                 icon={<PlusOutlined />}
                                 onClick={() => {
@@ -315,7 +315,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                             </Button>
                         </div>
                     </Collapse.Panel>
-                    <Collapse.Panel header='チェックマークパラメーター' key='bool'>
+                    <Collapse.Panel header="チェックマークパラメーター" key="bool">
                         {strIndex20Array.map(createBoolParamName)}
                         {strIndex20Array.some(key => boolParamNamesMap.has(key)) ? (
                             <div style={{ padding: 6 }} />
@@ -323,7 +323,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                         <div className={classNames(flex, flexRow)}>
                             <Select
                                 style={{ minWidth: 150 }}
-                                size='small'
+                                size="small"
                                 value={addBoolParamSelector}
                                 onChange={newValue => {
                                     setAddBoolParamSelector(newValue);
@@ -346,7 +346,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                                 })}
                             </Select>
                             <Button
-                                size='small'
+                                size="small"
                                 disabled={addBoolParamSelector == null}
                                 icon={<PlusOutlined />}
                                 onClick={() => {
@@ -367,7 +367,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                             </Button>
                         </div>
                     </Collapse.Panel>
-                    <Collapse.Panel header='文字列パラメーター' key='str'>
+                    <Collapse.Panel header="文字列パラメーター" key="str">
                         {strIndex20Array.map(createStrParamName)}
                         {strIndex20Array.some(key => strParamNamesMap.has(key)) ? (
                             <div style={{ padding: 6 }} />
@@ -375,7 +375,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                         <div style={{ display: 'flex', flexDirection: 'row' }}>
                             <Select
                                 style={{ minWidth: 150 }}
-                                size='small'
+                                size="small"
                                 value={addStrParamSelector}
                                 onChange={newValue => {
                                     setAddStrParamSelector(newValue);
@@ -398,7 +398,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                                 })}
                             </Select>
                             <Button
-                                size='small'
+                                size="small"
                                 disabled={addStrParamSelector == null}
                                 icon={<PlusOutlined />}
                                 onClick={() => {

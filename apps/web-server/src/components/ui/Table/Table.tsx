@@ -42,7 +42,7 @@ export const TableRow: React.FC<{ children: React.ReactNode; label?: React.React
     const labelStyle = React.useContext(LabelStyleContext);
     return (
         <tr>
-            <td className='label' align='right' style={labelStyle}>
+            <td className="label" align="right" style={labelStyle}>
                 {label}
             </td>
             <td>{children}</td>
@@ -60,7 +60,7 @@ export const TableCombinedRow: React.FC<{ children: React.ReactNode }> = ({ chil
 
 export const TableHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return (
-        <tr className='header'>
+        <tr className="header">
             <td colSpan={2}>{children}</td>
         </tr>
     );

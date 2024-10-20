@@ -150,7 +150,7 @@ export const useImagePieceEditor = ({
                 <Table labelStyle={labelStyle}>
                     {/* TODO: isPrivateがまだ未実装 */}
 
-                    <TableRow label='画像'>
+                    <TableRow label="画像">
                         <FileView
                             style={{ maxWidth: 350 }}
                             maxWidthOfLink={null}

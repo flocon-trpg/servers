@@ -171,17 +171,19 @@ export const createServer = async ({
     apolloServer.applyMiddleware({ app });
 
     if (serverConfig.accessControlAllowOrigin == null) {
-        !quiet &&
+        if (!quiet) {
             AppConsole.infoAsNotice({
                 en: '"accessControlAllowOrigin" config was not found. "Access-Control-Allow-Origin" header will be empty.',
                 ja: '"accessControlAllowOrigin" のコンフィグが見つかりませんでした。"Access-Control-Allow-Origin" ヘッダーは空になります。',
             });
+        }
     } else {
-        !quiet &&
+        if (!quiet) {
             AppConsole.infoAsNotice({
                 en: `"accessControlAllowOrigin" config was found. "Access-Control-Allow-Origin" header will be "${serverConfig.accessControlAllowOrigin}".`,
                 ja: `"accessControlAllowOrigin" のコンフィグが見つかりました。"Access-Control-Allow-Origin" ヘッダーは "${serverConfig.accessControlAllowOrigin}" になります。`,
             });
+        }
         const accessControlAllowOrigin = serverConfig.accessControlAllowOrigin;
         app.use((req, res, next) => {
             res.header('Access-Control-Allow-Origin', accessControlAllowOrigin);
@@ -196,28 +198,31 @@ export const createServer = async ({
     const applyUploader = async () => {
         const uploaderConfig = serverConfig.uploader;
         if (uploaderConfig == null || !uploaderConfig.enabled) {
-            !quiet &&
+            if (!quiet) {
                 AppConsole.infoAsNotice({
                     en: `The uploader of API server is disabled.`,
                     ja: `APIサーバーのアップローダーは無効化されています。`,
                 });
+            }
             return;
         }
         const directory = uploaderConfig.directory;
         if (directory == null) {
-            !quiet &&
+            if (!quiet) {
                 AppConsole.warn({
                     en: `The uploader of API server is disabled because "${EMBUPLOADER_PATH}" is empty.`,
                     ja: `"${EMBUPLOADER_PATH}"の値が空なので、APIサーバーのアップローダーは無効化されています。`,
                 });
+            }
             return;
         }
 
-        !quiet &&
+        if (!quiet) {
             AppConsole.infoAsNotice({
                 en: `The uploader of API server is enabled.`,
                 ja: `APIサーバーのアップローダーは有効化されています。`,
             });
+        }
 
         await ensureDir(path.resolve(directory));
         const storage = multer.diskStorage({
@@ -235,6 +240,7 @@ export const createServer = async ({
         };
         app.post(
             '/uploader/upload/:permission',
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             async (req, res, next) => {
                 switch (req.params.permission) {
                     case permission.unlisted:
@@ -303,8 +309,11 @@ export const createServer = async ({
 
                 upload.single('file')(req, res, next);
             },
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             async (req, res) => {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 const forkedEm: EM = res.locals.forkedEm;
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 const user: User = res.locals.user;
 
                 const file = req.file;
@@ -348,74 +357,78 @@ export const createServer = async ({
             },
         );
 
-        app.get('/uploader/:type/:file_name', async (req, res) => {
-            let typeParam: 'files' | 'thumbs';
-            switch (req.params.type) {
-                case 'files':
-                    typeParam = 'files';
-                    break;
-                case 'thumbs':
-                    typeParam = 'thumbs';
-                    break;
-                default:
-                    res.sendStatus(404);
-                    return;
-            }
+        app.get(
+            '/uploader/:type/:file_name',
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            async (req, res) => {
+                let typeParam: 'files' | 'thumbs';
+                switch (req.params.type) {
+                    case 'files':
+                        typeParam = 'files';
+                        break;
+                    case 'thumbs':
+                        typeParam = 'thumbs';
+                        break;
+                    default:
+                        res.sendStatus(404);
+                        return;
+                }
 
-            if (directory == null) {
-                res.status(403).send('Flocon uploader is disabled by server config');
-                return;
-            }
-
-            const decodedIdToken = await getDecodedIdTokenFromExpressRequest(req);
-            if (decodedIdToken == null || decodedIdToken.isError) {
-                set401Status(res).send('Invalid Authorization header');
-                return;
-            }
-
-            const rateLimitError = await consume(rateLimiter, decodedIdToken.value.uid, 5);
-            if (rateLimitError != null) {
-                res.status(429).send(rateLimitError.errorMessage);
-                return;
-            }
-
-            const forkedEm = em.fork();
-            const user = await forkedEm.findOne(User, { userUid: decodedIdToken.value.uid });
-            if (user?.isEntry !== true) {
-                res.status(403).send('Requires entry');
-                return;
-            }
-
-            const filename = sanitize(req.params.file_name);
-            if (filename !== req.params.file_name) {
-                res.status(400).send('file_name is invalid');
-                return;
-            }
-
-            let filepath: string;
-            if (typeParam === 'files') {
-                const fileCount = await forkedEm.count(File, { filename });
-                if (fileCount === 0) {
-                    res.sendStatus(404);
+                if (directory == null) {
+                    res.status(403).send('Flocon uploader is disabled by server config');
                     return;
                 }
-                filepath = path.join(path.resolve(directory), filename);
-            } else {
-                const fileCount = await forkedEm.count(File, { thumbFilename: filename });
-                if (fileCount === 0) {
-                    res.sendStatus(404);
+
+                const decodedIdToken = await getDecodedIdTokenFromExpressRequest(req);
+                if (decodedIdToken == null || decodedIdToken.isError) {
+                    set401Status(res).send('Invalid Authorization header');
                     return;
                 }
-                filepath = path.join(path.resolve(directory), 'thumbs', filename);
-            }
 
-            // 現在は内蔵アップローダーのファイルを直接開く手段はクライアントには実装されていないが、念のためCSPを設定している
-            res.header('Content-Security-Policy', "default-src 'self'; img-src *; media-src *");
+                const rateLimitError = await consume(rateLimiter, decodedIdToken.value.uid, 5);
+                if (rateLimitError != null) {
+                    res.status(429).send(rateLimitError.errorMessage);
+                    return;
+                }
 
-            res.sendFile(filepath, () => {
-                res.end();
-            });
-        });
+                const forkedEm = em.fork();
+                const user = await forkedEm.findOne(User, { userUid: decodedIdToken.value.uid });
+                if (user?.isEntry !== true) {
+                    res.status(403).send('Requires entry');
+                    return;
+                }
+
+                const filename = sanitize(req.params.file_name);
+                if (filename !== req.params.file_name) {
+                    res.status(400).send('file_name is invalid');
+                    return;
+                }
+
+                let filepath: string;
+                if (typeParam === 'files') {
+                    const fileCount = await forkedEm.count(File, { filename });
+                    if (fileCount === 0) {
+                        res.sendStatus(404);
+                        return;
+                    }
+                    filepath = path.join(path.resolve(directory), filename);
+                } else {
+                    const fileCount = await forkedEm.count(File, { thumbFilename: filename });
+                    if (fileCount === 0) {
+                        res.sendStatus(404);
+                        return;
+                    }
+                    filepath = path.join(path.resolve(directory), 'thumbs', filename);
+                }
+
+                // 現在は内蔵アップローダーのファイルを直接開く手段はクライアントには実装されていないが、念のためCSPを設定している
+                res.header('Content-Security-Policy', "default-src 'self'; img-src *; media-src *");
+
+                res.sendFile(filepath, () => {
+                    res.end();
+                });
+            },
+        );
     };
     await applyUploader();
 
@@ -493,14 +506,14 @@ export const createServer = async ({
     }
     const server = httpServer.listen(port, () => {
         // TODO: /graphqlが含まれているとAPI_HTTPなどの設定にも/graphqlの部分も入力してしまいそうなので、対処したほうがいいと思われる。また、createServerAsErrorとの統一性も取れていない
-        !quiet &&
+        if (!quiet) {
             loggerRef.infoAsNotice(
                 `🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`,
             );
-        !quiet &&
             loggerRef.infoAsNotice(
                 `🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`,
             );
+        }
     });
     const close = async () => {
         await new Promise((resolve, reject) => {

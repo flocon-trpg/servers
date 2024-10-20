@@ -1,6 +1,5 @@
 import { Col, Row } from 'antd';
-import React from 'react';
-import { PropsWithChildren } from 'react';
+import React, { PropsWithChildren } from 'react';
 
 type Props = { setPaddingY: boolean };
 
@@ -11,8 +10,8 @@ export const Center: React.FC<PropsWithChildren<Props>> = ({
     return (
         <Row
             style={{ height: '100%', padding: `${setPaddingY ? 16 : 0}px 0` }}
-            justify='center'
-            align='middle'
+            justify="center"
+            align="middle"
         >
             <Col flex={1} />
             <Col flex={0}>{children}</Col>

@@ -1,12 +1,12 @@
 import * as Icon from '@ant-design/icons';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { Alert, Button, Collapse, Typography } from 'antd';
 import classNames from 'classnames';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
 import React from 'react';
 import { Layout } from '../../ui/Layout/Layout';
 import { SupportedApiServers, VERSION } from '@/VERSION';
 import { FileSelectorModal } from '@/components/models/file/FileSelectorModal/FileSelectorModal';
+import { AwaitableButton } from '@/components/ui/AwaitableButton/AwaitableButton';
 import { GraphQLAlert } from '@/components/ui/GraphQLAlert/GraphQLAlert';
 import { useGetApiSemVer } from '@/hooks/useGetApiSemVer';
 import { flex, flexColumn } from '@/styles/className';
@@ -15,7 +15,7 @@ import { semVerRangeToString } from '@/versioning/semVerRange';
 
 export const IndexPage: React.FC = () => {
     const [fileSelectorModalVisible, setFileSelectorModalVisible] = React.useState(false);
-    const router = useRouter();
+    const router = useNavigate();
     const apiServerSemVer = useGetApiSemVer();
 
     let versionInfo: JSX.Element | null;
@@ -37,9 +37,9 @@ export const IndexPage: React.FC = () => {
         } else {
             alert = (
                 <Alert
-                    type='error'
+                    type="error"
                     showIcon
-                    message='APIサーバーとWebサーバーの間に互換性がありません。APIサーバーとWebサーバーのいずれかもしくは両方をアップデートすることを推奨します。'
+                    message="APIサーバーとWebサーバーの間に互換性がありません。APIサーバーとWebサーバーのいずれかもしくは両方をアップデートすることを推奨します。"
                 />
             );
         }
@@ -47,7 +47,7 @@ export const IndexPage: React.FC = () => {
             <div className={classNames(flex, flexColumn)}>
                 {alert}
                 <Collapse ghost>
-                    <Collapse.Panel header='詳細' key='version-info-detais-panel'>
+                    <Collapse.Panel header="詳細" key="version-info-detais-panel">
                         <div className={classNames(flex, flexColumn)}>
                             <div>{`このWebサーバーが対応しているAPIサーバーのバージョン範囲: ${supportedApiServersAsString}`}</div>
                             <div>
@@ -66,14 +66,14 @@ export const IndexPage: React.FC = () => {
         <Layout>
             <div style={{ padding: 32 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', width: 300 }}>
-                    <Button
+                    <AwaitableButton
                         style={{ margin: '0 0 4px 0' }}
-                        type='primary'
-                        size='large'
-                        onClick={() => router.push('/rooms')}
+                        type="primary"
+                        size="large"
+                        onClick={() => router({ to: '/rooms' })}
                     >
                         部屋一覧
-                    </Button>
+                    </AwaitableButton>
                     <Button
                         style={{ margin: '0 0 8px 0' }}
                         onClick={() => setFileSelectorModalVisible(true)}
@@ -141,33 +141,33 @@ export const IndexPage: React.FC = () => {
                 <Typography.Title level={3}>利用規約・プライバシーポリシー</Typography.Title>
                 <ul>
                     <li>
-                        <Link href='/tos'>利用規約</Link>
+                        <Link to="/tos">利用規約</Link>
                     </li>
                     <li>
-                        <Link href='/privacy_policy'>プライバシーポリシー</Link>
+                        <Link to="/privacy_policy">プライバシーポリシー</Link>
                     </li>
                 </ul>
                 <Typography.Title level={3}>外部リンク</Typography.Title>
                 <ul>
                     <li>
-                        <a href='https://flocon.app' target='_blank' rel='noopener noreferrer'>
+                        <a href="https://flocon.app" target="_blank" rel="noopener noreferrer">
                             公式サイト
                         </a>
                     </li>
                     <li>
                         <a
-                            href='https://github.com/flocon-trpg/servers'
-                            target='_blank'
-                            rel='noopener noreferrer'
+                            href="https://github.com/flocon-trpg/servers"
+                            target="_blank"
+                            rel="noopener noreferrer"
                         >
                             ソースコード
                         </a>
                     </li>
                     <li>
                         <a
-                            href='https://github.com/flocon-trpg/servers/releases'
-                            target='_blank'
-                            rel='noopener noreferrer'
+                            href="https://github.com/flocon-trpg/servers/releases"
+                            target="_blank"
+                            rel="noopener noreferrer"
                         >
                             更新履歴
                         </a>
@@ -176,7 +176,7 @@ export const IndexPage: React.FC = () => {
                 <Typography.Title level={3}>その他</Typography.Title>
                 <ul>
                     <li>
-                        <Link href='/licenses'>使用している素材とライブラリのライセンス</Link>
+                        <Link to="/licenses">使用している素材とライブラリのライセンス</Link>
                     </li>
                 </ul>
             </div>

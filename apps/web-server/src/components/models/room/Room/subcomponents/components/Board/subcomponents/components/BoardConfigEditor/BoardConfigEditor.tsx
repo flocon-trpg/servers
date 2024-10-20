@@ -88,7 +88,7 @@ export const BoardConfigEditor: React.FC<{
                     表示
                 </Checkbox>
             </TableRow>
-            <TableRow label='線の太さ'>
+            <TableRow label="線の太さ">
                 <InputNumber
                     value={boardConfig.gridLineTension}
                     onChange={e => {
@@ -111,7 +111,7 @@ export const BoardConfigEditor: React.FC<{
                     }}
                 />
             </TableRow>
-            <TableRow label='色'>
+            <TableRow label="色">
                 {/* ↓ trigger='click' にすると、SketchPickerを開いている状態でPopover全体を閉じたときに次にSketchPickerが開かず（開き直したら直る）操作性が悪いため、'click'は用いていない */}
                 <ColorPickerButton
                     buttonStyle={NonTransparentStyle}
