@@ -14,7 +14,8 @@
         "prettier-check": "yarn prettier:base --check && yarn workspaces foreach -pv run prettier-check",
         "prettier:base": "prettier \"**/*.{json,yml,md}\"",
         "sort-package-json": "sort-package-json \"package.json\" \"apps/*/package.json\" \"packages/*/package.json\"",
-        "test": "yarn workspaces foreach -pv run test"
+        "test": "yarn workspaces foreach -pv run test",
+        "test-ci": "yarn workspaces foreach -pv run test-ci"
     },
     "devDependencies": {
         "@commitlint/cli": "19.5.0",

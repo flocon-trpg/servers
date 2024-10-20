@@ -38,7 +38,7 @@ jobs:
             - run: yarn
 
             - name: Build web-server
-              run: yarn run export
+              run: yarn build
               working-directory: ./apps/web-server
             - name: mv out directory
               run: mv ./apps/web-server/out ./out
