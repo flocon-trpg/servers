@@ -143,7 +143,6 @@ const InputD6Die: React.FC<InputD6Props> = ({
                 }
                 checkedChildren={<Icons.EyeOutlined />}
                 unCheckedChildren={<Icons.EyeInvisibleOutlined />}
-                 
                 onChange={async e => onIsValuePrivateChange(!e)}
                 shape="circle"
                 defaultType="dashed"

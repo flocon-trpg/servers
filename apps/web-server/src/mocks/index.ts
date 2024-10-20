@@ -1,6 +1,9 @@
 import { FirebaseApp } from '@firebase/app';
 import { FirebaseStorage } from '@firebase/storage';
-import { $free, ParticipantRole, State as S ,
+import {
+    $free,
+    ParticipantRole,
+    State as S,
     boardTemplate,
     characterTemplate,
     forceMaxLength100String,
