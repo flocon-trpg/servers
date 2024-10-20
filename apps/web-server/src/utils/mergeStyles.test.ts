@@ -1,5 +1,5 @@
+import { describe, expect, it } from 'vitest';
 import { mergeStyles } from './mergeStyles';
-import { it, expect, describe } from 'vitest';
 
 describe('mergeStyles', () => {
     it('tests merging 1 object', () => {

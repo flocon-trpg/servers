@@ -1,9 +1,9 @@
 import { ParticipantRole, State as S, roomTemplate } from '@flocon-trpg/core';
+import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { CharacterListPanelContent } from './CharacterListPanelContent';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
-import { Meta, StoryObj } from '@storybook/react';
 
 type RoomState = S<typeof roomTemplate>;
 

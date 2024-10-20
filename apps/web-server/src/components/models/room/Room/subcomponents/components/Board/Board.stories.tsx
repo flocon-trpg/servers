@@ -1,11 +1,11 @@
 import { ParticipantRole, State as S, roomTemplate } from '@flocon-trpg/core';
+import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { Board, Props } from './Board';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { defaultBoardId } from '@/mocks';
 import { createMockUrqlClientForLayout } from '@/mocks/createMockUrqlClientForLayout';
-import { Meta, StoryObj } from '@storybook/react';
 
 type RoomState = S<typeof roomTemplate>;
 

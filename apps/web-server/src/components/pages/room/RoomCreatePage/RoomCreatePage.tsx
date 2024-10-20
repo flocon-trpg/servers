@@ -1,4 +1,5 @@
 import { CreateRoomDocument, CreateRoomInput } from '@flocon-trpg/typed-document-node';
+import { useNavigate } from '@tanstack/react-router';
 import { Alert, Button, Card, Form, Input, Spin, Switch } from 'antd';
 import { useAtomValue } from 'jotai';
 import React from 'react';
@@ -7,7 +8,6 @@ import { Center } from '@/components/ui/Center/Center';
 import { HelpMessageTooltip } from '@/components/ui/HelpMessageTooltip/HelpMessageTooltip';
 import { Layout, loginAndEntry } from '@/components/ui/Layout/Layout';
 import { firebaseUserValueAtom } from '@/hooks/useSetupApp';
-import { useNavigate } from '@tanstack/react-router';
 
 const labelCol = 10;
 const wrapperCol = 24 - labelCol;

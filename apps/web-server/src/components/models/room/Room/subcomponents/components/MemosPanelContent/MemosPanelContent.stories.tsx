@@ -1,8 +1,8 @@
+import { Meta } from '@storybook/react';
 import React from 'react';
 import { MemosPanelContent } from './MemosPanelContent';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
-import { Meta } from '@storybook/react';
 
 export const Default: React.FC<{ width?: number }> = ({ width }) => {
     const { roomClientContextValue } = useSetupStorybook({

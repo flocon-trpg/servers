@@ -1,4 +1,5 @@
 import { FirebaseError } from '@firebase/util';
+import { useNavigate } from '@tanstack/react-router';
 import { Alert, Button, Form, Input, Tooltip } from 'antd';
 import classNames from 'classnames';
 import {
@@ -22,14 +23,13 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai/react';
 import { atom } from 'jotai/vanilla';
 import React from 'react';
 import { storybookAtom } from '@/atoms/storybookAtom/storybookAtom';
+import { AwaitableButton } from '@/components/ui/AwaitableButton/AwaitableButton';
 import { Center } from '@/components/ui/Center/Center';
 import { Layout } from '@/components/ui/Layout/Layout';
 import { anonymous, email, facebook, github, google, phone, twitter } from '@/env';
 import { firebaseAuthAtom } from '@/hooks/useSetupApp';
 import { useWebConfig } from '@/hooks/useWebConfig';
 import { flex, flexColumn, flexRow } from '@/styles/className';
-import { useNavigate } from '@tanstack/react-router';
-import { AwaitableButton } from '@/components/ui/AwaitableButton/AwaitableButton';
 
 const displayName = 'new user';
 const formWidth = 400;

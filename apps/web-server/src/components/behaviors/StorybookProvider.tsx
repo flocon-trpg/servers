@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { createRouter, getRouterContext } from '@tanstack/react-router';
 import { App } from 'antd';
 import React from 'react';
 import { DndProvider } from 'react-dnd';
@@ -7,7 +8,6 @@ import { Client, Provider } from 'urql';
 import { RoomGlobalStyle } from '../globalStyles/RoomGlobalStyle';
 import { AntdThemeConfigProvider } from './AntdThemeConfigProvider';
 import { RoomClientContext, RoomClientContextValue } from '@/contexts/RoomClientContext';
-import { createRouter, getRouterContext } from '@tanstack/react-router';
 import { routeTree } from '@/routeTree.gen';
 
 /** Storybookに表示するコンポーネント用のProviderです。Storybookやデバッグ以外で用いることは避けてください。 */

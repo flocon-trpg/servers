@@ -213,7 +213,7 @@ export const NumberParameterInput: React.FC<Props> = ({
                 checkedChildren={<EyeOutlined />}
                 unCheckedChildren={<EyeInvisibleOutlined />}
                 size="small"
-                // eslint-disable-next-line @typescript-eslint/require-await
+                 
                 onChange={async e => {
                     const operation: CharacterUpOperation = {
                         $v: 2,

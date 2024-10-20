@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import path, { dirname, join } from 'path';
 import type { StorybookConfig } from '@storybook/react-vite';
 
-import path, { join, dirname } from 'path';
 
 /**
  * This function is used to resolve the absolute path of a package.
@@ -36,7 +36,7 @@ const config: StorybookConfig = {
         reactDocgen: false,
     },
     // @ts-expect-error - webpackFinal is not defined in the StorybookConfig type
-    // eslint-disable-next-line @typescript-eslint/require-await
+     
     webpackFinal: async (config: any) => {
         config.resolve.alias = {
             ...config.resolve.alias,

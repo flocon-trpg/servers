@@ -1,9 +1,9 @@
+import { Meta } from '@storybook/react';
 import React from 'react';
 import { useShapePieceEditor } from './ShapePieceEditor';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { defaultBoardId, shapePieceKey1 } from '@/mocks';
-import { Meta } from '@storybook/react';
 
 const Core: React.FC = () => {
     const shapePieceEditor = useShapePieceEditor({

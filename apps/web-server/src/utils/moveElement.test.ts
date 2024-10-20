@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { describe, expect, it } from 'vitest';
 import { moveElement } from './moveElement';
-import { it, expect, describe } from 'vitest';
 
 const numberToString = (source: number): string => {
     switch (source) {

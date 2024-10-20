@@ -1,5 +1,5 @@
+import { describe, expect, it } from 'vitest';
 import { HtmlObject, div, generateHtml } from './generateHtml';
-import { it, expect, describe } from 'vitest';
 
 describe('generateHtml', () => {
     it('tests XSS', () => {

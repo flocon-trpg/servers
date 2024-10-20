@@ -1,5 +1,6 @@
 import * as Doc from '@flocon-trpg/typed-document-node';
 import { loggerRef } from '@flocon-trpg/utils';
+import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { Client, CombinedError } from 'urql';
 import { fromValue, never } from 'wonka';
@@ -7,7 +8,6 @@ import { IndexPage } from './IndexPage';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { createDummyUrqlOperation, createMockUrqlClient } from '@/mocks';
 import { withPromise } from '@/mocks/withPromise';
-import { Meta, StoryObj } from '@storybook/react';
 
 type Version = Doc.GetServerInfoQuery['result']['version'];
 

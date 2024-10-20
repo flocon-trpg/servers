@@ -1,4 +1,5 @@
 import { Result } from '@kizahasi/result';
+import { Meta } from '@storybook/react';
 import { useSetAtom } from 'jotai';
 import React from 'react';
 import { SignIn } from './SignIn';
@@ -7,7 +8,6 @@ import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import * as Env from '@/env';
 import { mockAuth, mockUser, mockWebConfig } from '@/mocks';
 import { createMockUrqlClientForLayout } from '@/mocks/createMockUrqlClientForLayout';
-import { Meta } from '@storybook/react';
 
 export const Default: React.FC<{
     amIAnonymous: boolean;

@@ -1,6 +1,5 @@
 import { Col, Row } from 'antd';
-import React from 'react';
-import { PropsWithChildren } from 'react';
+import React, { PropsWithChildren } from 'react';
 
 type Props = { setPaddingY: boolean };
 

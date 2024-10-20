@@ -1,11 +1,11 @@
 import { ParticipantRole } from '@flocon-trpg/core';
+import { Meta } from '@storybook/react';
 import { useSetAtom } from 'jotai';
 import React from 'react';
 import { BoardEditorModal, boardEditorModalAtom } from './BoardEditorModal';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { defaultBoardId } from '@/mocks';
-import { Meta } from '@storybook/react';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
     const { roomClientContextValue } = useSetupStorybook({

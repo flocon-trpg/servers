@@ -1,10 +1,10 @@
+import { Meta, StoryObj } from '@storybook/react';
 import classNames from 'classnames';
 import React from 'react';
 import { interval } from 'rxjs';
 import { CollaborativeInput, OnChangeParams } from './CollaborativeInput';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { flex, flex1, flexColumn, flexInitial } from '@/styles/className';
-import { Meta, StoryObj } from '@storybook/react';
 
 const Main: React.FC<{
     bufferDuration: number | 'default' | 'short' | null;

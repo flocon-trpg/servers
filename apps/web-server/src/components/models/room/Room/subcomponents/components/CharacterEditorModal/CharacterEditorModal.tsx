@@ -446,7 +446,7 @@ export const CharacterEditorModal: React.FC = () => {
                                                   isCreate,
                                               })
                                     }
-                                    // eslint-disable-next-line @typescript-eslint/require-await
+                                     
                                     onChange={async newValue =>
                                         updateCharacter(character => {
                                             if (character == null) {

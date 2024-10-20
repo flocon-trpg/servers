@@ -1,11 +1,11 @@
 import { App } from 'antd';
+import { useAtomValue } from 'jotai';
 import fileDownload from 'js-file-download';
 import React from 'react';
+import { getIdTokenResultAtom } from './useSetupApp';
+import { useSingleExecuteAsync1 } from './useSingleExecuteAsync';
 import { useWebConfig } from './useWebConfig';
 import { files, getFloconUploaderFile, idTokenIsNull } from '@/utils/file/getFloconUploaderFile';
-import { useSingleExecuteAsync1 } from './useSingleExecuteAsync';
-import { useAtomValue } from 'jotai';
-import { getIdTokenResultAtom } from './useSetupApp';
 
 export const useOpenFloconUploaderFile = () => {
     const webConfig = useWebConfig();

@@ -1,12 +1,11 @@
 import { FirebaseApp } from '@firebase/app';
 import { FirebaseStorage } from '@firebase/storage';
-import { State as S, characterTemplate, roomTemplate } from '@flocon-trpg/core';
-import {
-    $free,
-    ParticipantRole,
+import { $free, ParticipantRole, State as S ,
     boardTemplate,
+    characterTemplate,
     forceMaxLength100String,
     path,
+    roomTemplate,
 } from '@flocon-trpg/core';
 import {
     RoomMessages,

@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 
 import { act, renderHook } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { CreateModeParams, UpdateModeParams, useStateEditor } from './useStateEditor';
-import { it, expect, describe, vi } from 'vitest';
 
 type Props<T> = {
     createMode: CreateModeParams<T> | undefined;

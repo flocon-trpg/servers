@@ -4,21 +4,20 @@ import './styles/css/main.scss';
 import 'firebase/auth';
 import 'firebase/storage';
 
-import { enableMapSet } from 'immer';
-import { PropsWithChildren, StrictMode } from 'react';
-import ReactDOM from 'react-dom/client';
+import { loggerRef } from '@flocon-trpg/utils';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
+import { App as AntdApp, Layout } from 'antd';
+import { enableMapSet } from 'immer';
+import { useAtomValue } from 'jotai';
+import React, { PropsWithChildren, StrictMode } from 'react';
+import ReactDOM from 'react-dom/client';
 
 // Import the generated route tree
-import { routeTree } from './routeTree.gen';
-import { AllContextProvider } from './components/behaviors/AllContextProvider';
-import { loggerRef } from '@flocon-trpg/utils';
-import React from 'react';
-import { firebaseAppAtom, useSetupApp } from './hooks/useSetupApp';
-import { AntdThemeConfigProvider } from './components/behaviors/AntdThemeConfigProvider';
-import { App as AntdApp, Layout } from 'antd';
 import { usePreviousDistinct } from 'react-use';
-import { useAtomValue } from 'jotai';
+import { AllContextProvider } from './components/behaviors/AllContextProvider';
+import { AntdThemeConfigProvider } from './components/behaviors/AntdThemeConfigProvider';
+import { firebaseAppAtom, useSetupApp } from './hooks/useSetupApp';
+import { routeTree } from './routeTree.gen';
 
 enableMapSet();
 

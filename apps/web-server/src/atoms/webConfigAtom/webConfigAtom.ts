@@ -5,6 +5,7 @@ import {
     parsePinoLogLevel,
     parseStringToBoolean,
 } from '@flocon-trpg/utils';
+import { Option } from '@kizahasi/option';
 import { Result } from '@kizahasi/result';
 import { atom } from 'jotai/vanilla';
 import { WebConfig } from '../../configType';
@@ -15,7 +16,6 @@ import {
 } from '../../env';
 import { storybookAtom } from '../storybookAtom/storybookAtom';
 import { DotenvParseOutput, parse } from '@/utils/dotEnvParse';
-import { Option } from '@kizahasi/option';
 
 type Env = {
     firebaseConfig?: FirebaseConfig;

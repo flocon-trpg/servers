@@ -1,17 +1,17 @@
 import * as Icon from '@ant-design/icons';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { Alert, Button, Collapse, Typography } from 'antd';
 import classNames from 'classnames';
 import React from 'react';
 import { Layout } from '../../ui/Layout/Layout';
 import { SupportedApiServers, VERSION } from '@/VERSION';
 import { FileSelectorModal } from '@/components/models/file/FileSelectorModal/FileSelectorModal';
+import { AwaitableButton } from '@/components/ui/AwaitableButton/AwaitableButton';
 import { GraphQLAlert } from '@/components/ui/GraphQLAlert/GraphQLAlert';
 import { useGetApiSemVer } from '@/hooks/useGetApiSemVer';
 import { flex, flexColumn } from '@/styles/className';
 import { apiServerSatisfies } from '@/versioning/apiServerSatisfies';
 import { semVerRangeToString } from '@/versioning/semVerRange';
-import { Link, useNavigate } from '@tanstack/react-router';
-import { AwaitableButton } from '@/components/ui/AwaitableButton/AwaitableButton';
 
 export const IndexPage: React.FC = () => {
     const [fileSelectorModalVisible, setFileSelectorModalVisible] = React.useState(false);
