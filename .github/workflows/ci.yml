@@ -71,7 +71,7 @@ jobs:
 
         services:
             mysql:
-                image: mysql:8.4
+                image: mysql:9.1
                 env:
                     MYSQL_ROOT_PASSWORD: root_password
                     MYSQL_USER: test
@@ -157,7 +157,7 @@ jobs:
 
         services:
             mysql:
-                image: mysql:8.4
+                image: mysql:9.1
                 env:
                     MYSQL_ROOT_PASSWORD: root_password
                     MYSQL_USER: test
