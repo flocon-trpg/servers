@@ -699,7 +699,7 @@ function ofFStatement(statement: FStatement, context: Context): FStatementResult
                 }
             }
             let isFirstLoop = true;
-            // eslint-disable-next-line no-constant-condition
+
             while (true) {
                 if (!isFirstLoop && statement.update != null) {
                     ofFExpression(statement.update, context);
