@@ -5,17 +5,17 @@
 import { act, renderHook } from '@testing-library/react';
 import { useAtom, useSetAtom } from 'jotai';
 import { fakeEnvText, fakeEnvTextSource } from './fakeEnvText';
-import { mockProcessEnvAtom, mockPublicEnvTxtAtom, webConfigAtom } from './webConfigAtom';
+import { mockImportMetaEnvAtom, mockPublicEnvTxtAtom, webConfigAtom } from './webConfigAtom';
 import { it, expect, describe } from 'vitest';
 import { Option } from '@kizahasi/option';
 import { delay } from '@flocon-trpg/utils';
 
 // これを実行しないと、OSに設定されている環境変数や .env ファイルが読み込まれてしまう。実行するタイミングはどこでも構わないはず。
-const preventUsingProcessEnv = () => {
-    const { result: setMockProcessEnv } = renderHook(() => useSetAtom(mockProcessEnvAtom));
+const preventUsingImportMetaEnv = () => {
+    const { result: setMockImportMetaEnv } = renderHook(() => useSetAtom(mockImportMetaEnvAtom));
 
     act(() => {
-        setMockProcessEnv.current({});
+        setMockImportMetaEnv.current({});
     });
 };
 
@@ -24,7 +24,7 @@ const waitForWebConfig = async () => await delay(100);
 
 describe('webConfigAtom (process.env does not exist)', () => {
     it('tests with empty env.txt', async () => {
-        preventUsingProcessEnv();
+        preventUsingImportMetaEnv();
 
         const { result: webConfigAtomResult } = renderHook(() => useAtom(webConfigAtom));
         const { result: setMockPublicEnvTxtAtom } = renderHook(() =>
@@ -40,7 +40,7 @@ describe('webConfigAtom (process.env does not exist)', () => {
     });
 
     it('tests with non-empty env.txt', async () => {
-        preventUsingProcessEnv();
+        preventUsingImportMetaEnv();
 
         const { result: webConfigAtomResult } = renderHook(() => useAtom(webConfigAtom));
         const { result: setMockPublicEnvTxtAtom } = renderHook(() =>

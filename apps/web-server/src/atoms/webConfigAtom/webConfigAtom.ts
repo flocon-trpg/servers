@@ -27,7 +27,7 @@ type Env = {
 };
 
 type Envs = {
-    processEnv: Env;
+    importMetaEnv: Env;
     publicEnvTxt: Env | undefined;
 };
 
@@ -119,9 +119,9 @@ const parseConfig = (env: DotenvParseOutput | undefined): Result<Env> => {
     return Result.ok(result);
 };
 
-const processEnv = parseConfig(undefined);
+const importMetaEnv = parseConfig(undefined);
 
-export const mockProcessEnvAtom = atom<DotenvParseOutput | null>(null);
+export const mockImportMetaEnvAtom = atom<DotenvParseOutput | null>(null);
 
 // もし fetch に失敗した状態でキャッシュされると再び fetch しに行くことはないので、atomWithCache は使っていない
 const publicEnvTxtAtom = atom(async () => {
@@ -137,16 +137,17 @@ const publicEnvTxtAtom = atom(async () => {
 export const mockPublicEnvTxtAtom = atom<Option<string | null>>(Option.none());
 
 export const envsAtom = atom<Promise<Result<Envs>>>(async get => {
-    const mockProcessEnv = get(mockProcessEnvAtom);
-    const $processEnv = mockProcessEnv == null ? processEnv : parseConfig(mockProcessEnv);
-    if ($processEnv.isError) {
-        return $processEnv;
+    const mockImportMetaEnv = get(mockImportMetaEnvAtom);
+    const $importMetaEnv =
+        mockImportMetaEnv == null ? importMetaEnv : parseConfig(mockImportMetaEnv);
+    if ($importMetaEnv.isError) {
+        return $importMetaEnv;
     }
     const publicEnvTxt = await get(publicEnvTxtAtom);
     const mockPublicEnvTxt = get(mockPublicEnvTxtAtom);
     const $publicEnvTxt = mockPublicEnvTxt.isNone ? publicEnvTxt : mockPublicEnvTxt.value;
     if ($publicEnvTxt == null) {
-        return Result.ok({ processEnv: $processEnv.value, publicEnvTxt: undefined });
+        return Result.ok({ importMetaEnv: $importMetaEnv.value, publicEnvTxt: undefined });
     }
     const publicEnvTxtObject = parse($publicEnvTxt);
     const publicEnvTxtResult = parseConfig(publicEnvTxtObject);
@@ -154,16 +155,16 @@ export const envsAtom = atom<Promise<Result<Envs>>>(async get => {
         return publicEnvTxtResult;
     }
     return Result.ok({
-        processEnv: $processEnv.value,
+        importMetaEnv: $importMetaEnv.value,
         publicEnvTxt: publicEnvTxtResult.value,
     });
 });
 
 const mergeEnv = (envs: Envs): Env => {
     if (envs.publicEnvTxt == null) {
-        return envs.processEnv;
+        return envs.importMetaEnv;
     }
-    const result = { ...envs.processEnv };
+    const result = { ...envs.importMetaEnv };
     if (result.authProviders == null) {
         result.authProviders = envs.publicEnvTxt.authProviders;
     }

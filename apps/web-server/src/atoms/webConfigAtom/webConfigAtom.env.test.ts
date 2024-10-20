@@ -15,7 +15,7 @@ import {
 import { fakeEnvText } from './fakeEnvText';
 import { Option } from '@kizahasi/option';
 import { it, expect, describe } from 'vitest';
-import { mockProcessEnvAtom, mockPublicEnvTxtAtom, webConfigAtom } from './webConfigAtom';
+import { mockImportMetaEnvAtom, mockPublicEnvTxtAtom, webConfigAtom } from './webConfigAtom';
 import { delay } from '@flocon-trpg/utils';
 
 const fakeEnvFile = {
@@ -31,8 +31,10 @@ const waitForWebConfig = async () => await delay(100);
 
 describe('webConfigAtom (process.env exists)', () => {
     it('tests with empty env.txt', async () => {
-        const { result: setMockProcessEnv } = renderHook(() => useSetAtom(mockProcessEnvAtom));
-        act(() => setMockProcessEnv.current(fakeEnvFile));
+        const { result: setMockImportMetaEnv } = renderHook(() =>
+            useSetAtom(mockImportMetaEnvAtom),
+        );
+        act(() => setMockImportMetaEnv.current(fakeEnvFile));
         const { result: webConfigAtomResult } = renderHook(() => useAtom(webConfigAtom));
         const { result: setMockPublicEnvTxtAtom } = renderHook(() =>
             useSetAtom(mockPublicEnvTxtAtom),
@@ -57,12 +59,12 @@ describe('webConfigAtom (process.env exists)', () => {
         expect(webConfigAtomResult.current[0]?.value?.isUnlistedFirebaseStorageEnabled).toBe(true);
 
         // cleanup
-        act(() => setMockProcessEnv.current(null));
+        act(() => setMockImportMetaEnv.current(null));
     });
 
     it('tests with non-empty env.txt', async () => {
-        const { result: setMockProcessEnv } = renderHook(() => useSetAtom(mockProcessEnvAtom));
-        act(() => setMockProcessEnv.current(fakeEnvFile));
+        const { result: setImportMetaEnv } = renderHook(() => useSetAtom(mockImportMetaEnvAtom));
+        act(() => setImportMetaEnv.current(fakeEnvFile));
         const { result: webConfigAtomResult } = renderHook(() => useAtom(webConfigAtom));
         const { result: setMockPublicEnvTxtAtom } = renderHook(() =>
             useSetAtom(mockPublicEnvTxtAtom),
@@ -87,6 +89,6 @@ describe('webConfigAtom (process.env exists)', () => {
         expect(webConfigAtomResult.current[0]?.value?.isUnlistedFirebaseStorageEnabled).toBe(true);
 
         // cleanup
-        act(() => setMockProcessEnv.current(null));
+        act(() => setImportMetaEnv.current(null));
     });
 });
