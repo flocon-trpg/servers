@@ -1,10 +1,10 @@
 import { loggerRef } from '@flocon-trpg/utils';
+import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { MyCharactersSelect } from './MyCharactersSelect';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { myRichCharacterId } from '@/mocks';
-import { Meta, StoryObj } from '@storybook/react';
 
 export const Default: React.FC<{
     characterIdMode: 'found' | 'notFound' | 'undefined';

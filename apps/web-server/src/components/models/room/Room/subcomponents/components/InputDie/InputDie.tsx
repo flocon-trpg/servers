@@ -143,7 +143,7 @@ const InputD6Die: React.FC<InputD6Props> = ({
                 }
                 checkedChildren={<Icons.EyeOutlined />}
                 unCheckedChildren={<Icons.EyeInvisibleOutlined />}
-                // eslint-disable-next-line @typescript-eslint/require-await
+                 
                 onChange={async e => onIsValuePrivateChange(!e)}
                 shape="circle"
                 defaultType="dashed"

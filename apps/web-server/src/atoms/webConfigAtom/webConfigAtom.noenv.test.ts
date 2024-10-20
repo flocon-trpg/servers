@@ -2,13 +2,13 @@
 
 // このファイルのテストは、Flocon の設定が書かれた .env ファイルなどが存在すると失敗します。
 
+import { delay } from '@flocon-trpg/utils';
+import { Option } from '@kizahasi/option';
 import { act, renderHook } from '@testing-library/react';
 import { useAtom, useSetAtom } from 'jotai';
+import { describe, expect, it } from 'vitest';
 import { fakeEnvText, fakeEnvTextSource } from './fakeEnvText';
 import { mockImportMetaEnvAtom, mockPublicEnvTxtAtom, webConfigAtom } from './webConfigAtom';
-import { it, expect, describe } from 'vitest';
-import { Option } from '@kizahasi/option';
-import { delay } from '@flocon-trpg/utils';
 
 // これを実行しないと、OSに設定されている環境変数や .env ファイルが読み込まれてしまう。実行するタイミングはどこでも構わないはず。
 const preventUsingImportMetaEnv = () => {

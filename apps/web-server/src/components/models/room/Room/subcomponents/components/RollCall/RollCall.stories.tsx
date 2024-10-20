@@ -1,10 +1,10 @@
 import { Player, Spectator, State, forceMaxLength100String, roomTemplate } from '@flocon-trpg/core';
+import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { RollCall } from './RollCall';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { mockUser } from '@/mocks';
-import { Meta, StoryObj } from '@storybook/react';
 
 const currentDateTime = 1_000_000_000_000;
 

@@ -5,8 +5,8 @@
 import { act, render } from '@testing-library/react';
 import Quill from 'quill';
 import React from 'react';
+import { describe, expect, test, vi } from 'vitest';
 import { CollaborativeInput, OnChangeParams } from './CollaborativeInput';
-import { expect, describe, test, vi } from 'vitest';
 
 const delayTime = 1100;
 

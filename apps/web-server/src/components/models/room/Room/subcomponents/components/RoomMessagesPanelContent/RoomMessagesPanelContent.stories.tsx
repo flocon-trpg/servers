@@ -1,11 +1,11 @@
 import { getExactlyOneKey } from '@flocon-trpg/utils';
+import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { RoomMessagesPanelContent } from './RoomMessagesPanelContent';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { CreateMockRoomMessagesParams } from '@/mocks';
 import { createMockUrqlClientForRoomMessage } from '@/mocks/createMockUrqlClientForRoomMessage';
-import { Meta, StoryObj } from '@storybook/react';
 
 export const Default: React.FC<
     { height: number; fetchingMessages: boolean } & CreateMockRoomMessagesParams

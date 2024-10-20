@@ -9,6 +9,7 @@ import {
     RoomAsListItemFragment,
     WritingMessageStatusInputType,
 } from '@flocon-trpg/typed-document-node';
+import { Link } from '@tanstack/react-router';
 import { Alert, Card, Input, Result, Spin } from 'antd';
 import classNames from 'classnames';
 import { produce } from 'immer';
@@ -28,6 +29,7 @@ import { roomPrivateMessageInputAtom } from '@/components/models/room/Room/subco
 import { roomPublicMessageInputAtom } from '@/components/models/room/Room/subcomponents/atoms/roomPublicMessageInputAtom/roomPublicMessageInputAtom';
 import { NotificationType } from '@/components/models/room/Room/subcomponents/components/Notification/Notification';
 import { useUpdateWritingMessageStatus } from '@/components/models/room/Room/subcomponents/hooks/useUpdateWritingMessageStatus';
+import { AwaitableButton } from '@/components/ui/AwaitableButton/AwaitableButton';
 import { Center } from '@/components/ui/Center/Center';
 import { GraphQLErrorResult } from '@/components/ui/GraphQLErrorResult/GraphQLErrorResult';
 import { Layout, loginAndEntry, success } from '@/components/ui/Layout/Layout';
@@ -40,8 +42,6 @@ import { useRoomState } from '@/hooks/useRoomState';
 import { firebaseUserValueAtom, getIdTokenResultAtom } from '@/hooks/useSetupApp';
 import { flex, flexColumn, itemsCenter } from '@/styles/className';
 import { getRoomConfig } from '@/utils/localStorage/roomConfig';
-import { Link } from '@tanstack/react-router';
-import { AwaitableButton } from '@/components/ui/AwaitableButton/AwaitableButton';
 
 const debouncedWindowInnerWidthAtomCore = atom(0);
 const debouncedWindowInnerHeightAtomCore = atom(0);

@@ -1,11 +1,11 @@
 // @ts-check
 
-import { defineConfig, Plugin } from 'vite';
-import react from '@vitejs/plugin-react-swc';
-import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
-import tsconfigPaths from 'vite-tsconfig-paths';
-import license from 'rollup-plugin-license';
 import path from 'path';
+import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
+import react from '@vitejs/plugin-react-swc';
+import license from 'rollup-plugin-license';
+import { Plugin, defineConfig } from 'vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
     plugins: [TanStackRouterVite(), react(), tsconfigPaths()],

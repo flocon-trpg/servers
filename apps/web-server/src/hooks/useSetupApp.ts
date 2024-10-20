@@ -8,9 +8,11 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
 import { atom, useAtomValue, useSetAtom } from 'jotai';
+import { atomWithObservable } from 'jotai/utils';
 import pino from 'pino';
 import React from 'react';
 import { useAsync, useDebounce, useLatest } from 'react-use';
+import { Observable, from, switchAll } from 'rxjs';
 import urljoin from 'url-join';
 import useConstant from 'use-constant';
 import { roomConfigAtom } from '../atoms/roomConfigAtom/roomConfigAtom';
@@ -29,8 +31,6 @@ import {
 } from '@/utils/firebase/firebaseUserState';
 import { setRoomConfig } from '@/utils/localStorage/roomConfig';
 import { getUserConfig, setUserConfig } from '@/utils/localStorage/userConfig';
-import { atomWithObservable } from 'jotai/utils';
-import { from, Observable, switchAll } from 'rxjs';
 
 export const firebaseAppAtom = atom(async get => {
     const config = await get(webConfigAtom);

@@ -5,6 +5,7 @@ import { useAtomValue } from 'jotai/react';
 import { NumberSize, ResizeDirection } from 're-resizable';
 import React from 'react';
 import { ControlPosition } from 'react-draggable';
+import { Board } from './subcomponents/components/Board/Board';
 import { BoardEditorModal } from './subcomponents/components/BoardEditorModal/BoardEditorModal';
 import {
     BoardContextMenu,
@@ -54,7 +55,6 @@ import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { relative } from '@/styles/className';
-import { Board } from './subcomponents/components/Board/Board';
 
 type ConfigProps<T> = {
     config: T;

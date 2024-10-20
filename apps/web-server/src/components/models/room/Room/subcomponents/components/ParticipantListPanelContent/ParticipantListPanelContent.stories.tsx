@@ -1,9 +1,9 @@
 import { ParticipantRole } from '@flocon-trpg/core';
+import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { ParticipantListPanelContent } from './ParticipantListPanelContent';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
-import { Meta, StoryObj } from '@storybook/react';
 
 export const Master: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
     const { roomClientContextValue } = useSetupStorybook({ room: { myParticipantRole } });

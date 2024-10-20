@@ -1,8 +1,8 @@
+import { createFileRoute } from '@tanstack/react-router';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { FetchTextState } from '../utils/types';
 import { Layout } from '@/components/ui/Layout/Layout';
-import { createFileRoute } from '@tanstack/react-router';
 
 const padding = 20;
 const filename = 'privacy_policy.md';

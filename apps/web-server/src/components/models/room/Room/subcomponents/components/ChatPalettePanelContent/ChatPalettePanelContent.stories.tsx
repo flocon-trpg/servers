@@ -1,11 +1,11 @@
 import { ParticipantRole } from '@flocon-trpg/core';
 import { getExactlyOneKey } from '@flocon-trpg/utils';
+import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { ChatPalettePanelContent } from './ChatPalettePanelContent';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { createMockUrqlClientForRoomMessage } from '@/mocks/createMockUrqlClientForRoomMessage';
-import { Meta, StoryObj } from '@storybook/react';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
     const { roomId, roomConfig, roomClientContextValue } = useSetupStorybook({

@@ -1,11 +1,11 @@
 import { ParticipantRole } from '@flocon-trpg/core';
+import { Meta, StoryObj } from '@storybook/react';
 import { useSetAtom } from 'jotai/react';
 import React from 'react';
 import { CharacterEditorModal, characterEditorModalAtom } from './CharacterEditorModal';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { anotherPlayerCharacterId1, myRichCharacterId, mySimpleCharacterId } from '@/mocks';
-import { Meta, StoryObj } from '@storybook/react';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole; characterStateId: string }> = ({
     myParticipantRole,
