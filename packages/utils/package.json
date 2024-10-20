@@ -25,6 +25,7 @@
         "@kizahasi/option": "^1.1.0",
         "@kizahasi/result": "^1.1.0",
         "browser-or-node": "^2.0.0",
+        "es-toolkit": "^1.25.2",
         "pino": "^9.4.0"
     },
     "devDependencies": {
@@ -34,12 +35,10 @@
         "@flocon-trpg/rollup-config": "workspace:^",
         "@flocon-trpg/tsconfig": "workspace:^",
         "@types/jest": "29.5.13",
-        "@types/lodash": "4.17.9",
         "eslint": "9.12.0",
         "eslint-config-prettier": "9.1.0",
         "eslint-plugin-import": "2.31.0",
         "jest": "29.7.0",
-        "lodash": "4.17.21",
         "prettier": "3.3.3",
         "rimraf": "5.0.10",
         "rollup": "4.23.0",

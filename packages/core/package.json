@@ -29,8 +29,8 @@
         "@kizahasi/ot-string": "0.7.0",
         "@kizahasi/result": "^1.1.0",
         "@ltd/j-toml": "^1.23.0",
+        "es-toolkit": "^1.25.2",
         "immer": "^10.0.0",
-        "lodash": "^4.17.21",
         "sanitize-filename": "^1.6.3",
         "truncate-utf8-bytes": "^1.0.2",
         "zod": "^3.19.1"
@@ -42,7 +42,6 @@
         "@flocon-trpg/tsconfig": "workspace:^",
         "@types/estree": "1.0.6",
         "@types/jest": "29.5.13",
-        "@types/lodash": "4.17.9",
         "@types/sanitize-filename": "1.6.3",
         "@types/truncate-utf8-bytes": "1.0.2",
         "eslint": "9.12.0",

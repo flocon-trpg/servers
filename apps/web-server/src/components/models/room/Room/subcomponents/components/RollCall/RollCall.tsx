@@ -10,7 +10,7 @@ import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { Alert, Button, Modal, Tooltip } from 'antd';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
-import { maxBy, sortBy } from 'lodash';
+import { maxBy, sortBy } from 'es-toolkit';
 import React from 'react';
 import { useInterval } from 'react-use';
 import { useMutation } from 'urql';
