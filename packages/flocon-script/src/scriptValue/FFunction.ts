@@ -55,7 +55,7 @@ export class FFunction implements FObjectBase {
         });
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-types
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     public toJObject(): Function {
         return () => {
             throw new Error('Not supported');
