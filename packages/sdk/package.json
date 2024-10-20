@@ -1,10 +1,10 @@
 {
     "name": "@flocon-trpg/sdk",
     "version": "0.1.0",
+    "private": true,
     "license": "MIT",
     "author": "kizahasi",
     "main": "dist/cjs/index.js",
-    "private": true,
     "module": "dist/esm/index.js",
     "files": [
         "dist"

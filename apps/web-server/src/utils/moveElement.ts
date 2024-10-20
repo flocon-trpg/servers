@@ -16,7 +16,6 @@ export const moveElement = <T>(
         return source;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const elementToMove = source[fromIndex] as T;
     source.splice(fromIndex, 1);
     source.splice(toIndex, 0, elementToMove);

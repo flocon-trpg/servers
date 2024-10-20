@@ -1,10 +1,10 @@
 {
     "name": "@flocon-trpg/core",
     "version": "0.22.0-beta.1",
+    "private": true,
     "description": "Core library for Flocon project.",
     "license": "MIT",
     "author": "kizahasi",
-    "private": true,
     "main": "dist/cjs/index.js",
     "module": "dist/esm/index.js",
     "files": [

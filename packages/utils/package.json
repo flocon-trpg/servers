@@ -1,11 +1,11 @@
 {
     "name": "@flocon-trpg/utils",
     "version": "0.9.2",
+    "private": true,
     "license": "MIT",
     "author": "kizahasi",
     "main": "dist/cjs/index.js",
     "module": "dist/esm/index.js",
-    "private": true,
     "files": [
         "dist"
     ],
