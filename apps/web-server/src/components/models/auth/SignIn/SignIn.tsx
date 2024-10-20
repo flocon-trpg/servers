@@ -26,8 +26,8 @@ import { storybookAtom } from '@/atoms/storybookAtom/storybookAtom';
 import { Center } from '@/components/ui/Center/Center';
 import { Layout } from '@/components/ui/Layout/Layout';
 import { anonymous, email, facebook, github, google, phone, twitter } from '@/env';
+import { firebaseAuthAtom } from '@/hooks/useSetupApp';
 import { useWebConfig } from '@/hooks/useWebConfig';
-import { firebaseAuthAtom } from '@/pages/_app';
 import { flex, flexColumn, flexRow } from '@/styles/className';
 
 const displayName = 'new user';

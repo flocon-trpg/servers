@@ -3,7 +3,7 @@ import { useAtomValue } from 'jotai';
 import React from 'react';
 import { useLatest } from 'react-use';
 import { useCallbackOne } from 'use-memo-one';
-import { firebaseAuthAtom, firebaseUserAtom } from '@/pages/_app';
+import { firebaseAuthAtom, firebaseUserAtom } from './useSetupApp';
 
 /** @returns getIdTokenResultを実行したときにnon-nullishな値が返ってくると予想される場合は、canGetIdTokenResultはtrueとなる。 */
 export const useGetIdTokenResult = () => {

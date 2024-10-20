@@ -29,8 +29,8 @@ import { LoadingResult } from '../LoadingResult/LoadingResult';
 import { NotSignInResult } from '../NotSignInResult/NotSignInResult';
 import { useGetIdToken } from '@/hooks/useGetIdToken';
 import { useGetMyRoles } from '@/hooks/useGetMyRoles';
+import { firebaseUserAtom } from '@/hooks/useSetupApp';
 import { useSignOut } from '@/hooks/useSignOut';
-import { firebaseUserAtom } from '@/pages/_app';
 import { authNotFound, loading, notSignIn } from '@/utils/firebase/firebaseUserState';
 
 const { Header, Content } = AntdLayout;

@@ -1,13 +1,13 @@
 import { StorageReference } from 'firebase/storage';
 import { useAtomValue } from 'jotai';
 import React from 'react';
+import { firebaseStorageAtom } from './useSetupApp';
 import {
     reference as referenceType,
     string,
     toReference,
     useFirebaseStorageUrlQuery,
 } from '@/hooks/useFirebaseStorageUrlQuery';
-import { firebaseStorageAtom } from '@/pages/_app';
 
 type Props = {
     reference: StorageReference | string;

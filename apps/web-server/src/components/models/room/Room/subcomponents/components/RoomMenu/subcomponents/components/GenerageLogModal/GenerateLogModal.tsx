@@ -20,8 +20,8 @@ import {
     ChannelsFilterOptions,
 } from './subcomponents/components/ChannelsFilter/ChannelsFilter';
 import { useGetIdToken } from '@/hooks/useGetIdToken';
+import { firebaseStorageAtom } from '@/hooks/useSetupApp';
 import { useWebConfig } from '@/hooks/useWebConfig';
-import { firebaseStorageAtom } from '@/pages/_app';
 import { flex, flexColumn } from '@/styles/className';
 
 const simple = 'simple';
