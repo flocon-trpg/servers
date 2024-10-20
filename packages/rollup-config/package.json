@@ -1,9 +1,9 @@
 {
     "name": "@flocon-trpg/rollup-config",
     "version": "1.0.0",
+    "private": true,
     "license": "MIT",
     "author": "kizahasi",
-    "private": true,
     "scripts": {
         "build": "tsc",
         "prettier": "yarn prettier:base --write --cache",

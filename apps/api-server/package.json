@@ -1,8 +1,8 @@
 {
     "name": "@flocon-trpg/api-server",
+    "private": true,
     "description": "Flocon API server",
     "license": "MIT",
-    "private": true,
     "scripts": {
         "bcrypt-interactive": "ts-node --project tsconfig.ts-node.json src/run-bcryptInteractive.ts",
         "build": "run-s build:deps build:self",

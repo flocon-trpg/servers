@@ -13,10 +13,7 @@ interface LogFn {
 
 type PinoMethodName = 'debug' | 'error' | 'fatal' | 'info' | 'warn' | 'silent' | 'trace';
 
-const printFn = (
-    logger: Logger,
-    methodName: PinoMethodName,
-): LogFn => {
+const printFn = (logger: Logger, methodName: PinoMethodName): LogFn => {
     function result(msg: string, ...args: readonly unknown[]): void;
     function result(
         obj: Error | Record<string, unknown>,
@@ -45,27 +42,31 @@ const printFn = (
 };
 
 // Promise の catch で受け取った値は型が不明なので、それをログに含めるときに便利な関数。
-// もし msg を optional にすると、obj == null かつ msg === undefined のときに出力するエラーメッセージがないのと、msg を空にすることは通常はないので、msg は optional にしていない。printFn の msg のほうも optional でなくするのもいいかもしれない。 
-const autoDetectObjFn = (logger: Logger,
-    methodName: PinoMethodName) => (obj: unknown, msg: string, ...args: readonly unknown[]) => {
-    if (obj instanceof Error) {
-        printFn(logger, methodName)(obj, msg, ...args);
-        return;
-    }
-    if (typeof obj === 'string') {
-        if (msg == null) {
-        printFn(logger, methodName)(obj, ...args);
-        return;
+// もし msg を optional にすると、obj == null かつ msg === undefined のときに出力するエラーメッセージがないのと、msg を空にすることは通常はないので、msg は optional にしていない。printFn の msg のほうも optional でなくするのもいいかもしれない。
+const autoDetectObjFn =
+    (logger: Logger, methodName: PinoMethodName) =>
+    (obj: unknown, msg: string, ...args: readonly unknown[]) => {
+        if (obj instanceof Error) {
+            printFn(logger, methodName)(obj, msg, ...args);
+            return;
         }
-        printFn(logger, methodName)(`${msg} (Error: ${obj})`, ...args);
-        return
-    }
-    if (obj == null) {
-        printFn(logger, methodName)(msg, ...args);
-        return;
-    }
-        printFn(logger, methodName)(`${msg} (not supported obj type. typeof obj is ${typeof obj})`, ...args);
-}
+        if (typeof obj === 'string') {
+            if (msg == null) {
+                printFn(logger, methodName)(obj, ...args);
+                return;
+            }
+            printFn(logger, methodName)(`${msg} (Error: ${obj})`, ...args);
+            return;
+        }
+        if (obj == null) {
+            printFn(logger, methodName)(msg, ...args);
+            return;
+        }
+        printFn(logger, methodName)(
+            `${msg} (not supported obj type. typeof obj is ${typeof obj})`,
+            ...args,
+        );
+    };
 
 export const createDefaultLogger = (args?: { logLevel?: PinoLogLevel; isBrowser?: boolean }) => {
     return (args?.isBrowser ?? isBrowser)
@@ -124,6 +125,6 @@ export const loggerRef = {
             warn: autoDetectObjFn(this.value, 'warn'),
             silent: autoDetectObjFn(this.value, 'silent'),
             trace: autoDetectObjFn(this.value, 'trace'),
-        }
-    }
+        };
+    },
 };
