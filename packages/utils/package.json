@@ -17,7 +17,8 @@
         "prettier": "yarn prettier:base --write --cache",
         "prettier-check": "yarn prettier:base --check",
         "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\"",
-        "test": "jest"
+        "test": "jest",
+        "test-ci": "jest --ci --coverage"
     },
     "dependencies": {
         "@flocon-trpg/default-pino-transport": "workspace:^",

@@ -12,6 +12,7 @@
         "preview": "vite preview",
         "storybook": "storybook dev -p 6006",
         "test": "vitest",
+        "test-ci": "vitest --coverage",
         "prettier": "yarn prettier:base --write --cache",
         "prettier-check": "yarn prettier:base --check",
         "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\"",

@@ -41,15 +41,11 @@ jobs:
             - run: yarn build
 
             - name: Test
-              run: yarn test --ci --coverage --runInBand
+              run: yarn test-ci
               env:
                   REDIS_TEST: 0
                   MYSQL_TEST: 0
                   POSTGRESQL_TEST: 0
-
-            - name: Next export
-              run: yarn run export
-              working-directory: ./apps/web-server
 
     tests-with-docker:
         name: 'Full tests on ${{ matrix.container }} and Codecov'
@@ -134,7 +130,7 @@ jobs:
                       }
 
             - name: Test
-              run: yarn test --ci --coverage --runInBand
+              run: yarn test-ci
 
             - name: Upload coverages to Codecov
               if: ${{ matrix.container == 'node:18-bullseye' }}
