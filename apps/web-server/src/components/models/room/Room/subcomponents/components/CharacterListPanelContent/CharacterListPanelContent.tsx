@@ -489,7 +489,6 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                                             ? characterIsPrivate({ isCreate: false })
                                             : characterIsNotPrivate({ isCreate: false })
                                     }
-                                     
                                     onChange={async newValue => {
                                         setRoomState(roomState => {
                                             const targetCharacter =

@@ -59,7 +59,7 @@ const MemoBrowserModal: React.FC<{
                 onOpen: () => {
                     onClose(memoId);
                 },
-                 
+
                 onMoveOrRename: async ({ newPath }) =>
                     setRoomState(roomState => {
                         const memo = roomState.memos?.[memoId];

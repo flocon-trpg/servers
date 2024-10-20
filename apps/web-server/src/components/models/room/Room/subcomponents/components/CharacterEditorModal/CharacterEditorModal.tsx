@@ -446,7 +446,6 @@ export const CharacterEditorModal: React.FC = () => {
                                                   isCreate,
                                               })
                                     }
-                                     
                                     onChange={async newValue =>
                                         updateCharacter(character => {
                                             if (character == null) {

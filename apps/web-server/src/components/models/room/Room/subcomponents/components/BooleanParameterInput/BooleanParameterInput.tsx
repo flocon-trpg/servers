@@ -163,7 +163,6 @@ export const BooleanParameterInput: React.FC<Props> = ({
             checkedChildren={<EyeOutlined />}
             unCheckedChildren={<EyeInvisibleOutlined />}
             size="small"
-             
             onChange={async e => {
                 const operation: CharacterUpOperation = {
                     $v: 2,
