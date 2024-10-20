@@ -24,7 +24,7 @@ export default defineConfig({
         rollupOptions: {
             plugins: [
                 // https://github.com/vitejs/vite/discussions/7722#discussioncomment-4007436 を参考にして、npm パッケージのライセンスを出力するようにしている。
-                // CONSIDER: ただし、こうしている理由はただ単に Flocon では以前から licenses-npm-package.txt にライセンス一覧を出力していてそれを参照するページが web-server にあるからというだけである。このプラグインがなくても Vite（というよりは esbuild）にはビルドされた JavaScript ファイル内にライセンスを含める機能があるため、ただ単にライセンスを公開するという目的であればこのプラグインは不要である。
+                // CONSIDER: ただし、こうしている理由はただ単に Flocon では以前から licenses-npm-package.txt にライセンス一覧を出力していてそれを参照するページが web-server にあるからというだけである。このプラグインがなくても Vite（というよりは rollup）にはビルドされた JavaScript ファイル内にライセンスを含める機能があるため、ただ単にライセンスを公開するという目的だけであればこのプラグインは不要である。
                 license({
                     thirdParty: {
                         output: path.resolve(
