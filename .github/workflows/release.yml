@@ -54,7 +54,7 @@ jobs:
               run: zip ${GITHUB_WORKSPACE}/flocon_api_server_flyio.zip ./Dockerfile
 
             - name: Release
-              uses: softprops/action-gh-release@v1
+              uses: softprops/action-gh-release@v2
               with:
                   files: |
                       flocon_web_server.zip
