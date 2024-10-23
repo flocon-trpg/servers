@@ -124,12 +124,11 @@ const RollCallResult: React.FC<RollCallResultProps> = ({
             }
 
             return (
-                <div className={classNames(flex, flexColumn)}>
-                    <div
-                        style={{ height: 22 }}
-                        key={keyNames('ActiveRollCall.Participant', p.userUid)}
-                        className={classNames(flex, flexRow, itemsCenter)}
-                    >
+                <div
+                    key={keyNames('ActiveRollCall.Participant', p.userUid)}
+                    className={classNames(flex, flexColumn)}
+                >
+                    <div style={{ height: 22 }} className={classNames(flex, flexRow, itemsCenter)}>
                         <div style={{ width: 16 }}>{checkbox}</div>
                         <Jdenticon
                             hashOrValue={p.userUid}
