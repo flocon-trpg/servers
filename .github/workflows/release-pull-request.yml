@@ -33,4 +33,4 @@ jobs:
               run: git config --local core.autocrlf input && git add . && git reset
 
             - name: Fail if not all the artifacts are OK
-              uses: numtide/clean-git-action@v1
+              uses: numtide/clean-git-action@v2
