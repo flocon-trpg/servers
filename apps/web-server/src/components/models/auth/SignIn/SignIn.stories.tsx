@@ -61,7 +61,19 @@ export const Default: React.FC<{
         setStorybook({
             isStorybook: true,
             mock: {
-                auth: { ...mockAuth, currentUser: { ...mockUser, isAnonymous: amIAnonymous } },
+                auth: {
+                    ...mockAuth,
+                    currentUser: { ...mockUser, isAnonymous: amIAnonymous },
+                    onAuthStateChanged: observer => {
+                        const unsubscribe = () => undefined;
+                        if (typeof observer === 'function') {
+                            observer(mockUser);
+                            return unsubscribe;
+                        }
+                        observer.next(mockUser);
+                        return unsubscribe;
+                    },
+                },
                 webConfig: Result.ok(mockWebConfig),
             },
         });
