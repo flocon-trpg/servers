@@ -1,10 +1,12 @@
 import * as Icon from '@ant-design/icons';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { Alert, Button, Collapse, Typography } from 'antd';
+import { Alert, Button, Checkbox, Collapse, Typography } from 'antd';
 import classNames from 'classnames';
+import { useAtom } from 'jotai';
 import React from 'react';
 import { Layout } from '../../ui/Layout/Layout';
 import { SupportedApiServers, VERSION } from '@/VERSION';
+import { enableTanStackRouterDevtoolsAtom } from '@/atoms/enableTanStackRouterDevtoolsAtom/enableTanStackRouterDevtoolsAtom';
 import { FileSelectorModal } from '@/components/models/file/FileSelectorModal/FileSelectorModal';
 import { AwaitableButton } from '@/components/ui/AwaitableButton/AwaitableButton';
 import { GraphQLAlert } from '@/components/ui/GraphQLAlert/GraphQLAlert';
@@ -12,6 +14,25 @@ import { useGetApiSemVer } from '@/hooks/useGetApiSemVer';
 import { flex, flexColumn } from '@/styles/className';
 import { apiServerSatisfies } from '@/versioning/apiServerSatisfies';
 import { semVerRangeToString } from '@/versioning/semVerRange';
+
+const DeveloperOption: React.FC = () => {
+    const [enableTanStackRouterDevtools, setEnableTanStackRouterDevtools] = useAtom(
+        enableTanStackRouterDevtoolsAtom,
+    );
+
+    return (
+        <div className={classNames(flex, flexColumn)}>
+            <Checkbox
+                value={enableTanStackRouterDevtools}
+                onChange={e => {
+                    setEnableTanStackRouterDevtools(e.target.checked);
+                }}
+            >
+                {'@tanstack/router-devtools を表示する'}
+            </Checkbox>
+        </div>
+    );
+};
 
 export const IndexPage: React.FC = () => {
     const [fileSelectorModalVisible, setFileSelectorModalVisible] = React.useState(false);
@@ -46,18 +67,25 @@ export const IndexPage: React.FC = () => {
         versionInfo = (
             <div className={classNames(flex, flexColumn)}>
                 {alert}
-                <Collapse ghost>
-                    <Collapse.Panel header="詳細" key="version-info-detais-panel">
-                        <div className={classNames(flex, flexColumn)}>
-                            <div>{`このWebサーバーが対応しているAPIサーバーのバージョン範囲: ${supportedApiServersAsString}`}</div>
-                            <div>
-                                {
-                                    '※ prereleaseの比較は、Node.jsにおけるSemVerとは異なった方法を採用しています。例えば Node.js では "1.0.1-beta.1" は ">1.0.0" の制約を満たしませんが、Flocon では満たしていると判定されます。'
-                                }
-                            </div>
-                        </div>
-                    </Collapse.Panel>
-                </Collapse>
+                <Collapse
+                    ghost
+                    items={[
+                        {
+                            key: '1',
+                            label: '詳細',
+                            children: (
+                                <div className={classNames(flex, flexColumn)}>
+                                    <div>{`このWebサーバーが対応しているAPIサーバーのバージョン範囲: ${supportedApiServersAsString}`}</div>
+                                    <div>
+                                        {
+                                            '※ prereleaseの比較は、Node.jsにおけるSemVerとは異なった方法を採用しています。例えば Node.js では "1.0.1-beta.1" は ">1.0.0" の制約を満たしませんが、Flocon では満たしていると判定されます。'
+                                        }
+                                    </div>
+                                </div>
+                            ),
+                        },
+                    ]}
+                ></Collapse>
             </div>
         );
     }
@@ -179,6 +207,11 @@ export const IndexPage: React.FC = () => {
                         <Link to="/licenses">使用している素材とライブラリのライセンス</Link>
                     </li>
                 </ul>
+                <Typography.Title level={3}>開発者向けオプション</Typography.Title>
+                <Collapse
+                    ghost
+                    items={[{ key: '1', label: 'クリックで表示', children: <DeveloperOption /> }]}
+                />
             </div>
         </Layout>
     );
