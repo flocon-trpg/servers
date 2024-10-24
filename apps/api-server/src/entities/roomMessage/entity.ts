@@ -72,7 +72,6 @@ export class RoomPubCh {
     @PrimaryKey()
     public id: string = v4();
 
-    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ version: true, index: true })
     public version: number = 1;
 
@@ -109,7 +108,6 @@ export class RoomPubMsg {
     @PrimaryKey()
     public id: string = easyFlake();
 
-    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ version: true, index: true })
     public version: number = 1;
 
@@ -167,7 +165,6 @@ export class RoomPubMsg {
     @Property({ nullable: true, type: TextType })
     public altTextToSecret?: string;
 
-    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ index: true })
     public isSecret: boolean = false;
 
@@ -227,7 +224,6 @@ export class RoomPrvMsg {
     @PrimaryKey()
     public id: string = easyFlake();
 
-    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ version: true, index: true })
     public version: number = 1;
 
@@ -285,7 +281,6 @@ export class RoomPrvMsg {
     @Property({ nullable: true, type: TextType })
     public altTextToSecret?: string;
 
-    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ index: true })
     public isSecret: boolean = false;
 

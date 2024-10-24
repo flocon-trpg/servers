@@ -3,27 +3,16 @@ import { useQueryClient } from '@tanstack/react-query';
 import { App } from 'antd';
 import React from 'react';
 import { fetchFirebaseStorageUrlQuery } from './useFirebaseStorageUrlQuery';
+import { useSingleExecuteAsync1 } from './useSingleExecuteAsync';
 
 export const useOpenFirebaseStorageFile = () => {
     const queryClient = useQueryClient();
-    const [isFetching, setIsFetching] = React.useState(false);
     const { notification } = App.useApp();
-
-    const open = React.useCallback(
+    const result = useSingleExecuteAsync1(
         async (storageReference: StorageReference) => {
-            if (isFetching) {
-                notification.warning({
-                    message:
-                        '他のファイルをダウンロードしているため、ダウンロードを開始できませんでした。',
-                });
-                return;
-            }
-            setIsFetching(true);
-            const url = await fetchFirebaseStorageUrlQuery(queryClient, storageReference)
-                .catch(() => null)
-                .finally(() => {
-                    setIsFetching(false);
-                });
+            const url = await fetchFirebaseStorageUrlQuery(queryClient, storageReference).catch(
+                () => null,
+            );
             if (url == null) {
                 notification.warning({
                     message: 'ファイルを開けませんでした。',
@@ -32,14 +21,17 @@ export const useOpenFirebaseStorageFile = () => {
             }
             window.open(url, '_blank', 'noreferrer');
         },
-        [isFetching, notification, queryClient],
+        {
+            onDecline: () => {
+                notification.warning({
+                    message:
+                        '他のファイルをダウンロードしているため、ダウンロードを開始できませんでした。',
+                });
+            },
+        },
     );
-
     return React.useMemo(
-        () => ({
-            open,
-            isFetching,
-        }),
-        [isFetching, open],
+        () => ({ open: result.execute, isExecuting: result.isExecuting }),
+        [result.execute, result.isExecuting],
     );
 };

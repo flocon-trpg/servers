@@ -4,23 +4,31 @@ interface LogFn {
     (msg: string, ...args: readonly unknown[]): void;
     (obj: Error | Record<string, unknown>, msg?: string, ...args: readonly unknown[]): void;
 }
-type Type = {
-    /** pino のインスタンスを get もしくは set できます。 */
-    value: Logger;
-    debug: LogFn;
-    error: LogFn;
-    fatal: LogFn;
-    info: LogFn;
-    infoAsNotice: (msg: string) => void;
-    warn: LogFn;
-    silent: LogFn;
-    trace: LogFn;
-};
 export declare const createDefaultLogger: (args?: {
     logLevel?: PinoLogLevel;
     isBrowser?: boolean;
 }) => Logger<never, boolean>;
 /** pino のロガーを取得もしくは変更できます。 */
-export declare const loggerRef: Type;
+export declare const loggerRef: {
+    /** pino のインスタンスを get もしくは set できます。 */
+    value: Logger;
+    readonly debug: LogFn;
+    readonly error: LogFn;
+    readonly fatal: LogFn;
+    readonly info: LogFn;
+    infoAsNotice(msg: string): void;
+    readonly warn: LogFn;
+    readonly silent: LogFn;
+    readonly trace: LogFn;
+    readonly autoDetectObj: {
+        debug: (obj: unknown, msg: string, ...args: readonly unknown[]) => void;
+        error: (obj: unknown, msg: string, ...args: readonly unknown[]) => void;
+        fatal: (obj: unknown, msg: string, ...args: readonly unknown[]) => void;
+        info: (obj: unknown, msg: string, ...args: readonly unknown[]) => void;
+        warn: (obj: unknown, msg: string, ...args: readonly unknown[]) => void;
+        silent: (obj: unknown, msg: string, ...args: readonly unknown[]) => void;
+        trace: (obj: unknown, msg: string, ...args: readonly unknown[]) => void;
+    };
+};
 export {};
 //# sourceMappingURL=logger.d.ts.map

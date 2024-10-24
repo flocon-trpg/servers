@@ -88,7 +88,7 @@ class FFunction {
             return;
         });
     }
-    // eslint-disable-next-line @typescript-eslint/ban-types
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     toJObject() {
         return () => {
             throw new Error('Not supported');
@@ -646,7 +646,6 @@ function fStatement(statement) {
 
 const getRestValues = (iterator) => {
     const result = [];
-    // eslint-disable-next-line no-constant-condition
     while (true) {
         const next = iterator.next();
         if (next.done) {
@@ -922,6 +921,7 @@ class FObject {
         return exports.FType.Object;
     }
     toPrimitiveAsString() {
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
         return {}.toString();
     }
     toPrimitiveAsNumber() {
@@ -1424,6 +1424,7 @@ class FMap extends FObject {
     }
 }
 
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 function toFValue(source) {
     if (source === null) {
         return null;
@@ -2058,7 +2059,6 @@ function ofFStatement(statement, context) {
                 }
             }
             let isFirstLoop = true;
-            // eslint-disable-next-line no-constant-condition
             while (true) {
                 if (!isFirstLoop && statement.update != null) {
                     ofFExpression(statement.update, context);

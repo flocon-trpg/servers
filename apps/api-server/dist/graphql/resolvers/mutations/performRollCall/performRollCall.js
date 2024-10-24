@@ -3,8 +3,8 @@
 var FilePathModule = require('@flocon-trpg/core');
 var utils = require('@flocon-trpg/utils');
 var result = require('@kizahasi/result');
+var esToolkit = require('es-toolkit');
 var immer = require('immer');
-var lodash = require('lodash');
 var PerformRollCallFailureType = require('../../../../enums/PerformRollCallFailureType.js');
 
 const maxRollCallHistoryCount = 3;
@@ -22,7 +22,7 @@ const performRollCall = (source, myUserUid, soundEffect) => {
     if (openRollCall != null) {
         return result.Result.error(PerformRollCallFailureType.PerformRollCallFailureType.HasOpenRollCall);
     }
-    const maxCreatedAt = lodash.maxBy(utils.recordToArray(source.rollCalls ?? {}), ({ value }) => value.createdAt)?.value.createdAt;
+    const maxCreatedAt = esToolkit.maxBy(utils.recordToArray(source.rollCalls ?? {}), ({ value }) => value.createdAt)?.value.createdAt;
     if (maxCreatedAt != null) {
         const elapsed = new Date().getTime() - maxCreatedAt;
         if (elapsed < minimumTimeWindow) {

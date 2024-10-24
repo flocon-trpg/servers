@@ -13,13 +13,13 @@ import {
     ResetRoomMessagesFailureType,
 } from '@flocon-trpg/typed-document-node';
 import { recordToArray } from '@flocon-trpg/utils';
+import { useNavigate } from '@tanstack/react-router';
 import { Input, Menu, Modal, Popover, Tooltip } from 'antd';
 import { ItemType } from 'antd/lib/menu/interface';
 import classNames from 'classnames';
 import { produce } from 'immer';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react';
 import { atom } from 'jotai/vanilla';
-import { useRouter } from 'next/router';
 import React from 'react';
 import { useMutation, useQuery } from 'urql';
 import { editRoomModalVisibilityAtom } from '../../atoms/editRoomModalVisibilityAtom/editRoomModalVisibilityAtom';
@@ -43,9 +43,9 @@ import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
+import { firebaseUserValueAtom } from '@/hooks/useSetupApp';
 import { useSignOut } from '@/hooks/useSignOut';
-import { firebaseUserValueAtom } from '@/pages/_app';
-import { path } from '@/resources/path';
+import { useSingleExecuteAsync0, useSingleExecuteAsync1 } from '@/hooks/useSingleExecuteAsync';
 import { Styles } from '@/styles';
 import { flex, flexRow, itemsCenter } from '@/styles/className';
 
@@ -94,21 +94,62 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
 }: BecomePlayerModalProps) => {
     const addRoomNotification = useAddNotification();
     const [inputValue, setInputValue] = React.useState('');
-    const [isPosting, setIsPosting] = React.useState(false);
     const [, promoteToPlayer] = useMutation(PromoteToPlayerDocument);
     const [getRoomAsListItemResult, getRoomAsListItem] = useQuery({
         query: GetRoomAsListItemDocument,
         pause: true,
         variables: { roomId },
     });
-    const requiresPlayerPasswordRef = React.useRef(getRoomAsListItem);
+    const getRoomAsListItemRef = React.useRef(getRoomAsListItem);
     React.useEffect(() => {
-        requiresPlayerPasswordRef.current = getRoomAsListItem;
+        getRoomAsListItemRef.current = getRoomAsListItem;
     }, [getRoomAsListItem]);
+    const onOkAsync = React.useCallback(
+        async (requiresPlayerPassword: boolean) => {
+            const e = await promoteToPlayer({
+                roomId,
+                password: requiresPlayerPassword ? inputValue : undefined,
+            });
+            if (e.error != null) {
+                addRoomNotification({
+                    type: 'error',
+                    error: e.error,
+                    message: 'PromoteToPlayer Mutation でエラーが発生しました。',
+                });
+                onOk();
+                return;
+            }
+
+            if (e.data?.result.failureType != null) {
+                let text: string | undefined;
+                switch (e.data?.result.failureType) {
+                    case PromoteFailureType.WrongPassword:
+                        text = 'パスワードが誤っています。';
+                        break;
+                    case PromoteFailureType.NoNeedToPromote:
+                        text = '既に昇格済みです。';
+                        break;
+                    default:
+                        text = undefined;
+                        break;
+                }
+                addRoomNotification({
+                    type: 'warning',
+                    message: '参加者への昇格に失敗しました。',
+                    description: text,
+                });
+                onOk();
+                return;
+            }
+
+            onOk();
+        },
+        [addRoomNotification, inputValue, onOk, promoteToPlayer, roomId],
+    );
+    const { execute, isExecuting } = useSingleExecuteAsync1(onOkAsync);
     React.useEffect(() => {
         setInputValue('');
-        setIsPosting(false);
-        requiresPlayerPasswordRef.current();
+        getRoomAsListItemRef.current();
     }, [visible, roomId]);
 
     const title = '参加者に昇格';
@@ -130,49 +171,12 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
             <Modal
                 open={visible}
                 title={title}
-                okButtonProps={{ disabled: isPosting }}
-                onOk={() => {
-                    setIsPosting(true);
-                    promoteToPlayer({ roomId, password: inputValue }).then(e => {
-                        if (e.error != null) {
-                            addRoomNotification({
-                                type: 'error',
-                                error: e.error,
-                                message: 'PromoteToPlayer Mutation でエラーが発生しました。',
-                            });
-                            onOk();
-                            return;
-                        }
-
-                        if (e.data?.result.failureType != null) {
-                            let text: string | undefined;
-                            switch (e.data?.result.failureType) {
-                                case PromoteFailureType.WrongPassword:
-                                    text = 'パスワードが誤っています。';
-                                    break;
-                                case PromoteFailureType.NoNeedToPromote:
-                                    text = '既に昇格済みです。';
-                                    break;
-                                default:
-                                    text = undefined;
-                                    break;
-                            }
-                            addRoomNotification({
-                                type: 'warning',
-                                message: '参加者への昇格に失敗しました。',
-                                description: text,
-                            });
-                            onOk();
-                            return;
-                        }
-
-                        onOk();
-                    });
-                }}
+                okButtonProps={{ disabled: isExecuting }}
+                onOk={execute == null ? undefined : () => execute(true)}
                 onCancel={() => onCancel()}
             >
                 <Input.Password
-                    placeholder='パスワード'
+                    placeholder="パスワード"
                     value={inputValue}
                     onChange={e => setInputValue(e.target.value)}
                 />
@@ -183,45 +187,8 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
         <Modal
             open={visible}
             title={title}
-            okButtonProps={{ disabled: isPosting }}
-            onOk={() => {
-                setIsPosting(true);
-                promoteToPlayer({ roomId }).then(e => {
-                    if (e.error != null) {
-                        addRoomNotification({
-                            type: 'error',
-                            error: e.error,
-                            message: 'PromoteToPlayer Mutation でエラーが発生しました。',
-                        });
-                        onOk();
-                        return;
-                    }
-
-                    if (e.data?.result.failureType != null) {
-                        let text: string | undefined;
-                        switch (e.data?.result.failureType) {
-                            case PromoteFailureType.WrongPassword:
-                                text = 'パスワードが誤っています。';
-                                break;
-                            case PromoteFailureType.NoNeedToPromote:
-                                text = '既に昇格済みです。';
-                                break;
-                            default:
-                                text = undefined;
-                                break;
-                        }
-                        addRoomNotification({
-                            type: 'warning',
-                            message: '参加者への昇格に失敗しました。',
-                            description: text,
-                        });
-                        onOk();
-                        return;
-                    }
-
-                    onOk();
-                });
-            }}
+            okButtonProps={{ disabled: isExecuting }}
+            onOk={execute == null ? undefined : () => execute(false)}
             onCancel={() => onCancel()}
         >
             パスワードなしで参加者に昇格できます。昇格しますか？
@@ -245,59 +212,54 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
     roomCreatedByMe,
 }: DeleteRoomModalProps) => {
     const addRoomNotification = useAddNotification();
-    const [isPosting, setIsPosting] = React.useState(false);
     const [, deleteRoom] = useMutation(DeleteRoomDocument);
-    React.useEffect(() => {
-        setIsPosting(false);
-    }, [visible, roomId]);
+    const { execute, isExecuting } = useSingleExecuteAsync0(async () => {
+        const e = await deleteRoom({ id: roomId });
+        if (e.error != null) {
+            addRoomNotification({
+                type: 'error',
+                error: e.error,
+                message: 'DeleteRoom Mutation でエラーが発生しました。',
+            });
+            onOk();
+            return;
+        }
 
-    const disabled = isPosting || !roomCreatedByMe;
+        if (e.data?.result.failureType != null) {
+            let text: string | undefined;
+            switch (e.data?.result.failureType) {
+                case DeleteRoomFailureType.NotCreatedByYou:
+                    text = 'この部屋の作成者でないため、削除できません。';
+                    break;
+                case DeleteRoomFailureType.NotFound:
+                    text = '部屋が見つかりませんでした。';
+                    break;
+                default:
+                    text = undefined;
+                    break;
+            }
+            addRoomNotification({
+                type: 'warning',
+                message: '部屋の削除に失敗しました。',
+                description: text,
+            });
+            onOk();
+            return;
+        }
+
+        onOk();
+    });
+
+    const disabled = isExecuting || !roomCreatedByMe;
     return (
         <Modal
             open={visible}
-            title='部屋の削除'
+            title="部屋の削除"
             okButtonProps={{ disabled }}
-            okType='danger'
-            okText='削除する'
+            okType="danger"
+            okText="削除する"
             cancelText={disabled ? '閉じる' : 'キャンセル'}
-            onOk={() => {
-                setIsPosting(true);
-                deleteRoom({ id: roomId }).then(e => {
-                    if (e.error != null) {
-                        addRoomNotification({
-                            type: 'error',
-                            error: e.error,
-                            message: 'DeleteRoom Mutation でエラーが発生しました。',
-                        });
-                        onOk();
-                        return;
-                    }
-
-                    if (e.data?.result.failureType != null) {
-                        let text: string | undefined;
-                        switch (e.data?.result.failureType) {
-                            case DeleteRoomFailureType.NotCreatedByYou:
-                                text = 'この部屋の作成者でないため、削除できません。';
-                                break;
-                            case DeleteRoomFailureType.NotFound:
-                                text = '部屋が見つかりませんでした。';
-                                break;
-                            default:
-                                text = undefined;
-                                break;
-                        }
-                        addRoomNotification({
-                            type: 'warning',
-                            message: '部屋の削除に失敗しました。',
-                            description: text,
-                        });
-                        onOk();
-                        return;
-                    }
-
-                    onOk();
-                });
-            }}
+            onOk={execute}
             onCancel={() => onCancel()}
         >
             {roomCreatedByMe ? (
@@ -333,60 +295,55 @@ const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
     roomCreatedByMe,
 }: DeleteRoomModalProps) => {
     const addRoomNotification = useAddNotification();
-    const [isPosting, setIsPosting] = React.useState(false);
     const [, resetMessages] = useMutation(ResetMessagesDocument);
-    React.useEffect(() => {
-        setIsPosting(false);
-    }, [visible, roomId]);
+    const { execute, isExecuting } = useSingleExecuteAsync0(async () => {
+        const e = await resetMessages({ roomId });
+        if (e.error != null) {
+            addRoomNotification({
+                type: 'error',
+                error: e.error,
+                message: 'ResetMessages Mutation でエラーが発生しました。',
+            });
+            onOk();
+            return;
+        }
 
-    const disabled = isPosting || !roomCreatedByMe;
+        if (e.data?.result.failureType != null) {
+            let text: string | undefined;
+            switch (e.data?.result.failureType) {
+                case ResetRoomMessagesFailureType.NotAuthorized:
+                case ResetRoomMessagesFailureType.NotParticipant:
+                    text = 'この部屋の参加者でないため、削除できません。';
+                    break;
+                case ResetRoomMessagesFailureType.RoomNotFound:
+                    text = '部屋が存在しません。';
+                    break;
+                default:
+                    text = undefined;
+                    break;
+            }
+            addRoomNotification({
+                type: 'warning',
+                message: '部屋の削除に失敗しました。',
+                description: text,
+            });
+            onOk();
+            return;
+        }
+
+        onOk();
+    });
+
+    const disabled = isExecuting || !roomCreatedByMe;
     return (
         <Modal
             open={visible}
-            title='ログの初期化'
+            title="ログの初期化"
             okButtonProps={{ disabled }}
-            okType='danger'
-            okText='削除する'
+            okType="danger"
+            okText="削除する"
             cancelText={disabled ? '閉じる' : 'キャンセル'}
-            onOk={() => {
-                setIsPosting(true);
-                resetMessages({ roomId }).then(e => {
-                    if (e.error != null) {
-                        addRoomNotification({
-                            type: 'error',
-                            error: e.error,
-                            message: 'ResetMessages Mutation でエラーが発生しました。',
-                        });
-                        onOk();
-                        return;
-                    }
-
-                    if (e.data?.result.failureType != null) {
-                        let text: string | undefined;
-                        switch (e.data?.result.failureType) {
-                            case ResetRoomMessagesFailureType.NotAuthorized:
-                            case ResetRoomMessagesFailureType.NotParticipant:
-                                text = 'この部屋の参加者でないため、削除できません。';
-                                break;
-                            case ResetRoomMessagesFailureType.RoomNotFound:
-                                text = '部屋が存在しません。';
-                                break;
-                            default:
-                                text = undefined;
-                                break;
-                        }
-                        addRoomNotification({
-                            type: 'warning',
-                            message: '部屋の削除に失敗しました。',
-                            description: text,
-                        });
-                        onOk();
-                        return;
-                    }
-
-                    onOk();
-                });
-            }}
+            onOk={execute}
             onCancel={() => onCancel()}
         >
             {roomCreatedByMe ? (
@@ -419,9 +376,9 @@ const PanelsOpacityModal: React.FC<{
         <Modal
             open={visible}
             closable
-            title='ウィンドウの透過度の設定'
+            title="ウィンドウの透過度の設定"
             okButtonProps={{ style: { display: 'none' } }}
-            cancelText='閉じる'
+            cancelText="閉じる"
             onCancel={() => onClose()}
         >
             <div className={classNames(flex, flexRow, itemsCenter)} style={opacityStyle}>
@@ -430,7 +387,7 @@ const PanelsOpacityModal: React.FC<{
                     value={panelOpacity ?? defaultPanelOpacity}
                     minValue={minPanelOpacity}
                     onChange={setPanelOpacity}
-                    inputNumberType='0-1'
+                    inputNumberType="0-1"
                     readonly={false}
                 />
             </div>
@@ -453,53 +410,48 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
 }: ChangeMyParticipantNameModalProps) => {
     const addRoomNotification = useAddNotification();
     const [inputValue, setInputValue] = React.useState('');
-    const [isPosting, setIsPosting] = React.useState(false);
     const [, changeParticipantName] = useMutation(ChangeParticipantNameDocument);
     React.useEffect(() => {
         setInputValue('');
-        setIsPosting(false);
     }, [visible, roomId]);
-
-    const onOk = () => {
-        setIsPosting(true);
-        changeParticipantName({ roomId, newName: inputValue }).then(e => {
-            if (e.error != null) {
-                addRoomNotification({
-                    type: 'error',
-                    error: e.error,
-                    message: 'ChangeParticipantName Mutation でエラーが発生しました。',
-                });
-                onOkCore();
-                return;
-            }
-
-            if (e.data?.result.failureType != null) {
-                addRoomNotification({
-                    type: 'warning',
-                    message: '名前の変更に失敗しました。',
-                });
-                onOkCore();
-                return;
-            }
-
+    const { execute, isExecuting } = useSingleExecuteAsync0(async () => {
+        const e = await changeParticipantName({ roomId, newName: inputValue });
+        if (e.error != null) {
+            addRoomNotification({
+                type: 'error',
+                error: e.error,
+                message: 'ChangeParticipantName Mutation でエラーが発生しました。',
+            });
             onOkCore();
-        });
-    };
+            return;
+        }
+
+        if (e.data?.result.failureType != null) {
+            addRoomNotification({
+                type: 'warning',
+                message: '名前の変更に失敗しました。',
+            });
+            onOkCore();
+            return;
+        }
+
+        onOkCore();
+    });
 
     return (
         <Modal
             open={visible}
-            title='名前を変更'
-            okButtonProps={{ disabled: isPosting }}
-            onOk={() => onOk()}
+            title="名前を変更"
+            okButtonProps={{ disabled: isExecuting }}
+            onOk={execute}
             onCancel={() => onCancel()}
         >
             <Input
-                placeholder='新しい名前'
+                placeholder="新しい名前"
                 autoFocus
                 value={inputValue}
                 onChange={e => setInputValue(e.target.value)}
-                onPressEnter={() => onOk()}
+                onPressEnter={execute}
             />
         </Modal>
     );
@@ -1068,7 +1020,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
     const me = useMe();
     const myUserUid = useMyUserUid();
     const firebaseUser = useAtomValue(firebaseUserValueAtom);
-    const router = useRouter();
+    const router = useNavigate();
     const signOut = useSignOut();
     const roomId = useRoomId();
     const createdBy = useRoomStateValueSelector(state => state.createdBy);
@@ -1092,6 +1044,20 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
 
     const panelsMenuItem = usePanelsMenuItem();
 
+    const { execute: executeLeaveRoomMutation, isExecuting: isExecutingLeaveRoomMutation } =
+        useSingleExecuteAsync0(async () => {
+            const result = await leaveRoomMutation({ id: roomId });
+            if (result.data == null) {
+                return;
+            }
+            await router({ to: '/rooms' });
+        });
+    const { execute: executeSignOut, isExecuting: isExecutingSignOut } = useSingleExecuteAsync0(
+        async () => {
+            await signOut();
+        },
+    );
+
     return React.useMemo(() => {
         if (me == null || myUserUid == null || firebaseUser == null || roomId == null) {
             return null;
@@ -1101,13 +1067,14 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
                 key: 'logo@menu',
                 label: (
                     <img
-                        src='/assets/logo.png'
+                        src="/assets/logo.png"
                         width={24}
                         height={24}
                         style={{ verticalAlign: 'middle' }}
                     />
                 ),
-                onClick: () => router.push('/'),
+                // routing であれば複数回実行されてもあまり問題ないため、Promise の結果を無視してコードを簡略化している。
+                onClick: () => void router({ to: '/' }),
             },
             {
                 key: '部屋@menu',
@@ -1164,7 +1131,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
             {
                 key: 'ボリューム@menu',
                 label: (
-                    <Popover trigger='click' content={<RoomVolumeBar />}>
+                    <Popover trigger="click" content={<RoomVolumeBar />}>
                         ボリューム
                     </Popover>
                 ),
@@ -1197,7 +1164,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
                         label:
                             me.role === ParticipantRole.Player ||
                             me.role === ParticipantRole.Master ? (
-                                <Tooltip title='すでに昇格済みです。'>参加者に昇格</Tooltip>
+                                <Tooltip title="すでに昇格済みです。">参加者に昇格</Tooltip>
                             ) : (
                                 '参加者に昇格'
                             ),
@@ -1209,14 +1176,8 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
                     {
                         key: '退室する@menu',
                         label: '退室する',
-                        onClick: () => {
-                            leaveRoomMutation({ id: roomId }).then(result => {
-                                if (result.data == null) {
-                                    return;
-                                }
-                                router.push(path.rooms.index);
-                            });
-                        },
+                        disabled: isExecutingLeaveRoomMutation,
+                        onClick: executeLeaveRoomMutation,
                     },
                 ],
             },
@@ -1228,7 +1189,8 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
                     {
                         key: 'ログアウト@menu',
                         label: 'ログアウト',
-                        onClick: () => signOut(),
+                        disabled: isExecutingSignOut,
+                        onClick: executeSignOut,
                     },
                 ],
             },
@@ -1238,9 +1200,9 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
             <>
                 <Menu
                     items={menuItems}
-                    triggerSubMenuAction='click'
+                    triggerSubMenuAction="click"
                     selectable={false}
-                    mode='horizontal'
+                    mode="horizontal"
                 />
                 <FileSelectorModal
                     visible={fileSelectorModalVisible}
@@ -1293,6 +1255,10 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
         roomId,
         panelsMenuItem,
         showBackgroundBoardViewer,
+        isExecutingLeaveRoomMutation,
+        executeLeaveRoomMutation,
+        isExecutingSignOut,
+        executeSignOut,
         fileSelectorModalVisible,
         isBecomePlayerModalVisible,
         isChangeMyParticipantNameModalVisible,
@@ -1304,8 +1270,6 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
         router,
         setEditRoomModalVisibility,
         setShowBackgroundBoardViewerAtom,
-        leaveRoomMutation,
-        signOut,
         setIsPanelsOpacityModalVisible,
     ]);
 });

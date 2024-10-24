@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { isDate, isEqual } from 'es-toolkit';
 import { State, strParamTemplate } from '../..';
 
 const isEmpty = (source: Record<string, unknown>): boolean => {
@@ -12,7 +12,7 @@ const isEmpty = (source: Record<string, unknown>): boolean => {
 };
 
 const isDefaultSimpleParam = (source: Record<string, unknown>) => {
-    return _.isEqual(source, {
+    return isEqual(source, {
         $v: 2,
         $r: 1,
         isValuePrivate: false,
@@ -29,7 +29,7 @@ const isDefaultStrParam = (source: Record<string, unknown>) => {
         value: undefined,
         overriddenParameterName: undefined,
     };
-    return _.isEqual(source, defaultStrParam);
+    return isEqual(source, defaultStrParam);
 };
 
 const isDefaultParam = (source: Record<string, unknown>) => {
@@ -60,7 +60,7 @@ export const normalizeRoomState = (source: unknown): any => {
             if (source == null) {
                 return undefined;
             }
-            if (_.isDate(source)) {
+            if (isDate(source)) {
                 return source;
             }
             const record = source as Record<string, unknown>;

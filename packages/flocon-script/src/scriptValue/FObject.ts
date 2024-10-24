@@ -28,6 +28,7 @@ export abstract class FObject implements FObjectBase {
     }
 
     public toPrimitiveAsString() {
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
         return {}.toString();
     }
 

@@ -24,7 +24,7 @@ export const UISelector = <T,>({
 }: Props<T>) => {
     return (
         <div className={className} style={style}>
-            <Radio.Group value={activeKey} onChange={e => onChange(e.target.value)}>
+            <Radio.Group value={activeKey} onChange={e => onChange(e.target.value as T)}>
                 {keys.map((key, i) => (
                     <Radio.Button key={i} value={key}>
                         {getName(key)}
