@@ -11,7 +11,7 @@ import { atom, useAtomValue, useSetAtom } from 'jotai';
 import { atomWithObservable } from 'jotai/utils';
 import pino from 'pino';
 import React from 'react';
-import { useAsync, useDebounce, useLatest } from 'react-use';
+import { useAsync, useDebounce, useLatest, usePreviousDistinct } from 'react-use';
 import { Observable, from, switchAll } from 'rxjs';
 import urljoin from 'url-join';
 import useConstant from 'use-constant';
@@ -32,21 +32,35 @@ import {
 import { setRoomConfig } from '@/utils/localStorage/roomConfig';
 import { getUserConfig, setUserConfig } from '@/utils/localStorage/userConfig';
 
-export const firebaseAppAtom = atom(async get => {
+const firebaseAppAtom = atom(async get => {
     const config = await get(webConfigAtom);
-
     if (config?.value == null) {
         return undefined;
     }
-    return initializeApp(config.value.firebaseConfig);
+    if (config.value.isMock) {
+        return undefined;
+    }
+    return initializeApp(config.value.value.firebaseConfig);
 });
+
+export const useOnFirebaseAppChange = (onChange: () => void) => {
+    const app = useAtomValue(firebaseAppAtom);
+    const prevApp = usePreviousDistinct(app);
+    const onChangeRef = React.useRef(onChange);
+
+    return React.useEffect(() => {
+        if (app !== prevApp) {
+            onChangeRef.current();
+        }
+    }, [app, prevApp]);
+};
 
 const httpUriAtom = atom(async get => {
     const config = await get(webConfigAtom);
-    if (config?.value == null) {
+    if (config?.value?.value == null) {
         return undefined;
     }
-    return urljoin(getHttpUri(config.value), 'graphql');
+    return urljoin(getHttpUri(config.value.value), 'graphql');
 });
 
 const wsUriAtom = atom(async get => {
@@ -54,7 +68,7 @@ const wsUriAtom = atom(async get => {
     if (config?.value == null) {
         return undefined;
     }
-    return urljoin(getWsUri(config.value), 'graphql');
+    return urljoin(getWsUri(config.value.value), 'graphql');
 });
 
 /**
@@ -227,8 +241,8 @@ export const useSetupApp = () => {
         const defaultLevel = 'info';
         loggerRef.value = storybook.isStorybook
             ? pino()
-            : createDefaultLogger({ logLevel: config?.value?.logLevel ?? defaultLevel });
-    }, [config?.value?.logLevel, storybook.isStorybook]);
+            : createDefaultLogger({ logLevel: config?.value?.value?.logLevel ?? defaultLevel });
+    }, [config?.value?.value?.logLevel, storybook.isStorybook]);
 
     const user = useAtomValue(firebaseUserAtom);
     const userValue = useAtomValue(firebaseUserValueAtom);

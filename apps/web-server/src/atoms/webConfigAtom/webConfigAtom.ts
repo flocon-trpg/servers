@@ -8,7 +8,7 @@ import {
 import { Option } from '@kizahasi/option';
 import { Result } from '@kizahasi/result';
 import { atom } from 'jotai/vanilla';
-import { WebConfig } from '../../configType';
+import { WebConfig, WebConfigMock } from '../../configType';
 import {
     NEXT_PUBLIC_FIREBASE_CONFIG,
     NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED,
@@ -184,11 +184,28 @@ const mergeEnv = (envs: Envs): Env => {
     return result;
 };
 
-export const webConfigAtom = atom<Promise<Result<WebConfig> | null>>(async get => {
+type WebConfigAtomReturnType =
+    | {
+          isMock: false;
+          value: WebConfig;
+      }
+    | {
+          isMock: true;
+          value: WebConfigMock;
+      };
+
+export const webConfigAtom = atom<Promise<Result<WebConfigAtomReturnType> | null>>(async get => {
     const storybook = get(storybookAtom);
     const envs = await get(envsAtom);
     if (storybook.mock?.webConfig != null) {
-        return storybook.mock.webConfig;
+        if (storybook.mock.webConfig.isError) {
+            return storybook.mock.webConfig;
+        } else {
+            return Result.ok({
+                isMock: true,
+                value: storybook.mock.webConfig.value,
+            });
+        }
     }
     if (envs == null) {
         return null;
@@ -216,10 +233,10 @@ export const webConfigAtom = atom<Promise<Result<WebConfig> | null>>(async get =
         ws: mergedEnv.ws,
         logLevel: logLevel?.value,
     };
-    return Result.ok(result);
+    return Result.ok({ isMock: false, value: result });
 });
 
-export const getHttpUri = (config: WebConfig) => {
+export const getHttpUri = (config: WebConfig | WebConfigMock) => {
     if (config.http == null) {
         return `${location.protocol}//${location.host}`;
     } else {
@@ -227,7 +244,7 @@ export const getHttpUri = (config: WebConfig) => {
     }
 };
 
-export const getWsUri = (config: WebConfig) => {
+export const getWsUri = (config: WebConfig | WebConfigMock) => {
     if (config.ws == null) {
         return `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}`;
     } else {

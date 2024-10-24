@@ -54,6 +54,34 @@ export const createMockUrqlClientForRoomMessage = () => {
                         }),
                     );
                 }
+                case Doc.GetRoomAsListItemDocument: {
+                    const res: Doc.GetRoomAsListItemQuery = {
+                        __typename: 'Query',
+                        result: {
+                            __typename: 'GetRoomAsListItemSuccessResult',
+                            room: {
+                                __typename: 'RoomAsListItem',
+                                id: 'test-id',
+                                name: 'test-name',
+                                createdBy: 'test-createdBy',
+                                createdAt: 1704034800,
+                                updatedAt: 1704038400,
+                                role: Doc.ParticipantRole.Player,
+                                isBookmarked: false,
+                                requiresPlayerPassword: false,
+                                requiresSpectatorPassword: false,
+                            },
+                        },
+                    };
+                    return withPromise(
+                        fromValue({
+                            data: res,
+                            operation: createDummyUrqlOperation(),
+                            stale: false,
+                            hasNext: false,
+                        }),
+                    );
+                }
                 default:
                     loggerRef.error({ query: query.query }, 'Query');
                     throw new Error('Query not match');

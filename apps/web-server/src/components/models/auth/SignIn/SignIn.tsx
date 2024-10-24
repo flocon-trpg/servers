@@ -295,10 +295,10 @@ const SignInContent: React.FC = () => {
     const loginWithAuthProvider = useLoginWithAuthProvider();
 
     const areProvidersEmptyValue = React.useMemo(() => {
-        const authProviders = config?.value?.authProviders ?? [];
+        const authProviders = config?.value?.value.authProviders ?? [];
         return areProvidersEmpty(authProviders);
-    }, [config?.value?.authProviders]);
-    const authProviders = config?.value?.authProviders ?? [];
+    }, [config?.value?.value.authProviders]);
+    const authProviders = config?.value?.value.authProviders ?? [];
 
     if (config?.isError === true) {
         return <div>{config.error}</div>;

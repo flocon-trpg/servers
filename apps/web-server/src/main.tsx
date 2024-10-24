@@ -17,7 +17,7 @@ import { usePreviousDistinct } from 'react-use';
 import { AllContextProvider } from './components/behaviors/AllContextProvider';
 import { AntdThemeConfigProvider } from './components/behaviors/AntdThemeConfigProvider';
 import { LayoutWithNoHook } from './components/ui/Layout/Layout';
-import { firebaseAppAtom, useSetupApp } from './hooks/useSetupApp';
+import { useOnFirebaseAppChange, useSetupApp } from './hooks/useSetupApp';
 import { routeTree } from './routeTree.gen';
 
 enableMapSet();
@@ -50,23 +50,13 @@ declare module '@tanstack/react-router' {
     }
 }
 
-const useLogFirebaseAppMultipleInitialization = () => {
-    const app = useAtomValue(firebaseAppAtom);
-    const prevApp = usePreviousDistinct(app);
-
-    React.useEffect(() => {
-        if (prevApp == null) {
-            return;
-        }
-        loggerRef.warn('Firebase app is initialized multiple times');
-    }, [prevApp]);
-};
-
 const App = ({ children }: PropsWithChildren) => {
     const { config, authNotFoundState, urqlClient, reactQueryClient, clientId, httpUri, wsUri } =
         useSetupApp();
 
-    useLogFirebaseAppMultipleInitialization();
+    useOnFirebaseAppChange(() => {
+        loggerRef.warn('Firebase app is initialized multiple times');
+    });
     React.useEffect(() => {
         if (httpUri == null) {
             return;
