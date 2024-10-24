@@ -16,20 +16,11 @@ import ReactDOM from 'react-dom/client';
 import { usePreviousDistinct } from 'react-use';
 import { AllContextProvider } from './components/behaviors/AllContextProvider';
 import { AntdThemeConfigProvider } from './components/behaviors/AntdThemeConfigProvider';
+import { LayoutWithNoHook } from './components/ui/Layout/Layout';
 import { firebaseAppAtom, useSetupApp } from './hooks/useSetupApp';
 import { routeTree } from './routeTree.gen';
 
 enableMapSet();
-
-// Create a new router instance
-const router = createRouter({ routeTree });
-
-// Register the router instance for type safety
-declare module '@tanstack/react-router' {
-    interface Register {
-        router: typeof router;
-    }
-}
 
 const ThemedDiv: React.FC<PropsWithChildren<{ style?: React.CSSProperties }>> = ({
     children,
@@ -38,15 +29,26 @@ const ThemedDiv: React.FC<PropsWithChildren<{ style?: React.CSSProperties }>> = 
     return (
         <AntdThemeConfigProvider compact={false}>
             <AntdApp>
-                <Layout style={{ minHeight: '100vh' }}>
-                    <Layout.Content>
-                        <div style={style}>{children}</div>
-                    </Layout.Content>
-                </Layout>
+                <LayoutWithNoHook>
+                    <div style={style}>{children}</div>
+                </LayoutWithNoHook>
             </AntdApp>
         </AntdThemeConfigProvider>
     );
 };
+
+// Create a new router instance
+const router = createRouter({
+    routeTree,
+    notFoundMode: 'root',
+});
+
+// Register the router instance for type safety
+declare module '@tanstack/react-router' {
+    interface Register {
+        router: typeof router;
+    }
+}
 
 const useLogFirebaseAppMultipleInitialization = () => {
     const app = useAtomValue(firebaseAppAtom);

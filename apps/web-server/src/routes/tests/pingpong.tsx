@@ -9,6 +9,7 @@ import { Button, InputNumber } from 'antd';
 import React from 'react';
 import { CombinedError, useClient, useMutation, useSubscription } from 'urql';
 import { pipe, subscribe } from 'wonka';
+import { Layout, LayoutWithNoHook } from '@/components/ui/Layout/Layout';
 
 type PongObservableResultState =
     | {
@@ -98,24 +99,28 @@ const PingPong: React.FC = () => {
     })();
 
     return (
-        <div>
-            <h2>ping pong test</h2>
-            <div>You can do simple tests of GraphQL subscription here.</div>
-            <div>This subscribes pongs invoked by other users.</div>
-            <InputNumber
-                value={postValue}
-                onChange={value => (typeof value === 'number' ? setPostValue(value) : undefined)}
-            />
-            <Button onClick={() => void pingMutation({ value: postValue })} type="primary">
-                Ping
-            </Button>
-            <h3>ping response (mutation)</h3>
-            {pingMutationResponse}
-            <h3>pong (subscription method)</h3>
-            {pongObservableResponse}
-            <h3>pong (useSubscription hook)</h3>
-            {pongHooksResponse}
-        </div>
+        <LayoutWithNoHook>
+            <div>
+                <h2>ping pong test</h2>
+                <div>You can do simple tests of GraphQL subscription here.</div>
+                <div>This subscribes pongs invoked by other users.</div>
+                <InputNumber
+                    value={postValue}
+                    onChange={value =>
+                        typeof value === 'number' ? setPostValue(value) : undefined
+                    }
+                />
+                <Button onClick={() => void pingMutation({ value: postValue })} type="primary">
+                    Ping
+                </Button>
+                <h3>ping response (mutation)</h3>
+                {pingMutationResponse}
+                <h3>pong (subscription method)</h3>
+                {pongObservableResponse}
+                <h3>pong (useSubscription hook)</h3>
+                {pongHooksResponse}
+            </div>
+        </LayoutWithNoHook>
     );
 };
 

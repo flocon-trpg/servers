@@ -21,7 +21,7 @@ import {
     Spin,
 } from 'antd';
 import { useAtomValue } from 'jotai';
-import React, { PropsWithChildren } from 'react';
+import React, { Children, PropsWithChildren } from 'react';
 import { useClient, useMutation } from 'urql';
 import { AwaitableButton } from '../AwaitableButton/AwaitableButton';
 import { Center } from '../Center/Center';
@@ -116,6 +116,8 @@ type Props = {
 
     hideHeader?: typeof always | typeof success;
 };
+
+const antdLayoutStyle: React.CSSProperties = { minHeight: '100vh' };
 
 export const Layout: React.FC<PropsWithChildren<Props>> = ({
     children,
@@ -236,7 +238,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
     }
 
     return (
-        <AntdLayout style={{ minHeight: '100vh' }}>
+        <AntdLayout style={antdLayoutStyle}>
             {!hideHeader && (
                 <Header>
                     <Row>
@@ -302,6 +304,14 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                 </Header>
             )}
             <Content>{content}</Content>
+        </AntdLayout>
+    );
+};
+
+export const LayoutWithNoHook: React.FC<PropsWithChildren> = ({ children }) => {
+    return (
+        <AntdLayout style={antdLayoutStyle}>
+            <Content>{children}</Content>
         </AntdLayout>
     );
 };
