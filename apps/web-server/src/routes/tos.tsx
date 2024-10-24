@@ -1,11 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { useAtomValue } from 'jotai';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { FetchTextState } from '../utils/types';
+import { fetchTosAtom, tosFileName } from '@/atoms/fetchTosAtom/fetchTosAtom';
 import { Layout } from '@/components/ui/Layout/Layout';
 
 const padding = 20;
-const filename = 'tos.md';
 
 /**
  * `tos.md` の内容を用い、利用規約を表示します。
@@ -13,45 +14,33 @@ const filename = 'tos.md';
  * サーバーを運用する際は、このコードを改変して利用規約を直接表示させても構いません。その場合は必ずしも `tos.md` を使う必要はありません。
  */
 const TosContent: React.FC = () => {
-    const [text, setText] = React.useState<FetchTextState>({ fetched: false });
     React.useEffect(() => {
-        const main = async () => {
-            // chromeなどではfetchできないと `http://localhost:3000/tos.md 404 (Not Found)` などといったエラーメッセージが表示されるが、実際は問題ない
-            const envTxtObj = await fetch(`/${filename}`);
-            if (!envTxtObj.ok) {
-                setText({ fetched: true, value: null });
-                return;
-            }
-            const envTxt = await envTxtObj.text();
-            setText({ fetched: true, value: envTxt });
-        };
+        const main = async () => {};
         void main();
     }, []);
-    if (!text.fetched) {
-        return <div style={{ padding }}>利用規約を取得しています…</div>;
-    }
-    if (text.value == null) {
+    const text = useAtomValue(fetchTosAtom);
+    if (text == null) {
         return (
             <div
                 style={{ padding }}
-            >{`${filename}が見つからなかったため、利用規約の文章を生成することができませんでした。`}</div>
+            >{`${tosFileName}が見つからなかったため、利用規約の文章を生成することができませんでした。`}</div>
         );
     }
     return (
         <div style={{ padding }}>
             <div style={{ paddingBottom: 16 }}>
                 このページは、
-                <a href={`/${filename}`} target="_blank" rel="noopener noreferrer">
-                    {filename}
+                <a href={`/${tosFileName}`} target="_blank" rel="noopener noreferrer">
+                    {tosFileName}
                 </a>
                 ファイルから生成されています。
             </div>
-            {text.value.trim() === '' ? (
+            {text.trim() === '' ? (
                 <div
                     style={{ padding }}
-                >{`${filename}の中身が空であるため、利用規約の文章を生成することができませんでした。`}</div>
+                >{`${tosFileName}の中身が空であるため、利用規約の文章を生成することができませんでした。`}</div>
             ) : (
-                <ReactMarkdown>{text.value}</ReactMarkdown>
+                <ReactMarkdown>{text}</ReactMarkdown>
             )}
         </div>
     );
