@@ -6,7 +6,7 @@ module.exports = {
     settings: {
         react: { version: 'detect' },
     },
-    extends: ['@flocon-trpg/eslint-config', 'plugin:@next/next/recommended'],
+    extends: ['@flocon-trpg/eslint-config-v8', 'plugin:@next/next/recommended'],
     globals: {
         Atomics: 'readonly',
         SharedArrayBuffer: 'readonly',

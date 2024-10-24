@@ -52,7 +52,7 @@ export const ParticipantsSelect: React.FC<Props> = ({
     return (
         <Select
             placeholder={placeholder}
-            mode='multiple'
+            mode="multiple"
             style={{ width: '100%' }}
             value={[...selectedParticipantIds].filter(participantId => participantId !== myUserUid)}
             onChange={value => onChange(value)}

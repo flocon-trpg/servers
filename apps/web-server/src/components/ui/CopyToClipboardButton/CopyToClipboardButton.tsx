@@ -1,7 +1,8 @@
 import { simpleId } from '@flocon-trpg/core';
-import { Button, ButtonProps, Tooltip } from 'antd';
+import { ButtonProps, Tooltip } from 'antd';
 import copy from 'clipboard-copy';
 import React, { PropsWithChildren } from 'react';
+import { AwaitableButton } from '../AwaitableButton/AwaitableButton';
 
 type Props = Omit<ButtonProps, 'onClick'> & {
     clipboardText: () => Promise<string>;
@@ -27,7 +28,7 @@ export const CopyToClipboardButton: React.FC<React.PropsWithChildren<Props>> = (
     }, [currentSubscriptionId]);
 
     const button = (
-        <Button
+        <AwaitableButton
             onClick={async () => {
                 const id = simpleId();
                 const text = await clipboardText();
@@ -38,7 +39,7 @@ export const CopyToClipboardButton: React.FC<React.PropsWithChildren<Props>> = (
         />
     );
     return (
-        <Tooltip title='コピーしました!' visible={subscriptionCount >= 1}>
+        <Tooltip title="コピーしました!" visible={subscriptionCount >= 1}>
             {button}
         </Tooltip>
     );

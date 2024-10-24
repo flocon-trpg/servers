@@ -1,4 +1,4 @@
-import { ComponentMeta } from '@storybook/react';
+import { Meta } from '@storybook/react';
 import React from 'react';
 import { useShapePieceEditor } from './ShapePieceEditor';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
@@ -24,7 +24,9 @@ export const Update: React.FC = () => {
     );
 };
 
-export default {
+const meta = {
     title: 'models/room/Room/ShapePieceEditor',
     component: Update,
-} as ComponentMeta<typeof Update>;
+} satisfies Meta<typeof Update>;
+
+export default meta;

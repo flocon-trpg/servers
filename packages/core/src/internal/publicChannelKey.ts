@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-namespace */
 import { $free, $system } from './constants';
 import { StrIndex10, strIndex10Array } from './indexes';
 

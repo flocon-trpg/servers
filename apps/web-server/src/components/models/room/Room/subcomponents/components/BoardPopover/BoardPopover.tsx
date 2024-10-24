@@ -4,21 +4,18 @@ import {
     characterTemplate,
     diff,
     execCharacterCommand,
-    filePathTemplate,
     pieceTemplate,
     roomTemplate,
     simpleId,
     toUpOperation,
     update,
 } from '@flocon-trpg/core';
-import { FileSourceType, WriteRoomSoundEffectDocument } from '@flocon-trpg/typed-document-node';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { Menu, Tooltip } from 'antd';
 import { ItemType } from 'antd/lib/menu/interface';
 import classNames from 'classnames';
 import { useAtomValue, useSetAtom } from 'jotai/react';
 import React from 'react';
-import { useMutation } from 'urql';
 import { ImageView } from '../../../../../file/ImageView/ImageView';
 import {
     ContextMenuState,
@@ -78,7 +75,6 @@ type BoardPositionState = State<typeof boardPositionTemplate>;
 type CharacterState = State<typeof characterTemplate>;
 type RoomState = State<typeof roomTemplate>;
 type PieceState = State<typeof pieceTemplate>;
-type FilePath = State<typeof filePathTemplate>;
 
 /* absolute positionで表示するときにBoardの子として表示させると、Boardウィンドウから要素がはみ出ることができないため、ウィンドウ右端に近いところで要素を表示させるときに不便なことがある。そのため、ページ全体の子として持たせるようにしている。 */
 
@@ -487,7 +483,6 @@ const selectedCharacterCommandsMenu = ({
     operate,
     room,
     myUserUid,
-    onSe,
 }: {
     characterPiecesOnCursor: ContextMenuState['characterPiecesOnCursor'];
     portraitsOnCursor: ContextMenuState['portraitsOnCursor'];
@@ -495,7 +490,6 @@ const selectedCharacterCommandsMenu = ({
     operate: ReturnType<typeof useSetRoomStateByApply>;
     room: RoomState;
     myUserUid: string;
-    onSe: (filePath: FilePath, volume: number) => void;
 }): ItemType[] => {
     if (characterPiecesOnCursor.length + portraitsOnCursor.length === 0) {
         return [];
@@ -603,7 +597,7 @@ const selectedDicePiecesMenu = ({
             ...dicePiecesOnCursor.map(
                 ({ pieceId, piece, boardId }): ItemType => ({
                     key: pieceId + '@selected',
-                    label: <DicePieceValue.images state={piece} size={22} padding='6px 0 0 0' />,
+                    label: <DicePieceValue.images state={piece} size={22} padding="6px 0 0 0" />,
                     children: [
                         isMyCharacter(piece.ownerCharacterId)
                             ? {
@@ -1100,7 +1094,6 @@ export const BoardContextMenu: React.FC = () => {
     const myUserUid = useMyUserUid();
     const contextMenuState = useAtomValue(boardContextMenuAtom);
     const roomId = useRoomId();
-    const [, writeSe] = useMutation(WriteRoomSoundEffectDocument);
     const setBoardContextMenu = useSetAtom(boardContextMenuAtom);
     const hooks = useHooks();
     const isMyCharacter = useIsMyCharacter();
@@ -1168,18 +1161,6 @@ export const BoardContextMenu: React.FC = () => {
             onContextMenuClear,
             operate: operate,
             room,
-            onSe: (se, volume) =>
-                writeSe({
-                    roomId,
-                    volume,
-                    file: {
-                        ...se,
-                        sourceType:
-                            se.sourceType === 'Default'
-                                ? FileSourceType.Default
-                                : FileSourceType.FirebaseStorage,
-                    },
-                }),
             myUserUid,
         }),
         basicMenu({

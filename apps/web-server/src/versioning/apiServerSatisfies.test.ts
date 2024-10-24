@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { SemVer, alpha } from '@flocon-trpg/utils';
+import { describe, expect, test } from 'vitest';
 import { apiServerSatisfies } from './apiServerSatisfies';
 
 describe.each(['^', '~'] as const)('apiServerSatisfies', range => {

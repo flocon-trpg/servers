@@ -37,7 +37,7 @@ export const CharacterTagsSelect: React.FC<Props> = ({ character, onChange }: Pr
 
     return (
         <Select
-            mode='multiple'
+            mode="multiple"
             style={{ width: '100%' }}
             value={values}
             onChange={value => {

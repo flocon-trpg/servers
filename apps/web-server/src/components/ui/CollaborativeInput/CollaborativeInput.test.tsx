@@ -1,6 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+// @vitest-environment jsdom
+
 import { act, render } from '@testing-library/react';
 import Quill from 'quill';
 import React from 'react';
+import { describe, expect, test, vi } from 'vitest';
 import { CollaborativeInput, OnChangeParams } from './CollaborativeInput';
 
 const delayTime = 1100;
@@ -23,15 +28,15 @@ describe('CollaborativeInput', () => {
         ${1000}               | ${false}      | ${false}
         ${1000}               | ${true}       | ${false}
         ${1000}               | ${true}       | ${true}
-    `('テキスト変更直後のonChange', async ({ bufferDuration, invokeUpdate1, invokeUpdate2 }) => {
-        const onChange = jest.fn<void, [OnChangeParams]>();
+    `('テキスト変更直後のonChange', ({ bufferDuration, invokeUpdate1, invokeUpdate2 }) => {
+        const onChange = vi.fn<(_: OnChangeParams) => void>();
         let quill: Quill | undefined;
         const onGetQuill = (newQuill: Quill | undefined) => {
             quill = newQuill;
         };
         const { unmount } = render(
             <CollaborativeInput
-                value='TEXT_VALUE1'
+                value="TEXT_VALUE1"
                 bufferDuration={bufferDuration}
                 onChange={onChange}
                 onGetQuill={onGetQuill}
@@ -64,7 +69,7 @@ describe('CollaborativeInput', () => {
             };
             render(
                 <CollaborativeInput
-                    value='TEXT_VALUE1'
+                    value="TEXT_VALUE1"
                     bufferDuration={bufferDuration}
                     onChange={onChange}
                 />,
@@ -87,7 +92,7 @@ describe('CollaborativeInput', () => {
             };
             render(
                 <CollaborativeInput
-                    value='TEXT_VALUE1'
+                    value="TEXT_VALUE1"
                     bufferDuration={bufferDuration}
                     onChange={onChange}
                     onGetQuill={onGetQuill}
@@ -124,7 +129,7 @@ describe('CollaborativeInput', () => {
         };
         const { rerender } = render(
             <CollaborativeInput
-                value='TEXT_VALUE1'
+                value="TEXT_VALUE1"
                 bufferDuration={bufferDuration}
                 onChange={onChange}
                 onGetQuill={onGetQuill}
@@ -136,7 +141,7 @@ describe('CollaborativeInput', () => {
         quill.setText(newValue);
         rerender(
             <CollaborativeInput
-                value='TEXT_VALUE3'
+                value="TEXT_VALUE3"
                 bufferDuration={bufferDuration}
                 onChange={onChange}
             />,
@@ -166,7 +171,7 @@ describe('CollaborativeInput', () => {
             };
             const { rerender } = render(
                 <CollaborativeInput
-                    value='TEXT_VALUE1'
+                    value="TEXT_VALUE1"
                     bufferDuration={bufferDuration}
                     onChange={onChange}
                     onGetQuill={onGetQuill}
@@ -178,7 +183,7 @@ describe('CollaborativeInput', () => {
             quill.setText(newValue);
             rerender(
                 <CollaborativeInput
-                    value='TEXT_VALUE3'
+                    value="TEXT_VALUE3"
                     bufferDuration={bufferDuration}
                     onChange={onChange}
                 />,

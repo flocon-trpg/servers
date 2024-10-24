@@ -2,9 +2,8 @@ import { UseQueryResult, useQueries } from '@tanstack/react-query';
 import { useAtomValue } from 'jotai/react';
 import React from 'react';
 import { useMemoOne } from 'use-memo-one';
-import { firebaseStorageAtom } from '../pages/_app';
 import { FilePathLikeOrThumb, FilePathModule } from '../utils/file/filePath';
-import { useGetIdToken } from './useGetIdToken';
+import { firebaseStorageAtom, getIdTokenResultAtom } from './useSetupApp';
 import { useWebConfig } from './useWebConfig';
 import { idTokenIsNull, thumbs } from '@/utils/file/getFloconUploaderFile';
 
@@ -29,7 +28,7 @@ export function useSrcArrayFromFilePath(
 ): SrcArrayResult {
     const config = useWebConfig();
     const storage = useAtomValue(firebaseStorageAtom);
-    const { getIdToken } = useGetIdToken();
+    const { getIdToken } = useAtomValue(getIdTokenResultAtom);
 
     const cleanPathArray =
         pathArray == null || config?.value == null || storage == null

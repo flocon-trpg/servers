@@ -49,11 +49,11 @@ export function JumpToBottomVirtuoso<T>({ items, create, height }: Props<T>) {
                     setAtBottom(bottom);
                 }}
                 itemContent={create == null ? undefined : (index, data) => create(index, data)}
-                followOutput='auto'
+                followOutput="auto"
             />
             {showButton && (
                 <Button
-                    size='small'
+                    size="small"
                     onClick={() => scrollToBottom(items.length)}
                     style={{
                         position: 'absolute',

@@ -74,7 +74,7 @@ export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete 
     return (
         <Modal
             open={visible}
-            title='ボードビュアーに表示させるボードの変更'
+            title="ボードビュアーに表示させるボードの変更"
             onOk={onOk}
             okButtonProps={
                 hasSelectedBoardKey || selectedBoardKey?.delete === true
@@ -94,7 +94,7 @@ export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete 
                 <Select
                     style={{ minWidth: 150 }}
                     autoFocus
-                    onChange={newValue => {
+                    onChange={(newValue: unknown) => {
                         if (newValue === '$$delete') {
                             setSelectedBoardKey({ delete: true });
                             return;
@@ -103,11 +103,15 @@ export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete 
                             setSelectedBoardKey(undefined);
                             return;
                         }
-                        setSelectedBoardKey({ delete: false, boardId: newValue.toString() });
+                        if (typeof newValue === 'string' || typeof newValue === 'number') {
+                            setSelectedBoardKey({ delete: false, boardId: newValue.toString() });
+                        }
+
+                        // Select.Option の value に string か number か null か undefined を渡している限り、ここには来ない
                     }}
                 >
-                    <Select.Option value='$$delete'>クリアする</Select.Option>
-                    <Select.OptGroup label='ボード一覧'>{options}</Select.OptGroup>
+                    <Select.Option value="$$delete">クリアする</Select.Option>
+                    <Select.OptGroup label="ボード一覧">{options}</Select.OptGroup>
                 </Select>
             </div>
         </Modal>

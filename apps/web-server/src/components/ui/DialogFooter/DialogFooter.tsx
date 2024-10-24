@@ -54,7 +54,7 @@ export const DialogFooter: React.FC<Props> = ({ close, ok, destroy, custom }: Pr
                     if (close.disabled === true) {
                         return;
                     }
-                    close.onClick && close.onClick();
+                    close.onClick?.();
                 }}
                 disabled={close.disabled ?? false}
             >
@@ -135,7 +135,7 @@ export const DialogFooter: React.FC<Props> = ({ close, ok, destroy, custom }: Pr
                     ok.onClick();
                 }}
                 disabled={ok.disabled ?? false}
-                type='primary'
+                type="primary"
             >
                 {okText}
             </Button>

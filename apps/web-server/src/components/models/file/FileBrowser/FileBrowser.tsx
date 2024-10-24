@@ -183,6 +183,8 @@ export type Props = {
     /** ファイルのリネーム処理が完了したときにトリガーされます。複数のファイルがリネームされるときは、最後のファイルがリネームされたときにトリガーされます。 */
     onRename?: (renamedFiles: readonly RenameResult[]) => void;
 
+    onFileCreate?: (absolutePath: readonly string[]) => void;
+
     canMove: (
         /** 例えば`folder1`というフォルダに`a.png`と`b.png`と`c.png`というファイルがあってこれらのうち`a.png`と`b.png`のみを`folder2`フォルダに移動しようとした場合、`currentDirectoryPath`は`['folder1']`、newDirectoryPathは`['folder2']`となります。ファイル名が`a.png`と`b.png`であるという情報の取得は、現時点では必要とされていないためサポートしていません。 */ params: {
             currentDirectoryPath: readonly string[];
@@ -190,7 +192,7 @@ export type Props = {
             /** cutの際はnullに、pasteの際はnon-nullになります。 */
             newDirectoryPath: readonly string[] | null;
         },
-    ) => Result<undefined>;
+    ) => Result<void>;
 
     canRename: (params: {
         directoryPath: readonly string[];
@@ -201,18 +203,16 @@ export type Props = {
         newName: string | null;
 
         nodeType: Node['type'];
-    }) => Result<undefined>;
+    }) => Result<void>;
 
     canCreateFolder: (params: {
         directoryPath: readonly string[];
 
         foldername: string;
-    }) => Result<undefined>;
+    }) => Result<void>;
 
     /** trueが返されたファイルパスでは、ファイルおよびフォルダの作成とリネームと移動と削除などが無効化されます。 */
     isProtected: IsProtected;
-
-    onFileCreate: (absolutePath: readonly string[]) => void;
 
     fileCreateLabel: string;
 
@@ -714,7 +714,7 @@ class PathState {
         }
 
         if (nodeSource.onSelect == null) {
-            nodeSource.onOpen && nodeSource.onOpen();
+            nodeSource.onOpen?.();
         } else {
             nodeSource.onSelect();
         }
@@ -858,7 +858,7 @@ class PathState {
         });
     }
 
-    canCut(props: Props): Result<undefined> {
+    canCut(props: Props): Result<void> {
         if (this.isCurrentDirectoryProtected(props)) {
             return Result.error(protectedErrorMessage);
         }
@@ -917,7 +917,7 @@ class PathState {
         });
     }
 
-    canCreateFile(props: Props): Result<undefined> {
+    canCreateFile(props: Props): Result<void> {
         if (this.isCurrentDirectoryProtected(props)) {
             return Result.error(protectedErrorMessage);
         }
@@ -928,7 +928,7 @@ class PathState {
         if (this.canCreateFile(props).isError) {
             return;
         }
-        props.onFileCreate && props.onFileCreate(this.members.currentDirectory);
+        props.onFileCreate?.(this.members.currentDirectory);
     }
 
     #requestDeleting(source: readonly FilePathNode[]): FileToDelete[] {
@@ -953,7 +953,7 @@ class PathState {
             });
     }
 
-    canRequestDeleting(props: Props, node: Node): Result<undefined> {
+    canRequestDeleting(props: Props, node: Node): Result<void> {
         if (props.isProtected(node.folderPath)) {
             return Result.error(protectedErrorMessage);
         }
@@ -972,7 +972,7 @@ class PathState {
         };
     }
 
-    canRequestDeletingSelectedNodes(props: Props): Result<undefined> {
+    canRequestDeletingSelectedNodes(props: Props): Result<void> {
         if (props.isProtected(this.currentDirectory)) {
             return Result.error(protectedErrorMessage);
         }
@@ -992,7 +992,7 @@ class PathState {
         };
     }
 
-    canRequestPasting(props: Props, destDirectoryPath: readonly string[]): Result<undefined> {
+    canRequestPasting(props: Props, destDirectoryPath: readonly string[]): Result<void> {
         return props.canMove({
             currentDirectoryPath: this.members.cutAt,
             newDirectoryPath: destDirectoryPath,
@@ -1039,7 +1039,7 @@ class PathState {
         };
     }
 
-    canRequestRenaming(props: Props, node: Node, newName: string | null): Result<undefined> {
+    canRequestRenaming(props: Props, node: Node, newName: string | null): Result<void> {
         return props.canRename({
             directoryPath: node.folderPath,
             oldName: node.name,
@@ -1393,7 +1393,7 @@ const AddressBar: React.FC = () => {
     return (
         <div className={classNames(flex, flexRow, itemsCenter)}>
             <Button
-                size='small'
+                size="small"
                 disabled={currentDirectory.length === 0}
                 onClick={() =>
                     setPathState(pathState => {
@@ -1482,7 +1482,7 @@ const DeleteConfirmModal: React.FC = () => {
         case 'none':
         case 'finished':
             button = (
-                <Button style={buttonStyle} type='primary' danger disabled>
+                <Button style={buttonStyle} type="primary" danger disabled>
                     削除
                 </Button>
             );
@@ -1492,7 +1492,7 @@ const DeleteConfirmModal: React.FC = () => {
             button = (
                 <Button
                     style={buttonStyle}
-                    type='primary'
+                    type="primary"
                     danger
                     onClick={() => {
                         if (deleteStatus.type === 'asking') {
@@ -1547,7 +1547,7 @@ const DeleteConfirmModal: React.FC = () => {
     return (
         <Modal
             open={isModalVisible}
-            title='削除の確認'
+            title="削除の確認"
             footer={
                 <DialogFooter
                     close={{ textType: 'close', onClick: onClose, disabled: !canClose }}
@@ -1630,7 +1630,7 @@ const RenameConfirmModal: React.FC = () => {
         case 'none':
         case 'finished':
             button = (
-                <Button style={buttonStyle} type='primary' danger disabled>
+                <Button style={buttonStyle} type="primary" danger disabled>
                     移動/リネーム
                 </Button>
             );
@@ -1640,7 +1640,7 @@ const RenameConfirmModal: React.FC = () => {
             button = (
                 <Button
                     style={buttonStyle}
-                    type='primary'
+                    type="primary"
                     onClick={() => {
                         if (renameStatus.type === 'asking') {
                             setPathState(pathState => {
@@ -1695,7 +1695,7 @@ const RenameConfirmModal: React.FC = () => {
     return (
         <Modal
             open={isModalVisible}
-            title='移動、リネームの確認'
+            title="移動、リネームの確認"
             footer={
                 <DialogFooter
                     close={{ textType: 'close', onClick: onClose, disabled: !canClose }}
@@ -1732,7 +1732,7 @@ const RenameInputModal: React.FC = () => {
     return (
         <Modal
             open={state != null}
-            title='リネーム'
+            title="リネーム"
             onCancel={onClose}
             footer={
                 <DialogFooter
@@ -1796,7 +1796,7 @@ const CreateFolderModal: React.FC = () => {
     return (
         <Modal
             open={visible}
-            title='新しいフォルダの作成'
+            title="新しいフォルダの作成"
             onCancel={() => setVisible(false)}
             footer={
                 <DialogFooter
@@ -1814,13 +1814,13 @@ const CreateFolderModal: React.FC = () => {
             <div className={classNames(flex, flexColumn)} style={{ gap: 4 }}>
                 <div>新しく作るフォルダの名前を入力してください。</div>
                 <Alert
-                    type='info'
+                    type="info"
                     showIcon
-                    message='ファイルが1つもない空のフォルダは、サーバーに保存されません。空のフォルダは、ファイル操作を行いやすくするためにブラウザの画面上でのみ存在する一時的なフォルダであり、ブラウザを閉じた際などに自動的に消去されます。'
+                    message="ファイルが1つもない空のフォルダは、サーバーに保存されません。空のフォルダは、ファイル操作を行いやすくするためにブラウザの画面上でのみ存在する一時的なフォルダであり、ブラウザを閉じた際などに自動的に消去されます。"
                 />
                 <Input
                     ref={inputRef}
-                    placeholder='フォルダ名'
+                    placeholder="フォルダ名"
                     value={foldername}
                     onChange={e => setFoldername(e.target.value)}
                     onKeyDown={e => {
@@ -1830,7 +1830,7 @@ const CreateFolderModal: React.FC = () => {
                     }}
                 />
                 {foldernameError != null && (
-                    <Alert type='error' showIcon message={foldernameError} />
+                    <Alert type="error" showIcon message={foldernameError} />
                 )}
             </div>
         </Modal>
@@ -1883,7 +1883,7 @@ const ContextMenu: React.FC<{
         result,
     }: {
         label: string;
-        result: Result<undefined>;
+        result: Result<void>;
     }) => {
         return {
             label: <Tooltip overlay={result.isError ? result.error : undefined}>{label}</Tooltip>,
@@ -1928,7 +1928,7 @@ const ContextMenu: React.FC<{
                 }),
                 key: createMenuKey('fileCreateLabel'),
                 onClick: () => {
-                    props.onFileCreate(pathState.currentDirectory);
+                    props.onFileCreate?.(pathState.currentDirectory);
                 },
             },
             {
@@ -2159,7 +2159,7 @@ const NodeView: React.FC<{
                         textOverflow: 'ellipsis',
                     }}
                 >
-                    <Tooltip title={node.name} placement='bottom'>
+                    <Tooltip title={node.name} placement="bottom">
                         {node.name}
                     </Tooltip>
                 </div>
@@ -2226,7 +2226,7 @@ const NodesGrid: React.FC = () => {
                 style={{ backgroundColor }}
                 totalCount={filteredNodes.length}
                 components={{
-                    List: ListContainer as any,
+                    List: ListContainer,
                 }}
                 itemContent={index => <NodeView node={filteredNodes[index]!} />}
                 computeItemKey={index => filteredNodes[index]!.key}
@@ -2279,13 +2279,12 @@ const useStartAutoDeleteFiles = () => {
                 placement: 'bottomRight',
                 message: 'ファイルの削除が完了しました。',
             });
-            onDeleteRef.current &&
-                onDeleteRef.current(
-                    deleteStatusValueRef.current?.map(file => ({
-                        path: new Node(file.file).path,
-                        id: file.file.id,
-                    })) ?? [],
-                );
+            onDeleteRef.current?.(
+                deleteStatusValueRef.current?.map(file => ({
+                    path: new Node(file.file).path,
+                    id: file.file.id,
+                })) ?? [],
+            );
             foldersDeletingOnNextRootFolderUpdate(oldState => {
                 if (deleteStatusRef.current.type === 'none') {
                     return oldState;
@@ -2326,13 +2325,13 @@ const useStartAutoDeleteFiles = () => {
                 setHasDeleted(true);
                 setIsDeleting(false);
             })
-            .catch(e => {
+            .catch((e: unknown) => {
                 notification.error({
                     placement: 'bottomRight',
                     message: 'ファイルの削除に失敗しました。',
                     description: joinPath(new Node(fileToDelete.file).path).string,
                 });
-                loggerRef.error(e, 'ファイルの削除に失敗しました。');
+                loggerRef.autoDetectObj.error(e, 'ファイルの削除に失敗しました。');
                 setFileStatus(fileToDelete, 'error');
                 setIsDeleting(false);
             });
@@ -2389,14 +2388,13 @@ const useStartAutoRenameFiles = () => {
                 message: 'ファイルの移動もしくはリネームが完了しました。',
             });
 
-            onRenameRef.current &&
-                onRenameRef.current(
-                    renameStatusValueRef.current?.map(file => ({
-                        id: file.file.id,
-                        oldPath: new Node(file.file).path,
-                        currentPath: file.newPath,
-                    })) ?? [],
-                );
+            onRenameRef.current?.(
+                renameStatusValueRef.current?.map(file => ({
+                    id: file.file.id,
+                    oldPath: new Node(file.file).path,
+                    currentPath: file.newPath,
+                })) ?? [],
+            );
             setPathState(pathState => {
                 return pathState.resetCutState();
             });
@@ -2446,13 +2444,13 @@ const useStartAutoRenameFiles = () => {
                 setHasRenamed(true);
                 setIsRenaming(false);
             })
-            .catch(e => {
+            .catch((e: unknown) => {
                 notification.error({
                     placement: 'bottomRight',
                     message: 'ファイルのリネームに失敗しました。',
                     description: joinPath(new Node(fileToRename.file).path).string,
                 });
-                loggerRef.error(e, 'ファイルのリネームに失敗しました。');
+                loggerRef.autoDetectObj.error(e, 'ファイルのリネームに失敗しました。');
                 setFileStatus(fileToRename, 'error');
                 setIsRenaming(false);
             });

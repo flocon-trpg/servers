@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { exec, toFValue } from '../src';
 
 test('docs.md 例1', () => {

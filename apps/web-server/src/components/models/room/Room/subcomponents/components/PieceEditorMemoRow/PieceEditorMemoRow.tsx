@@ -7,12 +7,12 @@ export const PieceEditorMemoRow: React.FC<{
     onChange: (newValue: string) => void;
 }> = ({ state, onChange }) => {
     return (
-        <TableRow label='メモ'>
+        <TableRow label="メモ">
             <CollaborativeInput
                 style={{ height: 100 }}
                 multiline
-                size='small'
-                bufferDuration='default'
+                size="small"
+                bufferDuration="default"
                 value={state ?? ''}
                 onChange={e => {
                     if (e.previousValue === e.currentValue) {

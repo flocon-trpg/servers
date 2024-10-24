@@ -1,5 +1,5 @@
 import { recordToArray } from '@flocon-trpg/utils';
-import { maxBy } from 'lodash';
+import { maxBy } from 'es-toolkit';
 import { State } from '../../../generator/types';
 import { StringKeyRecord } from '../../../record';
 import { template } from './types';

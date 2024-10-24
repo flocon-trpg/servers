@@ -9,9 +9,9 @@ import {
 import { Button, Input } from 'antd';
 import { TextAreaRef } from 'antd/lib/input/TextArea';
 import classNames from 'classnames';
+import { compact } from 'es-toolkit';
 import { Draft } from 'immer';
 import { useAtom } from 'jotai';
-import _ from 'lodash';
 import React from 'react';
 import { useLatest } from 'react-use';
 import { Observable } from 'rxjs';
@@ -98,21 +98,18 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
     );
     const fontSize = UserConfigUtils.getRoomMessagesFontSize(roomMessagesFontSizeDelta ?? 0);
     const participants = useParticipants();
-    const selectedParticipantsBase = React.useMemo(
-        () =>
-            _([...participantIdsOfSendTo])
-                .map(id => {
-                    const found = participants?.get(id);
-                    if (found == null) {
-                        return null;
-                    }
-                    return [id, found] as const;
-                })
-                .compact()
-                .sort(([, x], [, y]) => (x.name ?? '').localeCompare(y.name ?? ''))
-                .value(),
-        [participantIdsOfSendTo, participants],
-    );
+    const selectedParticipantsBase = React.useMemo(() => {
+        const notCompacted = [...participantIdsOfSendTo].map(id => {
+            const found = participants?.get(id);
+            if (found == null) {
+                return null;
+            }
+            return [id, found] as const;
+        });
+        return compact(notCompacted).sort(([, x], [, y]) =>
+            (x.name ?? '').localeCompare(y.name ?? ''),
+        );
+    }, [participantIdsOfSendTo, participants]);
     const selectedParticipants = React.useMemo(
         () => selectedParticipantsBase.map(([, participant]) => participant.name ?? ''),
         [selectedParticipantsBase],
@@ -145,7 +142,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
             customNameVariable = undefined;
         }
         setIsPostingState({ isPosting: true, focus: false });
-        writePrivateMessage({
+        void writePrivateMessage({
             roomId,
             text,
             textColor: config.selectedTextColor,
@@ -302,7 +299,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
         }
 
         setIsPostingState({ isPosting: true, focus: false });
-        writePublicMessage({
+        void writePublicMessage({
             roomId,
             text,
             textColor: config.selectedTextColor,

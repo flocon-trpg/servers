@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { sortBy } from 'es-toolkit';
 import { MultiValueSet } from '..';
 
 describe('multiValueSet', () => {
@@ -45,14 +45,8 @@ describe('multiValueSet', () => {
         actual.add(['a', 'b']);
         actual.add(['b']);
         expect(actual.size).toBe(4);
-        expect(
-            _([...actual.toIterator()])
-                .sortBy(x => JSON.stringify(x))
-                .value(),
-        ).toEqual(
-            _([[], ['a'], ['a', 'b'], ['b']])
-                .sortBy(x => JSON.stringify(x))
-                .value(),
+        expect(sortBy([...actual.toIterator()], [x => JSON.stringify(x)])).toEqual(
+            sortBy([[], ['a'], ['a', 'b'], ['b']], [x => JSON.stringify(x)]),
         );
     });
 

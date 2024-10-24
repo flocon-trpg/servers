@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { SemVer, SemverOption, alpha, beta, rc } from '..';
 
 it.each`

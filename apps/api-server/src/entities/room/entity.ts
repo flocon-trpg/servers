@@ -48,7 +48,6 @@ export class Room {
     @PrimaryKey()
     public id: string = easyFlake();
 
-    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ version: true, index: true })
     public version: number = 1;
 
@@ -85,7 +84,6 @@ export class Room {
     @Property({ type: JsonType })
     public value: DbState;
 
-    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property()
     public revision: number = 0;
 
