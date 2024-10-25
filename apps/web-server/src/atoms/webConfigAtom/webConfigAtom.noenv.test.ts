@@ -56,19 +56,19 @@ describe('webConfigAtom (process.env does not exist)', () => {
             throw new Error('Unexpected isMock');
         }
 
-        expect(webConfigAtomResult.current[0]?.value?.value.http).toEqual(
+        expect(webConfigAtomResult.current[0].value?.value.http).toEqual(
             fakeEnvTextSource.NEXT_PUBLIC_API_HTTP,
         );
-        expect(webConfigAtomResult.current[0]?.value?.value.ws).toEqual(
+        expect(webConfigAtomResult.current[0].value?.value.ws).toEqual(
             fakeEnvTextSource.NEXT_PUBLIC_API_WS,
         );
-        expect(webConfigAtomResult.current[0]?.value?.value.authProviders?.sort()).toEqual(
+        expect(webConfigAtomResult.current[0].value?.value.authProviders?.sort()).toEqual(
             [...fakeEnvTextSource.NEXT_PUBLIC_AUTH_PROVIDERS].sort(),
         );
-        expect(webConfigAtomResult.current[0]?.value?.value.firebaseConfig).toEqual(
+        expect(webConfigAtomResult.current[0].value?.value.firebaseConfig).toEqual(
             fakeEnvTextSource.NEXT_PUBLIC_FIREBASE_CONFIG,
         );
-        expect(webConfigAtomResult.current[0]?.value?.value.isUnlistedFirebaseStorageEnabled).toBe(
+        expect(webConfigAtomResult.current[0].value?.value.isUnlistedFirebaseStorageEnabled).toBe(
             fakeEnvTextSource.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED,
         );
     });

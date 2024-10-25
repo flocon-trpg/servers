@@ -1,7 +1,7 @@
 import { FirebaseConfig } from '@flocon-trpg/core';
 import { PinoLogLevel } from '@flocon-trpg/utils';
 
-export type WebConfigMock = {
+export type MockableWebConfig = {
     http?: string;
     ws?: string;
     authProviders?: string[];
@@ -12,6 +12,6 @@ export type WebConfigMock = {
     isPublicFirebaseStorageEnabled: boolean;
 };
 
-export type WebConfig = WebConfigMock & {
+export type WebConfig = MockableWebConfig & {
     firebaseConfig: FirebaseConfig;
 };

@@ -8,7 +8,7 @@ import {
 import { Option } from '@kizahasi/option';
 import { Result } from '@kizahasi/result';
 import { atom } from 'jotai/vanilla';
-import { WebConfig, WebConfigMock } from '../../configType';
+import { MockableWebConfig, WebConfig } from '../../configType';
 import {
     NEXT_PUBLIC_FIREBASE_CONFIG,
     NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED,
@@ -191,10 +191,10 @@ type WebConfigAtomReturnType =
       }
     | {
           isMock: true;
-          value: WebConfigMock;
+          value: MockableWebConfig;
       };
 
-export const webConfigAtom = atom<Promise<Result<WebConfigAtomReturnType> | null>>(async get => {
+export const webConfigAtom = atom<Promise<Result<WebConfigAtomReturnType>>>(async get => {
     const storybook = get(storybookAtom);
     const envs = await get(envsAtom);
     if (storybook.mock?.webConfig != null) {
@@ -206,9 +206,6 @@ export const webConfigAtom = atom<Promise<Result<WebConfigAtomReturnType> | null
                 value: storybook.mock.webConfig.value,
             });
         }
-    }
-    if (envs == null) {
-        return null;
     }
     if (envs.isError) {
         return envs;
@@ -236,7 +233,7 @@ export const webConfigAtom = atom<Promise<Result<WebConfigAtomReturnType> | null
     return Result.ok({ isMock: false, value: result });
 });
 
-export const getHttpUri = (config: WebConfig | WebConfigMock) => {
+export const getHttpUri = (config: MockableWebConfig) => {
     if (config.http == null) {
         return `${location.protocol}//${location.host}`;
     } else {
@@ -244,7 +241,7 @@ export const getHttpUri = (config: WebConfig | WebConfigMock) => {
     }
 };
 
-export const getWsUri = (config: WebConfig | WebConfigMock) => {
+export const getWsUri = (config: MockableWebConfig) => {
     if (config.ws == null) {
         return `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}`;
     } else {

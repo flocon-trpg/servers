@@ -34,7 +34,7 @@ import { getUserConfig, setUserConfig } from '@/utils/localStorage/userConfig';
 
 const firebaseAppAtom = atom(async get => {
     const config = await get(webConfigAtom);
-    if (config?.value == null) {
+    if (config.value == null) {
         return undefined;
     }
     if (config.value.isMock) {
@@ -57,7 +57,7 @@ export const useOnFirebaseAppChange = (onChange: () => void) => {
 
 const httpUriAtom = atom(async get => {
     const config = await get(webConfigAtom);
-    if (config?.value?.value == null) {
+    if (config.value?.value == null) {
         return undefined;
     }
     return urljoin(getHttpUri(config.value.value), 'graphql');
@@ -65,7 +65,7 @@ const httpUriAtom = atom(async get => {
 
 const wsUriAtom = atom(async get => {
     const config = await get(webConfigAtom);
-    if (config?.value == null) {
+    if (config.value == null) {
         return undefined;
     }
     return urljoin(getWsUri(config.value.value), 'graphql');
@@ -241,8 +241,8 @@ export const useSetupApp = () => {
         const defaultLevel = 'info';
         loggerRef.value = storybook.isStorybook
             ? pino()
-            : createDefaultLogger({ logLevel: config?.value?.value?.logLevel ?? defaultLevel });
-    }, [config?.value?.value?.logLevel, storybook.isStorybook]);
+            : createDefaultLogger({ logLevel: config?.value?.logLevel ?? defaultLevel });
+    }, [config?.value?.logLevel, storybook.isStorybook]);
 
     const user = useAtomValue(firebaseUserAtom);
     const userValue = useAtomValue(firebaseUserValueAtom);

@@ -8,12 +8,8 @@ import { loggerRef } from '@flocon-trpg/utils';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { App as AntdApp, Layout } from 'antd';
 import { enableMapSet } from 'immer';
-import { useAtomValue } from 'jotai';
 import React, { PropsWithChildren, StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
-
-// Import the generated route tree
-import { usePreviousDistinct } from 'react-use';
 import { AllContextProvider } from './components/behaviors/AllContextProvider';
 import { AntdThemeConfigProvider } from './components/behaviors/AntdThemeConfigProvider';
 import { LayoutWithNoHook } from './components/ui/Layout/Layout';

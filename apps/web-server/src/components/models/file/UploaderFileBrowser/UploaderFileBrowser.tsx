@@ -29,7 +29,7 @@ import { ImageView } from '../ImageView/ImageView';
 import { accept } from './utils/helper';
 import { getHttpUri } from '@/atoms/webConfigAtom/webConfigAtom';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import { WebConfig } from '@/configType';
+import { MockableWebConfig } from '@/configType';
 import {
     FetchResult,
     File,
@@ -311,7 +311,7 @@ type FloconUploaderProps = {
     storageType: StorageType;
     /** フォルダのパスを表します。ルートにある特殊フォルダや、ファイルの名前は含めないでください。 */
     folderPath: readonly string[];
-    webConfig: WebConfig;
+    webConfig: MockableWebConfig;
 };
 
 const FloconUploader: React.FC<FloconUploaderProps> = ({

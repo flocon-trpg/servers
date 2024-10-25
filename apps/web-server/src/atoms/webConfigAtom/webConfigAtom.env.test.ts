@@ -50,19 +50,19 @@ describe('webConfigAtom (process.env exists)', () => {
             throw new Error('Unexpected isMock');
         }
 
-        expect(webConfigAtomResult.current[0]?.value?.value.http).toEqual(
+        expect(webConfigAtomResult.current[0].value?.value.http).toEqual(
             fakeEnvFile[NEXT_PUBLIC_API_HTTP],
         );
-        expect(webConfigAtomResult.current[0]?.value?.value.ws).toEqual(
+        expect(webConfigAtomResult.current[0].value?.value.ws).toEqual(
             fakeEnvFile[NEXT_PUBLIC_API_WS],
         );
-        expect(webConfigAtomResult.current[0]?.value?.value.authProviders?.sort()).toEqual(
+        expect(webConfigAtomResult.current[0].value?.value.authProviders?.sort()).toEqual(
             [email, google].sort(),
         );
-        expect(webConfigAtomResult.current[0]?.value?.value.firebaseConfig).toEqual(
+        expect(webConfigAtomResult.current[0].value?.value.firebaseConfig).toEqual(
             fakeFirebaseConfig1[0],
         );
-        expect(webConfigAtomResult.current[0]?.value?.value.isUnlistedFirebaseStorageEnabled).toBe(
+        expect(webConfigAtomResult.current[0].value?.value.isUnlistedFirebaseStorageEnabled).toBe(
             true,
         );
 
@@ -88,19 +88,19 @@ describe('webConfigAtom (process.env exists)', () => {
             throw new Error('Unexpected isMock');
         }
 
-        expect(webConfigAtomResult.current[0]?.value?.value.http).toEqual(
+        expect(webConfigAtomResult.current[0].value?.value.http).toEqual(
             fakeEnvFile[NEXT_PUBLIC_API_HTTP],
         );
-        expect(webConfigAtomResult.current[0]?.value?.value.ws).toEqual(
+        expect(webConfigAtomResult.current[0].value?.value.ws).toEqual(
             fakeEnvFile[NEXT_PUBLIC_API_WS],
         );
-        expect(webConfigAtomResult.current[0]?.value?.value.authProviders?.sort()).toEqual(
+        expect(webConfigAtomResult.current[0].value?.value.authProviders?.sort()).toEqual(
             [email, google].sort(),
         );
-        expect(webConfigAtomResult.current[0]?.value?.value.firebaseConfig).toEqual(
+        expect(webConfigAtomResult.current[0].value?.value.firebaseConfig).toEqual(
             fakeFirebaseConfig1[0],
         );
-        expect(webConfigAtomResult.current[0]?.value?.value.isUnlistedFirebaseStorageEnabled).toBe(
+        expect(webConfigAtomResult.current[0].value?.value.isUnlistedFirebaseStorageEnabled).toBe(
             true,
         );
 

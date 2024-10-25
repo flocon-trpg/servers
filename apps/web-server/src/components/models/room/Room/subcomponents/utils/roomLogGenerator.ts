@@ -23,7 +23,7 @@ import {
 } from '../components/RoomMessagesPanelContent/subcomponents/components/RoomMessage/RoomMessage';
 import { HtmlObject, div, generateHtml, span } from './generateHtml';
 import { isDeleted, toText } from './message';
-import { WebConfig } from '@/configType';
+import { MockableWebConfig } from '@/configType';
 import { Styles } from '@/styles';
 import { analyzeUrl } from '@/utils/analyzeUrl';
 import { FilePath, FilePathModule } from '@/utils/file/filePath';
@@ -528,7 +528,7 @@ class ImageDownloader {
     private readonly uploaderImages = new Map<string, ImageResult | null>();
 
     public constructor(
-        private readonly config: WebConfig,
+        private readonly config: MockableWebConfig,
         private readonly storage: FirebaseStorageType,
     ) {}
 
@@ -677,7 +677,7 @@ export const generateAsRichLog = async ({
     onProgressChange,
 }: {
     params: GenerateLogParams;
-    config: WebConfig;
+    config: MockableWebConfig;
     storage: FirebaseStorageType;
     getIdToken: () => Promise<string | null>;
     onProgressChange: (p: RichLogProgress) => void;
