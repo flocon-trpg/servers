@@ -2440,7 +2440,7 @@ __metadata:
     tslib: "npm:^2.4.1"
     type-fest: "npm:^4.0.0"
     type-graphql: "npm:^1.1.1"
-    typescript: "npm:5.6.2"
+    typescript: "npm:5.6.3"
     typescript-eslint: "npm:8.8.1"
     url-join: "npm:4.0.1"
     uuid: "npm:^9.0.0"
@@ -2470,7 +2470,7 @@ __metadata:
     rimraf: "npm:5.0.10"
     rollup: "npm:4.23.0"
     ts-jest: "npm:29.2.5"
-    typescript: "npm:5.6.2"
+    typescript: "npm:5.6.3"
     typescript-eslint: "npm:8.8.1"
   languageName: unknown
   linkType: soft
@@ -2506,7 +2506,7 @@ __metadata:
     sanitize-filename: "npm:^1.6.3"
     truncate-utf8-bytes: "npm:^1.0.2"
     ts-jest: "npm:29.2.5"
-    typescript: "npm:5.6.2"
+    typescript: "npm:5.6.3"
     typescript-eslint: "npm:8.8.1"
     zod: "npm:^3.19.1"
   languageName: unknown
@@ -2527,7 +2527,7 @@ __metadata:
     prettier: "npm:3.3.3"
     rimraf: "npm:5.0.10"
     rollup: "npm:4.23.0"
-    typescript: "npm:5.6.2"
+    typescript: "npm:5.6.3"
     typescript-eslint: "npm:8.8.1"
   languageName: unknown
   linkType: soft
@@ -2542,7 +2542,7 @@ __metadata:
     eslint: "npm:9.12.0"
     eslint-plugin-import: "npm:2.31.0"
     prettier: "npm:3.3.3"
-    typescript: "npm:5.6.2"
+    typescript: "npm:5.6.3"
     typescript-eslint: "npm:8.8.1"
   peerDependencies:
     eslint: ^9.0.0
@@ -2573,7 +2573,7 @@ __metadata:
     rimraf: "npm:5.0.10"
     rollup: "npm:4.23.0"
     ts-jest: "npm:29.2.5"
-    typescript: "npm:5.6.2"
+    typescript: "npm:5.6.3"
     typescript-eslint: "npm:8.8.1"
   languageName: unknown
   linkType: soft
@@ -2592,7 +2592,7 @@ __metadata:
     prettier: "npm:3.3.3"
     rimraf: "npm:5.0.10"
     rollup: "npm:4.23.0"
-    typescript: "npm:5.6.2"
+    typescript: "npm:5.6.3"
     typescript-eslint: "npm:8.8.1"
   languageName: unknown
   linkType: soft
@@ -2617,7 +2617,7 @@ __metadata:
     eslint-config-prettier: "npm:9.1.0"
     eslint-plugin-import: "npm:2.31.0"
     prettier: "npm:3.3.3"
-    typescript: "npm:5.6.2"
+    typescript: "npm:5.6.3"
     typescript-eslint: "npm:8.8.1"
   peerDependencies:
     rollup: ^4.0.0
@@ -2648,7 +2648,7 @@ __metadata:
     rimraf: "npm:5.0.10"
     rollup: "npm:4.23.0"
     ts-jest: "npm:29.2.5"
-    typescript: "npm:5.6.2"
+    typescript: "npm:5.6.3"
     typescript-eslint: "npm:8.8.1"
     use-memo-one: "npm:^1.1.2"
   languageName: unknown
@@ -2675,7 +2675,7 @@ __metadata:
     rimraf: "npm:5.0.10"
     rollup: "npm:4.23.0"
     rxjs: "npm:^7.5.6"
-    typescript: "npm:5.6.2"
+    typescript: "npm:5.6.3"
     typescript-eslint: "npm:8.8.1"
     urql: "npm:^4.1.0"
     wonka: "npm:^6.0.0"
@@ -2706,7 +2706,7 @@ __metadata:
     rollup: "npm:4.23.0"
     rxjs: "npm:^7.5.6"
     ts-jest: "npm:29.2.5"
-    typescript: "npm:5.6.2"
+    typescript: "npm:5.6.3"
     typescript-eslint: "npm:8.8.1"
   languageName: unknown
   linkType: soft
@@ -2746,7 +2746,7 @@ __metadata:
     prettier: "npm:3.3.3"
     rimraf: "npm:5.0.10"
     rollup: "npm:4.23.0"
-    typescript: "npm:5.6.2"
+    typescript: "npm:5.6.3"
     typescript-eslint: "npm:8.8.1"
   languageName: unknown
   linkType: soft
@@ -2775,7 +2775,7 @@ __metadata:
     rimraf: "npm:5.0.10"
     rollup: "npm:4.23.0"
     ts-jest: "npm:29.2.5"
-    typescript: "npm:5.6.2"
+    typescript: "npm:5.6.3"
     typescript-eslint: "npm:8.8.1"
   languageName: unknown
   linkType: soft
@@ -2803,7 +2803,7 @@ __metadata:
     rollup: "npm:4.23.0"
     rxjs: "npm:^7.5.6"
     ts-jest: "npm:29.2.5"
-    typescript: "npm:5.6.2"
+    typescript: "npm:5.6.3"
     typescript-eslint: "npm:8.8.1"
   languageName: unknown
   linkType: soft
@@ -19941,16 +19941,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:5.6.2":
-  version: 5.6.2
-  resolution: "typescript@npm:5.6.2"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 10/f95365d4898f357823e93d334ecda9fcade54f009b397c7d05b7621cd9e865981033cf89ccde0f3e3a7b73b1fdbae18e92bc77db237b43e912f053fef0f9a53b
-  languageName: node
-  linkType: hard
-
 "typescript@npm:5.6.3":
   version: 5.6.3
   resolution: "typescript@npm:5.6.3"
@@ -19958,16 +19948,6 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 10/c328e418e124b500908781d9f7b9b93cf08b66bf5936d94332b463822eea2f4e62973bfb3b8a745fdc038785cb66cf59d1092bac3ec2ac6a3e5854687f7833f1
-  languageName: node
-  linkType: hard
-
-"typescript@patch:typescript@npm%3A5.6.2#optional!builtin<compat/typescript>":
-  version: 5.6.2
-  resolution: "typescript@patch:typescript@npm%3A5.6.2#optional!builtin<compat/typescript>::version=5.6.2&hash=8c6c40"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 10/8bfc7ca0d9feca4c3fcbd6c70741abfcd714197d6448e68225ae71e462447d904d3bfba49759a8fbe4956d87f054e2d346833c8349c222daa594a2626d4e1be8
   languageName: node
   linkType: hard
 
