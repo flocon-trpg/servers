@@ -196,7 +196,6 @@ type WebConfigAtomReturnType =
 
 export const webConfigAtom = atom<Promise<Result<WebConfigAtomReturnType>>>(async get => {
     const storybook = get(storybookAtom);
-    const envs = await get(envsAtom);
     if (storybook.mock?.webConfig != null) {
         if (storybook.mock.webConfig.isError) {
             return storybook.mock.webConfig;
@@ -207,6 +206,7 @@ export const webConfigAtom = atom<Promise<Result<WebConfigAtomReturnType>>>(asyn
             });
         }
     }
+    const envs = await get(envsAtom);
     if (envs.isError) {
         return envs;
     }
