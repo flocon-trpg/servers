@@ -2851,9 +2851,9 @@ __metadata:
     "@types/html-escaper": "npm:3.0.2"
     "@types/jest": "npm:29.5.13"
     "@types/quill": "npm:2.0.14"
-    "@types/react": "npm:^18.3.10"
+    "@types/react": "npm:18.3.11"
     "@types/react-color": "npm:3.0.12"
-    "@types/react-dom": "npm:^18.3.0"
+    "@types/react-dom": "npm:18.3.1"
     "@types/react-linkify": "npm:1.0.4"
     "@types/sinonjs__fake-timers": "npm:8.1.5"
     "@types/url-join": "npm:4.0.3"
@@ -6562,7 +6562,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:^18.0.0, @types/react-dom@npm:^18.3.0":
+"@types/react-dom@npm:18.3.1, @types/react-dom@npm:^18.0.0":
   version: 18.3.1
   resolution: "@types/react-dom@npm:18.3.1"
   dependencies:
@@ -6589,7 +6589,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^16.8.0 || ^17.0.0 || ^18.0.0, @types/react@npm:^18.3.10":
+"@types/react@npm:*, @types/react@npm:18.3.11, @types/react@npm:^16.8.0 || ^17.0.0 || ^18.0.0":
   version: 18.3.11
   resolution: "@types/react@npm:18.3.11"
   dependencies:
