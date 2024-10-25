@@ -1,0 +1,30 @@
+export type Apply<TState, TOperation> = (params: {
+    state: TState;
+    operation: TOperation;
+}) => TState;
+export type Compose<TState, TOperation> = (params: {
+    state: TState;
+    first: TOperation;
+    second: TOperation;
+}) => TOperation;
+export type Transform<TState, TFirstOperation, TSecondOperation> = (params: {
+    state: TState;
+    first: TFirstOperation;
+    second: TSecondOperation;
+}) => {
+    firstPrime: TFirstOperation;
+    secondPrime: TSecondOperation;
+};
+export type Diff<TState, TOperation> = (params: {
+    prevState: TState;
+    nextState: TState;
+}) => TOperation | undefined;
+export type StateManagerParameters<TState, TOperation> = {
+    revision: number;
+    state: TState;
+    apply: Apply<TState, TOperation>;
+    transform: Transform<TState, TOperation, TOperation>;
+    diff: Diff<TState, TOperation>;
+    enableHistory?: boolean;
+};
+//# sourceMappingURL=types.d.ts.map
