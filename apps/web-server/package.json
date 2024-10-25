@@ -6,7 +6,7 @@
     "scripts": {
         "dev": "vite",
         "build": "run-s build:deps build:self",
-        "build:deps": "yarn workspaces foreach -pvtR --from '@flocon-trpg/web-server' --exclude '@flocon-trpg/web-server' run build",
+        "build:deps": "yarn workspaces foreach --recursive -pt --from '@flocon-trpg/web-server' --exclude '@flocon-trpg/web-server' run build",
         "build:self": "tsc -b && vite build",
         "lint": "eslint .",
         "preview": "vite preview",
