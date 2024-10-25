@@ -108,12 +108,11 @@ const createBooleanParameterColumn = ({
         sorter: (x, y, sortOrder) =>
             booleanToNumber(x.character.state.boolParams?.[key]?.value, sortOrder) -
             booleanToNumber(y.character.state.boolParams?.[key]?.value, sortOrder),
-        // eslint-disable-next-line react/display-name
         render: (_: unknown, { character, onOperateCharacter }: DataSource) => {
             return (
                 <div className={classNames(flex, flexRow)}>
                     <OverriddenParameterNameEditor
-                        type='table'
+                        type="table"
                         overriddenParameterName={
                             character.state.boolParams?.[key]?.overriddenParameterName
                         }
@@ -170,12 +169,11 @@ const createNumberParameterColumn = ({
             );
         },
         sortDirections: ['descend', 'ascend'],
-        // eslint-disable-next-line react/display-name
         render: (_: unknown, { character, onOperateCharacter }: DataSource) => {
             return (
                 <div className={classNames(flex, flexRow)}>
                     <OverriddenParameterNameEditor
-                        type='table'
+                        type="table"
                         overriddenParameterName={
                             character.state.numParams?.[key]?.overriddenParameterName
                         }
@@ -231,12 +229,11 @@ const createStringParameterColumn = ({
             const yValue = y.character.state.strParams?.[key]?.value ?? '';
             return xValue.localeCompare(yValue);
         },
-        // eslint-disable-next-line react/display-name
         render: (_: unknown, { character, onOperateCharacter }: DataSource) => {
             return (
                 <div className={classNames(flex, flexRow)}>
                     <OverriddenParameterNameEditor
-                        type='table'
+                        type="table"
                         overriddenParameterName={
                             character.state.strParams?.[key]?.overriddenParameterName
                         }
@@ -292,6 +289,7 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
             type,
             end: (_, monitor) => {
                 const dropResult = monitor.getDropResult();
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 const draggedItemRowKey = (dropResult as any)?.[dndItemKey] as string | undefined;
                 if (draggedItemRowKey == null) {
                     return;
@@ -357,8 +355,8 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
                 <Button
                     ref={drag}
                     style={{ cursor: 'move' }}
-                    type='text'
-                    size='small'
+                    type="text"
+                    size="small"
                     onClick={e => e.stopPropagation()}
                 >
                     <Icon.MenuOutlined
@@ -412,12 +410,11 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                             title: <TableHeaderCell title={null} rowKey={rowKey} />,
                             key: 'menu',
                             width: 36,
-                            // eslint-disable-next-line react/display-name
                             render: (_: unknown, { character }: DataSource) => (
-                                <Tooltip title='編集'>
+                                <Tooltip title="編集">
                                     <Button
                                         style={{ alignSelf: 'center' }}
-                                        size='small'
+                                        size="small"
                                         onClick={() =>
                                             setCharacterEditorModal({
                                                 type: update,
@@ -433,11 +430,10 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                         };
                     case RowKeys.Name:
                         return {
-                            title: <TableHeaderCell title='名前' rowKey={rowKey} />,
+                            title: <TableHeaderCell title="名前" rowKey={rowKey} />,
                             key: 'name',
                             sorter: (x, y) =>
                                 x.character.state.name.localeCompare(y.character.state.name),
-                            // eslint-disable-next-line react/display-name
                             render: (_: unknown, { character }: DataSource) => (
                                 <div className={classNames(flex, flexRow, itemsCenter)}>
                                     {character.state.image == null ? (
@@ -448,8 +444,8 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                                     <div style={{ width: 4 }} />
                                     <CollaborativeInput
                                         style={{ minWidth: 100, width: '100%' }}
-                                        bufferDuration='default'
-                                        size='small'
+                                        bufferDuration="default"
+                                        size="small"
                                         value={character.state.name}
                                         onChange={e => {
                                             if (e.previousValue === e.currentValue) {
@@ -476,10 +472,9 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                                 (x.character.state.isPrivate ? 1 : 0) -
                                 (y.character.state.isPrivate ? 1 : 0),
                             width: 36,
-                            // eslint-disable-next-line react/display-name
                             render: (_: unknown, { character }: DataSource) => (
                                 <ToggleButton
-                                    size='small'
+                                    size="small"
                                     checked={!character.state.isPrivate}
                                     disabled={
                                         character.createdByMe
@@ -494,7 +489,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                                             ? characterIsPrivate({ isCreate: false })
                                             : characterIsNotPrivate({ isCreate: false })
                                     }
-                                    onChange={newValue => {
+                                    onChange={async newValue => {
                                         setRoomState(roomState => {
                                             const targetCharacter =
                                                 roomState.characters?.[character.stateId];
@@ -504,8 +499,8 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                                             targetCharacter.isPrivate = !newValue;
                                         });
                                     }}
-                                    shape='circle'
-                                    defaultType='dashed'
+                                    shape="circle"
+                                    defaultType="dashed"
                                 />
                             ),
                         };
@@ -575,7 +570,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
         <AntdTable
             columns={columns}
             dataSource={charactersDataSource}
-            size='small'
+            size="small"
             pagination={false}
             // 列をドラッグして動かすときにTooltipをドラッグするとキャラクターウィンドウが開いてしまう。簡単な方法でTooltipを調整する手段はなさそうなので、非表示にすることで解決している
             showSorterTooltip={false}
@@ -627,7 +622,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
     return (
         <Modal
             open={config != null}
-            title='タブの編集'
+            title="タブの編集"
             closable
             onCancel={() => onClose()}
             width={500}
@@ -641,7 +636,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
             }
         >
             <Table>
-                <TableRow label='タブ名'>
+                <TableRow label="タブ名">
                     <Input
                         value={config?.tabName ?? ''}
                         onChange={e =>
@@ -654,9 +649,9 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                         <>
                             <br />
                             <Alert
-                                type='info'
+                                type="info"
                                 showIcon
-                                message='タブ名が空白であるため、自動的に決定された名前が表示されます。'
+                                message="タブ名が空白であるため、自動的に決定された名前が表示されます。"
                             />
                         </>
                     )}
@@ -736,7 +731,7 @@ const CharacterListPanelWithPanelId: React.FC<{
                                                 icon: <Icon.DeleteOutlined />,
                                                 label: '削除',
                                                 onClick: () =>
-                                                    modal.warning({
+                                                    void modal.warning({
                                                         onOk: () => {
                                                             setRoomConfig(roomConfig => {
                                                                 if (roomConfig == null) {
@@ -768,8 +763,8 @@ const CharacterListPanelWithPanelId: React.FC<{
                                         // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
                                         padding: '0 2px',
                                     }}
-                                    type='text'
-                                    size='small'
+                                    type="text"
+                                    size="small"
                                     onClick={e => e.stopPropagation()}
                                 >
                                     <Icon.EllipsisOutlined />
@@ -815,27 +810,27 @@ const CharacterListPanelWithPanelId: React.FC<{
                             });
                         }}
                     />
-                    <Button size='small' onClick={() => setCharacterEditorModal({ type: create })}>
+                    <Button size="small" onClick={() => setCharacterEditorModal({ type: create })}>
                         キャラクターを作成
                     </Button>
-                    <Button size='small' onClick={() => setImportCharacterModal(true)}>
+                    <Button size="small" onClick={() => setImportCharacterModal(true)}>
                         キャラクターをインポート
                     </Button>
                     <Button
-                        size='small'
+                        size="small"
                         onClick={() => setCharacterParameterNamesEditorVisibility(true)}
                     >
                         パラメーターを追加・編集・削除
                     </Button>
-                    <Button size='small' onClick={() => setCharacterTagNamesEditorVisibility(true)}>
+                    <Button size="small" onClick={() => setCharacterTagNamesEditorVisibility(true)}>
                         タグを追加・編集・削除
                     </Button>
                 </div>
                 <DraggableTabs
                     items={tabItems}
                     // キャラクターウィンドウは最大で1個までしか存在しないため、静的な値で構わない
-                    dndType='CharacterListTabs'
-                    type='editable-card'
+                    dndType="CharacterListTabs"
+                    type="editable-card"
                     onDnd={action => {
                         setRoomConfig(roomConfig => {
                             if (roomConfig == null) {
@@ -895,5 +890,5 @@ const CharacterListPanelWithPanelId: React.FC<{
 
 export const CharacterListPanelContent: React.FC<{ height: number }> = ({ height }) => {
     // 現状ではCharacterListは最大でも1つしか存在しないため、panelIdは適当で構わない
-    return <CharacterListPanelWithPanelId panelId='CharacterList' height={height} />;
+    return <CharacterListPanelWithPanelId panelId="CharacterList" height={height} />;
 };

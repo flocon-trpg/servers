@@ -67,7 +67,7 @@ export const CharacterSelector: React.FC<Props> = ({
             {selectedCharacterType === some && (
                 <Select
                     style={{ flex: 1, maxWidth: inputMaxWidth }}
-                    placeholder='キャラクター'
+                    placeholder="キャラクター"
                     value={config.selectedCharacterId}
                     onChange={value => {
                         if (value == null) {
@@ -84,7 +84,7 @@ export const CharacterSelector: React.FC<Props> = ({
             {selectedCharacterType === custom && (
                 <Input
                     style={{ flex: 1, maxWidth: inputMaxWidth }}
-                    placeholder='名前'
+                    placeholder="名前"
                     value={config.customCharacterName}
                     onChange={e =>
                         onConfigUpdate(draft => {

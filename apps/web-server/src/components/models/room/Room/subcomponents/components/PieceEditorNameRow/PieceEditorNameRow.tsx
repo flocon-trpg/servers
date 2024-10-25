@@ -7,10 +7,10 @@ export const PieceEditorNameRow: React.FC<{
     onChange: (newValue: string) => void;
 }> = ({ state, onChange }) => {
     return (
-        <TableRow label='名前'>
+        <TableRow label="名前">
             <CollaborativeInput
-                bufferDuration='default'
-                size='small'
+                bufferDuration="default"
+                size="small"
                 value={state ?? ''}
                 onChange={e => {
                     if (e.previousValue === e.currentValue) {

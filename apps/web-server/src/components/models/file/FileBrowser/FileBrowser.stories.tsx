@@ -1,6 +1,6 @@
 import { both, delay, groupJoinArray, loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { createStore } from 'jotai/vanilla';
 import React from 'react';
 import useConstant from 'use-constant';
@@ -120,12 +120,15 @@ const Practical: React.FC<PracticalProps> = ({
                 jotaiStore={jotaiStore}
                 height={null}
                 files={filesState}
-                fileCreateLabel='😀ファイルを作成🤖'
-                searchPlaceholder='😀検索🤖'
+                fileCreateLabel="😀ファイルを作成🤖"
+                searchPlaceholder="😀検索🤖"
                 onDelete={() => {
                     setFilesState(toFilePath(filesSourceRef));
                 }}
                 onRename={() => {
+                    setFilesState(toFilePath(filesSourceRef));
+                }}
+                onFileCreate={() => {
                     setFilesState(toFilePath(filesSourceRef));
                 }}
                 // TODO: canMoveを用いたstoryも作成する
@@ -159,7 +162,6 @@ const Practical: React.FC<PracticalProps> = ({
                     ],
                 }}
                 isProtected={() => false}
-                onFileCreate={() => Promise.resolve(true)}
                 ensuredFolderPaths={ensuredFolderPaths}
                 // TODO: overridingElementsを用いたstoryも作成する
                 overridingElements={[]}
@@ -205,11 +207,10 @@ export const Default: React.FC<Props> = ({
             <FileBrowser
                 jotaiStore={jotaiStore}
                 height={null}
-                fileCreateLabel='😀ファイルを作成🤖'
-                searchPlaceholder='😀検索🤖'
+                fileCreateLabel="😀ファイルを作成🤖"
+                searchPlaceholder="😀検索🤖"
                 files={files}
                 isProtected={() => false}
-                onFileCreate={() => Promise.resolve(true)}
                 ensuredFolderPaths={ensuredFolderPaths}
                 overridingElements={[]}
                 canMove={() => Result.error('fake error')}
@@ -220,7 +221,7 @@ export const Default: React.FC<Props> = ({
     );
 };
 
-export default {
+const meta = {
     title: 'models/file/FileBrowser',
     component: Default,
     args: {
@@ -235,7 +236,7 @@ export default {
                 thumb: (
                     <img
                         style={{ maxWidth: '100%', maxHeight: '100%' }}
-                        src='https://dummyimage.com/100x100/fff/000'
+                        src="https://dummyimage.com/100x100/fff/000"
                     />
                 ),
             },
@@ -245,7 +246,7 @@ export default {
                 thumb: (
                     <img
                         style={{ maxWidth: '100%', maxHeight: '100%' }}
-                        src='https://dummyimage.com/200x100/fff/000'
+                        src="https://dummyimage.com/200x100/fff/000"
                     />
                 ),
             },
@@ -255,7 +256,7 @@ export default {
                 thumb: (
                     <img
                         style={{ maxWidth: '100%', maxHeight: '100%' }}
-                        src='https://dummyimage.com/100x200/fff/000'
+                        src="https://dummyimage.com/100x200/fff/000"
                     />
                 ),
             },
@@ -302,26 +303,31 @@ export default {
             },
         ],
     },
-} as ComponentMeta<typeof Default>;
+} satisfies Meta<typeof Default>;
 
-const Template: ComponentStory<typeof Default> = args => <Default {...args} />;
+export default meta;
 
-export const Filtered = Template.bind({});
-Filtered.args = {
-    defaultFileTypeFilter: others,
+type Story = StoryObj<typeof meta>;
+
+export const Filtered: Story = {
+    args: {
+        defaultFileTypeFilter: others,
+    },
 };
 
-export const Empty = Template.bind({});
-Empty.args = {
-    filesSource: undefined,
-    files: [],
-    ensuredFolderPaths: [],
+export const Empty: Story = {
+    args: {
+        filesSource: undefined,
+        files: [],
+        ensuredFolderPaths: [],
+    },
 };
 
-export const EmptyButEnsured = Template.bind({});
-EmptyButEnsured.args = {
-    filesSource: undefined,
-    files: [],
+export const EmptyButEnsured: Story = {
+    args: {
+        filesSource: undefined,
+        files: [],
+    },
 };
 
 const success = async () => {
@@ -333,18 +339,19 @@ const fail = async () => {
     return Promise.reject(new Error('(Fake error)'));
 };
 
-export const ManyFiles = Template.bind({});
-ManyFiles.args = {
-    filesSource: undefined,
-    files: [...Array(200)].map((_, i) => {
-        const filename = `file${(i + 1).toString().padStart(3, '0')}.dll`;
-        return {
-            key: filename,
-            type: others,
-            onDelete: i % 2 === 0 ? success : fail,
-            onMoveOrRename: i % 2 === 0 ? success : fail,
-            path: [filename],
-            id: undefined,
-        };
-    }),
+export const ManyFiles: Story = {
+    args: {
+        filesSource: undefined,
+        files: [...Array(200).keys()].map(i => {
+            const filename = `file${(i + 1).toString().padStart(3, '0')}.dll`;
+            return {
+                key: filename,
+                type: others,
+                onDelete: i % 2 === 0 ? success : fail,
+                onMoveOrRename: i % 2 === 0 ? success : fail,
+                path: [filename],
+                id: undefined,
+            };
+        }),
+    },
 };

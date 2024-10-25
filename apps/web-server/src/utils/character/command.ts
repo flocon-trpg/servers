@@ -15,7 +15,7 @@ const transpile = (script: string): Result<string> => {
     return Result.ok(transpiled);
 };
 
-export const testCommand = (script: string): Result<undefined> => {
+export const testCommand = (script: string): Result<void> => {
     const transpiled = transpile(script);
     if (transpiled.isError) {
         return transpiled;

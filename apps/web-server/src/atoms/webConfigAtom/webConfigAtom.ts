@@ -5,15 +5,15 @@ import {
     parsePinoLogLevel,
     parseStringToBoolean,
 } from '@flocon-trpg/utils';
+import { Option } from '@kizahasi/option';
 import { Result } from '@kizahasi/result';
 import { atom } from 'jotai/vanilla';
-import { WebConfig } from '../../configType';
+import { MockableWebConfig, WebConfig } from '../../configType';
 import {
     NEXT_PUBLIC_FIREBASE_CONFIG,
     NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED,
     NEXT_PUBLIC_LOG_LEVEL,
 } from '../../env';
-import { FetchTextState } from '../../utils/types';
 import { storybookAtom } from '../storybookAtom/storybookAtom';
 import { DotenvParseOutput, parse } from '@/utils/dotEnvParse';
 
@@ -27,11 +27,19 @@ type Env = {
 };
 
 type Envs = {
-    processEnv: Env;
+    importMetaEnv: Env;
     publicEnvTxt: Env | undefined;
 };
 
+const tryToString = (value: unknown): string | undefined => {
+    if (typeof value === 'string') {
+        return value;
+    }
+    return undefined;
+};
+
 const parseConfig = (env: DotenvParseOutput | undefined): Result<Env> => {
+    // TODO: ↓のコメントはNext.jsの話で、Viteだとどうなるかわからないので調査して修正する
     /* 
     Because of Next.js restrictions, we cannot do like these:
     
@@ -55,12 +63,14 @@ const parseConfig = (env: DotenvParseOutput | undefined): Result<Env> => {
     const validValue = process.env.NEXT_PUBLIC_FOO;
 
     // valid code 2
-    const validValue = process,env['NEXT_PUBLIC_FOO'];
+    const validValue = process.env['NEXT_PUBLIC_FOO'];
     */
+
+    const importMetaEnv = import.meta.env;
 
     const isUnlistedFirebaseStorageEnabled = parseStringToBoolean(
         env == null
-            ? process.env.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED
+            ? tryToString(importMetaEnv.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED)
             : env.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED,
     );
     if (isUnlistedFirebaseStorageEnabled.error) {
@@ -69,24 +79,35 @@ const parseConfig = (env: DotenvParseOutput | undefined): Result<Env> => {
                 isUnlistedFirebaseStorageEnabled.error.ja,
         );
     }
+
+    // https://vite.dev/guide/env-and-mode#env-files によると、import.meta.env の値が number や boolean になることはないため、tryToString を使うことで値が抜け落ちることはない。
+
     const result: Env = {
-        http: env == null ? process.env.NEXT_PUBLIC_API_HTTP : env.NEXT_PUBLIC_API_HTTP,
-        ws: env == null ? process.env.NEXT_PUBLIC_API_WS : env.NEXT_PUBLIC_API_WS,
-        logLevel: env == null ? process.env.NEXT_PUBLIC_LOG_LEVEL : env.NEXT_PUBLIC_LOG_LEVEL,
+        http:
+            env == null
+                ? tryToString(importMetaEnv.NEXT_PUBLIC_API_HTTP)
+                : env.NEXT_PUBLIC_API_HTTP,
+        ws: env == null ? tryToString(importMetaEnv.NEXT_PUBLIC_API_WS) : env.NEXT_PUBLIC_API_WS,
+        logLevel:
+            env == null
+                ? tryToString(importMetaEnv.NEXT_PUBLIC_LOG_LEVEL)
+                : env.NEXT_PUBLIC_LOG_LEVEL,
         authProviders:
             parseEnvListValue(
                 env == null
-                    ? process.env.NEXT_PUBLIC_AUTH_PROVIDERS
+                    ? tryToString(importMetaEnv.NEXT_PUBLIC_AUTH_PROVIDERS)
                     : env.NEXT_PUBLIC_AUTH_PROVIDERS,
             ) ?? undefined,
         isUnlistedFirebaseStorageEnabled: isUnlistedFirebaseStorageEnabled.value,
     };
 
     const firebaseFile =
-        env == null ? process.env.NEXT_PUBLIC_FIREBASE_CONFIG : env.NEXT_PUBLIC_FIREBASE_CONFIG;
+        env == null
+            ? tryToString(importMetaEnv.NEXT_PUBLIC_FIREBASE_CONFIG)
+            : env.NEXT_PUBLIC_FIREBASE_CONFIG;
 
     if (firebaseFile != null) {
-        const firebaseJson = JSON.parse(firebaseFile.toString());
+        const firebaseJson: unknown = JSON.parse(firebaseFile.toString());
         // jsonファイルを直接importしても動くが、jsonファイルにミスがあるときに出るエラーメッセージをわかりやすくするため、zodを用いている。
         const firebaseConfigObject = firebaseConfig.safeParse(firebaseJson);
         if (!firebaseConfigObject.success) {
@@ -98,41 +119,52 @@ const parseConfig = (env: DotenvParseOutput | undefined): Result<Env> => {
     return Result.ok(result);
 };
 
-const processEnv = parseConfig(undefined);
+const importMetaEnv = parseConfig(undefined);
 
-export const mockProcessEnvAtom = atom<DotenvParseOutput | null>(null);
+export const mockImportMetaEnvAtom = atom<DotenvParseOutput | null>(null);
 
-export const publicEnvTxtAtom = atom<FetchTextState>({ fetched: false });
-
-export const envsAtom = atom<Result<Envs> | null>(get => {
-    const mockProcessEnv = get(mockProcessEnvAtom);
-    const $processEnv = mockProcessEnv == null ? processEnv : parseConfig(mockProcessEnv);
-    if ($processEnv.isError) {
-        return $processEnv;
-    }
-    const publicEnvTxt = get(publicEnvTxtAtom);
-    if (!publicEnvTxt.fetched) {
+// もし fetch に失敗した状態でキャッシュされると再び fetch しに行くことはないので、atomWithCache は使っていない
+const publicEnvTxtAtom = atom(async () => {
+    // chromeなどではfetchできないと `http://localhost:3000/env.txt 404 (Not Found)` などといったエラーメッセージが表示されるが、実際は問題ない
+    const envTxtObj = await fetch('/env.txt').catch(() => null);
+    if (envTxtObj == null || !envTxtObj.ok) {
+        // 正常に取得できなかったときはnullを返す
         return null;
     }
-    if (publicEnvTxt.value == null) {
-        return Result.ok({ processEnv: $processEnv.value, publicEnvTxt: undefined });
+    return await envTxtObj.text();
+});
+
+export const mockPublicEnvTxtAtom = atom<Option<string | null>>(Option.none());
+
+export const envsAtom = atom<Promise<Result<Envs>>>(async get => {
+    const mockImportMetaEnv = get(mockImportMetaEnvAtom);
+    const $importMetaEnv =
+        mockImportMetaEnv == null ? importMetaEnv : parseConfig(mockImportMetaEnv);
+    if ($importMetaEnv.isError) {
+        return $importMetaEnv;
     }
-    const publicEnvTxtObject = parse(publicEnvTxt.value);
+    const publicEnvTxt = await get(publicEnvTxtAtom);
+    const mockPublicEnvTxt = get(mockPublicEnvTxtAtom);
+    const $publicEnvTxt = mockPublicEnvTxt.isNone ? publicEnvTxt : mockPublicEnvTxt.value;
+    if ($publicEnvTxt == null) {
+        return Result.ok({ importMetaEnv: $importMetaEnv.value, publicEnvTxt: undefined });
+    }
+    const publicEnvTxtObject = parse($publicEnvTxt);
     const publicEnvTxtResult = parseConfig(publicEnvTxtObject);
     if (publicEnvTxtResult.isError) {
         return publicEnvTxtResult;
     }
     return Result.ok({
-        processEnv: $processEnv.value,
+        importMetaEnv: $importMetaEnv.value,
         publicEnvTxt: publicEnvTxtResult.value,
     });
 });
 
 const mergeEnv = (envs: Envs): Env => {
     if (envs.publicEnvTxt == null) {
-        return envs.processEnv;
+        return envs.importMetaEnv;
     }
-    const result = { ...envs.processEnv };
+    const result = { ...envs.importMetaEnv };
     if (result.authProviders == null) {
         result.authProviders = envs.publicEnvTxt.authProviders;
     }
@@ -152,15 +184,29 @@ const mergeEnv = (envs: Envs): Env => {
     return result;
 };
 
-export const webConfigAtom = atom<Result<WebConfig> | null>(get => {
+type WebConfigAtomReturnType =
+    | {
+          isMock: false;
+          value: WebConfig;
+      }
+    | {
+          isMock: true;
+          value: MockableWebConfig;
+      };
+
+export const webConfigAtom = atom<Promise<Result<WebConfigAtomReturnType>>>(async get => {
     const storybook = get(storybookAtom);
-    const envs = get(envsAtom);
     if (storybook.mock?.webConfig != null) {
-        return storybook.mock.webConfig;
+        if (storybook.mock.webConfig.isError) {
+            return storybook.mock.webConfig;
+        } else {
+            return Result.ok({
+                isMock: true,
+                value: storybook.mock.webConfig.value,
+            });
+        }
     }
-    if (envs == null) {
-        return null;
-    }
+    const envs = await get(envsAtom);
     if (envs.isError) {
         return envs;
     }
@@ -184,10 +230,10 @@ export const webConfigAtom = atom<Result<WebConfig> | null>(get => {
         ws: mergedEnv.ws,
         logLevel: logLevel?.value,
     };
-    return Result.ok(result);
+    return Result.ok({ isMock: false, value: result });
 });
 
-export const getHttpUri = (config: WebConfig) => {
+export const getHttpUri = (config: MockableWebConfig) => {
     if (config.http == null) {
         return `${location.protocol}//${location.host}`;
     } else {
@@ -195,7 +241,7 @@ export const getHttpUri = (config: WebConfig) => {
     }
 };
 
-export const getWsUri = (config: WebConfig) => {
+export const getWsUri = (config: MockableWebConfig) => {
     if (config.ws == null) {
         return `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}`;
     } else {

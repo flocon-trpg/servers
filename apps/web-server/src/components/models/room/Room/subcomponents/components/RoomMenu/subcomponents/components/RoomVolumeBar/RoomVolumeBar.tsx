@@ -67,7 +67,7 @@ export const RoomVolumeBar: React.FC = () => {
 
     const masterVolumeBar = (
         <VolumeBar
-            inputNumberType='0-1'
+            inputNumberType="0-1"
             readonly={false}
             value={masterVolume}
             onChange={i => setMasterVolume(i)}
@@ -75,7 +75,7 @@ export const RoomVolumeBar: React.FC = () => {
     );
     const channel1VolumeBar = (
         <VolumeBar
-            inputNumberType='0-1'
+            inputNumberType="0-1"
             readonly={false}
             value={channelVolumes['1'] ?? defaultChannelVolume}
             onChange={i => setChannelVolume({ channelKey: '1', newVolume: i })}
@@ -83,7 +83,7 @@ export const RoomVolumeBar: React.FC = () => {
     );
     const channel2VolumeBar = (
         <VolumeBar
-            inputNumberType='0-1'
+            inputNumberType="0-1"
             readonly={false}
             value={channelVolumes['2'] ?? defaultChannelVolume}
             onChange={i => setChannelVolume({ channelKey: '2', newVolume: i })}
@@ -91,7 +91,7 @@ export const RoomVolumeBar: React.FC = () => {
     );
     const channel3VolumeBar = (
         <VolumeBar
-            inputNumberType='0-1'
+            inputNumberType="0-1"
             readonly={false}
             value={channelVolumes['3'] ?? defaultChannelVolume}
             onChange={i => setChannelVolume({ channelKey: '3', newVolume: i })}
@@ -99,7 +99,7 @@ export const RoomVolumeBar: React.FC = () => {
     );
     const channel4VolumeBar = (
         <VolumeBar
-            inputNumberType='0-1'
+            inputNumberType="0-1"
             readonly={false}
             value={channelVolumes['4'] ?? defaultChannelVolume}
             onChange={i => setChannelVolume({ channelKey: '4', newVolume: i })}
@@ -107,7 +107,7 @@ export const RoomVolumeBar: React.FC = () => {
     );
     const channel5VolumeBar = (
         <VolumeBar
-            inputNumberType='0-1'
+            inputNumberType="0-1"
             readonly={false}
             value={channelVolumes['5'] ?? defaultChannelVolume}
             onChange={i => setChannelVolume({ channelKey: '5', newVolume: i })}
@@ -115,7 +115,7 @@ export const RoomVolumeBar: React.FC = () => {
     );
     const seVolumeBar = (
         <VolumeBar
-            inputNumberType='0-1'
+            inputNumberType="0-1"
             readonly={false}
             value={seVolume}
             onChange={i => setSeVolume(i)}

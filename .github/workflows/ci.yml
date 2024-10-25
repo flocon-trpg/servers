@@ -41,15 +41,11 @@ jobs:
             - run: yarn build
 
             - name: Test
-              run: yarn test --ci --coverage --runInBand
+              run: yarn test-ci
               env:
                   REDIS_TEST: 0
                   MYSQL_TEST: 0
                   POSTGRESQL_TEST: 0
-
-            - name: Next export
-              run: yarn run export
-              working-directory: ./apps/web-server
 
     tests-with-docker:
         name: 'Full tests on ${{ matrix.container }} and Codecov'
@@ -134,7 +130,7 @@ jobs:
                       }
 
             - name: Test
-              run: yarn test --ci --coverage --runInBand
+              run: yarn test-ci
 
             - name: Upload coverages to Codecov
               if: ${{ matrix.container == 'node:18-bullseye' }}
@@ -233,13 +229,15 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - name: Use Node 18.x
+            - name: Use Node 20.x
               uses: actions/setup-node@v4
               with:
-                  node-version: 18.x
+                  node-version: 20.x
                   cache: yarn
 
             - run: yarn
+
+            - run: yarn build
 
             - name: Lint
               run: yarn lint
@@ -264,10 +262,10 @@ jobs:
                   # Requires full git history: https://github.com/chromaui/action#getting-started
                   fetch-depth: 0
 
-            - name: Use Node 18.x
+            - name: Use Node 20.x
               uses: actions/setup-node@v4
               with:
-                  node-version: 18.x
+                  node-version: 20.x
                   cache: yarn
 
             - run: yarn

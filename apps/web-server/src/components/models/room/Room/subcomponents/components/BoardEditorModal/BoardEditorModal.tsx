@@ -183,10 +183,10 @@ export const BoardEditorModal: React.FC = () => {
             <div>
                 <Divider />
                 <Table>
-                    <TableRow label='名前'>
+                    <TableRow label="名前">
                         <CollaborativeInput
-                            bufferDuration='default'
-                            size='small'
+                            bufferDuration="default"
+                            size="small"
                             value={board.name}
                             onChange={e => {
                                 if (e.previousValue === e.currentValue) {
@@ -201,7 +201,7 @@ export const BoardEditorModal: React.FC = () => {
                             }}
                         />
                     </TableRow>
-                    <TableRow label='背景画像'>
+                    <TableRow label="背景画像">
                         <FileView
                             style={{ maxWidth: 450 }}
                             maxWidthOfLink={null}
@@ -219,9 +219,9 @@ export const BoardEditorModal: React.FC = () => {
                             uploaderFileBrowserHeight={null}
                         />
                     </TableRow>
-                    <TableRow label='背景画像の拡大率'>
+                    <TableRow label="背景画像の拡大率">
                         <InputNumber
-                            size='small'
+                            size="small"
                             value={board.backgroundImageZoom * 100}
                             min={0}
                             formatter={value => `${value}%`}
@@ -247,10 +247,10 @@ export const BoardEditorModal: React.FC = () => {
                             }
                         />
                     </TableRow>
-                    <TableRow label='セルの大きさ'>
+                    <TableRow label="セルの大きさ">
                         {/* cellWidth === cellHeight という前提だが、もし異なる場合は代表してcellWidthの値を用いることにしている */}
                         <InputNumber
-                            size='small'
+                            size="small"
                             value={board.cellWidth}
                             onChange={newValue =>
                                 typeof newValue === 'number'
@@ -265,10 +265,10 @@ export const BoardEditorModal: React.FC = () => {
                             }
                         />
                     </TableRow>
-                    <TableRow label='セルの基準点'>
+                    <TableRow label="セルの基準点">
                         <span>x=</span>
                         <InputNumber
-                            size='small'
+                            size="small"
                             value={board.cellOffsetX}
                             onChange={newValue =>
                                 typeof newValue === 'number'
@@ -283,7 +283,7 @@ export const BoardEditorModal: React.FC = () => {
                         />
                         <span style={{ marginLeft: 10 }}>y=</span>
                         <InputNumber
-                            size='small'
+                            size="small"
                             value={board.cellOffsetY}
                             onChange={newValue =>
                                 typeof newValue === 'number'
@@ -300,8 +300,8 @@ export const BoardEditorModal: React.FC = () => {
                 </Table>
                 <Divider dashed />
                 <CopyToClipboardButton
-                    clipboardText={async () => {
-                        return JSON.stringify(board);
+                    clipboardText={() => {
+                        return Promise.resolve(JSON.stringify(board));
                     }}
                 >
                     クリップボードにエクスポート
