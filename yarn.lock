@@ -2413,7 +2413,7 @@ __metadata:
     form-data: "npm:4.0.0"
     fs-extra: "npm:^11.0.0"
     graphql: "npm:^15.6.0"
-    graphql-subscriptions: "npm:^1.1.0"
+    graphql-subscriptions: "npm:^2.0.0"
     graphql-ws: "npm:^5.8.1"
     immer: "npm:^10.0.0"
     inquirer: "npm:^8.0.0"
@@ -11821,6 +11821,17 @@ __metadata:
   peerDependencies:
     graphql: ^0.10.5 || ^0.11.3 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0
   checksum: 10/6dfc0bf278b595c7d99b577e05902d18cd0e56c8c060892ccba7651ff1a49218c7cdd5a8e811fcb9071b98492d238609ba6f326129f5cb0f5433c993671e2d14
+  languageName: node
+  linkType: hard
+
+"graphql-subscriptions@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "graphql-subscriptions@npm:2.0.0"
+  dependencies:
+    iterall: "npm:^1.3.0"
+  peerDependencies:
+    graphql: ^15.7.2 || ^16.0.0
+  checksum: 10/fcf47bd8cef90f3d38f07b49b4b0e70514c22d56e3604a6cde03a250d3129a6c5b3e8420953a6fe5dab68e48d092a4d13fa39bcc61610bdd6c4a0804b9ee2f82
   languageName: node
   linkType: hard
 
