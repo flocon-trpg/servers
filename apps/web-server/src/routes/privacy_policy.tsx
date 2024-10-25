@@ -2,7 +2,6 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
-import { FetchTextState } from '../utils/types';
 import {
     fetchPrivacyPolicyAtom,
     privacyPolicyFileName,

@@ -2,7 +2,6 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
-import { FetchTextState } from '../utils/types';
 import { fetchTosAtom, tosFileName } from '@/atoms/fetchTosAtom/fetchTosAtom';
 import { Layout } from '@/components/ui/Layout/Layout';
 
