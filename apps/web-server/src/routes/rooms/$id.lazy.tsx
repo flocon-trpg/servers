@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createLazyFileRoute } from '@tanstack/react-router';
 import { RoomId } from '@/components/pages/room/RoomIdPage/RoomIdPage';
 
 const Component = () => {
@@ -6,6 +6,6 @@ const Component = () => {
     return <RoomId id={id} />;
 };
 
-export const Route = createFileRoute('/rooms/$id')({
+export const Route = createLazyFileRoute('/rooms/$id')({
     component: Component,
 });
