@@ -117,6 +117,11 @@ type EnvsMonitorContentProps = {
 };
 
 const EnvsMonitorCardContent: React.FC<EnvsMonitorContentProps> = ({ envsMonitor }) => {
+    const envTxtHeader = (
+        <h4>
+            <Link to="/text/env">{'env.txt'}</Link> の値
+        </h4>
+    );
     const importMetaEnvHeader = (
         <h4>
             <HelpMessageTooltip
@@ -149,11 +154,6 @@ const EnvsMonitorCardContent: React.FC<EnvsMonitorContentProps> = ({ envsMonitor
             </HelpMessageTooltip>
         </h4>
     );
-    const envTxtHeader = (
-        <h4>
-            <Link to="/text/env">{'env.txt'}</Link> の値
-        </h4>
-    );
 
     const sourceTitle = '元の値: ';
     const parsedTitle = 'パース後の値: ';
@@ -178,17 +178,6 @@ const EnvsMonitorCardContent: React.FC<EnvsMonitorContentProps> = ({ envsMonitor
 
     const firebaseConfigPopoverContent = (
         <div>
-            {importMetaEnvHeader}
-            <div>
-                {sourceTitle}
-                <SourceValueView value={envsMonitor.value.firebaseConfig.importMetaEnv.source} />
-            </div>
-            <div>
-                {parsedTitle}
-                <ParsedFirebaseConfigValueView
-                    value={envsMonitor.value.firebaseConfig.importMetaEnv.parsed}
-                />
-            </div>
             {envTxtHeader}
             {envsMonitor.publicEnvTxtFetched ? (
                 <div>
@@ -208,16 +197,22 @@ const EnvsMonitorCardContent: React.FC<EnvsMonitorContentProps> = ({ envsMonitor
             ) : (
                 envTxtNotFound
             )}
+            {importMetaEnvHeader}
+            <div>
+                {sourceTitle}
+                <SourceValueView value={envsMonitor.value.firebaseConfig.importMetaEnv.source} />
+            </div>
+            <div>
+                {parsedTitle}
+                <ParsedFirebaseConfigValueView
+                    value={envsMonitor.value.firebaseConfig.importMetaEnv.parsed}
+                />
+            </div>
         </div>
     );
 
     const httpPopoverContent = (
         <div>
-            {importMetaEnvHeader}
-            <div>
-                {sourceAndParsedTitle}
-                <ParsedValueView value={envsMonitor.value.http.importMetaEnv} />
-            </div>
             {envTxtHeader}
             {envsMonitor.publicEnvTxtFetched ? (
                 <div>
@@ -229,16 +224,16 @@ const EnvsMonitorCardContent: React.FC<EnvsMonitorContentProps> = ({ envsMonitor
             ) : (
                 envTxtNotFound
             )}
+            {importMetaEnvHeader}
+            <div>
+                {sourceAndParsedTitle}
+                <ParsedValueView value={envsMonitor.value.http.importMetaEnv} />
+            </div>
         </div>
     );
 
     const wsPopoverContent = (
         <div>
-            {importMetaEnvHeader}
-            <div>
-                {sourceAndParsedTitle}
-                <ParsedValueView value={envsMonitor.value.ws.importMetaEnv} />
-            </div>
             {envTxtHeader}
             {envsMonitor.publicEnvTxtFetched ? (
                 <div>
@@ -250,20 +245,16 @@ const EnvsMonitorCardContent: React.FC<EnvsMonitorContentProps> = ({ envsMonitor
             ) : (
                 envTxtNotFound
             )}
+            {importMetaEnvHeader}
+            <div>
+                {sourceAndParsedTitle}
+                <ParsedValueView value={envsMonitor.value.ws.importMetaEnv} />
+            </div>
         </div>
     );
 
     const authProvidersPopoverContent = (
         <div>
-            {importMetaEnvHeader}
-            <div>
-                {sourceTitle}
-                <SourceValueView value={envsMonitor.value.authProviders.importMetaEnv.source} />
-            </div>
-            <div>
-                {parsedTitle}
-                <ParsedValueView value={envsMonitor.value.authProviders.importMetaEnv.parsed} />
-            </div>
             {envTxtHeader}
             {envsMonitor.publicEnvTxtFetched ? (
                 <div>
@@ -283,24 +274,20 @@ const EnvsMonitorCardContent: React.FC<EnvsMonitorContentProps> = ({ envsMonitor
             ) : (
                 envTxtNotFound
             )}
+            {importMetaEnvHeader}
+            <div>
+                {sourceTitle}
+                <SourceValueView value={envsMonitor.value.authProviders.importMetaEnv.source} />
+            </div>
+            <div>
+                {parsedTitle}
+                <ParsedValueView value={envsMonitor.value.authProviders.importMetaEnv.parsed} />
+            </div>
         </div>
     );
 
     const unlistedFirebaseStorageEnabledPopoverContent = (
         <div>
-            {importMetaEnvHeader}
-            <div>
-                {sourceTitle}
-                <SourceValueView
-                    value={envsMonitor.value.isUnlistedFirebaseStorageEnabled.importMetaEnv.source}
-                />
-            </div>
-            <div>
-                {parsedTitle}
-                <ParsedValueView
-                    value={envsMonitor.value.isUnlistedFirebaseStorageEnabled.importMetaEnv.parsed}
-                />
-            </div>
             {envTxtHeader}
             {envsMonitor.publicEnvTxtFetched ? (
                 <div>
@@ -326,20 +313,24 @@ const EnvsMonitorCardContent: React.FC<EnvsMonitorContentProps> = ({ envsMonitor
             ) : (
                 envTxtNotFound
             )}
+            {importMetaEnvHeader}
+            <div>
+                {sourceTitle}
+                <SourceValueView
+                    value={envsMonitor.value.isUnlistedFirebaseStorageEnabled.importMetaEnv.source}
+                />
+            </div>
+            <div>
+                {parsedTitle}
+                <ParsedValueView
+                    value={envsMonitor.value.isUnlistedFirebaseStorageEnabled.importMetaEnv.parsed}
+                />
+            </div>
         </div>
     );
 
     const logLevelPopoverContent = (
         <div>
-            {importMetaEnvHeader}
-            <div>
-                {sourceTitle}
-                <SourceValueView value={envsMonitor.value.logLevel.importMetaEnv.source} />
-            </div>
-            <div>
-                {parsedTitle}
-                <ParsedValueView value={envsMonitor.value.logLevel.importMetaEnv.parsed} />
-            </div>
             {envTxtHeader}
             {envsMonitor.publicEnvTxtFetched ? (
                 <div>
@@ -355,6 +346,15 @@ const EnvsMonitorCardContent: React.FC<EnvsMonitorContentProps> = ({ envsMonitor
             ) : (
                 envTxtNotFound
             )}
+            {importMetaEnvHeader}
+            <div>
+                {sourceTitle}
+                <SourceValueView value={envsMonitor.value.logLevel.importMetaEnv.source} />
+            </div>
+            <div>
+                {parsedTitle}
+                <ParsedValueView value={envsMonitor.value.logLevel.importMetaEnv.parsed} />
+            </div>
         </div>
     );
 
