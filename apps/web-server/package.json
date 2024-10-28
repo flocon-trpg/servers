@@ -1,6 +1,6 @@
 {
     "name": "@flocon-trpg/web-server",
-    "version": "0.8.12-beta.2",
+    "version": "0.9.0-beta.1",
     "private": true,
     "type": "module",
     "scripts": {
