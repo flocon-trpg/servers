@@ -1,7 +1,7 @@
 import { Outlet, createRootRoute } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 import { Typography } from 'antd';
-import { atom, useAtomValue } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { enableTanStackRouterDevtoolsAtom } from '@/atoms/enableTanStackRouterDevtoolsAtom/enableTanStackRouterDevtoolsAtom';
 import { LayoutWithNoHook } from '@/components/ui/Layout/Layout';
 

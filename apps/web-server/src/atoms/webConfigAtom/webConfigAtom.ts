@@ -10,11 +10,8 @@ import { Option } from '@kizahasi/option';
 import { Result } from '@kizahasi/result';
 import { atom } from 'jotai/vanilla';
 import { MockableWebConfig, WebConfig } from '../../configType';
-import {
-    NEXT_PUBLIC_FIREBASE_CONFIG,
-    NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED,
-    NEXT_PUBLIC_LOG_LEVEL,
-} from '../../env';
+import { NEXT_PUBLIC_LOG_LEVEL } from '../../env';
+import { fetchEnvTxtAtom } from '../fetchEnvTxtAtom/fetchEnvTxtAtom';
 import { storybookAtom } from '../storybookAtom/storybookAtom';
 import { DotenvParseOutput, parse } from '@/utils/dotEnvParse';
 
@@ -192,24 +189,13 @@ const importMetaEnv = toEnvSource(undefined);
 
 export const mockImportMetaEnvAtom = atom<DotenvParseOutput | null>(null);
 
-// もし fetch に失敗した状態でキャッシュされると再び fetch しに行くことはないので、atomWithCache は使っていない
-const publicEnvTxtAtom = atom(async () => {
-    // chromeなどではfetchできないと `http://localhost:3000/env.txt 404 (Not Found)` などといったエラーメッセージが表示されるが、実際は問題ない
-    const envTxtObj = await fetch('/env.txt').catch(() => null);
-    if (envTxtObj == null || !envTxtObj.ok) {
-        // 正常に取得できなかったときはnullを返す
-        return null;
-    }
-    return await envTxtObj.text();
-});
-
 export const mockPublicEnvTxtAtom = atom<Option<string | null>>(Option.none());
 
 const envsAtom = atom<Promise<Envs>>(async get => {
     const mockImportMetaRawEnv = get(mockImportMetaEnvAtom);
     const importMetaEnvSource =
         mockImportMetaRawEnv == null ? importMetaEnv : toEnvSource(mockImportMetaRawEnv);
-    const publicEnvTxt = await get(publicEnvTxtAtom);
+    const publicEnvTxt = await get(fetchEnvTxtAtom);
     const mockPublicEnvTxt = get(mockPublicEnvTxtAtom);
     const $publicEnvTxt = mockPublicEnvTxt.isNone ? publicEnvTxt : mockPublicEnvTxt.value;
     if ($publicEnvTxt == null) {

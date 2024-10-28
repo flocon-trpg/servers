@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { Link, createFileRoute } from '@tanstack/react-router';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -28,9 +28,7 @@ const PrivacyPolicyContent: React.FC = () => {
         <div style={{ padding }}>
             <div style={{ paddingBottom: 16 }}>
                 このページは、
-                <a href={`/${privacyPolicyFileName}`} target="_blank" rel="noopener noreferrer">
-                    {privacyPolicyFileName}
-                </a>
+                <Link to="/text/privacy_policy">{privacyPolicyFileName}</Link>
                 ファイルから生成されています。
             </div>
             {text.trim() === '' ? (

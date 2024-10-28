@@ -1,5 +1,6 @@
 import { FirebaseConfig } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
+import { Link } from '@tanstack/react-router';
 import { Alert, Card, Divider, Popover } from 'antd';
 import { useAtomValue } from 'jotai';
 import React, { PropsWithChildren } from 'react';
@@ -122,7 +123,7 @@ const EnvsMonitorCardContent: React.FC<EnvsMonitorContentProps> = ({ envsMonitor
                 overlayWidth={500}
                 title={
                     <div>
-                        Vite の <code>import.meta.env</code>
+                        Vite の <code>import.meta.env</code>{' '}
                         から取得された値です。これは一般的に次の値となります。
                         <ul>
                             <li>
@@ -148,7 +149,11 @@ const EnvsMonitorCardContent: React.FC<EnvsMonitorContentProps> = ({ envsMonitor
             </HelpMessageTooltip>
         </h4>
     );
-    const envTxtHeader = <h4>env.txt の値</h4>;
+    const envTxtHeader = (
+        <h4>
+            <Link to="/text/env">{'env.txt'}</Link> の値
+        </h4>
+    );
 
     const sourceTitle = '元の値: ';
     const parsedTitle = 'パース後の値: ';

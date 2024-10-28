@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { Link, createFileRoute } from '@tanstack/react-router';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -29,9 +29,7 @@ const TosContent: React.FC = () => {
         <div style={{ padding }}>
             <div style={{ paddingBottom: 16 }}>
                 このページは、
-                <a href={`/${tosFileName}`} target="_blank" rel="noopener noreferrer">
-                    {tosFileName}
-                </a>
+                <Link to="/text/tos">{tosFileName}</Link>
                 ファイルから生成されています。
             </div>
             {text.trim() === '' ? (

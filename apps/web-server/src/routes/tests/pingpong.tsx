@@ -9,7 +9,7 @@ import { Button, InputNumber } from 'antd';
 import React from 'react';
 import { CombinedError, useClient, useMutation, useSubscription } from 'urql';
 import { pipe, subscribe } from 'wonka';
-import { Layout, LayoutWithNoHook } from '@/components/ui/Layout/Layout';
+import { LayoutWithNoHook } from '@/components/ui/Layout/Layout';
 
 type PongObservableResultState =
     | {

@@ -20,6 +20,9 @@ import { Route as PrivacypolicyImport } from './routes/privacy_policy';
 import { Route as LicensesImport } from './routes/licenses';
 import { Route as IndexImport } from './routes/index';
 import { Route as RoomsIndexImport } from './routes/rooms/index';
+import { Route as TextTosImport } from './routes/text/tos';
+import { Route as TextPrivacypolicyImport } from './routes/text/privacy_policy';
+import { Route as TextEnvImport } from './routes/text/env';
 import { Route as TestsPingpongImport } from './routes/tests/pingpong';
 import { Route as RoomsCreateImport } from './routes/rooms/create';
 
@@ -76,6 +79,24 @@ const RoomsIdLazyRoute = RoomsIdLazyImport.update({
     path: '/rooms/$id',
     getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/rooms/$id.lazy').then(d => d.Route));
+
+const TextTosRoute = TextTosImport.update({
+    id: '/text/tos',
+    path: '/text/tos',
+    getParentRoute: () => rootRoute,
+} as any);
+
+const TextPrivacypolicyRoute = TextPrivacypolicyImport.update({
+    id: '/text/privacy_policy',
+    path: '/text/privacy_policy',
+    getParentRoute: () => rootRoute,
+} as any);
+
+const TextEnvRoute = TextEnvImport.update({
+    id: '/text/env',
+    path: '/text/env',
+    getParentRoute: () => rootRoute,
+} as any);
 
 const TestsPingpongRoute = TestsPingpongImport.update({
     id: '/tests/pingpong',
@@ -149,6 +170,27 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof TestsPingpongImport;
             parentRoute: typeof rootRoute;
         };
+        '/text/env': {
+            id: '/text/env';
+            path: '/text/env';
+            fullPath: '/text/env';
+            preLoaderRoute: typeof TextEnvImport;
+            parentRoute: typeof rootRoute;
+        };
+        '/text/privacy_policy': {
+            id: '/text/privacy_policy';
+            path: '/text/privacy_policy';
+            fullPath: '/text/privacy_policy';
+            preLoaderRoute: typeof TextPrivacypolicyImport;
+            parentRoute: typeof rootRoute;
+        };
+        '/text/tos': {
+            id: '/text/tos';
+            path: '/text/tos';
+            fullPath: '/text/tos';
+            preLoaderRoute: typeof TextTosImport;
+            parentRoute: typeof rootRoute;
+        };
         '/rooms/$id': {
             id: '/rooms/$id';
             path: '/rooms/$id';
@@ -177,6 +219,9 @@ export interface FileRoutesByFullPath {
     '/tos': typeof TosRoute;
     '/rooms/create': typeof RoomsCreateRoute;
     '/tests/pingpong': typeof TestsPingpongRoute;
+    '/text/env': typeof TextEnvRoute;
+    '/text/privacy_policy': typeof TextPrivacypolicyRoute;
+    '/text/tos': typeof TextTosRoute;
     '/rooms/$id': typeof RoomsIdLazyRoute;
     '/rooms': typeof RoomsIndexRoute;
 }
@@ -190,6 +235,9 @@ export interface FileRoutesByTo {
     '/tos': typeof TosRoute;
     '/rooms/create': typeof RoomsCreateRoute;
     '/tests/pingpong': typeof TestsPingpongRoute;
+    '/text/env': typeof TextEnvRoute;
+    '/text/privacy_policy': typeof TextPrivacypolicyRoute;
+    '/text/tos': typeof TextTosRoute;
     '/rooms/$id': typeof RoomsIdLazyRoute;
     '/rooms': typeof RoomsIndexRoute;
 }
@@ -204,6 +252,9 @@ export interface FileRoutesById {
     '/tos': typeof TosRoute;
     '/rooms/create': typeof RoomsCreateRoute;
     '/tests/pingpong': typeof TestsPingpongRoute;
+    '/text/env': typeof TextEnvRoute;
+    '/text/privacy_policy': typeof TextPrivacypolicyRoute;
+    '/text/tos': typeof TextTosRoute;
     '/rooms/$id': typeof RoomsIdLazyRoute;
     '/rooms/': typeof RoomsIndexRoute;
 }
@@ -219,6 +270,9 @@ export interface FileRouteTypes {
         | '/tos'
         | '/rooms/create'
         | '/tests/pingpong'
+        | '/text/env'
+        | '/text/privacy_policy'
+        | '/text/tos'
         | '/rooms/$id'
         | '/rooms';
     fileRoutesByTo: FileRoutesByTo;
@@ -231,6 +285,9 @@ export interface FileRouteTypes {
         | '/tos'
         | '/rooms/create'
         | '/tests/pingpong'
+        | '/text/env'
+        | '/text/privacy_policy'
+        | '/text/tos'
         | '/rooms/$id'
         | '/rooms';
     id:
@@ -243,6 +300,9 @@ export interface FileRouteTypes {
         | '/tos'
         | '/rooms/create'
         | '/tests/pingpong'
+        | '/text/env'
+        | '/text/privacy_policy'
+        | '/text/tos'
         | '/rooms/$id'
         | '/rooms/';
     fileRoutesById: FileRoutesById;
@@ -257,6 +317,9 @@ export interface RootRouteChildren {
     TosRoute: typeof TosRoute;
     RoomsCreateRoute: typeof RoomsCreateRoute;
     TestsPingpongRoute: typeof TestsPingpongRoute;
+    TextEnvRoute: typeof TextEnvRoute;
+    TextPrivacypolicyRoute: typeof TextPrivacypolicyRoute;
+    TextTosRoute: typeof TextTosRoute;
     RoomsIdLazyRoute: typeof RoomsIdLazyRoute;
     RoomsIndexRoute: typeof RoomsIndexRoute;
 }
@@ -270,6 +333,9 @@ const rootRouteChildren: RootRouteChildren = {
     TosRoute: TosRoute,
     RoomsCreateRoute: RoomsCreateRoute,
     TestsPingpongRoute: TestsPingpongRoute,
+    TextEnvRoute: TextEnvRoute,
+    TextPrivacypolicyRoute: TextPrivacypolicyRoute,
+    TextTosRoute: TextTosRoute,
     RoomsIdLazyRoute: RoomsIdLazyRoute,
     RoomsIndexRoute: RoomsIndexRoute,
 };
@@ -294,6 +360,9 @@ export const routeTree = rootRoute
         "/tos",
         "/rooms/create",
         "/tests/pingpong",
+        "/text/env",
+        "/text/privacy_policy",
+        "/text/tos",
         "/rooms/$id",
         "/rooms/"
       ]
@@ -321,6 +390,15 @@ export const routeTree = rootRoute
     },
     "/tests/pingpong": {
       "filePath": "tests/pingpong.tsx"
+    },
+    "/text/env": {
+      "filePath": "text/env.tsx"
+    },
+    "/text/privacy_policy": {
+      "filePath": "text/privacy_policy.tsx"
+    },
+    "/text/tos": {
+      "filePath": "text/tos.tsx"
     },
     "/rooms/$id": {
       "filePath": "rooms/$id.lazy.tsx"
