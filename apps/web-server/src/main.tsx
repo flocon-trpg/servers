@@ -47,7 +47,7 @@ declare module '@tanstack/react-router' {
 }
 
 const App = ({ children }: PropsWithChildren) => {
-    const { config, authNotFoundState, urqlClient, reactQueryClient, clientId, httpUri, wsUri } =
+    const { authNotFoundState, urqlClient, reactQueryClient, clientId, httpUri, wsUri } =
         useSetupApp();
 
     useOnFirebaseAppChange(() => {
@@ -68,18 +68,6 @@ const App = ({ children }: PropsWithChildren) => {
     React.useEffect(() => {
         loggerRef.info(`clientId: ${clientId}`);
     }, [clientId]);
-
-    if (config == null) {
-        return <ThemedDiv style={{ padding: 5 }}>{'env.txt を確認しています…'}</ThemedDiv>;
-    }
-
-    if (config.isError) {
-        return (
-            <ThemedDiv
-                style={{ padding: 5 }}
-            >{`設定ファイルに問題があります: ${config.error}`}</ThemedDiv>
-        );
-    }
 
     if (authNotFoundState) {
         return (

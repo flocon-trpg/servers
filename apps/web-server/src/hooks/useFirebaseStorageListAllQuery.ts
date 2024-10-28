@@ -134,10 +134,8 @@ export const useFirebaseStorageListAllQuery = () => {
     const storage = useAtomValue(firebaseStorageAtom);
     const myUserUid = useMyUserUid();
     const webConfig = useWebConfig();
-    const isPublicFirebaseStorageEnabled =
-        webConfig?.value?.isPublicFirebaseStorageEnabled === true;
-    const isUnlistedFirebaseStorageEnabled =
-        webConfig?.value?.isUnlistedFirebaseStorageEnabled === true;
+    const isPublicFirebaseStorageEnabled = webConfig.isPublicFirebaseStorageEnabled === true;
+    const isUnlistedFirebaseStorageEnabled = webConfig.isUnlistedFirebaseStorageEnabled === true;
 
     const publicFiles = useQuery({
         queryKey: queryKey({

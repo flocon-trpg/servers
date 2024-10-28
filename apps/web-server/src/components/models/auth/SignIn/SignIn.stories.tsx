@@ -74,7 +74,7 @@ export const Default: React.FC<{
                         return unsubscribe;
                     },
                 },
-                webConfig: Result.ok(mockWebConfig),
+                webConfig: mockWebConfig,
             },
         });
     }, [amIAnonymous, authProviders, setStorybook]);

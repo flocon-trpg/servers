@@ -1,5 +1,6 @@
 import { FirebaseConfig, firebaseConfig } from '@flocon-trpg/core';
 import {
+    PinoLogLevel,
     loggerRef,
     parseEnvListValue,
     parsePinoLogLevel,
@@ -17,14 +18,105 @@ import {
 import { storybookAtom } from '../storybookAtom/storybookAtom';
 import { DotenvParseOutput, parse } from '@/utils/dotEnvParse';
 
-type Env = {
+type EnvValue<TParsed> =
+    | {
+          source: undefined;
+          parsed: undefined;
+      }
+    | {
+          source: string;
+          parsed: TParsed;
+      };
+
+type EnvSource = {
+    firebaseConfig?: string;
+    http?: string;
+    ws?: string;
+    authProviders?: string;
+    isUnlistedFirebaseStorageEnabled?: string;
+    logLevel?: string;
+};
+
+type EnvJson = {
     firebaseConfig?: FirebaseConfig;
     http?: string;
     ws?: string;
     authProviders?: string[];
     isUnlistedFirebaseStorageEnabled?: boolean;
-    logLevel?: string;
+    logLevel?: PinoLogLevel;
 };
+
+class Env {
+    constructor(private readonly source: EnvSource) {}
+
+    get firebaseConfig(): EnvValue<Result<FirebaseConfig> | undefined> {
+        if (this.source.firebaseConfig == null) {
+            return { source: undefined, parsed: undefined };
+        }
+        const parse = (): Result<FirebaseConfig> | undefined => {
+            const firebaseFile = this.source.firebaseConfig;
+            if (firebaseFile != null) {
+                const firebaseJson: unknown = JSON.parse(firebaseFile.toString());
+                // jsonファイルを直接importしても動くが、jsonファイルにミスがあるときに出るエラーメッセージをわかりやすくするため、zodを用いている。
+                const firebaseConfigObject = firebaseConfig.safeParse(firebaseJson);
+                if (!firebaseConfigObject.success) {
+                    return Result.error(firebaseConfigObject.error.message);
+                }
+                return Result.ok(firebaseConfigObject.data);
+            }
+
+            return undefined;
+        };
+
+        return {
+            source: this.source.firebaseConfig,
+            parsed: parse(),
+        };
+    }
+
+    get http(): string | undefined {
+        return this.source.http;
+    }
+
+    get ws(): string | undefined {
+        return this.source.ws;
+    }
+
+    get logLevel(): EnvValue<Result<PinoLogLevel | undefined>> {
+        if (this.source.logLevel == null) {
+            return { source: undefined, parsed: undefined };
+        }
+        const parsed = parsePinoLogLevel(this.source.logLevel, NEXT_PUBLIC_LOG_LEVEL);
+
+        return {
+            source: this.source.logLevel,
+            parsed,
+        };
+    }
+
+    get authProviders(): EnvValue<string[] | undefined> {
+        if (this.source.authProviders == null) {
+            return { source: undefined, parsed: undefined };
+        }
+        return {
+            source: this.source.authProviders,
+            parsed: parseEnvListValue(this.source.authProviders) ?? undefined,
+        };
+    }
+
+    get isUnlistedFirebaseStorageEnabled(): EnvValue<Result<boolean>> {
+        if (this.source.isUnlistedFirebaseStorageEnabled == null) {
+            return { source: undefined, parsed: undefined };
+        }
+
+        const parsed = parseStringToBoolean(this.source.isUnlistedFirebaseStorageEnabled);
+
+        return {
+            source: this.source.isUnlistedFirebaseStorageEnabled,
+            parsed: parsed.isError ? Result.error(parsed.error.ja) : parsed,
+        };
+    }
+}
 
 type Envs = {
     importMetaEnv: Env;
@@ -38,7 +130,7 @@ const tryToString = (value: unknown): string | undefined => {
     return undefined;
 };
 
-const parseConfig = (env: DotenvParseOutput | undefined): Result<Env> => {
+const toEnvSource = (env: DotenvParseOutput | undefined): EnvSource => {
     // TODO: ↓のコメントはNext.jsの話で、Viteだとどうなるかわからないので調査して修正する
     /* 
     Because of Next.js restrictions, we cannot do like these:
@@ -68,21 +160,12 @@ const parseConfig = (env: DotenvParseOutput | undefined): Result<Env> => {
 
     const importMetaEnv = import.meta.env;
 
-    const isUnlistedFirebaseStorageEnabled = parseStringToBoolean(
-        env == null
-            ? tryToString(importMetaEnv.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED)
-            : env.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED,
-    );
-    if (isUnlistedFirebaseStorageEnabled.error) {
-        loggerRef.warn(
-            `${NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED} において次のエラーが発生したため、false とみなされます:` +
-                isUnlistedFirebaseStorageEnabled.error.ja,
-        );
-    }
-
     // https://vite.dev/guide/env-and-mode#env-files によると、import.meta.env の値が number や boolean になることはないため、tryToString を使うことで値が抜け落ちることはない。
-
-    const result: Env = {
+    const result: EnvSource = {
+        firebaseConfig:
+            env == null
+                ? tryToString(importMetaEnv.NEXT_PUBLIC_FIREBASE_CONFIG)
+                : env.NEXT_PUBLIC_FIREBASE_CONFIG,
         http:
             env == null
                 ? tryToString(importMetaEnv.NEXT_PUBLIC_API_HTTP)
@@ -93,33 +176,19 @@ const parseConfig = (env: DotenvParseOutput | undefined): Result<Env> => {
                 ? tryToString(importMetaEnv.NEXT_PUBLIC_LOG_LEVEL)
                 : env.NEXT_PUBLIC_LOG_LEVEL,
         authProviders:
-            parseEnvListValue(
-                env == null
-                    ? tryToString(importMetaEnv.NEXT_PUBLIC_AUTH_PROVIDERS)
-                    : env.NEXT_PUBLIC_AUTH_PROVIDERS,
-            ) ?? undefined,
-        isUnlistedFirebaseStorageEnabled: isUnlistedFirebaseStorageEnabled.value,
+            env == null
+                ? tryToString(importMetaEnv.NEXT_PUBLIC_AUTH_PROVIDERS)
+                : env.NEXT_PUBLIC_AUTH_PROVIDERS,
+        isUnlistedFirebaseStorageEnabled:
+            env == null
+                ? tryToString(importMetaEnv.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED)
+                : env.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED,
     };
 
-    const firebaseFile =
-        env == null
-            ? tryToString(importMetaEnv.NEXT_PUBLIC_FIREBASE_CONFIG)
-            : env.NEXT_PUBLIC_FIREBASE_CONFIG;
-
-    if (firebaseFile != null) {
-        const firebaseJson: unknown = JSON.parse(firebaseFile.toString());
-        // jsonファイルを直接importしても動くが、jsonファイルにミスがあるときに出るエラーメッセージをわかりやすくするため、zodを用いている。
-        const firebaseConfigObject = firebaseConfig.safeParse(firebaseJson);
-        if (!firebaseConfigObject.success) {
-            return Result.error(firebaseConfigObject.error.message);
-        }
-        result.firebaseConfig = firebaseConfigObject.data;
-    }
-
-    return Result.ok(result);
+    return result;
 };
 
-const importMetaEnv = parseConfig(undefined);
+const importMetaEnv = toEnvSource(undefined);
 
 export const mockImportMetaEnvAtom = atom<DotenvParseOutput | null>(null);
 
@@ -136,53 +205,168 @@ const publicEnvTxtAtom = atom(async () => {
 
 export const mockPublicEnvTxtAtom = atom<Option<string | null>>(Option.none());
 
-export const envsAtom = atom<Promise<Result<Envs>>>(async get => {
-    const mockImportMetaEnv = get(mockImportMetaEnvAtom);
-    const $importMetaEnv =
-        mockImportMetaEnv == null ? importMetaEnv : parseConfig(mockImportMetaEnv);
-    if ($importMetaEnv.isError) {
-        return $importMetaEnv;
-    }
+const envsAtom = atom<Promise<Envs>>(async get => {
+    const mockImportMetaRawEnv = get(mockImportMetaEnvAtom);
+    const importMetaEnvSource =
+        mockImportMetaRawEnv == null ? importMetaEnv : toEnvSource(mockImportMetaRawEnv);
     const publicEnvTxt = await get(publicEnvTxtAtom);
     const mockPublicEnvTxt = get(mockPublicEnvTxtAtom);
     const $publicEnvTxt = mockPublicEnvTxt.isNone ? publicEnvTxt : mockPublicEnvTxt.value;
     if ($publicEnvTxt == null) {
-        return Result.ok({ importMetaEnv: $importMetaEnv.value, publicEnvTxt: undefined });
+        return { importMetaEnv: new Env(importMetaEnvSource), publicEnvTxt: undefined };
     }
     const publicEnvTxtObject = parse($publicEnvTxt);
-    const publicEnvTxtResult = parseConfig(publicEnvTxtObject);
-    if (publicEnvTxtResult.isError) {
-        return publicEnvTxtResult;
-    }
-    return Result.ok({
-        importMetaEnv: $importMetaEnv.value,
-        publicEnvTxt: publicEnvTxtResult.value,
-    });
+    const publicEnvTxtEnvSource = toEnvSource(publicEnvTxtObject);
+    return {
+        importMetaEnv: new Env(importMetaEnvSource),
+        publicEnvTxt: new Env(publicEnvTxtEnvSource),
+    };
 });
 
-const mergeEnv = (envs: Envs): Env => {
-    if (envs.publicEnvTxt == null) {
-        return envs.importMetaEnv;
-    }
-    const result = { ...envs.importMetaEnv };
-    if (result.authProviders == null) {
-        result.authProviders = envs.publicEnvTxt.authProviders;
-    }
-    if (result.firebaseConfig == null) {
-        result.firebaseConfig = envs.publicEnvTxt.firebaseConfig;
-    }
-    if (result.http == null) {
-        result.http = envs.publicEnvTxt.http;
-    }
-    if (result.isUnlistedFirebaseStorageEnabled == null) {
+const toEnvJson = (envs: Envs): EnvJson => {
+    const keys = ['importMetaEnv', 'publicEnvTxt'] as const;
+    const result: EnvJson = {};
+    for (const key of keys) {
+        result.authProviders = result.authProviders ?? envs?.[key]?.authProviders.parsed;
+        result.firebaseConfig = result.firebaseConfig ?? envs?.[key]?.firebaseConfig.parsed?.value;
+        result.http = result.http ?? envs?.[key]?.http;
         result.isUnlistedFirebaseStorageEnabled =
-            envs.publicEnvTxt.isUnlistedFirebaseStorageEnabled;
-    }
-    if (result.ws == null) {
-        result.ws = envs.publicEnvTxt.ws;
+            result.isUnlistedFirebaseStorageEnabled ??
+            envs?.[key]?.isUnlistedFirebaseStorageEnabled.parsed?.value;
+        result.logLevel = result.logLevel ?? envs?.[key]?.logLevel.parsed?.value;
+        result.ws = result.ws ?? envs?.[key]?.ws;
     }
     return result;
 };
+
+const envJsonAtom = atom(async get => {
+    const envs = await get(envsAtom);
+    return toEnvJson(envs);
+});
+
+type NonParsedMonitorElement<HasPublicEnvTxt extends boolean> = {
+    importMetaEnv: string | undefined;
+    publicEnvTxt: HasPublicEnvTxt extends true ? string | undefined : undefined;
+    final: string | undefined;
+};
+
+type ParsedMonitorElement<HasPublicEnvTxt extends boolean, TParsed, TParsedFinal = TParsed> = {
+    importMetaEnv: EnvValue<TParsed>;
+    publicEnvTxt: HasPublicEnvTxt extends true ? EnvValue<TParsed> : undefined;
+    final: TParsedFinal;
+};
+
+type Monitor<HasPublicEnvTxt extends boolean> = {
+    firebaseConfig: ParsedMonitorElement<
+        HasPublicEnvTxt,
+        Result<FirebaseConfig> | undefined,
+        FirebaseConfig | undefined
+    >;
+    http: NonParsedMonitorElement<HasPublicEnvTxt>;
+    ws: NonParsedMonitorElement<HasPublicEnvTxt>;
+    authProviders: ParsedMonitorElement<HasPublicEnvTxt, string[] | undefined>;
+    isUnlistedFirebaseStorageEnabled: ParsedMonitorElement<
+        HasPublicEnvTxt,
+        Result<boolean>,
+        boolean | undefined
+    >;
+    logLevel: ParsedMonitorElement<
+        HasPublicEnvTxt,
+        Result<PinoLogLevel | undefined>,
+        PinoLogLevel | undefined
+    >;
+};
+
+export type EnvsMonitorAtomReturnType =
+    | {
+          publicEnvTxtFetched: true;
+          value: Monitor<true>;
+      }
+    | {
+          publicEnvTxtFetched: false;
+          value: Monitor<false>;
+      };
+
+export const envsMonitorAtom = atom<Promise<EnvsMonitorAtomReturnType>>(async get => {
+    const envs = await get(envsAtom);
+    const envJson = toEnvJson(envs);
+
+    // この関数から何も処理せずにそのまま { envs, envJson } を返す手もあるが、そうすると Storybook で { envs, envJson } のモックを作るのが面倒になるためここで処理を行っている。
+
+    if (envs.publicEnvTxt != null) {
+        return {
+            publicEnvTxtFetched: true,
+            value: {
+                firebaseConfig: {
+                    importMetaEnv: envs.importMetaEnv.firebaseConfig,
+                    publicEnvTxt: envs.publicEnvTxt.firebaseConfig,
+                    final: envJson.firebaseConfig,
+                },
+                authProviders: {
+                    importMetaEnv: envs.importMetaEnv.authProviders,
+                    publicEnvTxt: envs.publicEnvTxt.authProviders,
+                    final: envJson.authProviders,
+                },
+                isUnlistedFirebaseStorageEnabled: {
+                    importMetaEnv: envs.importMetaEnv.isUnlistedFirebaseStorageEnabled,
+                    publicEnvTxt: envs.publicEnvTxt.isUnlistedFirebaseStorageEnabled,
+                    final: envJson.isUnlistedFirebaseStorageEnabled,
+                },
+                logLevel: {
+                    importMetaEnv: envs.importMetaEnv.logLevel,
+                    publicEnvTxt: envs.publicEnvTxt.logLevel,
+                    final: envJson.logLevel,
+                },
+                http: {
+                    importMetaEnv: envs.importMetaEnv.http,
+                    publicEnvTxt: envs.publicEnvTxt.http,
+                    final: envJson.http,
+                },
+                ws: {
+                    importMetaEnv: envs.importMetaEnv.ws,
+                    publicEnvTxt: envs.publicEnvTxt.ws,
+                    final: envJson.ws,
+                },
+            },
+        } satisfies EnvsMonitorAtomReturnType;
+    }
+
+    return {
+        publicEnvTxtFetched: false,
+        value: {
+            firebaseConfig: {
+                importMetaEnv: envs.importMetaEnv.firebaseConfig,
+                publicEnvTxt: undefined,
+                final: envJson.firebaseConfig,
+            },
+            authProviders: {
+                importMetaEnv: envs.importMetaEnv.authProviders,
+                publicEnvTxt: undefined,
+                final: envJson.authProviders,
+            },
+            isUnlistedFirebaseStorageEnabled: {
+                importMetaEnv: envs.importMetaEnv.isUnlistedFirebaseStorageEnabled,
+                publicEnvTxt: undefined,
+                final: envJson.isUnlistedFirebaseStorageEnabled,
+            },
+            logLevel: {
+                importMetaEnv: envs.importMetaEnv.logLevel,
+                publicEnvTxt: undefined,
+                final: envJson.logLevel,
+            },
+            http: {
+                importMetaEnv: envs.importMetaEnv.http,
+                publicEnvTxt: undefined,
+                final: envJson.http,
+            },
+            ws: {
+                importMetaEnv: envs.importMetaEnv.ws,
+                publicEnvTxt: undefined,
+                final: envJson.ws,
+            },
+        },
+    } satisfies EnvsMonitorAtomReturnType;
+});
 
 type WebConfigAtomReturnType =
     | {
@@ -194,33 +378,15 @@ type WebConfigAtomReturnType =
           value: MockableWebConfig;
       };
 
-export const webConfigAtom = atom<Promise<Result<WebConfigAtomReturnType>>>(async get => {
+export const webConfigAtom = atom<Promise<WebConfigAtomReturnType>>(async get => {
     const storybook = get(storybookAtom);
     if (storybook.mock?.webConfig != null) {
-        if (storybook.mock.webConfig.isError) {
-            return storybook.mock.webConfig;
-        } else {
-            return Result.ok({
-                isMock: true,
-                value: storybook.mock.webConfig.value,
-            });
-        }
+        return {
+            isMock: true,
+            value: storybook.mock.webConfig,
+        };
     }
-    const envs = await get(envsAtom);
-    if (envs.isError) {
-        return envs;
-    }
-    const mergedEnv: Env = mergeEnv(envs.value);
-    if (mergedEnv.firebaseConfig == null) {
-        return Result.error(`${NEXT_PUBLIC_FIREBASE_CONFIG} の値が見つかりませんでした。`);
-    }
-    const logLevel =
-        mergedEnv.logLevel == null
-            ? undefined
-            : parsePinoLogLevel(mergedEnv.logLevel, NEXT_PUBLIC_LOG_LEVEL);
-    if (logLevel?.isError === true) {
-        loggerRef.warn(logLevel.error);
-    }
+    const mergedEnv = await get(envJsonAtom);
     const result: WebConfig = {
         authProviders: mergedEnv.authProviders,
         firebaseConfig: mergedEnv.firebaseConfig,
@@ -228,9 +394,9 @@ export const webConfigAtom = atom<Promise<Result<WebConfigAtomReturnType>>>(asyn
         isPublicFirebaseStorageEnabled: false,
         http: mergedEnv.http,
         ws: mergedEnv.ws,
-        logLevel: logLevel?.value,
+        logLevel: mergedEnv.logLevel,
     };
-    return Result.ok({ isMock: false, value: result });
+    return { isMock: false, value: result };
 });
 
 export const getHttpUri = (config: MockableWebConfig) => {

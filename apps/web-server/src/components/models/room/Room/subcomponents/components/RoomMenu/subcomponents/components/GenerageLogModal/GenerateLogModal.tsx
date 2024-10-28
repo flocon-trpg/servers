@@ -83,7 +83,6 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
             if (
                 publicChannelNamesRef.current == null ||
                 participantsRef.current == null ||
-                configRef.current?.value == null ||
                 firebaseStorageRef.current == null
             ) {
                 return;
@@ -145,7 +144,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                     participants: participantsRef.current,
                     filter: ChannelsFilterOptions.toFilter(channelsFilterOptionsRef.current),
                 },
-                config: configRef.current.value,
+                config: configRef.current,
                 storage: firebaseStorageRef.current,
                 getIdToken: getIdTokenRef.current,
                 onProgressChange: p => setProgress(p.percent),

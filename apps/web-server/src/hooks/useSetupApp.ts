@@ -32,15 +32,32 @@ import {
 import { setRoomConfig } from '@/utils/localStorage/roomConfig';
 import { getUserConfig, setUserConfig } from '@/utils/localStorage/userConfig';
 
-const firebaseAppAtom = atom(async get => {
+const mockType = 'mock';
+const webConfigIsNullishType = 'webConfigIsNullish';
+const successType = 'success';
+
+type FirebaseAppAtomReturnType =
+    | {
+          type: typeof mockType;
+      }
+    | {
+          type: typeof webConfigIsNullishType;
+      }
+    | {
+          type: typeof successType;
+          value: ReturnType<typeof initializeApp>;
+      };
+
+const firebaseAppAtom = atom<Promise<FirebaseAppAtomReturnType>>(async get => {
     const config = await get(webConfigAtom);
-    if (config.value == null) {
-        return undefined;
+    if (config.isMock === true) {
+        return { type: mockType };
     }
-    if (config.value.isMock) {
-        return undefined;
+    if (config.value.firebaseConfig == null) {
+        return { type: webConfigIsNullishType };
     }
-    return initializeApp(config.value.value.firebaseConfig);
+    const app = initializeApp(config.value.firebaseConfig);
+    return { type: successType, value: app };
 });
 
 export const useOnFirebaseAppChange = (onChange: () => void) => {
@@ -49,6 +66,9 @@ export const useOnFirebaseAppChange = (onChange: () => void) => {
     const onChangeRef = React.useRef(onChange);
 
     return React.useEffect(() => {
+        if (prevApp == null) {
+            return;
+        }
         if (app !== prevApp) {
             onChangeRef.current();
         }
@@ -57,18 +77,12 @@ export const useOnFirebaseAppChange = (onChange: () => void) => {
 
 const httpUriAtom = atom(async get => {
     const config = await get(webConfigAtom);
-    if (config.value?.value == null) {
-        return undefined;
-    }
-    return urljoin(getHttpUri(config.value.value), 'graphql');
+    return urljoin(getHttpUri(config.value), 'graphql');
 });
 
 const wsUriAtom = atom(async get => {
     const config = await get(webConfigAtom);
-    if (config.value == null) {
-        return undefined;
-    }
-    return urljoin(getWsUri(config.value.value), 'graphql');
+    return urljoin(getWsUri(config.value), 'graphql');
 });
 
 /**
@@ -80,10 +94,10 @@ export const firebaseAuthAtom = atom(async get => {
         return mock;
     }
     const app = await get(firebaseAppAtom);
-    if (app == null) {
+    if (app.type !== successType) {
         return null;
     }
-    return getAuth(app);
+    return getAuth(app.value);
 });
 
 export const firebaseStorageAtom = atom(async get => {
@@ -92,10 +106,10 @@ export const firebaseStorageAtom = atom(async get => {
         return mock;
     }
     const app = await get(firebaseAppAtom);
-    if (app == null) {
+    if (app.type !== successType) {
         return null;
     }
-    return getStorage(app);
+    return getStorage(app.value);
 });
 
 export const firebaseUserAtom = atomWithObservable(get => {
@@ -241,8 +255,8 @@ export const useSetupApp = () => {
         const defaultLevel = 'info';
         loggerRef.value = storybook.isStorybook
             ? pino()
-            : createDefaultLogger({ logLevel: config?.value?.logLevel ?? defaultLevel });
-    }, [config?.value?.logLevel, storybook.isStorybook]);
+            : createDefaultLogger({ logLevel: config.logLevel ?? defaultLevel });
+    }, [config.logLevel, storybook.isStorybook]);
 
     const user = useAtomValue(firebaseUserAtom);
     const userValue = useAtomValue(firebaseUserValueAtom);
@@ -258,9 +272,6 @@ export const useSetupApp = () => {
 
     const [urqlClient, setUrqlClient] = React.useState<ReturnType<typeof createUrqlClient>>();
     React.useEffect(() => {
-        if (httpUri == null || wsUri == null) {
-            return;
-        }
         if (canGetIdToken) {
             setUrqlClient(
                 createUrqlClient({
@@ -318,7 +329,6 @@ export const useSetupApp = () => {
 
     return React.useMemo(
         () => ({
-            config,
             urqlClient,
             reactQueryClient,
             authNotFoundState,
@@ -326,6 +336,6 @@ export const useSetupApp = () => {
             httpUri,
             wsUri,
         }),
-        [authNotFoundState, clientId, config, httpUri, reactQueryClient, urqlClient, wsUri],
+        [authNotFoundState, clientId, httpUri, reactQueryClient, urqlClient, wsUri],
     );
 };

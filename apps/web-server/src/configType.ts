@@ -13,5 +13,5 @@ export type MockableWebConfig = {
 };
 
 export type WebConfig = MockableWebConfig & {
-    firebaseConfig: FirebaseConfig;
+    firebaseConfig?: FirebaseConfig;
 };

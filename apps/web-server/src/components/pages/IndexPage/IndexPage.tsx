@@ -7,6 +7,7 @@ import React from 'react';
 import { Layout } from '../../ui/Layout/Layout';
 import { SupportedApiServers, VERSION } from '@/VERSION';
 import { enableTanStackRouterDevtoolsAtom } from '@/atoms/enableTanStackRouterDevtoolsAtom/enableTanStackRouterDevtoolsAtom';
+import { EnvsMonitor } from '@/components/models/envs/EnvsMonitor/EnvsMonitor';
 import { FileSelectorModal } from '@/components/models/file/FileSelectorModal/FileSelectorModal';
 import { AwaitableButton } from '@/components/ui/AwaitableButton/AwaitableButton';
 import { GraphQLAlert } from '@/components/ui/GraphQLAlert/GraphQLAlert';
@@ -145,7 +146,7 @@ export const IndexPage: React.FC = () => {
                                 取得中…
                             </span>
                         ) : apiServerSemVer.isError ? (
-                            '(エラーが発生しました)'
+                            '(エラーが発生しました。Flocon が正常に動作しないと思われます。API サーバーが正常に稼働しているかどうかを確認してください。)'
                         ) : (
                             apiServerSemVer.value.toString()
                         )}
@@ -166,6 +167,8 @@ export const IndexPage: React.FC = () => {
                         </div>
                     </li>
                 </ul>
+                <Typography.Title level={3}>環境変数</Typography.Title>
+                <EnvsMonitor style={{ maxWidth: 600 }} />
                 <Typography.Title level={3}>利用規約・プライバシーポリシー</Typography.Title>
                 <ul>
                     <li>

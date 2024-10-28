@@ -46,25 +46,19 @@ describe('webConfigAtom (process.env exists)', () => {
 
         await waitForWebConfig();
 
-        if (webConfigAtomResult.current[0]?.value?.isMock === true) {
+        if (webConfigAtomResult.current[0]?.isMock === true) {
             throw new Error('Unexpected isMock');
         }
 
-        expect(webConfigAtomResult.current[0].value?.value.http).toEqual(
+        expect(webConfigAtomResult.current[0].value.http).toEqual(
             fakeEnvFile[NEXT_PUBLIC_API_HTTP],
         );
-        expect(webConfigAtomResult.current[0].value?.value.ws).toEqual(
-            fakeEnvFile[NEXT_PUBLIC_API_WS],
-        );
-        expect(webConfigAtomResult.current[0].value?.value.authProviders?.sort()).toEqual(
+        expect(webConfigAtomResult.current[0].value.ws).toEqual(fakeEnvFile[NEXT_PUBLIC_API_WS]);
+        expect(webConfigAtomResult.current[0].value.authProviders?.sort()).toEqual(
             [email, google].sort(),
         );
-        expect(webConfigAtomResult.current[0].value?.value.firebaseConfig).toEqual(
-            fakeFirebaseConfig1[0],
-        );
-        expect(webConfigAtomResult.current[0].value?.value.isUnlistedFirebaseStorageEnabled).toBe(
-            true,
-        );
+        expect(webConfigAtomResult.current[0].value.firebaseConfig).toEqual(fakeFirebaseConfig1[0]);
+        expect(webConfigAtomResult.current[0].value.isUnlistedFirebaseStorageEnabled).toBe(true);
 
         // cleanup
         act(() => setMockImportMetaEnv.current(null));
@@ -84,25 +78,19 @@ describe('webConfigAtom (process.env exists)', () => {
 
         await waitForWebConfig();
 
-        if (webConfigAtomResult.current[0]?.value?.isMock === true) {
+        if (webConfigAtomResult.current[0]?.isMock === true) {
             throw new Error('Unexpected isMock');
         }
 
-        expect(webConfigAtomResult.current[0].value?.value.http).toEqual(
+        expect(webConfigAtomResult.current[0].value.http).toEqual(
             fakeEnvFile[NEXT_PUBLIC_API_HTTP],
         );
-        expect(webConfigAtomResult.current[0].value?.value.ws).toEqual(
-            fakeEnvFile[NEXT_PUBLIC_API_WS],
-        );
-        expect(webConfigAtomResult.current[0].value?.value.authProviders?.sort()).toEqual(
+        expect(webConfigAtomResult.current[0].value.ws).toEqual(fakeEnvFile[NEXT_PUBLIC_API_WS]);
+        expect(webConfigAtomResult.current[0].value.authProviders?.sort()).toEqual(
             [email, google].sort(),
         );
-        expect(webConfigAtomResult.current[0].value?.value.firebaseConfig).toEqual(
-            fakeFirebaseConfig1[0],
-        );
-        expect(webConfigAtomResult.current[0].value?.value.isUnlistedFirebaseStorageEnabled).toBe(
-            true,
-        );
+        expect(webConfigAtomResult.current[0].value.firebaseConfig).toEqual(fakeFirebaseConfig1[0]);
+        expect(webConfigAtomResult.current[0].value.isUnlistedFirebaseStorageEnabled).toBe(true);
 
         // cleanup
         act(() => setImportMetaEnv.current(null));

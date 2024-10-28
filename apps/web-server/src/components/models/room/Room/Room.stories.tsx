@@ -15,11 +15,11 @@ export const Player: React.FC<
     }
 > = ({ isUnlistedFirebaseStorageEnabled, isPublicFirebaseStorageEnabled, myParticipantRole }) => {
     const webConfig = React.useMemo(() => {
-        return Result.ok({
+        return {
             ...mockWebConfig,
             isUnlistedFirebaseStorageEnabled,
             isPublicFirebaseStorageEnabled,
-        });
+        };
     }, [isPublicFirebaseStorageEnabled, isUnlistedFirebaseStorageEnabled]);
     const { roomClientContextValue } = useSetupStorybook({
         basicMock: {

@@ -259,14 +259,14 @@ const FirebaseStorageUploader: React.FC<UploaderProps> = ({
             height={draggerHeight}
             accept={accept}
             customRequest={options => {
-                if (myUserUid == null || config?.value == null || storage == null) {
+                if (myUserUid == null || storage == null) {
                     return;
                 }
                 if (typeof options.file === 'string' || !('name' in options.file)) {
                     return;
                 }
                 const storageRef = (() => {
-                    if (config.value.isUnlistedFirebaseStorageEnabled !== true) {
+                    if (config.isUnlistedFirebaseStorageEnabled !== true) {
                         return null;
                     }
                     return ref(
@@ -766,7 +766,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                     />
                 </Modal>
             )}
-            {floconUploaderModalState && webConfig?.value != null && (
+            {floconUploaderModalState && webConfig != null && (
                 <Modal
                     title="ファイルのアップロード"
                     open
@@ -787,7 +787,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                             refetchFloconUploader({ requestPolicy: 'network-only' });
                         }}
                         folderPath={floconUploaderModalState.folderPath}
-                        webConfig={webConfig.value}
+                        webConfig={webConfig}
                     />
                 </Modal>
             )}

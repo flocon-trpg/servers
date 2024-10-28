@@ -13,13 +13,9 @@ export const useOpenFloconUploaderFile = () => {
     const { notification } = App.useApp();
     const { execute, isExecuting } = useSingleExecuteAsync1(
         async (file: { filename: string; screenname: string }) => {
-            if (webConfig?.value == null) {
-                // CONSIDER: notificationなどで通知したほうがいいか
-                return;
-            }
             const blob = await getFloconUploaderFile({
                 filename: file.filename,
-                config: webConfig.value,
+                config: webConfig,
                 getIdToken,
                 mode: files,
             });

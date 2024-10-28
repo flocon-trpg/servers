@@ -295,16 +295,12 @@ const SignInContent: React.FC = () => {
     const loginWithAuthProvider = useLoginWithAuthProvider();
 
     const areProvidersEmptyValue = React.useMemo(() => {
-        const authProviders = config.value?.authProviders ?? [];
+        const authProviders = config.authProviders ?? [];
         return areProvidersEmpty(authProviders);
-    }, [config.value?.authProviders]);
-    const authProviders = config.value?.authProviders ?? [];
+    }, [config.authProviders]);
+    const authProviders = config.authProviders ?? [];
 
-    if (config?.isError === true) {
-        return <div>{config.error}</div>;
-    }
-
-    if (config?.value === undefined || auth == null) {
+    if (auth == null) {
         return <div>Firebase のサービスを準備しています…</div>;
     }
 
