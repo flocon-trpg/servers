@@ -19,15 +19,19 @@ export const TextPage: React.FC<{ text: string | null; filename: string }> = ({
                     }
                 </span>
                 <h4>ファイルの中身</h4>
-                <pre
-                    style={{
-                        whiteSpace: 'pre-wrap',
-                        wordBreak: 'break-all',
-                        backgroundColor: 'rgba(200,200,200,0.2)',
-                    }}
-                >
-                    {text}
-                </pre>
+                {text == null ? (
+                    '(ファイルを取得する際にエラーが発生しました)'
+                ) : (
+                    <pre
+                        style={{
+                            whiteSpace: 'pre-wrap',
+                            wordBreak: 'break-all',
+                            backgroundColor: 'rgba(200,200,200,0.2)',
+                        }}
+                    >
+                        {text}
+                    </pre>
+                )}
             </div>
         </Layout>
     );
