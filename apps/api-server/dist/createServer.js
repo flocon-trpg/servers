@@ -110,18 +110,20 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
     }));
     apolloServer.applyMiddleware({ app });
     if (serverConfig.accessControlAllowOrigin == null) {
-        !quiet &&
+        if (!quiet) {
             appConsole.AppConsole.infoAsNotice({
                 en: '"accessControlAllowOrigin" config was not found. "Access-Control-Allow-Origin" header will be empty.',
                 ja: '"accessControlAllowOrigin" のコンフィグが見つかりませんでした。"Access-Control-Allow-Origin" ヘッダーは空になります。',
             });
+        }
     }
     else {
-        !quiet &&
+        if (!quiet) {
             appConsole.AppConsole.infoAsNotice({
                 en: `"accessControlAllowOrigin" config was found. "Access-Control-Allow-Origin" header will be "${serverConfig.accessControlAllowOrigin}".`,
                 ja: `"accessControlAllowOrigin" のコンフィグが見つかりました。"Access-Control-Allow-Origin" ヘッダーは "${serverConfig.accessControlAllowOrigin}" になります。`,
             });
+        }
         const accessControlAllowOrigin = serverConfig.accessControlAllowOrigin;
         app.use((req, res, next) => {
             res.header('Access-Control-Allow-Origin', accessControlAllowOrigin);
@@ -132,27 +134,30 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
     const applyUploader = async () => {
         const uploaderConfig = serverConfig.uploader;
         if (uploaderConfig == null || !uploaderConfig.enabled) {
-            !quiet &&
+            if (!quiet) {
                 appConsole.AppConsole.infoAsNotice({
                     en: `The uploader of API server is disabled.`,
                     ja: `APIサーバーのアップローダーは無効化されています。`,
                 });
+            }
             return;
         }
         const directory = uploaderConfig.directory;
         if (directory == null) {
-            !quiet &&
+            if (!quiet) {
                 appConsole.AppConsole.warn({
                     en: `The uploader of API server is disabled because "${env.EMBUPLOADER_PATH}" is empty.`,
                     ja: `"${env.EMBUPLOADER_PATH}"の値が空なので、APIサーバーのアップローダーは無効化されています。`,
                 });
+            }
             return;
         }
-        !quiet &&
+        if (!quiet) {
             appConsole.AppConsole.infoAsNotice({
                 en: `The uploader of API server is enabled.`,
                 ja: `APIサーバーのアップローダーは有効化されています。`,
             });
+        }
         await fs.ensureDir(path.resolve(directory));
         const storage = multer.diskStorage({
             destination: function (req, file, cb) {
@@ -388,10 +393,10 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
         httpServer.keepAliveTimeout = httpServerOptions.keepAliveTimeout;
     }
     const server = httpServer.listen(port, () => {
-        !quiet &&
+        if (!quiet) {
             utils.loggerRef.infoAsNotice(`🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`);
-        !quiet &&
             utils.loggerRef.infoAsNotice(`🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`);
+        }
     });
     const close = async () => {
         await new Promise((resolve, reject) => {

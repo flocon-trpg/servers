@@ -7,6 +7,7 @@ function _interopDefault (e) { return e && e.__esModule ? e : { default: e }; }
 var build__default = /*#__PURE__*/_interopDefault(build);
 
 /* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 // これらの文字列を変更したら、@flocon-trpg/logger-base の文字列も変更すること！
 // 理由: @flocon-trpg/default-pino-transport は他から import されるのではく、pino で '@flocon-trpg/default-pino-transport' という文字列を渡すことでのみ参照されるという特殊性がある。そのためか、@flocon-trpg/default-pino-transport から @flocon-trpg/logger-base を import してしまうとビルドの際に警告が出る（実際に動くかどうかは確認していない）。不具合が起こる可能性を減らすため、import せずに @flocon-trpg/logger-base と同様の文字列を書いている。
 const LOG_FORMAT = 'LOG_FORMAT';

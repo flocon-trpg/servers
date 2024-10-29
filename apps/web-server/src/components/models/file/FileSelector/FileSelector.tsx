@@ -37,12 +37,12 @@ export const FileSelector: React.FC<Props> = ({
     if (urlInputValue == null || isUrlInputValueEmpty) {
         urlInfo = null;
     } else if (url == null) {
-        urlInfo = <Alert message='無効なURLです。' type='warning' showIcon />;
+        urlInfo = <Alert message="無効なURLです。" type="warning" showIcon />;
     } else if (url.type === 'dropbox') {
         urlInfo = (
             <Alert
-                message='DropboxのURLと判定されました。自動的に変換して処理されます。'
-                type='info'
+                message="DropboxのURLと判定されました。自動的に変換して処理されます。"
+                type="info"
                 showIcon
             />
         );
@@ -53,14 +53,14 @@ export const FileSelector: React.FC<Props> = ({
     return (
         <div className={classNames(flex, flexColumn)}>
             {header}
-            <Fieldset legend='アップローダーから選択'>
+            <Fieldset legend="アップローダーから選択">
                 <UploaderFileBrowser
                     height={uploaderFileBrowserHeight}
                     onSelect={onSelect}
                     defaultFileTypeFilter={defaultFileTypeFilter}
                 />
             </Fieldset>
-            <Fieldset legend='URLから直接指定'>
+            <Fieldset legend="URLから直接指定">
                 <div className={classNames(flex, flexRow)}>
                     <Input value={urlInputValue} onChange={e => setUrlInputValue(e.target.value)} />
                     <Button

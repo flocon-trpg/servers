@@ -19,6 +19,7 @@ export const createMockUrqlClientForLayout = (): Client => {
                     };
                     return withPromise(
                         fromValue({
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                             data: res as any,
                             operation: createDummyUrqlOperation(),
                             stale: false,

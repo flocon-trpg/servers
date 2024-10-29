@@ -74,7 +74,8 @@ import { JumpToBottomVirtuoso } from '@/components/ui/JumpToBottomVirtuoso/JumpT
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
-import { firebaseUserValueAtom } from '@/pages/_app';
+import { firebaseUserValueAtom } from '@/hooks/useSetupApp';
+import { useSingleExecuteAsync1 } from '@/hooks/useSingleExecuteAsync';
 import { Styles } from '@/styles';
 import { cancelRnd, flex, flexColumn, flexNone, flexRow, itemsCenter } from '@/styles/className';
 import { moveElement } from '@/utils/moveElement';
@@ -149,7 +150,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
         <Modal
             className={cancelRnd}
             open={config != null}
-            title='タブの編集'
+            title="タブの編集"
             closable
             onCancel={() => onClose()}
             width={500}
@@ -163,7 +164,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
             }
         >
             <Table>
-                <TableRow label='タブ名'>
+                <TableRow label="タブ名">
                     <Input
                         value={config?.tabName ?? ''}
                         onChange={e => onChange({ tabName: e.target.value })}
@@ -172,15 +173,15 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                         <>
                             <br />
                             <Alert
-                                type='info'
+                                type="info"
                                 showIcon
-                                message='タブ名が空白であるため、自動的に決定された名前が表示されます。'
+                                message="タブ名が空白であるため、自動的に決定された名前が表示されます。"
                             />
                         </>
                     )}
                 </TableRow>
                 <TableDivider />
-                <TableRow label='特殊チャンネル'>
+                <TableRow label="特殊チャンネル">
                     <Checkbox
                         checked={config?.showNotification ?? false}
                         onChange={e => onChange({ showNotification: e.target.checked })}
@@ -203,7 +204,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                     </Checkbox>
                 </TableRow>
                 <TableDivider dashed />
-                <TableRow label='一般チャンネル'>
+                <TableRow label="一般チャンネル">
                     <Checkbox
                         checked={config?.showPublic1 ?? false}
                         onChange={e => onChange({ showPublic1: e.target.checked })}
@@ -275,7 +276,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                     </Checkbox>
                 </TableRow>
                 <TableDivider dashed />
-                <TableRow label='秘話'>
+                <TableRow label="秘話">
                     <Radio.Group
                         style={{ marginBottom: 5 }}
                         value={hiwaSelectValue}
@@ -336,7 +337,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                                 );
                             })}
                     {hiwaSelectValue === custom && participantsMap.size <= 1 && (
-                        <Alert type='info' showIcon message='自分以外の入室者がいません。' />
+                        <Alert type="info" showIcon message="自分以外の入室者がいません。" />
                     )}
                 </TableRow>
             </Table>
@@ -359,7 +360,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorProps> = (props: ChannelName
         <Modal
             className={cancelRnd}
             open={visible}
-            title='チャンネル名の編集'
+            title="チャンネル名の編集"
             closable
             onCancel={() => onClose()}
             width={500}
@@ -381,7 +382,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorProps> = (props: ChannelName
                             label={`チャンネル${i}`}
                         >
                             <CollaborativeInput
-                                bufferDuration='default'
+                                bufferDuration="default"
                                 value={publicChannelNames == null ? '' : publicChannelNames[key]}
                                 onChange={e => {
                                     if (e.previousValue === e.currentValue) {
@@ -421,8 +422,40 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
 
     const firebaseUser = useAtomValue(firebaseUserValueAtom);
     const [, editMessageMutation] = useMutation(EditMessageDocument);
+    const editMessageAwaited = useSingleExecuteAsync1(
+        async ({
+            text,
+            messageId,
+            onResolve,
+        }: {
+            text: string;
+            messageId: string;
+            onResolve: () => void;
+        }) => {
+            if (roomId == null) {
+                return;
+            }
+            await editMessageMutation({
+                messageId,
+                roomId,
+                text,
+            }).then(() => onResolve());
+        },
+    );
     const [, deleteMessageMutation] = useMutation(DeleteMessageDocument);
+    const deleteMessageAwaited = useSingleExecuteAsync1(async (messageId: string) => {
+        if (roomId == null) {
+            return;
+        }
+        await deleteMessageMutation({ messageId, roomId });
+    });
     const [, makeMessageNotSecret] = useMutation(MakeMessageNotSecretDocument);
+    const makeMessageNotSecretAwaited = useSingleExecuteAsync1(async (messageId: string) => {
+        if (roomId == null) {
+            return;
+        }
+        await makeMessageNotSecret({ messageId, roomId });
+    });
     const [isEditModalVisible, setIsEditModalVisible] = React.useState(false);
     const roomId = useRoomId();
     const roomMessagesFontSizeDelta = useAtomValue(roomMessageFontSizeDeltaAtom);
@@ -522,11 +555,12 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
             ? {
                   key: '公開@RoomMessageComponent',
                   label: '公開',
+                  disabled: makeMessageNotSecretAwaited.isExecuting,
                   onClick: () => {
-                      if (roomId == null) {
+                      if (makeMessageNotSecretAwaited.execute == null) {
                           return;
                       }
-                      makeMessageNotSecret({ messageId: userMessage.messageId, roomId });
+                      makeMessageNotSecretAwaited.execute(userMessage.messageId);
                   },
               }
             : null;
@@ -543,11 +577,12 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
             ? {
                   key: '削除@RoomMessageComponent',
                   label: '削除',
+                  disabled: deleteMessageAwaited.isExecuting,
                   onClick: () => {
-                      if (roomId == null) {
+                      if (deleteMessageAwaited.execute == null) {
                           return;
                       }
-                      deleteMessageMutation({ messageId: userMessage.messageId, roomId });
+                      deleteMessageAwaited.execute(userMessage.messageId);
                   },
               }
             : null;
@@ -647,27 +682,31 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                         }
                         trigger={['click']}
                     >
-                        <Button type='text' size='small'>
+                        <Button type="text" size="small">
                             <Icon.EllipsisOutlined />
                         </Button>
                     </Dropdown>
                 )}
             </div>
             <InputModal
-                title='メッセージの編集'
+                title="メッセージの編集"
                 visible={isEditModalVisible}
                 isTextArea={true}
+                disabled={() => editMessageAwaited.isExecuting}
                 onOk={(value, setValue) => {
-                    if (userMessage == null || roomId == null) {
+                    if (editMessageAwaited.execute == null) {
                         return;
                     }
-                    editMessageMutation({
-                        messageId: userMessage.messageId,
-                        roomId,
+                    if (userMessage == null) {
+                        return;
+                    }
+                    editMessageAwaited.execute({
                         text: value,
-                    }).then(() => {
-                        setIsEditModalVisible(false);
-                        setValue('');
+                        messageId: userMessage.messageId,
+                        onResolve: () => {
+                            setIsEditModalVisible(false);
+                            setValue('');
+                        },
                     });
                 }}
                 onClose={setValue => {
@@ -922,8 +961,8 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                                         // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
                                         padding: '0 2px',
                                     }}
-                                    type='text'
-                                    size='small'
+                                    type="text"
+                                    size="small"
                                     onClick={e => e.stopPropagation()}
                                 >
                                     <Icon.EllipsisOutlined />
@@ -945,7 +984,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                 items={tabItems}
                 style={{ flexBasis: `${tabsHeight}px`, margin: `0 ${marginX}px 4px ${marginX}px` }}
                 dndType={`MessagePanelTab@${panelId}`}
-                type='editable-card'
+                type="editable-card"
                 onDnd={action => {
                     setRoomConfig(roomConfig => {
                         const messagePanel = roomConfig?.panels.messagePanels[panelId];
@@ -1030,7 +1069,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
             <div className={classNames(flex, flexRow, itemsCenter)}>
                 <Button
                     style={{ margin: `4px ${marginX}px 4px ${marginX}px`, width: 170 }}
-                    size='small'
+                    size="small"
                     onClick={() => setIsChannelNamesEditorVisible(true)}
                 >
                     チャンネルの名前を編集
@@ -1038,7 +1077,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                 <div style={{ width: 16 }} />
                 <InputDescription>フォントサイズ</InputDescription>
                 <Button
-                    size='small'
+                    size="small"
                     onClick={() => {
                         setUserConfig(userConfig => {
                             if (userConfig == null) {
@@ -1052,7 +1091,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                     <Icons.MinusOutlined />
                 </Button>
                 <Button
-                    size='small'
+                    size="small"
                     onClick={() => {
                         setUserConfig(userConfig => {
                             if (userConfig == null) {

@@ -33,9 +33,9 @@ export const NameLabel: React.FC<Props> = (props: Props) => {
 
     return (
         <ReactKonva.Label x={innerX} y={innerY} width={innerW} height={innerH}>
-            <ReactKonva.Tag fill='#606060D0' />
+            <ReactKonva.Tag fill="#606060D0" />
 
-            <ReactKonva.Text {...textPropsBase} width={innerW} fill='white' wrap='none' ellipsis />
+            <ReactKonva.Text {...textPropsBase} width={innerW} fill="white" wrap="none" ellipsis />
         </ReactKonva.Label>
     );
 };

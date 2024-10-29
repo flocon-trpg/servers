@@ -7,7 +7,7 @@ import {
     SetCoreParams,
     beginCast,
 } from '@flocon-trpg/flocon-script';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'es-toolkit';
 import * as Character from '../ot/flocon/room/character/types';
 import * as Room from '../ot/flocon/room/types';
 import { State } from '../ot/generator/types';

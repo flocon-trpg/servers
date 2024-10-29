@@ -41,7 +41,7 @@ export const useSetupStorybook = ({
         auth?: Auth;
         user?: FirebaseUserState;
         storage?: FirebaseStorage;
-        webConfig?: Result<WebConfig>;
+        webConfig?: WebConfig;
     };
     // custom が nullish ならば、Partial<Parameters<typeof createMockRoom>[0]> の値から createMockRoom を実行して RoomState が作成される。update はどちらの場合でも用いられる。
     room?: Partial<Parameters<typeof createMockRoom>[0]> & {
@@ -59,10 +59,22 @@ export const useSetupStorybook = ({
         setStorybook({
             isStorybook: true,
             mock: {
-                auth: basicMockProp?.auth ?? { ...mockAuth, currentUser: mockUser },
+                auth: basicMockProp?.auth ?? {
+                    ...mockAuth,
+                    currentUser: mockUser,
+                    onAuthStateChanged: observer => {
+                        const unsubscribe = () => undefined;
+                        if (typeof observer === 'function') {
+                            observer(mockUser);
+                            return unsubscribe;
+                        }
+                        observer.next(mockUser);
+                        return unsubscribe;
+                    },
+                },
                 storage: basicMockProp?.storage ?? mockStorage,
                 user: basicMockProp?.user ?? mockUser,
-                webConfig: basicMockProp?.webConfig ?? Result.ok(mockWebConfig),
+                webConfig: basicMockProp?.webConfig ?? mockWebConfig,
             },
         });
     }, [

@@ -4,7 +4,7 @@ var utils = require('@flocon-trpg/utils');
 var mysql = require('@mikro-orm/mysql');
 var postgresql = require('@mikro-orm/postgresql');
 var sqlite = require('@mikro-orm/sqlite');
-var lodash = require('lodash');
+var esToolkit = require('es-toolkit');
 var entity$4 = require('./entities/file/entity.js');
 var entity$5 = require('./entities/fileTag/entity.js');
 var entity$3 = require('./entities/participant/entity.js');
@@ -98,7 +98,7 @@ const createSQLiteOptions = ({ sqliteConfig, dirName, }) => {
         driver: sqlite.SqliteDriver,
         forceUndefined: true,
     };
-    return lodash.pickBy(opts, x => x !== undefined);
+    return esToolkit.pickBy(opts, x => x !== undefined);
 };
 const createPostgreSQLOptions = ({ dbName, dirName, clientUrl, driverOptions, }) => {
     const opts = {
@@ -114,7 +114,7 @@ const createPostgreSQLOptions = ({ dbName, dirName, clientUrl, driverOptions, })
         clientUrl,
         driverOptions,
     };
-    return lodash.pickBy(opts, x => x !== undefined);
+    return esToolkit.pickBy(opts, x => x !== undefined);
 };
 const createMySQLOptions = ({ dbName, dirName, clientUrl, driverOptions, }) => {
     const opts = {
@@ -127,7 +127,7 @@ const createMySQLOptions = ({ dbName, dirName, clientUrl, driverOptions, }) => {
         clientUrl,
         driverOptions,
     };
-    return lodash.pickBy(opts, x => x !== undefined);
+    return esToolkit.pickBy(opts, x => x !== undefined);
 };
 
 exports.createMySQLOptions = createMySQLOptions;

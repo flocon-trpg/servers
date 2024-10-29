@@ -5,8 +5,8 @@ import { listAll } from 'firebase/storage';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import { useMyUserUid } from './useMyUserUid';
+import { firebaseStorageAtom } from './useSetupApp';
 import { useWebConfig } from './useWebConfig';
-import { firebaseStorageAtom } from '@/pages/_app';
 import { Path } from '@/utils/file/firebaseStorage';
 
 /** 再帰的に Firebase Storage の listAll 関数を実行します。
@@ -134,10 +134,8 @@ export const useFirebaseStorageListAllQuery = () => {
     const storage = useAtomValue(firebaseStorageAtom);
     const myUserUid = useMyUserUid();
     const webConfig = useWebConfig();
-    const isPublicFirebaseStorageEnabled =
-        webConfig?.value?.isPublicFirebaseStorageEnabled === true;
-    const isUnlistedFirebaseStorageEnabled =
-        webConfig?.value?.isUnlistedFirebaseStorageEnabled === true;
+    const isPublicFirebaseStorageEnabled = webConfig.isPublicFirebaseStorageEnabled === true;
+    const isUnlistedFirebaseStorageEnabled = webConfig.isUnlistedFirebaseStorageEnabled === true;
 
     const publicFiles = useQuery({
         queryKey: queryKey({

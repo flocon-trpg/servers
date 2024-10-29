@@ -250,13 +250,13 @@ export namespace RoomMessage {
         switch (message.type) {
             case 'custom':
             case pieceLog:
-                return <IconView image='Message' size={size} />;
+                return <IconView image="Message" size={size} />;
             case privateMessage:
             case publicMessage:
                 break;
         }
         if (message.value.createdBy == null) {
-            return <IconView image='Message' size={size} />;
+            return <IconView image="Message" size={size} />;
         }
         return <IconView image={message.value.character?.image ?? 'Person'} size={size} />;
     };
@@ -294,7 +294,7 @@ export namespace RoomMessage {
         );
 
         return (
-            <Popover trigger='hover' content={popoverContent}>
+            <Popover trigger="hover" content={popoverContent}>
                 <div>
                     {message.value.customName ??
                         message.value.character?.name ??

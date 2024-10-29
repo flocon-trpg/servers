@@ -1,6 +1,6 @@
 import urljoin from 'url-join';
 import { getHttpUri } from '../../atoms/webConfigAtom/webConfigAtom';
-import { WebConfig } from '../../configType';
+import { MockableWebConfig, WebConfig } from '../../configType';
 
 export const idTokenIsNull = 'idTokenIsNull';
 export const files = 'files';
@@ -12,7 +12,7 @@ export const getFloconUploaderFile = async ({
     getIdToken,
     mode,
 }: {
-    config: WebConfig;
+    config: WebConfig | MockableWebConfig;
     filename: string;
     getIdToken: () => Promise<string | null>;
     mode: typeof files | typeof thumbs;

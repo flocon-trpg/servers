@@ -1,7 +1,7 @@
 import { useAtomValue } from 'jotai';
 import React from 'react';
-import { firebaseUserAtom } from '../pages/_app';
 import { authNotFound, loading, notSignIn } from '../utils/firebase/firebaseUserState';
+import { firebaseUserAtom } from './useSetupApp';
 
 export const useMyUserUid = () => {
     const firebaseUser = useAtomValue(firebaseUserAtom);

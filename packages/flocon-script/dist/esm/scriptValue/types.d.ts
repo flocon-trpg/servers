@@ -31,5 +31,6 @@ export type FObjectBase = {
     toPrimitiveAsDefault?(): number | string;
     iterate?(): IterableIterator<FValue>;
     equals?(other: FValue, operator: '==' | '==='): boolean;
+    toString(): string;
 };
 //# sourceMappingURL=types.d.ts.map

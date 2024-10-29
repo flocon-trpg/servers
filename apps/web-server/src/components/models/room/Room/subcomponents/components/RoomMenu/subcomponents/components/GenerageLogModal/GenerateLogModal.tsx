@@ -19,9 +19,8 @@ import {
     ChannelsFilter,
     ChannelsFilterOptions,
 } from './subcomponents/components/ChannelsFilter/ChannelsFilter';
-import { useGetIdToken } from '@/hooks/useGetIdToken';
+import { firebaseStorageAtom, getIdTokenResultAtom } from '@/hooks/useSetupApp';
 import { useWebConfig } from '@/hooks/useWebConfig';
-import { firebaseStorageAtom } from '@/pages/_app';
 import { flex, flexColumn } from '@/styles/className';
 
 const simple = 'simple';
@@ -43,7 +42,8 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
     const configRef = useLatest(config);
     const firebaseStorage = useAtomValue(firebaseStorageAtom);
     const firebaseStorageRef = useLatest(firebaseStorage);
-    const { getIdToken } = useGetIdToken();
+    const { getIdToken } = useAtomValue(getIdTokenResultAtom);
+    const getIdTokenRef = useLatest(getIdToken);
     const publicChannelNames = usePublicChannelNames();
     const publicChannelNamesRef = useLatest(publicChannelNames);
     const participants = useParticipants();
@@ -83,7 +83,6 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
             if (
                 publicChannelNamesRef.current == null ||
                 participantsRef.current == null ||
-                configRef.current?.value == null ||
                 firebaseStorageRef.current == null
             ) {
                 return;
@@ -145,11 +144,11 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                     participants: participantsRef.current,
                     filter: ChannelsFilterOptions.toFilter(channelsFilterOptionsRef.current),
                 },
-                config: configRef.current.value,
+                config: configRef.current,
                 storage: firebaseStorageRef.current,
-                getIdToken,
+                getIdToken: getIdTokenRef.current,
                 onProgressChange: p => setProgress(p.percent),
-            }).catch(err => {
+            }).catch((err: Error) => {
                 setErrorMessage(err.message);
                 return null;
             });
@@ -163,13 +162,13 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
             );
             setIsDownloading(false);
         };
-        main();
+        void main();
     }, [
         isDownloading,
         clientRef,
         publicChannelNamesRef,
         participantsRef,
-        getIdToken,
+        getIdTokenRef,
         roomIdRef,
         logModeRef,
         channelsFilterOptionsRef,
@@ -185,16 +184,22 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
             width={700}
             closable={false}
             maskClosable={!isDownloading}
-            title='ログのダウンロード'
+            title="ログのダウンロード"
             okButtonProps={{ style: { display: 'none' } }}
-            cancelText='閉じる'
+            cancelText="閉じる"
             cancelButtonProps={{ disabled: isDownloading }}
             onCancel={() => onClose()}
         >
             <div className={classNames(flex, flexColumn)}>
                 <p>
                     <div>ログ生成モード</div>
-                    <Radio.Group value={logMode} onChange={e => setLogMode(e.target.value)}>
+                    <Radio.Group
+                        value={logMode}
+                        onChange={e =>
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                            setLogMode(e.target.value)
+                        }
+                    >
                         <Radio value={rich}>リッチ</Radio>
                         <Radio value={simple}>シンプル</Radio>
                     </Radio.Group>
@@ -238,7 +243,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                 )}
                 <Button
                     style={{ alignSelf: 'start', marginTop: 8 }}
-                    type='primary'
+                    type="primary"
                     disabled={isDownloading}
                     onClick={() => setIsDownloading(true)}
                 >

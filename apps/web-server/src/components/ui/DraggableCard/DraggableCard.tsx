@@ -62,7 +62,7 @@ export const DraggableCard: React.FC<Props> = (props: Props) => {
         if (props.highlightKey == null) {
             return;
         }
-        api.start({
+        void api.start({
             to: [
                 {
                     headerBackgroundColor: headerBackgroundActiveColor,

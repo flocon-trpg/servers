@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { FArray } from './FArray';
 import { FBoolean } from './FBoolean';
 import { FFunction } from './FFunction';
