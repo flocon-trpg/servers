@@ -449,6 +449,7 @@ export const EnvsMonitorContent: React.FC<EnvsMonitorContentProps> = ({ envsMoni
             style={style}
             title={
                 <HelpMessageTooltip
+                    overlayWidth={400}
                     title={
                         'この Web サーバーに適用されている環境変数の一覧です。この Web サーバーの運用者向けの UI であり、運用者以外が利用する機会は少ないと思われます。API サーバーの環境変数は Web サーバーから直接取得することはできないためこの一覧には含まれません。'
                     }
