@@ -85,7 +85,6 @@ const App = ({ children }: PropsWithChildren) => {
     }
     return (
         <AllContextProvider
-            clientId={clientId}
             urqlClient={urqlClient}
             reactQueryClient={reactQueryClient}
             roomClient={null}
