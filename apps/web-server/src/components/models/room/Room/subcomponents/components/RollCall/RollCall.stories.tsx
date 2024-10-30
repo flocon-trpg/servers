@@ -4,7 +4,7 @@ import React from 'react';
 import { RollCall } from './RollCall';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
-import { mockUser } from '@/mocks';
+import { createMockUrqlClient, mockUser } from '@/mocks';
 
 const currentDateTime = 1_000_000_000_000;
 
@@ -181,8 +181,13 @@ export const Default: React.FC<{ roomState: RoomState }> = ({ roomState }) => {
             custom: roomState,
         },
     });
+    const mockUrqlClient = React.useRef(createMockUrqlClient());
     return (
-        <StorybookProvider compact roomClientContextValue={roomClientContextValue}>
+        <StorybookProvider
+            compact
+            roomClientContextValue={roomClientContextValue}
+            urqlClient={mockUrqlClient.current}
+        >
             <RollCall
                 rollCalls={roomState.rollCalls ?? {}}
                 mockDate={() => new Date(currentDateTime)}
