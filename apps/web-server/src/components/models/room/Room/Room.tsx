@@ -34,7 +34,7 @@ import { SoundPlayerPanelContent } from './subcomponents/components/SoundPlayerP
 import { StringPieceEditorModal } from './subcomponents/components/StringPieceEditorModal/StringPieceEditorModal';
 import { usePlayBgm } from './subcomponents/hooks/usePlayBgm';
 import { usePlaySoundEffect } from './subcomponents/hooks/usePlaySoundEffect';
-import { usePushNotifications } from './subcomponents/hooks/usePushNotifications';
+import { usePushNotificationsAndAutoOpenPanel } from './subcomponents/hooks/usePushNotifications';
 import { useRoomId } from './subcomponents/hooks/useRoomId';
 import { panelHighlightKeysAtom } from '@/atoms/panelHighlightKeysAtom/panelHighlightKeysAtom';
 import {
@@ -886,7 +886,7 @@ export const Room: React.FC<Props> = ({ debug }) => {
 
     usePlayBgm();
     usePlaySoundEffect();
-    usePushNotifications();
+    usePushNotificationsAndAutoOpenPanel();
 
     if (myUserUid == null) {
         return (

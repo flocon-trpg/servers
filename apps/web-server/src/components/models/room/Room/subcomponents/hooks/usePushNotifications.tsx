@@ -145,7 +145,7 @@ function useMessageNotifications(): void {
     }, [messageDiff, messageFilterRef, notification, participantsMapRef, publicChannelNameRef]);
 }
 
-function useRollCallNotifications(): void {
+function useRollCallNotificationsAndAutoOpenRollCallPanel(): void {
     const roomId = useRoomId();
     const roomConfigAtom = roomConfigAtomFamily(roomId);
     const reduceRoomConfig = useSetAtom(roomConfigAtom);
@@ -177,6 +177,12 @@ function useRollCallNotifications(): void {
         if (openRollCallRef.current.participants?.[myUserUid]?.answeredAt != null) {
             return;
         }
+        // 点呼が始まった瞬間に自動的に点呼ウィンドウを開いてほしいという要望があったので開くようにしている
+        reduceRoomConfig({
+            type: bringPanelToFront,
+            panelType: { type: rollCallPanel },
+            action: { unminimizePanel: true },
+        });
         const key = keyNames('RollCallNotification', simpleId());
         notification.open({
             key,
@@ -186,6 +192,7 @@ function useRollCallNotifications(): void {
             message: (
                 <div className={classNames(flex, flexColumn)} style={{ gap: 8 }}>
                     <div>{'点呼が行われています。'}</div>
+                    {/* CONSIDER: 点呼が始まったときに点呼ウィンドウが自動的に開くようになっているため、点呼ウィンドウを開くボタンは必要ないと思われる。通知自体も必要ないかもしれない。 */}
                     <Button
                         onClick={() => {
                             reduceRoomConfig({
@@ -216,7 +223,7 @@ function useRollCallNotifications(): void {
     ]);
 }
 
-export function usePushNotifications(): void {
+export function usePushNotificationsAndAutoOpenPanel(): void {
     useMessageNotifications();
-    useRollCallNotifications();
+    useRollCallNotificationsAndAutoOpenRollCallPanel();
 }
