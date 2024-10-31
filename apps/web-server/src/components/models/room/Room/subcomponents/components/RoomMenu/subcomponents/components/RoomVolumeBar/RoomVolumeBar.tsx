@@ -2,57 +2,65 @@ import classNames from 'classnames';
 import { produce } from 'immer';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
-import { manual, roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { useRoomId } from '../../../../../hooks/useRoomId';
+import { manual, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { defaultChannelVolume } from '@/atoms/roomConfigAtom/types/roomConfig/resources';
 import { VolumeBar } from '@/components/ui/VolumeBar/VolumeBar';
 import { flex, flexColumn, flexRow, itemsCenter } from '@/styles/className';
 
-const masterVolumeAtom = atom(
-    get => get(roomConfigAtom)?.masterVolume,
-    (get, set, newValue: number) => {
-        set(roomConfigAtom, {
-            type: manual,
-            action: roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                roomConfig.masterVolume = newValue;
-            },
-        });
-    },
-);
-const channelVolumesAtom = atom(
-    get => get(roomConfigAtom)?.channelVolumes,
-    (get, set, action: { channelKey: string; newVolume: number }) => {
-        set(roomConfigAtom, {
-            type: manual,
-            action: roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                roomConfig.channelVolumes[action.channelKey] = action.newVolume;
-            },
-        });
-    },
-);
-const seVolumeAtom = atom(
-    get => get(roomConfigAtom)?.seVolume,
-    (get, set, newValue: number) => {
-        set(roomConfigAtom, {
-            type: manual,
-            action: roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                roomConfig.seVolume = newValue;
-            },
-        });
-    },
-);
+const createMasterVolumeAtom = (roomId: string) =>
+    atom(
+        async get => (await get(roomConfigAtomFamily(roomId))).masterVolume,
+        (get, set, newValue: number) => {
+            set(roomConfigAtomFamily(roomId), {
+                type: manual,
+                action: roomConfig => {
+                    if (roomConfig == null) {
+                        return;
+                    }
+                    roomConfig.masterVolume = newValue;
+                },
+            });
+        },
+    );
+const createChannelVolumesAtom = (roomId: string) =>
+    atom(
+        async get => (await get(roomConfigAtomFamily(roomId))).channelVolumes,
+        (get, set, action: { channelKey: string; newVolume: number }) => {
+            set(roomConfigAtomFamily(roomId), {
+                type: manual,
+                action: roomConfig => {
+                    if (roomConfig == null) {
+                        return;
+                    }
+                    roomConfig.channelVolumes[action.channelKey] = action.newVolume;
+                },
+            });
+        },
+    );
+const createSeVolumeAtom = (roomId: string) =>
+    atom(
+        async get => (await get(roomConfigAtomFamily(roomId))).seVolume,
+        (get, set, newValue: number) => {
+            set(roomConfigAtomFamily(roomId), {
+                type: manual,
+                action: roomConfig => {
+                    if (roomConfig == null) {
+                        return;
+                    }
+                    roomConfig.seVolume = newValue;
+                },
+            });
+        },
+    );
 
 export const RoomVolumeBar: React.FC = () => {
+    const roomId = useRoomId();
+    const masterVolumeAtom = React.useMemo(() => createMasterVolumeAtom(roomId), [roomId]);
     const [masterVolume, setMasterVolume] = useAtom(masterVolumeAtom);
+    const channelVolumesAtom = React.useMemo(() => createChannelVolumesAtom(roomId), [roomId]);
     const [channelVolumes, setChannelVolume] = useAtom(channelVolumesAtom);
+    const seVolumeAtom = React.useMemo(() => createSeVolumeAtom(roomId), [roomId]);
     const [seVolume, setSeVolume] = useAtom(seVolumeAtom);
 
     if (masterVolume == null || channelVolumes == null || seVolume == null) {

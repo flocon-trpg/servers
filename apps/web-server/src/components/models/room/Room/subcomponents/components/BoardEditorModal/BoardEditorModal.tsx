@@ -4,8 +4,9 @@ import { atom, useAtom, useSetAtom } from 'jotai';
 import React from 'react';
 import { useMemoOne } from 'use-memo-one';
 import { useBoards } from '../../hooks/useBoards';
+import { useRoomId } from '../../hooks/useRoomId';
 import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
-import { manual, roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { manual, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { FileView } from '@/components/models/file/FileView/FileView';
 import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
 import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
@@ -68,6 +69,8 @@ export const BoardEditorModal: React.FC = () => {
     const myUserUid = useMyUserUid();
     const setRoomState = useSetRoomStateWithImmer();
     const [modalValue, setModalValue] = useAtom(boardEditorModalAtom);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
     const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const boards = useBoards();
     const createMode: CreateModeParams<BoardState | undefined> | undefined = useMemoOne(() => {

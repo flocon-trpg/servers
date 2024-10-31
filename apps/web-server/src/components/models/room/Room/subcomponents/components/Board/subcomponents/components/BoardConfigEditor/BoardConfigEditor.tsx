@@ -1,7 +1,8 @@
 import { Checkbox, InputNumber } from 'antd';
 import { useSetAtom } from 'jotai';
 import React from 'react';
-import { editBoard, roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { useRoomId } from '../../../../../hooks/useRoomId';
+import { editBoard, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { BoardConfig } from '@/atoms/roomConfigAtom/types/boardConfig';
 import { ColorPickerButton } from '@/components/ui/ColorPickerButton/ColorPickerButton';
 import {
@@ -24,6 +25,8 @@ export const BoardConfigEditor: React.FC<{
     boardType: BoardType;
     boardConfig: BoardConfig;
 }> = ({ boardId, boardType, boardConfig }) => {
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
     const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
     const createLabelVisibilityCheckbox = (

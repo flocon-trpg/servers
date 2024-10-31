@@ -53,7 +53,7 @@ import {
     pieceValuePanel,
     resizePanel,
     rollCallPanel,
-    roomConfigAtom,
+    roomConfigAtomFamily,
 } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { BoardEditorPanelConfig } from '@/atoms/roomConfigAtom/types/boardEditorPanelConfig';
 import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
@@ -93,7 +93,9 @@ namespace ChildrenContainerStyle {
 }
 
 const ActiveBoardPanel: React.FC = React.memo(function ActiveBoardPanel() {
-    const config = useAtomSelector(roomConfigAtom, state => state?.panels.activeBoardPanel);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const config = useAtomSelector(roomConfigAtom, state => state.panels.activeBoardPanel);
     const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
@@ -132,7 +134,7 @@ const ActiveBoardPanel: React.FC = React.memo(function ActiveBoardPanel() {
         });
     }, [reduceRoomConfig]);
 
-    if (config == null || config.isMinimized) {
+    if (config.isMinimized) {
         return null;
     }
 
@@ -163,6 +165,8 @@ const ActiveBoardPanel: React.FC = React.memo(function ActiveBoardPanel() {
 
 const BoardEditorPanel: React.FC<ConfigAndKeyProps<BoardEditorPanelConfig>> = React.memo(
     function BoardEditorPanel({ config, keyName }) {
+        const roomId = useRoomId();
+        const roomConfigAtom = roomConfigAtomFamily(roomId);
         const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
         const onDragStop = React.useCallback(
@@ -234,11 +238,9 @@ const BoardEditorPanel: React.FC<ConfigAndKeyProps<BoardEditorPanelConfig>> = Re
 );
 
 const BoardEditorPanels: React.FC = () => {
-    const config = useAtomSelector(roomConfigAtom, state => state?.panels.boardEditorPanels);
-
-    if (config == null) {
-        return null;
-    }
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const config = useAtomSelector(roomConfigAtom, state => state.panels.boardEditorPanels);
 
     return (
         <>
@@ -252,6 +254,7 @@ const BoardEditorPanels: React.FC = () => {
 const ChatPalettePanel: React.FC<ConfigAndKeyProps<ChatPalettePanelConfig>> = React.memo(
     function ChatPalettePanel({ keyName, config }) {
         const roomId = useRoomId();
+        const roomConfigAtom = roomConfigAtomFamily(roomId);
         const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
         const onDragStop = React.useCallback(
@@ -316,11 +319,9 @@ const ChatPalettePanel: React.FC<ConfigAndKeyProps<ChatPalettePanelConfig>> = Re
 );
 
 const ChatPalettePanels: React.FC = () => {
-    const config = useAtomSelector(roomConfigAtom, state => state?.panels.chatPalettePanels);
-
-    if (config == null) {
-        return null;
-    }
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const config = useAtomSelector(roomConfigAtom, state => state.panels.chatPalettePanels);
 
     return (
         <>
@@ -332,7 +333,9 @@ const ChatPalettePanels: React.FC = () => {
 };
 
 const CharacterPanel: React.FC = React.memo(function CharacterPanel() {
-    const config = useAtomSelector(roomConfigAtom, state => state?.panels.characterPanel);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const config = useAtomSelector(roomConfigAtom, state => state.panels.characterPanel);
     const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
@@ -371,7 +374,7 @@ const CharacterPanel: React.FC = React.memo(function CharacterPanel() {
         });
     }, [reduceRoomConfig]);
 
-    if (config == null || config.isMinimized) {
+    if (config.isMinimized) {
         return null;
     }
 
@@ -395,7 +398,9 @@ const CharacterPanel: React.FC = React.memo(function CharacterPanel() {
 });
 
 const GameEffectPanel: React.FC = React.memo(function GameEffectPanel() {
-    const config = useAtomSelector(roomConfigAtom, state => state?.panels.gameEffectPanel);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const config = useAtomSelector(roomConfigAtom, state => state.panels.gameEffectPanel);
     const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
@@ -434,7 +439,7 @@ const GameEffectPanel: React.FC = React.memo(function GameEffectPanel() {
         });
     }, [reduceRoomConfig]);
 
-    if (config == null || config.isMinimized) {
+    if (config.isMinimized) {
         return null;
     }
 
@@ -461,6 +466,8 @@ const MemoPanel: React.FC<ConfigAndKeyProps<MemoPanelConfig>> = React.memo(funct
     config,
     keyName,
 }) {
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
     const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
@@ -545,11 +552,9 @@ const MemoPanel: React.FC<ConfigAndKeyProps<MemoPanelConfig>> = React.memo(funct
 });
 
 const MemoPanels: React.FC = () => {
-    const config = useAtomSelector(roomConfigAtom, state => state?.panels.memoPanels);
-
-    if (config == null) {
-        return null;
-    }
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const config = useAtomSelector(roomConfigAtom, state => state.panels.memoPanels);
 
     return (
         <>
@@ -561,7 +566,9 @@ const MemoPanels: React.FC = () => {
 };
 
 const ParticipantPanel: React.FC = () => {
-    const config = useAtomSelector(roomConfigAtom, state => state?.panels.participantPanel);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const config = useAtomSelector(roomConfigAtom, state => state.panels.participantPanel);
     const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
@@ -600,7 +607,7 @@ const ParticipantPanel: React.FC = () => {
         });
     }, [reduceRoomConfig]);
 
-    if (config == null || config.isMinimized) {
+    if (config.isMinimized) {
         return null;
     }
 
@@ -624,7 +631,9 @@ const ParticipantPanel: React.FC = () => {
 };
 
 const PieceValuePanel: React.FC = () => {
-    const config = useAtomSelector(roomConfigAtom, state => state?.panels.pieceValuePanel);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const config = useAtomSelector(roomConfigAtom, state => state.panels.pieceValuePanel);
     const activeBoardId = useRoomStateValueSelector(state => state.activeBoardId);
     const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
@@ -664,7 +673,7 @@ const PieceValuePanel: React.FC = () => {
         });
     }, [reduceRoomConfig]);
 
-    if (config == null || config.isMinimized) {
+    if (config.isMinimized) {
         return null;
     }
 
@@ -692,7 +701,9 @@ const PieceValuePanel: React.FC = () => {
 };
 
 const RollCallPanel: React.FC = () => {
-    const config = useAtomSelector(roomConfigAtom, state => state?.panels.rollCallPanel);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const config = useAtomSelector(roomConfigAtom, state => state.panels.rollCallPanel);
     const highlightKey = useAtomValue(panelHighlightKeysAtom);
     const rollCalls = useRoomStateValueSelector(state => state.rollCalls);
     const reduceRoomConfig = useSetAtom(roomConfigAtom);
@@ -733,7 +744,7 @@ const RollCallPanel: React.FC = () => {
         });
     }, [reduceRoomConfig]);
 
-    if (config == null || config.isMinimized) {
+    if (config.isMinimized) {
         return null;
     }
 
@@ -760,6 +771,8 @@ const RollCallPanel: React.FC = () => {
 const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.memo(
     function RoomMessagePanel({ config, keyName }) {
         const { modal } = App.useApp();
+        const roomId = useRoomId();
+        const roomConfigAtom = roomConfigAtomFamily(roomId);
         const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
         const onDragStop = React.useCallback(
@@ -834,11 +847,9 @@ const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.
 );
 
 const RoomMessagePanels: React.FC = () => {
-    const config = useAtomSelector(roomConfigAtom, state => state?.panels.messagePanels);
-
-    if (config == null) {
-        return null;
-    }
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const config = useAtomSelector(roomConfigAtom, state => state.panels.messagePanels);
 
     return (
         <>
@@ -862,10 +873,11 @@ export const Room: React.FC<Props> = ({ debug }) => {
     const myUserUid = useMyUserUid();
     const innerWidth = useAtomValue(debouncedWindowInnerWidthAtom);
     const innerHeight = useAtomValue(debouncedWindowInnerHeightAtom);
-    const roomIdOfRoomConfig = useAtomSelector(roomConfigAtom, state => state?.roomId);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
     const showBackgroundBoardViewer = useAtomSelector(
         roomConfigAtom,
-        state => state?.showBackgroundBoardViewer,
+        state => state.showBackgroundBoardViewer,
     );
     const activeBoardBackgroundConfig = useAtomSelector(
         roomConfigAtom,
@@ -875,16 +887,6 @@ export const Room: React.FC<Props> = ({ debug }) => {
     usePlayBgm();
     usePlaySoundEffect();
     usePushNotifications();
-
-    const roomId = useRoomId();
-
-    if (
-        roomIdOfRoomConfig == null ||
-        roomIdOfRoomConfig !== roomId ||
-        activeBoardBackgroundConfig == null
-    ) {
-        return <LoadingResult title="個人設定のデータをブラウザから読み込んでいます…" />;
-    }
 
     if (myUserUid == null) {
         return (
@@ -905,7 +907,7 @@ export const Room: React.FC<Props> = ({ debug }) => {
             <AntdLayout.Content>
                 <RoomMenu />
                 <div className={classNames(relative)}>
-                    {showBackgroundBoardViewer == true && (
+                    {showBackgroundBoardViewer && (
                         <Board
                             canvasWidth={debug?.window?.innerWidth ?? innerWidth}
                             canvasHeight={

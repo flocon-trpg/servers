@@ -29,7 +29,7 @@ import { RoomVolumeBar } from './subcomponents/components/RoomVolumeBar/RoomVolu
 import {
     bringPanelToFront,
     manual,
-    roomConfigAtom,
+    roomConfigAtomFamily,
     unminimize,
 } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { defaultMemoPanelConfig } from '@/atoms/roomConfigAtom/types/memoPanelConfig';
@@ -51,35 +51,37 @@ import { useSingleExecuteAsync0, useSingleExecuteAsync1 } from '@/hooks/useSingl
 import { Styles } from '@/styles';
 import { flex, flexRow, itemsCenter } from '@/styles/className';
 
-const panelOpacityAtom = atom(
-    get => get(roomConfigAtom)?.panelOpacity,
-    (get, set, newValue: number) => {
-        set(roomConfigAtom, {
-            type: manual,
-            action: roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                roomConfig.panelOpacity = newValue;
-            },
-        });
-    },
-);
+const createPanelOpacityAtom = (roomId: string) =>
+    atom(
+        async get => (await get(roomConfigAtomFamily(roomId))).panelOpacity,
+        (get, set, newValue: number) => {
+            set(roomConfigAtomFamily(roomId), {
+                type: manual,
+                action: roomConfig => {
+                    if (roomConfig == null) {
+                        return;
+                    }
+                    roomConfig.panelOpacity = newValue;
+                },
+            });
+        },
+    );
 
-const showBackgroundBoardViewerAtom = atom(
-    get => get(roomConfigAtom)?.showBackgroundBoardViewer,
-    (get, set, newValue: boolean) => {
-        set(roomConfigAtom, {
-            type: manual,
-            action: roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                roomConfig.showBackgroundBoardViewer = newValue;
-            },
-        });
-    },
-);
+const createShowBackgroundBoardViewerAtom = (roomId: string) =>
+    atom(
+        async get => (await get(roomConfigAtomFamily(roomId))).showBackgroundBoardViewer,
+        (get, set, newValue: boolean) => {
+            set(roomConfigAtomFamily(roomId), {
+                type: manual,
+                action: roomConfig => {
+                    if (roomConfig == null) {
+                        return;
+                    }
+                    roomConfig.showBackgroundBoardViewer = newValue;
+                },
+            });
+        },
+    );
 
 const panelsOpacityModalVisibilityAtom = atom(false);
 
@@ -369,6 +371,8 @@ const PanelsOpacityModal: React.FC<{
     visible: boolean;
     onClose: () => void;
 }> = ({ visible, onClose }) => {
+    const roomId = useRoomId();
+    const panelOpacityAtom = React.useMemo(() => createPanelOpacityAtom(roomId), [roomId]);
     const [panelOpacity, setPanelOpacity] = useAtom(panelOpacityAtom);
     const opacityStyle: React.CSSProperties = React.useMemo(
         () => ({
@@ -462,13 +466,15 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
 };
 
 const usePanelsMenuItem = () => {
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
     const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const activeBoardPanel = useAtomSelector(
         roomConfigAtom,
         state => state?.panels.activeBoardPanel,
     );
-    const boardPanels = useAtomSelector(roomConfigAtom, state => state?.panels.boardEditorPanels);
-    const characterPanel = useAtomSelector(roomConfigAtom, state => state?.panels.characterPanel);
+    const boardPanels = useAtomSelector(roomConfigAtom, state => state.panels.boardEditorPanels);
+    const characterPanel = useAtomSelector(roomConfigAtom, state => state.panels.characterPanel);
     const chatPalettePanels = useAtomSelector(
         roomConfigAtom,
         state => state?.panels.chatPalettePanels,
@@ -478,16 +484,13 @@ const usePanelsMenuItem = () => {
         roomConfigAtom,
         state => state?.panels.participantPanel,
     );
-    const memoPanels = useAtomSelector(roomConfigAtom, state => state?.panels.memoPanels);
-    const messagePanels = useAtomSelector(roomConfigAtom, state => state?.panels.messagePanels);
-    const pieceValuePanel = useAtomSelector(roomConfigAtom, state => state?.panels.pieceValuePanel);
-    const rollCallPanel = useAtomSelector(roomConfigAtom, state => state?.panels.rollCallPanel);
+    const memoPanels = useAtomSelector(roomConfigAtom, state => state.panels.memoPanels);
+    const messagePanels = useAtomSelector(roomConfigAtom, state => state.panels.messagePanels);
+    const pieceValuePanel = useAtomSelector(roomConfigAtom, state => state.panels.pieceValuePanel);
+    const rollCallPanel = useAtomSelector(roomConfigAtom, state => state.panels.rollCallPanel);
     const setIsPanelsOpacityModalVisible = useSetAtom(panelsOpacityModalVisibilityAtom);
 
     const activeBoardPanelMenu = React.useMemo(() => {
-        if (activeBoardPanel == null) {
-            return null;
-        }
         return {
             key: 'activeBoardPanelMenu',
             label: (
@@ -514,9 +517,6 @@ const usePanelsMenuItem = () => {
         };
     }, [activeBoardPanel, reduceRoomConfig]);
     const boardPanelsMenu = React.useMemo(() => {
-        if (boardPanels == null) {
-            return null;
-        }
         return {
             key: 'boardPanelsMenu',
             label: 'ボードエディター',
@@ -592,9 +592,6 @@ const usePanelsMenuItem = () => {
     }, [boardPanels, reduceRoomConfig]);
 
     const characterPanelMenu = React.useMemo(() => {
-        if (characterPanel == null) {
-            return null;
-        }
         return {
             key: 'characterPanelMenu',
             label: (
@@ -621,9 +618,6 @@ const usePanelsMenuItem = () => {
         };
     }, [characterPanel, reduceRoomConfig]);
     const chatPalettePanelsMenu = React.useMemo(() => {
-        if (chatPalettePanels == null) {
-            return null;
-        }
         return {
             key: 'chatPalettePanelsMenu',
             label: 'チャットパレット',
@@ -698,9 +692,6 @@ const usePanelsMenuItem = () => {
         };
     }, [chatPalettePanels, reduceRoomConfig]);
     const gameEffectPanelMenu = React.useMemo(() => {
-        if (gameEffectPanel == null) {
-            return null;
-        }
         return {
             key: 'gameEffectPanelMenu',
             label: (
@@ -727,9 +718,6 @@ const usePanelsMenuItem = () => {
         };
     }, [gameEffectPanel, reduceRoomConfig]);
     const memoPanelsMenu = React.useMemo(() => {
-        if (memoPanels == null) {
-            return null;
-        }
         return {
             key: 'memoPanelsMenu',
             label: '共有メモ（部屋）',
@@ -795,9 +783,6 @@ const usePanelsMenuItem = () => {
         };
     }, [memoPanels, reduceRoomConfig]);
     const messagePanelsMenu = React.useMemo(() => {
-        if (messagePanels == null) {
-            return null;
-        }
         return {
             key: 'messagePanelsMenu',
             label: 'メッセージ',
@@ -864,9 +849,6 @@ const usePanelsMenuItem = () => {
         };
     }, [messagePanels, reduceRoomConfig]);
     const participantPanelMenu = React.useMemo(() => {
-        if (participantPanel == null) {
-            return null;
-        }
         return {
             key: 'participantPanelMenu',
             label: (
@@ -893,9 +875,6 @@ const usePanelsMenuItem = () => {
         };
     }, [participantPanel, reduceRoomConfig]);
     const pieceValuePanelMenu = React.useMemo(() => {
-        if (pieceValuePanel == null) {
-            return null;
-        }
         return {
             key: 'pieceValuePanelMenu',
             label: (
@@ -922,9 +901,6 @@ const usePanelsMenuItem = () => {
         };
     }, [pieceValuePanel, reduceRoomConfig]);
     const rollCallPanelMenu = React.useMemo(() => {
-        if (rollCallPanel == null) {
-            return null;
-        }
         return {
             key: 'rollCallPanelMenu',
             label: (
@@ -1000,6 +976,10 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
     const roomId = useRoomId();
     const createdBy = useRoomStateValueSelector(state => state.createdBy);
 
+    const showBackgroundBoardViewerAtom = React.useMemo(
+        () => createShowBackgroundBoardViewerAtom(roomId),
+        [roomId],
+    );
     const [showBackgroundBoardViewer, setShowBackgroundBoardViewerAtom] = useAtom(
         showBackgroundBoardViewerAtom,
     );

@@ -32,6 +32,7 @@ import { IconView } from '../../../../../file/IconView/IconView';
 import { useCharacterTagNames } from '../../hooks/useCharacterTagNames';
 import { useCharacters } from '../../hooks/useCharacters';
 import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hooks/useParamNames';
+import { useRoomId } from '../../hooks/useRoomId';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { BooleanParameterInput } from '../BooleanParameterInput/BooleanParameterInput';
 import { characterEditorModalAtom } from '../CharacterEditorModal/CharacterEditorModal';
@@ -42,7 +43,7 @@ import { NumberParameterInput } from '../NumberParameterInput/NumberParameterInp
 import { OverriddenParameterNameEditor } from '../OverriddenParameterNameEditor/OverriddenParameterNameEditor';
 import { StringParameterInput } from '../StringParameterInput/StringParameterInput';
 import { CharacterTabName } from './subcomponents/components/CharacterTabName/CharacterTabName';
-import { manual, roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { manual, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { CharacterTabConfig } from '@/atoms/roomConfigAtom/types/characterTabConfig';
 import { CharacterTabConfigUtils } from '@/atoms/roomConfigAtom/types/characterTabConfig/utils';
 import { RowKeys } from '@/atoms/roomConfigAtom/types/charactersPanelConfig';
@@ -280,6 +281,8 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
     // キャラクターウィンドウは現時点では最大1個までしか存在しないため、静的な文字列で構わない
     const type = 'TableHeaderCell';
 
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
     const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const keySorter = React.useMemo(() => new KeySorter(RowKeys.all), []);
 
@@ -391,6 +394,8 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
     const numParamNames = useNumParamNames();
     const strParamNames = useStrParamNames();
 
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
     const rowKeysOrderSource = useAtomSelector(
         roomConfigAtom,
         roomConfig => roomConfig?.panels.characterPanel.rowKeysOrder,
@@ -684,6 +689,8 @@ const CharacterListPanelWithPanelId: React.FC<{
     height: number;
 }> = ({ panelId, height }) => {
     const { modal } = App.useApp();
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
     const tabs = useAtomSelector(
         roomConfigAtom,
         roomConfig => roomConfig?.panels.characterPanel.tabs,

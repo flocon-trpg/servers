@@ -50,7 +50,7 @@ import { isDeleted, toText } from '../../utils/message';
 import { ChatInput } from '../ChatInput';
 import { MessageTabName } from './subcomponents/components/MessageTabName/MessageTabName';
 import { RoomMessage as RoomMessageNameSpace } from './subcomponents/components/RoomMessage/RoomMessage';
-import { manual, roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { manual, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { MessageFilter } from '@/atoms/roomConfigAtom/types/messageFilter';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { MessageTabConfig } from '@/atoms/roomConfigAtom/types/messageTabConfig';
@@ -837,9 +837,11 @@ type Props = {
 export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: Props) => {
     const { modal } = App.useApp();
 
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
     const tabsAtom = React.useMemo(() => {
-        return atom(get => get(roomConfigAtom)?.panels.messagePanels?.[panelId]?.tabs);
-    }, [panelId]);
+        return atom(async get => (await get(roomConfigAtom)).panels.messagePanels[panelId]?.tabs);
+    }, [panelId, roomConfigAtom]);
     const tabs = useAtomValue(tabsAtom);
     const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const setUserConfig = useImmerSetAtom(userConfigAtom);
@@ -854,7 +856,6 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
 
     const [isChannelNamesEditorVisible, setIsChannelNamesEditorVisible] = React.useState(false);
 
-    const roomId = useRoomId();
     const roomMessagesFontSizeDelta = useAtomValue(roomMessageFontSizeDeltaAtom);
     const chatInputDirectionCore = useAtomValue(chatInputDirectionAtom) ?? auto;
 

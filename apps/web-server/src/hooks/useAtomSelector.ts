@@ -10,14 +10,14 @@ type Options = {
 };
 
 export const useAtomSelector = <T1, T2>(
-    anAtom: Atom<T1>,
+    anAtom: Atom<T1 | Promise<T1>>,
     mapping: (value: T1) => T2,
     additionalDeps?: React.DependencyList | null,
     options?: Options,
 ) => {
     const mappingRef = useLatest(mapping);
     const mappedAtom = React.useMemo(() => {
-        return atom(get => mappingRef.current(get(anAtom)));
+        return atom(async get => mappingRef.current(await get(anAtom)));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [anAtom, mappingRef, ...(additionalDeps ?? [])]);
     const result = useAtomValue(

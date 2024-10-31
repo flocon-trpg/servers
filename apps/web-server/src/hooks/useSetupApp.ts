@@ -15,8 +15,6 @@ import { useAsync, useDebounce, useLatest, usePreviousDistinct } from 'react-use
 import { Observable, from, switchAll } from 'rxjs';
 import urljoin from 'url-join';
 import useConstant from 'use-constant';
-import { roomConfigAtom } from '../atoms/roomConfigAtom/roomConfigAtom';
-import { RoomConfig } from '../atoms/roomConfigAtom/types/roomConfig';
 import { storybookAtom } from '../atoms/storybookAtom/storybookAtom';
 import { UserConfig } from '../atoms/userConfigAtom/types';
 import { userConfigAtom } from '../atoms/userConfigAtom/userConfigAtom';
@@ -29,7 +27,6 @@ import {
     loading,
     notSignIn,
 } from '@/utils/firebase/firebaseUserState';
-import { setRoomConfig } from '@/utils/localStorage/roomConfig';
 import { getUserConfig, setUserConfig } from '@/utils/localStorage/userConfig';
 
 const mockType = 'mock';
@@ -222,32 +219,6 @@ const useAutoSaveUserConfig = () => {
 };
 
 // アプリ内で1回のみ呼ばれることを想定。
-const useAutoSaveRoomConfig = () => {
-    const throttleTimespan = 500;
-    const roomConfig = useAtomValue(roomConfigAtom);
-
-    // throttleでは非常に重くなるため、debounceを使っている
-    const [debouncedRoomConfig, setDebouncedRoomConfig] = React.useState<RoomConfig | null>(null);
-    useDebounce(
-        () => {
-            setDebouncedRoomConfig(roomConfig);
-        },
-        throttleTimespan,
-        [roomConfig],
-    );
-
-    useAsync(async () => {
-        if (debouncedRoomConfig == null) {
-            return;
-        }
-
-        // localForageから値を読み込んだ直後は常に値の書き込みが1回発生する仕様となっている。無駄な処理ではあるが、パフォーマンスの問題はほぼ生じないと判断している。
-        // CONSIDER: configをユーザーが更新した直後にすぐブラウザを閉じると、閉じる直前のconfigが保存されないケースがある。余裕があれば直したい（閉じるときに強制保存orダイアログを出すなど）。
-        await setRoomConfig(debouncedRoomConfig);
-    }, [debouncedRoomConfig]);
-};
-
-// アプリ内で1回のみ呼ばれることを想定。
 export const useSetupApp = () => {
     const storybook = useAtomValue(storybookAtom);
     const config = useWebConfig();
@@ -267,7 +238,6 @@ export const useSetupApp = () => {
     const getIdTokenResultRef = useLatest(getIdTokenResult);
 
     useUserConfig(myUserUid ?? null);
-    useAutoSaveRoomConfig();
     useAutoSaveUserConfig();
 
     const [urqlClient, setUrqlClient] = React.useState<ReturnType<typeof createUrqlClient>>();

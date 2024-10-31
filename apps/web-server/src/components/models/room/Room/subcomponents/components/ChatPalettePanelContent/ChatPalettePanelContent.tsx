@@ -11,7 +11,7 @@ import { useMyCharacters } from '../../hooks/useMyCharacters';
 import { CharacterVarInput } from '../CharacterVarInput/CharacterVarInput';
 import { GameSelector } from '../GameSelector/GameSelector';
 import { SelectedChannelType, SubmitMessage, publicChannel } from '../SubmitMessage/SubmitMessage';
-import { manual, roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { manual, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
@@ -125,6 +125,7 @@ export const ChatPalettePanelContent: React.FC<ChatPalettePanelContentProps> = (
 
     const setPublicMessageInput = useSetAtom(roomPublicMessageInputAtom);
     const setPrivateMessageInput = useSetAtom(roomPrivateMessageInputAtom);
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
     const config = useAtomSelector(
         roomConfigAtom,
         state => state?.panels.chatPalettePanels?.[panelId],

@@ -2,13 +2,16 @@ import { Auth } from '@firebase/auth';
 import { FirebaseStorage } from '@firebase/storage';
 import { State as S, UpOperation as U, apply, roomTemplate, toOtError } from '@flocon-trpg/core';
 import { createTestRoomClient } from '@flocon-trpg/sdk';
-import { Result } from '@kizahasi/result';
 import { produce } from 'immer';
 import { useSetAtom } from 'jotai';
 import React from 'react';
 import { CombinedError } from 'urql';
 import { useMemoOne } from 'use-memo-one';
-import { manual, roomConfigAtom } from '../atoms/roomConfigAtom/roomConfigAtom';
+import {
+    manual,
+    roomConfigAtomFamily,
+    setMockRoomConfig,
+} from '../atoms/roomConfigAtom/roomConfigAtom';
 import { defaultRoomConfig } from '../atoms/roomConfigAtom/types/roomConfig';
 import { storybookAtom } from '../atoms/storybookAtom/storybookAtom';
 import { WebConfig } from '../configType';
@@ -158,6 +161,13 @@ export const useSetupStorybook = ({
         roomMessagesConfigProp?.doNotQuery,
         testRoomClient.source.roomMessageClient,
     ]);
+    React.useEffect(() => {
+        setMockRoomConfig(defaultRoomConfig(roomId));
+        return () => {
+            setMockRoomConfig(null);
+        };
+    }, []);
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
     const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const roomConfig = React.useMemo(() => {
         return defaultRoomConfig(roomId);

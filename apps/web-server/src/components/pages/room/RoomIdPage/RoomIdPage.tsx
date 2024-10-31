@@ -20,7 +20,6 @@ import { useDebounce, usePrevious } from 'react-use';
 import { CombinedError, useClient, useMutation } from 'urql';
 import { useMemoOne } from 'use-memo-one';
 import { hideAllOverlayActionAtom } from '@/atoms/hideAllOverlayActionAtom/hideAllOverlayActionAtom';
-import { fix, manual, roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { AntdThemeConfigProvider } from '@/components/behaviors/AntdThemeConfigProvider';
 import { Room } from '@/components/models/room/Room/Room';
 import { roomPrivateMessageInputAtom } from '@/components/models/room/Room/subcomponents/atoms/roomPrivateMessageInputAtom/roomPrivateMessageInputAtom';
@@ -39,7 +38,6 @@ import { useRoomGraphQLStatus } from '@/hooks/useRoomGraphQLStatus';
 import { useRoomState } from '@/hooks/useRoomState';
 import { firebaseUserValueAtom, getIdTokenResultAtom } from '@/hooks/useSetupApp';
 import { flex, flexColumn, itemsCenter } from '@/styles/className';
-import { getRoomConfig } from '@/utils/localStorage/roomConfig';
 
 const debouncedWindowInnerWidthAtomCore = atom(0);
 const debouncedWindowInnerHeightAtomCore = atom(0);
@@ -247,33 +245,6 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
     );
 };
 
-// localForageを用いてRoomConfigを読み込み、atomと紐付ける。
-// Roomが変わるたびに、useRoomConfigが更新される必要がある。RoomのComponentのどこか一箇所でuseRoomConfigを呼び出すだけでよい。
-const useRoomConfig = (roomId: string): boolean => {
-    const [result, setResult] = React.useState<boolean>(false);
-    const reduceRoomConfig = useSetAtom(roomConfigAtom);
-
-    React.useEffect(() => {
-        let unmounted = false;
-        const main = async () => {
-            reduceRoomConfig({ type: manual, action: () => null });
-            const roomConfig = await getRoomConfig(roomId);
-            reduceRoomConfig({ type: manual, action: () => roomConfig });
-            if (unmounted) {
-                return;
-            }
-            reduceRoomConfig({ type: fix });
-            setResult(true);
-        };
-        void main();
-        return () => {
-            unmounted = true;
-        };
-    }, [roomId, reduceRoomConfig]);
-
-    return result;
-};
-
 const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     roomId,
     children,
@@ -290,7 +261,6 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     const hideAllOverlay = useSetAtom(hideAllOverlayActionAtom);
 
     useOnResize();
-    useRoomConfig(roomId);
 
     React.useEffect(() => {
         hideAllOverlay();

@@ -18,18 +18,15 @@ import { RoomMessage } from '../components/RoomMessagesPanelContent/subcomponent
 import { useMessageFilter } from './useMessageFilter';
 import { useParticipants } from './useParticipants';
 import { usePublicChannelNames } from './usePublicChannelNames';
+import { useRoomId } from './useRoomId';
 import { useRoomMessages } from './useRoomMessages';
 import { panelHighlightKeysAtom } from '@/atoms/panelHighlightKeysAtom/panelHighlightKeysAtom';
 import {
     bringPanelToFront,
     rollCallPanel,
-    roomConfigAtom,
+    roomConfigAtomFamily,
 } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { MessageFilterUtils } from '@/atoms/roomConfigAtom/types/messageFilter/utils';
-import {
-    defaultMasterVolume,
-    defaultSeVolume,
-} from '@/atoms/roomConfigAtom/types/roomConfig/resources';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
@@ -43,13 +40,13 @@ function useMessageNotifications(): void {
     const publicChannelNameRef = useLatest(publicChannelNames);
     const participantsMap = useParticipants();
     const participantsMapRef = useLatest(participantsMap);
-    const masterVolume = useAtomSelector(roomConfigAtom, state => state?.masterVolume);
-    const seVolume = useAtomSelector(roomConfigAtom, state => state?.seVolume);
-    const volumeRef = React.useRef(
-        (masterVolume ?? defaultMasterVolume) * (seVolume ?? defaultSeVolume),
-    );
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const masterVolume = useAtomSelector(roomConfigAtom, state => state.masterVolume);
+    const seVolume = useAtomSelector(roomConfigAtom, state => state.seVolume);
+    const volumeRef = React.useRef(masterVolume * seVolume);
     React.useEffect(() => {
-        volumeRef.current = (masterVolume ?? defaultMasterVolume) * (seVolume ?? defaultSeVolume);
+        volumeRef.current = masterVolume * seVolume;
     }, [masterVolume, seVolume]);
 
     const myUserUid = useMyUserUid();
@@ -149,6 +146,8 @@ function useMessageNotifications(): void {
 }
 
 function useRollCallNotifications(): void {
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
     const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const myUserUid = useMyUserUid();
     const rollCalls = useRoomStateValueSelector(roomState => roomState.rollCalls);

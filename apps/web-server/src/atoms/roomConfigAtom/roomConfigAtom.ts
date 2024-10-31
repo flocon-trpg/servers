@@ -1,8 +1,10 @@
 import { recordToArray } from '@flocon-trpg/utils';
 import { produce } from 'immer';
-import { atomWithReducer } from 'jotai/utils';
-import { atom } from 'jotai/vanilla';
+import { atom } from 'jotai';
+import { atomFamily } from 'jotai/utils';
+import localforage from 'localforage';
 import { NumberSize, ResizeDirection } from 're-resizable';
+import { atomWithDebounceStorage } from '../atomWithDebounceStorage/atomWithDebounceStorage';
 import { ActiveBoardPanelConfig } from './types/activeBoardPanelConfig';
 import { BoardConfig, defaultBoardConfig } from './types/boardConfig';
 import { BoardEditorPanelConfig } from './types/boardEditorPanelConfig';
@@ -15,7 +17,14 @@ import { PanelsConfig } from './types/panelsConfig';
 import { ParticipantsPanelConfig } from './types/participantsPanelConfig';
 import { PieceValuePanelConfig } from './types/pieceValuePanelConfig';
 import { RollCallPanelConfig } from './types/rollCallPanelConfig';
-import { RoomConfig } from './types/roomConfig';
+import {
+    RoomConfig,
+    SerializedRoomConfig,
+    defaultRoomConfig,
+    deserializeRoomConfig,
+    serializedRoomConfig,
+} from './types/roomConfig';
+import { tryParseJSON } from '@/utils/tryParseJSON';
 import { BoardType } from '@/utils/types';
 
 export const activeBoardPanel = 'activeBoardPanel';
@@ -393,7 +402,7 @@ export type Action =
     | { type: typeof fix }
     | {
           type: typeof manual;
-          action: (source: RoomConfig | null) => RoomConfig | null | void;
+          action: (source: RoomConfig) => RoomConfig | void;
       }
     | {
           type: typeof minimize;
@@ -418,7 +427,7 @@ export type Action =
           action: ZoomBoardAction;
       };
 
-const reducer = (prev: RoomConfig | null, action: Action): RoomConfig | null => {
+const reducer = (prev: RoomConfig, action: Action): RoomConfig => {
     switch (action.type) {
         case bringPanelToFront: {
             return produce(prev, state => {
@@ -507,4 +516,52 @@ const reducer = (prev: RoomConfig | null, action: Action): RoomConfig | null => 
     }
 };
 
-export const roomConfigAtom = atomWithReducer<RoomConfig | null, Action>(null, reducer);
+const roomConfigKey = (roomId: string) => `room@${roomId}`;
+
+const tryGetRoomConfig = async (roomId: string) => {
+    const raw = await localforage.getItem(roomConfigKey(roomId));
+    if (typeof raw !== 'string') {
+        return undefined;
+    }
+    const json = tryParseJSON(raw);
+    const result = serializedRoomConfig.passthrough().safeParse(json);
+    if (result.success) {
+        return result.data;
+    }
+    return undefined;
+};
+
+const getRoomConfig = async (roomId: string) => {
+    const result = await tryGetRoomConfig(roomId);
+    if (result == null) {
+        return defaultRoomConfig(roomId);
+    }
+    return deserializeRoomConfig(result, roomId);
+};
+
+let mockRoomConfig: RoomConfig | null = null;
+/** これを non-null にすると、`roomConfigAtomFamily` が mock モードになり、roomId が何かに関わらず setMockRoomConfig で渡した値が `roomConfigAtomFamily` の子の atom の初期値になります。roomId によって異なる初期値にする機能は現時点で需要がないと思われるため実装していません。 */
+export const setMockRoomConfig = (value: RoomConfig | null) => {
+    mockRoomConfig = value;
+};
+
+export const roomConfigAtomFamily = atomFamily((roomId: string) => {
+    if (mockRoomConfig != null) {
+        const baseAtom = atom(mockRoomConfig);
+        return atom(
+            get => Promise.resolve(get(baseAtom)),
+            (get, set, action: Action) => {
+                set(baseAtom, reducer(get(baseAtom), action));
+            },
+        );
+    }
+    return atomWithDebounceStorage({
+        getItemFromStorage: () => getRoomConfig(roomId),
+        setItemToStorage: async (newValue: RoomConfig) => {
+            // RoomConfigを安全にSerializedRoomConfigへ型変換できない場合、decodeができなくなってしまう。それを防ぐため、ここで安全に型変換できるかどうかチェックしている。
+            const serializedNewValue: SerializedRoomConfig = newValue;
+            await localforage.setItem(roomConfigKey(roomId), JSON.stringify(serializedNewValue));
+        },
+        atomSet: reducer,
+    });
+});

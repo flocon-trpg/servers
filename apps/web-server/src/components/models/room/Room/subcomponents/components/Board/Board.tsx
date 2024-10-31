@@ -53,7 +53,7 @@ import { ImagePiece } from './subcomponents/components/ImagePiece/ImagePiece';
 import {
     editBoard,
     manual,
-    roomConfigAtom,
+    roomConfigAtomFamily,
     zoomBoard,
 } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { ActiveBoardPanelConfig } from '@/atoms/roomConfigAtom/types/activeBoardPanelConfig';
@@ -221,6 +221,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const backgroundImage = useImageFromFilePath(board.backgroundImage);
     const backgroundImageResult =
         backgroundImage.type === success ? backgroundImage.image : undefined;
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
     const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const setRoomState = useSetRoomStateWithImmer();
     const publicMessages = useRoomMessages({ filter: publicMessageFilter });
@@ -824,11 +825,12 @@ const NonTransparentStyle: React.CSSProperties = {
 };
 
 export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) => {
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
     const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const setBoardContextMenu = useSetAtom(boardContextMenuAtom);
     const setBoardEditorModal = useSetAtom(boardEditorModalAtom);
     const setImportBoardModal = useSetAtom(importBoardModalVisibilityAtom);
-    const roomId = useRoomId();
     const boards = useBoards();
     const characters = useCharacters();
     const myUserUid = useMyUserUid();
