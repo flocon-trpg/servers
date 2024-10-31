@@ -1089,7 +1089,7 @@ const useAtom = <T,>(atom: PrimitiveAtom<T>) => {
 };
 
 const useAtomSelector = <T1, T2>(atom: Atom<T1>, mapping: (value: T1) => T2) => {
-    return useAtomSelectorCore(atom, mapping, undefined, { store: useJotaiStore() });
+    return useAtomSelectorCore(atom, mapping, { store: useJotaiStore() });
 };
 
 const pathStateAtom = atom(PathState.init());

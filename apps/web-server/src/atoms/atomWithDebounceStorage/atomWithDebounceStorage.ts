@@ -8,6 +8,29 @@ import { Subject, concatAll, debounceTime, map } from 'rxjs';
  * - ストレージへの保存処理が debounce される。
  * - atom の get は async だが、set は async ではない。ただし、get がどこかで完了していない場合は set を実行しても無視される。
  * - atomSet の引数を利用することで、atom の set のカスタマイズが比較的容易に行える。
+ *
+ * どうも atomWithDebounceStorage で作成した atomFamily を内部から get する新たな atom を作成する際、レンダリング時に作成すると永遠に get が完了しないという問題が起こる模様。下のように新たに atomFamily を使えばこの問題が起こらないようだ。
+ *
+ * ```tsx
+ * const baseAtomFamily = atomFamily(id => atomWithDebounceStorage(…));
+ * const createAnotherAtom = url => atom(async get => {
+ *     const base = await get(baseAtomFamily(id));
+ *     // some operations
+ *     return …;
+ * });
+ * const atomFamily = atomFamily(createAnotherAtom);
+ *
+ * const Component: React.FC = () => {
+ *     // NG
+ *     const atom = React.useMemo(() => createAnotherAtom('foo'), []);
+ *
+ *     // OK
+ *     const atom = atomFamily('foo');
+ *
+ *
+ *     return <div>hello world!</div>;
+ * }
+ * ```
  */
 export const atomWithDebounceStorage = <T, Args extends unknown[]>({
     getItemFromStorage,

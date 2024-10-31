@@ -35,11 +35,8 @@ export const ChatInput: React.FC<Props> = ({
     topElementsDirection,
 }: Props) => {
     const roomConfigAtom = roomConfigAtomFamily(roomId);
-    const configAtom = React.useMemo(
-        () => atom(async get => (await get(roomConfigAtom)).panels.messagePanels[panelId]),
-        [panelId, roomConfigAtom],
-    );
-    const config = useAtomValue(configAtom);
+    const roomConfig = useAtomValue(roomConfigAtom);
+    const config = roomConfig.panels.messagePanels[panelId];
     const [selectedChannelType, setSelectedChannelType] =
         React.useState<SelectedChannelType>(publicChannel);
 

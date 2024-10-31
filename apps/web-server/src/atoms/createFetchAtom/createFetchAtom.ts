@@ -1,7 +1,7 @@
-import { atomWithLazy } from 'jotai/utils';
+import { atomFamily, atomWithLazy } from 'jotai/utils';
 
 // もし fetch に失敗した状態でキャッシュされても再び fetch しに行く場面は今のところない(ユーザーにブラウザ更新で対応してもらう)ので、atomWithCache は使っていない
-export const createFetchAtom = (filepath: string) =>
+export const createFetchAtom = atomFamily((filepath: string) =>
     atomWithLazy(async () => {
         // chromeなどではfetchできないと `http://localhost:****/**** 404 (Not Found)` などといったエラーメッセージが表示されるが、実際は問題ない
         const txtObj = await fetch(filepath).catch(() => null);
@@ -10,4 +10,5 @@ export const createFetchAtom = (filepath: string) =>
             return null;
         }
         return await txtObj.text();
-    });
+    }),
+);

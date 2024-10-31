@@ -18,6 +18,7 @@ import { Input, Menu, Modal, Popover, Tooltip } from 'antd';
 import { ItemType } from 'antd/lib/menu/interface';
 import classNames from 'classnames';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react';
+import { atomFamily } from 'jotai/utils';
 import { atom } from 'jotai/vanilla';
 import React from 'react';
 import { useMutation, useQuery } from 'urql';
@@ -51,7 +52,7 @@ import { useSingleExecuteAsync0, useSingleExecuteAsync1 } from '@/hooks/useSingl
 import { Styles } from '@/styles';
 import { flex, flexRow, itemsCenter } from '@/styles/className';
 
-const createPanelOpacityAtom = (roomId: string) =>
+const createPanelOpacityAtom = atomFamily((roomId: string) =>
     atom(
         async get => (await get(roomConfigAtomFamily(roomId))).panelOpacity,
         (get, set, newValue: number) => {
@@ -65,9 +66,10 @@ const createPanelOpacityAtom = (roomId: string) =>
                 },
             });
         },
-    );
+    ),
+);
 
-const createShowBackgroundBoardViewerAtom = (roomId: string) =>
+const createShowBackgroundBoardViewerAtom = atomFamily((roomId: string) =>
     atom(
         async get => (await get(roomConfigAtomFamily(roomId))).showBackgroundBoardViewer,
         (get, set, newValue: boolean) => {
@@ -81,7 +83,8 @@ const createShowBackgroundBoardViewerAtom = (roomId: string) =>
                 },
             });
         },
-    );
+    ),
+);
 
 const panelsOpacityModalVisibilityAtom = atom(false);
 

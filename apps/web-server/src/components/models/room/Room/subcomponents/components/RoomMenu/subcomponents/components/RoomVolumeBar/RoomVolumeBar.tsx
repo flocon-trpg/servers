@@ -1,6 +1,7 @@
 import classNames from 'classnames';
 import { produce } from 'immer';
 import { atom, useAtom } from 'jotai';
+import { atomFamily } from 'jotai/utils';
 import React from 'react';
 import { useRoomId } from '../../../../../hooks/useRoomId';
 import { manual, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
@@ -8,7 +9,7 @@ import { defaultChannelVolume } from '@/atoms/roomConfigAtom/types/roomConfig/re
 import { VolumeBar } from '@/components/ui/VolumeBar/VolumeBar';
 import { flex, flexColumn, flexRow, itemsCenter } from '@/styles/className';
 
-const createMasterVolumeAtom = (roomId: string) =>
+const createMasterVolumeAtom = atomFamily((roomId: string) =>
     atom(
         async get => (await get(roomConfigAtomFamily(roomId))).masterVolume,
         (get, set, newValue: number) => {
@@ -22,8 +23,9 @@ const createMasterVolumeAtom = (roomId: string) =>
                 },
             });
         },
-    );
-const createChannelVolumesAtom = (roomId: string) =>
+    ),
+);
+const createChannelVolumesAtom = atomFamily((roomId: string) =>
     atom(
         async get => (await get(roomConfigAtomFamily(roomId))).channelVolumes,
         (get, set, action: { channelKey: string; newVolume: number }) => {
@@ -37,8 +39,9 @@ const createChannelVolumesAtom = (roomId: string) =>
                 },
             });
         },
-    );
-const createSeVolumeAtom = (roomId: string) =>
+    ),
+);
+const createSeVolumeAtom = atomFamily((roomId: string) =>
     atom(
         async get => (await get(roomConfigAtomFamily(roomId))).seVolume,
         (get, set, newValue: number) => {
@@ -52,7 +55,8 @@ const createSeVolumeAtom = (roomId: string) =>
                 },
             });
         },
-    );
+    ),
+);
 
 export const RoomVolumeBar: React.FC = () => {
     const roomId = useRoomId();
