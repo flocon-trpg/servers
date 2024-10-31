@@ -21,11 +21,12 @@ import {
     mockAuth,
     mockStorage,
     mockUser,
+    mockUserConfig,
     mockWebConfig,
 } from '../mocks';
 import { FirebaseUserState } from '../utils/firebase/firebaseUserState';
 import { Recipe, SetAction } from '../utils/types';
-import { useMockUserConfig } from './useMockUserConfig';
+import { setMockUserConfig } from '@/atoms/userConfigAtom/userConfigAtom';
 import { NotificationType } from '@/components/models/room/Room/subcomponents/components/Notification/Notification';
 import { RoomClientContextValue } from '@/contexts/RoomClientContext';
 
@@ -57,6 +58,19 @@ export const useSetupStorybook = ({
         doNotQuery?: boolean;
     };
 } = {}) => {
+    React.useEffect(() => {
+        setMockRoomConfig(defaultRoomConfig(roomId));
+        return () => {
+            setMockRoomConfig(null);
+        };
+    }, []);
+    React.useEffect(() => {
+        setMockUserConfig(mockUserConfig);
+        return () => {
+            setMockUserConfig(null);
+        };
+    }, []);
+
     const setStorybook = useSetAtom(storybookAtom);
     React.useEffect(() => {
         setStorybook({
@@ -145,7 +159,6 @@ export const useSetupStorybook = ({
         next();
     }, [testRoomClient.source.roomState, room]);
 
-    useMockUserConfig();
     React.useEffect(() => {
         testRoomClient.source.roomMessageClient.clear();
         if (roomMessagesConfigProp?.doNotQuery === true) {
@@ -161,12 +174,6 @@ export const useSetupStorybook = ({
         roomMessagesConfigProp?.doNotQuery,
         testRoomClient.source.roomMessageClient,
     ]);
-    React.useEffect(() => {
-        setMockRoomConfig(defaultRoomConfig(roomId));
-        return () => {
-            setMockRoomConfig(null);
-        };
-    }, []);
     const roomConfigAtom = roomConfigAtomFamily(roomId);
     const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const roomConfig = React.useMemo(() => {

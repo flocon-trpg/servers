@@ -56,7 +56,7 @@ import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelCon
 import { MessageTabConfig } from '@/atoms/roomConfigAtom/types/messageTabConfig';
 import { MessageTabConfigUtils } from '@/atoms/roomConfigAtom/types/messageTabConfig/utils';
 import { column, row } from '@/atoms/userConfigAtom/types';
-import { userConfigAtom } from '@/atoms/userConfigAtom/userConfigAtom';
+import { userConfigAtomFamily } from '@/atoms/userConfigAtom/userConfigAtom';
 import { UserConfigUtils } from '@/atoms/userConfigAtom/utils';
 import {
     NotificationMain,
@@ -72,7 +72,7 @@ import { InputDescription } from '@/components/ui/InputDescription/InputDescript
 import { InputModal } from '@/components/ui/InputModal/InputModal';
 import { JumpToBottomVirtuoso } from '@/components/ui/JumpToBottomVirtuoso/JumpToBottomVirtuoso';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
-import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { firebaseUserValueAtom } from '@/hooks/useSetupApp';
 import { useSingleExecuteAsync1 } from '@/hooks/useSingleExecuteAsync';
@@ -95,8 +95,10 @@ const auto = 'auto';
 const useParticipantsAsRecord = () => {
     return useRoomStateValueSelector(state => state.participants);
 };
-const roomMessageFontSizeDeltaAtom = atom(get => get(userConfigAtom)?.roomMessagesFontSizeDelta);
-const chatInputDirectionAtom = atom(get => get(userConfigAtom)?.chatInputDirection);
+const createRoomMessageFontSizeDeltaAtom = (userUid: string | undefined) =>
+    atom(async get => (await get(userConfigAtomFamily(userUid))).roomMessagesFontSizeDelta);
+const createChatInputDirectionAtom = (userUid: string | undefined) =>
+    atom(async get => (await get(userConfigAtomFamily(userUid))).chatInputDirection);
 
 type TabEditorModalProps = {
     // これがundefinedの場合、Drawerのvisibleがfalseとみなされる。
@@ -458,6 +460,11 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
     });
     const [isEditModalVisible, setIsEditModalVisible] = React.useState(false);
     const roomId = useRoomId();
+    const userUid = useMyUserUid();
+    const roomMessageFontSizeDeltaAtom = React.useMemo(
+        () => createRoomMessageFontSizeDeltaAtom(userUid),
+        [userUid],
+    );
     const roomMessagesFontSizeDelta = useAtomValue(roomMessageFontSizeDeltaAtom);
 
     const fontSize = UserConfigUtils.getRoomMessagesFontSize(roomMessagesFontSizeDelta ?? 0);
@@ -844,7 +851,9 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
     }, [panelId, roomConfigAtom]);
     const tabs = useAtomValue(tabsAtom);
     const reduceRoomConfig = useSetAtom(roomConfigAtom);
-    const setUserConfig = useImmerSetAtom(userConfigAtom);
+    const userUid = useMyUserUid();
+    const userConfigAtom = userConfigAtomFamily(userUid);
+    const setUserConfig = useSetAtom(userConfigAtom);
 
     const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<string>();
     const editingTabConfig = React.useMemo(() => {
@@ -856,7 +865,15 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
 
     const [isChannelNamesEditorVisible, setIsChannelNamesEditorVisible] = React.useState(false);
 
+    const roomMessageFontSizeDeltaAtom = React.useMemo(
+        () => createRoomMessageFontSizeDeltaAtom(userUid),
+        [userUid],
+    );
     const roomMessagesFontSizeDelta = useAtomValue(roomMessageFontSizeDeltaAtom);
+    const chatInputDirectionAtom = React.useMemo(
+        () => createChatInputDirectionAtom(userUid),
+        [userUid],
+    );
     const chatInputDirectionCore = useAtomValue(chatInputDirectionAtom) ?? auto;
 
     // GameSelectorの無駄なrerenderを抑止するため、useCallbackを使っている。

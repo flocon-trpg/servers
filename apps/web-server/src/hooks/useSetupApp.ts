@@ -7,17 +7,15 @@ import { devtoolsExchange } from '@urql/devtools';
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
-import { atom, useAtomValue, useSetAtom } from 'jotai';
+import { atom, useAtomValue } from 'jotai';
 import { atomWithObservable } from 'jotai/utils';
 import pino from 'pino';
 import React from 'react';
-import { useAsync, useDebounce, useLatest, usePreviousDistinct } from 'react-use';
+import { useLatest, usePreviousDistinct } from 'react-use';
 import { Observable, from, switchAll } from 'rxjs';
 import urljoin from 'url-join';
 import useConstant from 'use-constant';
 import { storybookAtom } from '../atoms/storybookAtom/storybookAtom';
-import { UserConfig } from '../atoms/userConfigAtom/types';
-import { userConfigAtom } from '../atoms/userConfigAtom/userConfigAtom';
 import { getHttpUri, getWsUri, webConfigAtom } from '../atoms/webConfigAtom/webConfigAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useWebConfig } from '@/hooks/useWebConfig';
@@ -27,7 +25,6 @@ import {
     loading,
     notSignIn,
 } from '@/utils/firebase/firebaseUserState';
-import { getUserConfig, setUserConfig } from '@/utils/localStorage/userConfig';
 
 const mockType = 'mock';
 const webConfigIsNullishType = 'webConfigIsNullish';
@@ -167,58 +164,6 @@ export const getIdTokenResultAtom = atom(async get => {
 });
 
 // アプリ内で1回のみ呼ばれることを想定。
-// localForageを用いてRoomConfigを読み込み、jotaiのatomと紐付ける。
-// Userが変わるたびに、useUserConfigが更新される必要がある。_app.tsxなどどこか一箇所でuseUserConfigを呼び出すだけでよい。
-const useUserConfig = (userUid: string | null): void => {
-    const setUserConfig = useSetAtom(userConfigAtom);
-
-    React.useEffect(() => {
-        let unmounted = false;
-        const main = async () => {
-            setUserConfig(null);
-            if (userUid == null) {
-                return;
-            }
-            const userConfig = await getUserConfig(userUid);
-            if (unmounted) {
-                return;
-            }
-            setUserConfig(userConfig);
-        };
-        void main();
-        return () => {
-            unmounted = true;
-        };
-    }, [userUid, setUserConfig]);
-};
-
-// アプリ内で1回のみ呼ばれることを想定。
-const useAutoSaveUserConfig = () => {
-    const throttleTimespan = 500;
-    const userConfig = useAtomValue(userConfigAtom);
-
-    // throttleでは非常に重くなるため、debounceを使っている
-    const [debouncedUserConfig, setDebouncedUserConfig] = React.useState<UserConfig | null>(null);
-    useDebounce(
-        () => {
-            setDebouncedUserConfig(userConfig);
-        },
-        throttleTimespan,
-        [userConfig],
-    );
-
-    useAsync(async () => {
-        if (debouncedUserConfig == null) {
-            return;
-        }
-
-        // localForageから値を読み込んだ直後は常に値の書き込みが1回発生する仕様となっている。これはこれはほとんどのケースで無意味な処理だが、シンプルなコードを優先している。
-        // CONSIDER: configをユーザーが更新した直後にすぐブラウザを閉じると、閉じる直前のconfigが保存されないケースがある。余裕があれば直したい（閉じるときに強制保存orダイアログを出すなど）。
-        await setUserConfig(debouncedUserConfig);
-    }, [debouncedUserConfig]);
-};
-
-// アプリ内で1回のみ呼ばれることを想定。
 export const useSetupApp = () => {
     const storybook = useAtomValue(storybookAtom);
     const config = useWebConfig();
@@ -236,9 +181,6 @@ export const useSetupApp = () => {
     const wsUri = useAtomValue(wsUriAtom);
     const { getIdTokenResult, canGetIdToken } = useAtomValue(getIdTokenResultAtom);
     const getIdTokenResultRef = useLatest(getIdTokenResult);
-
-    useUserConfig(myUserUid ?? null);
-    useAutoSaveUserConfig();
 
     const [urqlClient, setUrqlClient] = React.useState<ReturnType<typeof createUrqlClient>>();
     React.useEffect(() => {

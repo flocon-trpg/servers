@@ -65,7 +65,6 @@ import {
     debouncedWindowInnerWidthAtom,
 } from '@/components/pages/room/RoomIdPage/RoomIdPage';
 import { DraggableCard, horizontalPadding } from '@/components/ui/DraggableCard/DraggableCard';
-import { LoadingResult } from '@/components/ui/LoadingResult/LoadingResult';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';

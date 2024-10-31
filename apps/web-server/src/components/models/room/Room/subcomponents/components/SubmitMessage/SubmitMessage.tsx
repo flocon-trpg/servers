@@ -25,11 +25,12 @@ import { PrivateMessageChannelSelector } from './subcomponents/components/Privat
 import { PublicMessageChannelSelector } from './subcomponents/components/PublicMessageChannelSelector/PublicMessageChannelSelector';
 import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
-import { userConfigAtom } from '@/atoms/userConfigAtom/userConfigAtom';
+import { userConfigAtomFamily } from '@/atoms/userConfigAtom/userConfigAtom';
 import { UserConfigUtils } from '@/atoms/userConfigAtom/utils';
 import { UISelector } from '@/components/ui/UISelector/UISelector';
 import { useAddNotification } from '@/hooks/useAddNotification';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { flex, flexColumn, flexNone } from '@/styles/className';
 
 /* react-virtuosoはおそらくheightを指定しなければ正常に動作しないため、もしこれが可変だとheightの指定が無理とは言わないまでも面倒になる。そのため、70pxという適当な値で固定している */
@@ -92,6 +93,8 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
             textAreaRef.current?.focus();
         }
     }, [isPostingState.focus]);
+    const userUid = useMyUserUid();
+    const userConfigAtom = userConfigAtomFamily(userUid);
     const roomMessagesFontSizeDelta = useAtomSelector(
         userConfigAtom,
         state => state?.roomMessagesFontSizeDelta,
@@ -256,6 +259,8 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
             textAreaRef.current?.focus();
         }
     }, [isPostingState.focus]);
+    const userUid = useMyUserUid();
+    const userConfigAtom = userConfigAtomFamily(userUid);
     const roomMessagesFontSizeDelta = useAtomSelector(
         userConfigAtom,
         state => state?.roomMessagesFontSizeDelta,
