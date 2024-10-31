@@ -50,11 +50,15 @@ import {
     shapePiece,
 } from './subcomponents/components/CanvasOrDiceOrStringPiece/CanvasOrDiceOrStringPiece';
 import { ImagePiece } from './subcomponents/components/ImagePiece/ImagePiece';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import {
+    editBoard,
+    manual,
+    roomConfigAtom,
+    zoomBoard,
+} from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { ActiveBoardPanelConfig } from '@/atoms/roomConfigAtom/types/activeBoardPanelConfig';
 import { BoardConfig, defaultBoardConfig } from '@/atoms/roomConfigAtom/types/boardConfig';
 import { BoardEditorPanelConfig } from '@/atoms/roomConfigAtom/types/boardEditorPanelConfig';
-import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
 import { AllContextProvider } from '@/components/behaviors/AllContextProvider';
 import { NotificationType } from '@/components/models/room/Room/subcomponents/components/Notification/Notification';
 import { useRoomMessages } from '@/components/models/room/Room/subcomponents/hooks/useRoomMessages';
@@ -62,7 +66,6 @@ import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcompo
 import { AnimatedImageAsAnyProps } from '@/components/ui/AnimatedKonvaAsAnyProps/AnimatedKonvaAsAnyProps';
 import { success, useImageFromFilePath } from '@/hooks/imageHooks';
 import { useAllContext } from '@/hooks/useAllContext';
-import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { Styles } from '@/styles';
@@ -218,7 +221,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const backgroundImage = useImageFromFilePath(board.backgroundImage);
     const backgroundImageResult =
         backgroundImage.type === success ? backgroundImage.image : undefined;
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const setRoomState = useSetRoomStateWithImmer();
     const publicMessages = useRoomMessages({ filter: publicMessageFilter });
     const myUserUid = useMyUserUid();
@@ -724,18 +727,16 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             scaleY={scale}
             onWheel={e => {
                 e.evt.preventDefault();
-                setRoomConfig(roomConfig => {
-                    if (roomConfig == null) {
-                        return;
-                    }
-                    RoomConfigUtils.zoomBoard(roomConfig, {
+                reduceRoomConfig({
+                    type: zoomBoard,
+                    action: {
                         roomId,
                         boardId,
                         boardType,
                         zoomDelta: e.evt.deltaY > 0 ? -0.25 : 0.25,
                         prevCanvasWidth: canvasWidth,
                         prevCanvasHeight: canvasHeight,
-                    });
+                    },
                 });
             }}
         >
@@ -764,19 +765,14 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             return;
                         }
                         const nonZeroScale = scale === 0 ? 0.01 : scale;
-                        setRoomConfig(roomConfig => {
-                            if (roomConfig == null) {
-                                return;
-                            }
-                            RoomConfigUtils.editBoard(
-                                roomConfig,
-                                boardId,
-                                boardType,
-                                boardConfig => {
-                                    boardConfig.offsetX -= e.evt.movementX / nonZeroScale;
-                                    boardConfig.offsetY -= e.evt.movementY / nonZeroScale;
-                                },
-                            );
+                        reduceRoomConfig({
+                            type: editBoard,
+                            boardId,
+                            boardType,
+                            action: boardConfig => {
+                                boardConfig.offsetX -= e.evt.movementX / nonZeroScale;
+                                boardConfig.offsetY -= e.evt.movementY / nonZeroScale;
+                            },
                         });
                     }}
                 >
@@ -828,7 +824,7 @@ const NonTransparentStyle: React.CSSProperties = {
 };
 
 export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) => {
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const setBoardContextMenu = useSetAtom(boardContextMenuAtom);
     const setBoardEditorModal = useSetAtom(boardEditorModalAtom);
     const setImportBoardModal = useSetAtom(importBoardModalVisibilityAtom);
@@ -1050,16 +1046,19 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                   return {
                       key: boardId,
                       onClick: () =>
-                          setRoomConfig(roomConfig => {
-                              if (roomConfig == null) {
-                                  return;
-                              }
-                              const boardEditorPanel =
-                                  roomConfig.panels.boardEditorPanels[boardEditorPanelId];
-                              if (boardEditorPanel == null) {
-                                  return;
-                              }
-                              boardEditorPanel.activeBoardId = boardId;
+                          reduceRoomConfig({
+                              type: manual,
+                              action: roomConfig => {
+                                  if (roomConfig == null) {
+                                      return;
+                                  }
+                                  const boardEditorPanel =
+                                      roomConfig.panels.boardEditorPanels[boardEditorPanelId];
+                                  if (boardEditorPanel == null) {
+                                      return;
+                                  }
+                                  boardEditorPanel.activeBoardId = boardId;
+                              },
                           }),
                       label: board.name === '' ? '(名前なし)' : board.name,
                   };
@@ -1178,18 +1177,16 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                             if (boardIdToShow == null) {
                                 return;
                             }
-                            setRoomConfig(roomConfig => {
-                                if (roomConfig == null) {
-                                    return;
-                                }
-                                RoomConfigUtils.zoomBoard(roomConfig, {
+                            reduceRoomConfig({
+                                type: zoomBoard,
+                                action: {
                                     roomId,
                                     boardId: boardIdToShow,
                                     boardType,
                                     zoomDelta: 0.25,
                                     prevCanvasWidth: canvasWidth,
                                     prevCanvasHeight: canvasHeight,
-                                });
+                                },
                             });
                         }}
                     >
@@ -1201,18 +1198,16 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                             if (boardIdToShow == null) {
                                 return;
                             }
-                            setRoomConfig(roomConfig => {
-                                if (roomConfig == null) {
-                                    return;
-                                }
-                                RoomConfigUtils.zoomBoard(roomConfig, {
+                            reduceRoomConfig({
+                                type: zoomBoard,
+                                action: {
                                     roomId,
                                     boardId: boardIdToShow,
                                     boardType,
                                     zoomDelta: -0.25,
                                     prevCanvasWidth: canvasWidth,
                                     prevCanvasHeight: canvasHeight,
-                                });
+                                },
                             });
                         }}
                     >
@@ -1225,18 +1220,13 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                             if (boardIdToShow == null) {
                                 return;
                             }
-                            setRoomConfig(roomConfig => {
-                                if (roomConfig == null) {
-                                    return;
-                                }
-                                RoomConfigUtils.editBoard(
-                                    roomConfig,
-                                    boardIdToShow,
-                                    boardType,
-                                    () => {
-                                        return defaultBoardConfig();
-                                    },
-                                );
+                            reduceRoomConfig({
+                                type: editBoard,
+                                boardId: boardIdToShow,
+                                boardType,
+                                action: () => {
+                                    return defaultBoardConfig();
+                                },
                             });
                         }}
                     >

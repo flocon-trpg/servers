@@ -10,6 +10,7 @@ import {
 import { App, Button } from 'antd';
 import classNames from 'classnames';
 import { Howl } from 'howler';
+import { useSetAtom } from 'jotai';
 import React from 'react';
 import { useLatest } from 'react-use';
 import { NotificationMain } from '../components/Notification/Notification';
@@ -19,13 +20,16 @@ import { useParticipants } from './useParticipants';
 import { usePublicChannelNames } from './usePublicChannelNames';
 import { useRoomMessages } from './useRoomMessages';
 import { panelHighlightKeysAtom } from '@/atoms/panelHighlightKeysAtom/panelHighlightKeysAtom';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import {
+    bringPanelToFront,
+    rollCallPanel,
+    roomConfigAtom,
+} from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { MessageFilterUtils } from '@/atoms/roomConfigAtom/types/messageFilter/utils';
 import {
     defaultMasterVolume,
     defaultSeVolume,
 } from '@/atoms/roomConfigAtom/types/roomConfig/resources';
-import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
@@ -145,7 +149,7 @@ function useMessageNotifications(): void {
 }
 
 function useRollCallNotifications(): void {
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const myUserUid = useMyUserUid();
     const rollCalls = useRoomStateValueSelector(roomState => roomState.rollCalls);
     const openRollCall = React.useMemo(() => getOpenRollCall(rollCalls ?? {}), [rollCalls]);
@@ -185,13 +189,10 @@ function useRollCallNotifications(): void {
                     <div>{'点呼が行われています。'}</div>
                     <Button
                         onClick={() => {
-                            setRoomConfig(roomConfig => {
-                                if (roomConfig == null) {
-                                    return;
-                                }
-                                RoomConfigUtils.bringPanelToFront(roomConfig, {
-                                    type: 'rollCallPanel',
-                                });
+                            reduceRoomConfig({
+                                type: bringPanelToFront,
+                                panelType: { type: rollCallPanel },
+                                action: { unminimizePanel: true },
                             });
                             setPanelHightlightKeys(keys => {
                                 keys.rollCallPanel = simpleId();
@@ -212,7 +213,7 @@ function useRollCallNotifications(): void {
         openRollCallId,
         openRollCallRef,
         setPanelHightlightKeys,
-        setRoomConfig,
+        reduceRoomConfig,
     ]);
 }
 

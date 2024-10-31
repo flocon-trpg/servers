@@ -1,18 +1,17 @@
 import { State, boardTemplate, simpleId } from '@flocon-trpg/core';
 import { Divider, InputNumber, Modal, ModalProps } from 'antd';
-import { atom, useAtom } from 'jotai';
+import { atom, useAtom, useSetAtom } from 'jotai';
 import React from 'react';
 import { useMemoOne } from 'use-memo-one';
 import { useBoards } from '../../hooks/useBoards';
 import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { manual, roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { FileView } from '@/components/models/file/FileView/FileView';
 import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
 import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import { CopyToClipboardButton } from '@/components/ui/CopyToClipboardButton/CopyToClipboardButton';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { Table, TableRow } from '@/components/ui/Table/Table';
-import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { create, update } from '@/utils/constants';
 import { FilePathModule } from '@/utils/file/filePath';
@@ -69,7 +68,7 @@ export const BoardEditorModal: React.FC = () => {
     const myUserUid = useMyUserUid();
     const setRoomState = useSetRoomStateWithImmer();
     const [modalValue, setModalValue] = useAtom(boardEditorModalAtom);
-    const setRoomConfigAtom = useImmerSetAtom(roomConfigAtom);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const boards = useBoards();
     const createMode: CreateModeParams<BoardState | undefined> | undefined = useMemoOne(() => {
         if (modalValue?.type !== create) {
@@ -91,20 +90,23 @@ export const BoardEditorModal: React.FC = () => {
                         ownerParticipantId: myUserUid,
                     };
                 });
-                setRoomConfigAtom(roomConfig => {
-                    if (modalValue.boardEditorPanelId == null) {
-                        return;
-                    }
-                    const originBoardEditorPanel =
-                        roomConfig?.panels.boardEditorPanels[modalValue.boardEditorPanelId];
-                    if (originBoardEditorPanel == null) {
-                        return;
-                    }
-                    originBoardEditorPanel.activeBoardId = id;
+                reduceRoomConfig({
+                    type: manual,
+                    action: roomConfig => {
+                        if (modalValue.boardEditorPanelId == null) {
+                            return;
+                        }
+                        const originBoardEditorPanel =
+                            roomConfig?.panels.boardEditorPanels[modalValue.boardEditorPanelId];
+                        if (originBoardEditorPanel == null) {
+                            return;
+                        }
+                        originBoardEditorPanel.activeBoardId = id;
+                    },
                 });
             },
         };
-    }, [modalValue, myUserUid, setRoomConfigAtom, setRoomState]);
+    }, [modalValue, myUserUid, reduceRoomConfig, setRoomState]);
     const updateMode: UpdateModeParams<BoardState | undefined> | undefined = useMemoOne(() => {
         if (modalValue?.type !== update) {
             return undefined;

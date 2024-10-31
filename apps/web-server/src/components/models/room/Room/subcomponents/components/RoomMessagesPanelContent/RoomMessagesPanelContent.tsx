@@ -36,7 +36,7 @@ import {
 import { ItemType } from 'antd/lib/menu/interface';
 import classNames from 'classnames';
 import { Draft } from 'immer';
-import { useAtomValue } from 'jotai/react';
+import { useAtomValue, useSetAtom } from 'jotai/react';
 import { atom } from 'jotai/vanilla';
 import moment from 'moment';
 import React from 'react';
@@ -50,7 +50,7 @@ import { isDeleted, toText } from '../../utils/message';
 import { ChatInput } from '../ChatInput';
 import { MessageTabName } from './subcomponents/components/MessageTabName/MessageTabName';
 import { RoomMessage as RoomMessageNameSpace } from './subcomponents/components/RoomMessage/RoomMessage';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { manual, roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { MessageFilter } from '@/atoms/roomConfigAtom/types/messageFilter';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { MessageTabConfig } from '@/atoms/roomConfigAtom/types/messageTabConfig';
@@ -841,7 +841,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
         return atom(get => get(roomConfigAtom)?.panels.messagePanels?.[panelId]?.tabs);
     }, [panelId]);
     const tabs = useAtomValue(tabsAtom);
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const setUserConfig = useImmerSetAtom(userConfigAtom);
 
     const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<string>();
@@ -861,18 +861,21 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
     // GameSelectorの無駄なrerenderを抑止するため、useCallbackを使っている。
     const onChatInputConfigUpdate = React.useCallback(
         (recipe: (draft: Draft<MessagePanelConfig>) => void) => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                const messagePanel = roomConfig.panels.messagePanels[panelId];
-                if (messagePanel == null) {
-                    return;
-                }
-                recipe(messagePanel);
+            reduceRoomConfig({
+                type: manual,
+                action: roomConfig => {
+                    if (roomConfig == null) {
+                        return;
+                    }
+                    const messagePanel = roomConfig.panels.messagePanels[panelId];
+                    if (messagePanel == null) {
+                        return;
+                    }
+                    recipe(messagePanel);
+                },
             });
         },
-        [panelId, setRoomConfig],
+        [panelId, reduceRoomConfig],
     );
 
     const chatInputDirection =
@@ -895,15 +898,18 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
             const onTabDelete = () => {
                 modal.warning({
                     onOk: () => {
-                        setRoomConfig(roomConfig => {
-                            if (roomConfig == null) {
-                                return;
-                            }
-                            const messagePanel = roomConfig.panels.messagePanels[panelId];
-                            if (messagePanel == null) {
-                                return;
-                            }
-                            messagePanel.tabs.splice(tabIndex, 1);
+                        reduceRoomConfig({
+                            type: manual,
+                            action: roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                const messagePanel = roomConfig.panels.messagePanels[panelId];
+                                if (messagePanel == null) {
+                                    return;
+                                }
+                                messagePanel.tabs.splice(tabIndex, 1);
+                            },
                         });
                     },
                     okCancel: true,
@@ -986,12 +992,15 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                 dndType={`MessagePanelTab@${panelId}`}
                 type="editable-card"
                 onDnd={action => {
-                    setRoomConfig(roomConfig => {
-                        const messagePanel = roomConfig?.panels.messagePanels[panelId];
-                        if (messagePanel == null) {
-                            return;
-                        }
-                        moveElement(messagePanel.tabs, tab => tab.key, action);
+                    reduceRoomConfig({
+                        type: manual,
+                        action: roomConfig => {
+                            const messagePanel = roomConfig?.panels.messagePanels[panelId];
+                            if (messagePanel == null) {
+                                return;
+                            }
+                            moveElement(messagePanel.tabs, tab => tab.key, action);
+                        },
                     });
                 }}
                 onEdit={(e, type) => {
@@ -999,7 +1008,29 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                         if (typeof e !== 'string') {
                             return;
                         }
-                        setRoomConfig(roomConfig => {
+                        reduceRoomConfig({
+                            type: manual,
+                            action: roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                const messagePanel = roomConfig.panels.messagePanels[panelId];
+                                if (messagePanel == null) {
+                                    return;
+                                }
+                                const indexToSplice = messagePanel.tabs.findIndex(
+                                    tab => tab.key === editingTabConfigKey,
+                                );
+                                if (indexToSplice >= 0) {
+                                    messagePanel.tabs.splice(indexToSplice, 1);
+                                }
+                            },
+                        });
+                        return;
+                    }
+                    reduceRoomConfig({
+                        type: manual,
+                        action: roomConfig => {
                             if (roomConfig == null) {
                                 return;
                             }
@@ -1007,29 +1038,13 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                             if (messagePanel == null) {
                                 return;
                             }
-                            const indexToSplice = messagePanel.tabs.findIndex(
-                                tab => tab.key === editingTabConfigKey,
-                            );
-                            if (indexToSplice >= 0) {
-                                messagePanel.tabs.splice(indexToSplice, 1);
-                            }
-                        });
-                        return;
-                    }
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        const messagePanel = roomConfig.panels.messagePanels[panelId];
-                        if (messagePanel == null) {
-                            return;
-                        }
-                        messagePanel.tabs.push(MessageTabConfigUtils.createEmpty({}));
+                            messagePanel.tabs.push(MessageTabConfigUtils.createEmpty({}));
+                        },
                     });
                 }}
             />
         );
-    }, [contentHeight, editingTabConfigKey, modal, panelId, setRoomConfig, tabs, tabsHeight]);
+    }, [contentHeight, editingTabConfigKey, modal, panelId, reduceRoomConfig, tabs, tabsHeight]);
 
     if (roomId == null || draggableTabs == null) {
         return null;
@@ -1046,19 +1061,22 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                     if (editingTabConfigKey == null) {
                         return;
                     }
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        const messagePanel = roomConfig.panels.messagePanels[panelId];
-                        if (messagePanel == null) {
-                            return;
-                        }
-                        [...messagePanel.tabs].forEach((tab, i) => {
-                            if (tab.key === editingTabConfigKey) {
-                                messagePanel.tabs[i] = newValue;
+                    reduceRoomConfig({
+                        type: manual,
+                        action: roomConfig => {
+                            if (roomConfig == null) {
+                                return;
                             }
-                        });
+                            const messagePanel = roomConfig.panels.messagePanels[panelId];
+                            if (messagePanel == null) {
+                                return;
+                            }
+                            [...messagePanel.tabs].forEach((tab, i) => {
+                                if (tab.key === editingTabConfigKey) {
+                                    messagePanel.tabs[i] = newValue;
+                                }
+                            });
+                        },
                     });
                 }}
             />

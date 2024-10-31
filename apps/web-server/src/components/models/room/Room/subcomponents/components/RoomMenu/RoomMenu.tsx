@@ -17,7 +17,6 @@ import { useNavigate } from '@tanstack/react-router';
 import { Input, Menu, Modal, Popover, Tooltip } from 'antd';
 import { ItemType } from 'antd/lib/menu/interface';
 import classNames from 'classnames';
-import { produce } from 'immer';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react';
 import { atom } from 'jotai/vanilla';
 import React from 'react';
@@ -27,20 +26,23 @@ import { useMe } from '../../hooks/useMe';
 import { useRoomId } from '../../hooks/useRoomId';
 import { GenerateLogModal } from './subcomponents/components/GenerageLogModal/GenerateLogModal';
 import { RoomVolumeBar } from './subcomponents/components/RoomVolumeBar/RoomVolumeBar';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import {
+    bringPanelToFront,
+    manual,
+    roomConfigAtom,
+    unminimize,
+} from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { defaultMemoPanelConfig } from '@/atoms/roomConfigAtom/types/memoPanelConfig';
 import { defaultMessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import {
     defaultPanelOpacity,
     minPanelOpacity,
 } from '@/atoms/roomConfigAtom/types/roomConfig/resources';
-import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
 import { FileSelectorModal } from '@/components/models/file/FileSelectorModal/FileSelectorModal';
 import { Jdenticon } from '@/components/ui/Jdenticon/Jdenticon';
 import { OpacityBar } from '@/components/ui/VolumeBar/VolumeBar';
 import { useAddNotification } from '@/hooks/useAddNotification';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { firebaseUserValueAtom } from '@/hooks/useSetupApp';
@@ -52,13 +54,14 @@ import { flex, flexRow, itemsCenter } from '@/styles/className';
 const panelOpacityAtom = atom(
     get => get(roomConfigAtom)?.panelOpacity,
     (get, set, newValue: number) => {
-        set(roomConfigAtom, roomConfig => {
-            if (roomConfig == null) {
-                return roomConfig;
-            }
-            return produce(roomConfig, roomConfig => {
+        set(roomConfigAtom, {
+            type: manual,
+            action: roomConfig => {
+                if (roomConfig == null) {
+                    return;
+                }
                 roomConfig.panelOpacity = newValue;
-            });
+            },
         });
     },
 );
@@ -66,13 +69,14 @@ const panelOpacityAtom = atom(
 const showBackgroundBoardViewerAtom = atom(
     get => get(roomConfigAtom)?.showBackgroundBoardViewer,
     (get, set, newValue: boolean) => {
-        set(roomConfigAtom, roomConfig => {
-            if (roomConfig == null) {
-                return roomConfig;
-            }
-            return produce(roomConfig, roomConfig => {
+        set(roomConfigAtom, {
+            type: manual,
+            action: roomConfig => {
+                if (roomConfig == null) {
+                    return;
+                }
                 roomConfig.showBackgroundBoardViewer = newValue;
-            });
+            },
         });
     },
 );
@@ -458,7 +462,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
 };
 
 const usePanelsMenuItem = () => {
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const activeBoardPanel = useAtomSelector(
         roomConfigAtom,
         state => state?.panels.activeBoardPanel,
@@ -499,18 +503,16 @@ const usePanelsMenuItem = () => {
                 </div>
             ),
             onClick: () => {
-                setRoomConfig(roomConfig => {
-                    if (roomConfig == null) {
-                        return;
-                    }
-                    roomConfig.panels.activeBoardPanel.isMinimized = false;
-                    RoomConfigUtils.bringPanelToFront(roomConfig, {
-                        type: 'activeBoardPanel',
-                    });
+                reduceRoomConfig({
+                    type: bringPanelToFront,
+                    panelType: { type: 'activeBoardPanel' },
+                    action: {
+                        unminimizePanel: true,
+                    },
                 });
             },
         };
-    }, [activeBoardPanel, setRoomConfig]);
+    }, [activeBoardPanel, reduceRoomConfig]);
     const boardPanelsMenu = React.useMemo(() => {
         if (boardPanels == null) {
             return null;
@@ -523,23 +525,12 @@ const usePanelsMenuItem = () => {
                     return {
                         key: pair.key,
                         onClick: () => {
-                            setRoomConfig(roomConfig => {
-                                if (roomConfig == null) {
-                                    return;
-                                }
-                                const boardEditorPanel =
-                                    roomConfig?.panels.boardEditorPanels[pair.key];
-                                if (boardEditorPanel == null) {
-                                    return;
-                                }
-
-                                // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
-                                boardEditorPanel.isMinimized = false;
-
-                                RoomConfigUtils.bringPanelToFront(roomConfig, {
-                                    type: 'boardEditorPanel',
-                                    panelId: pair.key,
-                                });
+                            reduceRoomConfig({
+                                type: bringPanelToFront,
+                                panelType: { type: 'boardEditorPanel', panelId: pair.key },
+                                action: {
+                                    unminimizePanel: true,
+                                },
                             });
                         },
                         label: (
@@ -568,31 +559,37 @@ const usePanelsMenuItem = () => {
                         </div>
                     ),
                     onClick: () => {
-                        setRoomConfig(roomConfig => {
-                            if (roomConfig == null) {
-                                return;
-                            }
-                            const panelId = simpleId();
-                            roomConfig.panels.boardEditorPanels[panelId] = {
-                                activeBoardId: undefined,
-                                boards: {},
-                                isMinimized: false,
-                                x: 10,
-                                y: 10,
-                                width: 400,
-                                height: 300,
-                                zIndex: 0,
-                            };
-                            RoomConfigUtils.bringPanelToFront(roomConfig, {
-                                type: 'boardEditorPanel',
-                                panelId,
-                            });
+                        const panelId = simpleId();
+                        reduceRoomConfig({
+                            type: manual,
+                            action: roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                roomConfig.panels.boardEditorPanels[panelId] = {
+                                    activeBoardId: undefined,
+                                    boards: {},
+                                    isMinimized: false,
+                                    x: 10,
+                                    y: 10,
+                                    width: 400,
+                                    height: 300,
+                                    zIndex: 0,
+                                };
+                            },
+                        });
+                        reduceRoomConfig({
+                            type: bringPanelToFront,
+                            panelType: { type: 'boardEditorPanel', panelId },
+                            action: {
+                                unminimizePanel: true,
+                            },
                         });
                     },
                 },
             ],
         };
-    }, [boardPanels, setRoomConfig]);
+    }, [boardPanels, reduceRoomConfig]);
 
     const characterPanelMenu = React.useMemo(() => {
         if (characterPanel == null) {
@@ -613,18 +610,16 @@ const usePanelsMenuItem = () => {
                 </div>
             ),
             onClick: () => {
-                setRoomConfig(roomConfig => {
-                    if (roomConfig == null) {
-                        return;
-                    }
-                    roomConfig.panels.characterPanel.isMinimized = false;
-                    RoomConfigUtils.bringPanelToFront(roomConfig, {
-                        type: 'characterPanel',
-                    });
+                reduceRoomConfig({
+                    type: bringPanelToFront,
+                    panelType: { type: 'characterPanel' },
+                    action: {
+                        unminimizePanel: true,
+                    },
                 });
             },
         };
-    }, [characterPanel, setRoomConfig]);
+    }, [characterPanel, reduceRoomConfig]);
     const chatPalettePanelsMenu = React.useMemo(() => {
         if (chatPalettePanels == null) {
             return null;
@@ -649,23 +644,12 @@ const usePanelsMenuItem = () => {
                             </div>
                         ),
                         onClick: () => {
-                            setRoomConfig(roomConfig => {
-                                if (roomConfig == null) {
-                                    return;
-                                }
-                                const chatPalettePanel =
-                                    roomConfig?.panels.chatPalettePanels[pair.key];
-                                if (chatPalettePanel == null) {
-                                    return;
-                                }
-
-                                // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
-                                chatPalettePanel.isMinimized = false;
-
-                                RoomConfigUtils.bringPanelToFront(roomConfig, {
-                                    type: 'chatPalettePanel',
-                                    panelId: pair.key,
-                                });
+                            reduceRoomConfig({
+                                type: bringPanelToFront,
+                                panelType: { type: 'chatPalettePanel', panelId: pair.key },
+                                action: {
+                                    unminimizePanel: true,
+                                },
                             });
                         },
                     };
@@ -682,31 +666,37 @@ const usePanelsMenuItem = () => {
                         </div>
                     ),
                     onClick: () => {
-                        setRoomConfig(roomConfig => {
-                            if (roomConfig == null) {
-                                return;
-                            }
-                            const panelId = simpleId();
-                            roomConfig.panels.chatPalettePanels[panelId] = {
-                                isMinimized: false,
-                                x: 10,
-                                y: 10,
-                                width: 400,
-                                height: 300,
-                                isPrivateMessageMode: false,
-                                customCharacterName: '',
-                                zIndex: 0,
-                            };
-                            RoomConfigUtils.bringPanelToFront(roomConfig, {
-                                type: 'chatPalettePanel',
-                                panelId,
-                            });
+                        const panelId = simpleId();
+                        reduceRoomConfig({
+                            type: manual,
+                            action: roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                roomConfig.panels.chatPalettePanels[panelId] = {
+                                    isMinimized: false,
+                                    x: 10,
+                                    y: 10,
+                                    width: 400,
+                                    height: 300,
+                                    isPrivateMessageMode: false,
+                                    customCharacterName: '',
+                                    zIndex: 0,
+                                };
+                            },
+                        });
+                        reduceRoomConfig({
+                            type: bringPanelToFront,
+                            panelType: { type: 'chatPalettePanel', panelId },
+                            action: {
+                                unminimizePanel: true,
+                            },
                         });
                     },
                 },
             ],
         };
-    }, [chatPalettePanels, setRoomConfig]);
+    }, [chatPalettePanels, reduceRoomConfig]);
     const gameEffectPanelMenu = React.useMemo(() => {
         if (gameEffectPanel == null) {
             return null;
@@ -726,18 +716,16 @@ const usePanelsMenuItem = () => {
                 </div>
             ),
             onClick: () => {
-                setRoomConfig(roomConfig => {
-                    if (roomConfig == null) {
-                        return;
-                    }
-                    roomConfig.panels.gameEffectPanel.isMinimized = false;
-                    RoomConfigUtils.bringPanelToFront(roomConfig, {
-                        type: 'gameEffectPanel',
-                    });
+                reduceRoomConfig({
+                    type: bringPanelToFront,
+                    panelType: { type: 'gameEffectPanel' },
+                    action: {
+                        unminimizePanel: true,
+                    },
                 });
             },
         };
-    }, [gameEffectPanel, setRoomConfig]);
+    }, [gameEffectPanel, reduceRoomConfig]);
     const memoPanelsMenu = React.useMemo(() => {
         if (memoPanels == null) {
             return null;
@@ -762,22 +750,12 @@ const usePanelsMenuItem = () => {
                             </div>
                         ),
                         onClick: () => {
-                            setRoomConfig(roomConfig => {
-                                if (roomConfig == null) {
-                                    return;
-                                }
-                                const memoPanel = roomConfig?.panels.memoPanels[pair.key];
-                                if (memoPanel == null) {
-                                    return;
-                                }
-
-                                // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
-                                memoPanel.isMinimized = false;
-
-                                RoomConfigUtils.bringPanelToFront(roomConfig, {
-                                    type: 'memoPanel',
-                                    panelId: pair.key,
-                                });
+                            reduceRoomConfig({
+                                type: bringPanelToFront,
+                                panelType: { type: 'memoPanel', panelId: pair.key },
+                                action: {
+                                    unminimizePanel: true,
+                                },
                             });
                         },
                     };
@@ -794,22 +772,28 @@ const usePanelsMenuItem = () => {
                         </div>
                     ),
                     onClick: () => {
-                        setRoomConfig(roomConfig => {
-                            if (roomConfig == null) {
-                                return;
-                            }
-                            const panelId = simpleId();
-                            roomConfig.panels.memoPanels[panelId] = defaultMemoPanelConfig();
-                            RoomConfigUtils.bringPanelToFront(roomConfig, {
-                                type: 'memoPanel',
-                                panelId,
-                            });
+                        const panelId = simpleId();
+                        reduceRoomConfig({
+                            type: manual,
+                            action: roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                roomConfig.panels.memoPanels[panelId] = defaultMemoPanelConfig();
+                            },
+                        });
+                        reduceRoomConfig({
+                            type: bringPanelToFront,
+                            panelType: { type: 'memoPanel', panelId },
+                            action: {
+                                unminimizePanel: true,
+                            },
                         });
                     },
                 },
             ],
         };
-    }, [memoPanels, setRoomConfig]);
+    }, [memoPanels, reduceRoomConfig]);
     const messagePanelsMenu = React.useMemo(() => {
         if (messagePanels == null) {
             return null;
@@ -834,22 +818,12 @@ const usePanelsMenuItem = () => {
                             </div>
                         ),
                         onClick: () => {
-                            setRoomConfig(roomConfig => {
-                                if (roomConfig == null) {
-                                    return;
-                                }
-                                const messagePanel = roomConfig?.panels.messagePanels[pair.key];
-                                if (messagePanel == null) {
-                                    return;
-                                }
-
-                                // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
-                                messagePanel.isMinimized = false;
-
-                                RoomConfigUtils.bringPanelToFront(roomConfig, {
-                                    type: 'messagePanel',
-                                    panelId: pair.key,
-                                });
+                            reduceRoomConfig({
+                                type: bringPanelToFront,
+                                panelType: { type: 'messagePanel', panelId: pair.key },
+                                action: {
+                                    unminimizePanel: true,
+                                },
                             });
                         },
                     };
@@ -866,22 +840,29 @@ const usePanelsMenuItem = () => {
                         </div>
                     ),
                     onClick: () => {
-                        setRoomConfig(roomConfig => {
-                            if (roomConfig == null) {
-                                return;
-                            }
-                            const panelId = simpleId();
-                            roomConfig.panels.messagePanels[panelId] = defaultMessagePanelConfig();
-                            RoomConfigUtils.bringPanelToFront(roomConfig, {
-                                type: 'messagePanel',
-                                panelId,
-                            });
+                        const panelId = simpleId();
+                        reduceRoomConfig({
+                            type: manual,
+                            action: roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                roomConfig.panels.messagePanels[panelId] =
+                                    defaultMessagePanelConfig();
+                            },
+                        });
+                        reduceRoomConfig({
+                            type: bringPanelToFront,
+                            panelType: { type: 'messagePanel', panelId },
+                            action: {
+                                unminimizePanel: true,
+                            },
                         });
                     },
                 },
             ],
         };
-    }, [messagePanels, setRoomConfig]);
+    }, [messagePanels, reduceRoomConfig]);
     const participantPanelMenu = React.useMemo(() => {
         if (participantPanel == null) {
             return null;
@@ -901,18 +882,16 @@ const usePanelsMenuItem = () => {
                 </div>
             ),
             onClick: () => {
-                setRoomConfig(roomConfig => {
-                    if (roomConfig == null) {
-                        return;
-                    }
-                    roomConfig.panels.participantPanel.isMinimized = false;
-                    RoomConfigUtils.bringPanelToFront(roomConfig, {
-                        type: 'participantPanel',
-                    });
+                reduceRoomConfig({
+                    type: bringPanelToFront,
+                    panelType: { type: 'participantPanel' },
+                    action: {
+                        unminimizePanel: true,
+                    },
                 });
             },
         };
-    }, [participantPanel, setRoomConfig]);
+    }, [participantPanel, reduceRoomConfig]);
     const pieceValuePanelMenu = React.useMemo(() => {
         if (pieceValuePanel == null) {
             return null;
@@ -932,18 +911,16 @@ const usePanelsMenuItem = () => {
                 </div>
             ),
             onClick: () => {
-                setRoomConfig(roomConfig => {
-                    if (roomConfig == null) {
-                        return;
-                    }
-                    roomConfig.panels.pieceValuePanel.isMinimized = false;
-                    RoomConfigUtils.bringPanelToFront(roomConfig, {
-                        type: 'pieceValuePanel',
-                    });
+                reduceRoomConfig({
+                    type: bringPanelToFront,
+                    panelType: { type: 'pieceValuePanel' },
+                    action: {
+                        unminimizePanel: true,
+                    },
                 });
             },
         };
-    }, [pieceValuePanel, setRoomConfig]);
+    }, [pieceValuePanel, reduceRoomConfig]);
     const rollCallPanelMenu = React.useMemo(() => {
         if (rollCallPanel == null) {
             return null;
@@ -963,18 +940,16 @@ const usePanelsMenuItem = () => {
                 </div>
             ),
             onClick: () => {
-                setRoomConfig(roomConfig => {
-                    if (roomConfig == null) {
-                        return;
-                    }
-                    roomConfig.panels.rollCallPanel.isMinimized = false;
-                    RoomConfigUtils.bringPanelToFront(roomConfig, {
-                        type: 'rollCallPanel',
-                    });
+                reduceRoomConfig({
+                    type: bringPanelToFront,
+                    panelType: { type: 'rollCallPanel' },
+                    action: {
+                        unminimizePanel: true,
+                    },
                 });
             },
         };
-    }, [rollCallPanel, setRoomConfig]);
+    }, [rollCallPanel, reduceRoomConfig]);
 
     const menuItem = React.useMemo((): ItemType => {
         return {

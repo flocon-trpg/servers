@@ -12,7 +12,6 @@ import {
 import { Link } from '@tanstack/react-router';
 import { Alert, Card, Input, Result, Spin } from 'antd';
 import classNames from 'classnames';
-import { produce } from 'immer';
 import { useAtomValue, useSetAtom } from 'jotai/react';
 import { selectAtom } from 'jotai/utils';
 import { atom } from 'jotai/vanilla';
@@ -21,8 +20,7 @@ import { useDebounce, usePrevious } from 'react-use';
 import { CombinedError, useClient, useMutation } from 'urql';
 import { useMemoOne } from 'use-memo-one';
 import { hideAllOverlayActionAtom } from '@/atoms/hideAllOverlayActionAtom/hideAllOverlayActionAtom';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
-import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
+import { fix, manual, roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { AntdThemeConfigProvider } from '@/components/behaviors/AntdThemeConfigProvider';
 import { Room } from '@/components/models/room/Room/Room';
 import { roomPrivateMessageInputAtom } from '@/components/models/room/Room/subcomponents/atoms/roomPrivateMessageInputAtom/roomPrivateMessageInputAtom';
@@ -253,27 +251,25 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
 // Roomが変わるたびに、useRoomConfigが更新される必要がある。RoomのComponentのどこか一箇所でuseRoomConfigを呼び出すだけでよい。
 const useRoomConfig = (roomId: string): boolean => {
     const [result, setResult] = React.useState<boolean>(false);
-    const setRoomConfig = useSetAtom(roomConfigAtom);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
     React.useEffect(() => {
         let unmounted = false;
         const main = async () => {
-            setRoomConfig(null);
+            reduceRoomConfig({ type: manual, action: () => null });
             const roomConfig = await getRoomConfig(roomId);
+            reduceRoomConfig({ type: manual, action: () => roomConfig });
             if (unmounted) {
                 return;
             }
-            // immerを使わなくても問題ないが、コード変更があったときにエンバグする可能性を減らすことを狙ってimmerを使っている
-            setRoomConfig(
-                produce(roomConfig, roomConfig => RoomConfigUtils.fixRoomConfig(roomConfig)),
-            );
+            reduceRoomConfig({ type: fix });
             setResult(true);
         };
         void main();
         return () => {
             unmounted = true;
         };
-    }, [roomId, setRoomConfig]);
+    }, [roomId, reduceRoomConfig]);
 
     return result;
 };

@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import { produce } from 'immer';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { manual, roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { defaultChannelVolume } from '@/atoms/roomConfigAtom/types/roomConfig/resources';
 import { VolumeBar } from '@/components/ui/VolumeBar/VolumeBar';
 import { flex, flexColumn, flexRow, itemsCenter } from '@/styles/className';
@@ -10,39 +10,42 @@ import { flex, flexColumn, flexRow, itemsCenter } from '@/styles/className';
 const masterVolumeAtom = atom(
     get => get(roomConfigAtom)?.masterVolume,
     (get, set, newValue: number) => {
-        set(roomConfigAtom, roomConfig => {
-            if (roomConfig == null) {
-                return roomConfig;
-            }
-            return produce(roomConfig, roomConfig => {
+        set(roomConfigAtom, {
+            type: manual,
+            action: roomConfig => {
+                if (roomConfig == null) {
+                    return;
+                }
                 roomConfig.masterVolume = newValue;
-            });
+            },
         });
     },
 );
 const channelVolumesAtom = atom(
     get => get(roomConfigAtom)?.channelVolumes,
     (get, set, action: { channelKey: string; newVolume: number }) => {
-        set(roomConfigAtom, roomConfig => {
-            if (roomConfig == null) {
-                return roomConfig;
-            }
-            return produce(roomConfig, roomConfig => {
+        set(roomConfigAtom, {
+            type: manual,
+            action: roomConfig => {
+                if (roomConfig == null) {
+                    return;
+                }
                 roomConfig.channelVolumes[action.channelKey] = action.newVolume;
-            });
+            },
         });
     },
 );
 const seVolumeAtom = atom(
     get => get(roomConfigAtom)?.seVolume,
     (get, set, newValue: number) => {
-        set(roomConfigAtom, roomConfig => {
-            if (roomConfig == null) {
-                return roomConfig;
-            }
-            return produce(roomConfig, roomConfig => {
+        set(roomConfigAtom, {
+            type: manual,
+            action: roomConfig => {
+                if (roomConfig == null) {
+                    return;
+                }
                 roomConfig.seVolume = newValue;
-            });
+            },
         });
     },
 );

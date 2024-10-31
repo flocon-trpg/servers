@@ -42,7 +42,7 @@ import { NumberParameterInput } from '../NumberParameterInput/NumberParameterInp
 import { OverriddenParameterNameEditor } from '../OverriddenParameterNameEditor/OverriddenParameterNameEditor';
 import { StringParameterInput } from '../StringParameterInput/StringParameterInput';
 import { CharacterTabName } from './subcomponents/components/CharacterTabName/CharacterTabName';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { manual, roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { CharacterTabConfig } from '@/atoms/roomConfigAtom/types/characterTabConfig';
 import { CharacterTabConfigUtils } from '@/atoms/roomConfigAtom/types/characterTabConfig/utils';
 import { RowKeys } from '@/atoms/roomConfigAtom/types/charactersPanelConfig';
@@ -52,7 +52,6 @@ import { DraggableTabs } from '@/components/ui/DraggableTabs/DraggableTabs';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import {
     characterIsNotPrivate,
@@ -281,7 +280,7 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
     // キャラクターウィンドウは現時点では最大1個までしか存在しないため、静的な文字列で構わない
     const type = 'TableHeaderCell';
 
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const keySorter = React.useMemo(() => new KeySorter(RowKeys.all), []);
 
     const [, drag] = useDrag(
@@ -294,21 +293,24 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
                 if (draggedItemRowKey == null) {
                     return;
                 }
-                setRoomConfig(roomConfig => {
-                    if (roomConfig == null) {
-                        return;
-                    }
-                    const newRowKeysOrder = keySorter.move(
-                        roomConfig.panels.characterPanel.rowKeysOrder,
-                        { from: rowKey, to: draggedItemRowKey },
-                    );
-                    if (newRowKeysOrder != null) {
-                        roomConfig.panels.characterPanel.rowKeysOrder = newRowKeysOrder;
-                    }
+                reduceRoomConfig({
+                    type: manual,
+                    action: roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        const newRowKeysOrder = keySorter.move(
+                            roomConfig.panels.characterPanel.rowKeysOrder,
+                            { from: rowKey, to: draggedItemRowKey },
+                        );
+                        if (newRowKeysOrder != null) {
+                            roomConfig.panels.characterPanel.rowKeysOrder = newRowKeysOrder;
+                        }
+                    },
                 });
             },
         },
-        [setRoomConfig, rowKey],
+        [reduceRoomConfig, rowKey],
     );
     const [, drop] = useDrop({
         accept: type,
@@ -686,7 +688,7 @@ const CharacterListPanelWithPanelId: React.FC<{
         roomConfigAtom,
         roomConfig => roomConfig?.panels.characterPanel.tabs,
     );
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const setCharacterParameterNamesEditorVisibility = useSetAtom(
         characterParameterNamesEditorVisibilityAtom,
     );
@@ -733,14 +735,17 @@ const CharacterListPanelWithPanelId: React.FC<{
                                                 onClick: () =>
                                                     void modal.warning({
                                                         onOk: () => {
-                                                            setRoomConfig(roomConfig => {
-                                                                if (roomConfig == null) {
-                                                                    return;
-                                                                }
-                                                                roomConfig.panels.characterPanel.tabs.splice(
-                                                                    tabIndex,
-                                                                    1,
-                                                                );
+                                                            reduceRoomConfig({
+                                                                type: manual,
+                                                                action: roomConfig => {
+                                                                    if (roomConfig == null) {
+                                                                        return;
+                                                                    }
+                                                                    roomConfig.panels.characterPanel.tabs.splice(
+                                                                        tabIndex,
+                                                                        1,
+                                                                    );
+                                                                },
                                                             });
                                                         },
                                                         okCancel: true,
@@ -796,17 +801,21 @@ const CharacterListPanelWithPanelId: React.FC<{
                             if (editingTabConfigKey == null) {
                                 return;
                             }
-                            setRoomConfig(roomConfig => {
-                                if (roomConfig == null) {
-                                    return;
-                                }
-                                const targetTabConfig = roomConfig.panels.characterPanel.tabs.find(
-                                    tab => tab.key === editingTabConfigKey,
-                                );
-                                if (targetTabConfig == null) {
-                                    return;
-                                }
-                                recipe(targetTabConfig);
+                            reduceRoomConfig({
+                                type: manual,
+                                action: roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    const targetTabConfig =
+                                        roomConfig.panels.characterPanel.tabs.find(
+                                            tab => tab.key === editingTabConfigKey,
+                                        );
+                                    if (targetTabConfig == null) {
+                                        return;
+                                    }
+                                    recipe(targetTabConfig);
+                                },
                             });
                         }}
                     />
@@ -832,15 +841,18 @@ const CharacterListPanelWithPanelId: React.FC<{
                     dndType="CharacterListTabs"
                     type="editable-card"
                     onDnd={action => {
-                        setRoomConfig(roomConfig => {
-                            if (roomConfig == null) {
-                                return;
-                            }
-                            moveElement(
-                                roomConfig.panels.characterPanel.tabs,
-                                tab => tab.key,
-                                action,
-                            );
+                        reduceRoomConfig({
+                            type: manual,
+                            action: roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                moveElement(
+                                    roomConfig.panels.characterPanel.tabs,
+                                    tab => tab.key,
+                                    action,
+                                );
+                            },
                         });
                     }}
                     onEdit={(e, type) => {
@@ -848,27 +860,36 @@ const CharacterListPanelWithPanelId: React.FC<{
                             if (typeof e !== 'string') {
                                 return;
                             }
-                            setRoomConfig(roomConfig => {
-                                if (roomConfig == null) {
-                                    return;
-                                }
-                                const indexToSplice =
-                                    roomConfig.panels.characterPanel.tabs.findIndex(
-                                        tab => tab.key === e,
-                                    );
-                                if (indexToSplice >= 0) {
-                                    roomConfig.panels.characterPanel.tabs.splice(indexToSplice, 1);
-                                }
+                            reduceRoomConfig({
+                                type: manual,
+                                action: roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    const indexToSplice =
+                                        roomConfig.panels.characterPanel.tabs.findIndex(
+                                            tab => tab.key === e,
+                                        );
+                                    if (indexToSplice >= 0) {
+                                        roomConfig.panels.characterPanel.tabs.splice(
+                                            indexToSplice,
+                                            1,
+                                        );
+                                    }
+                                },
                             });
                             return;
                         }
-                        setRoomConfig(roomConfig => {
-                            if (roomConfig == null) {
-                                return;
-                            }
-                            roomConfig.panels.characterPanel.tabs.push(
-                                CharacterTabConfigUtils.createEmpty({}),
-                            );
+                        reduceRoomConfig({
+                            type: manual,
+                            action: roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                roomConfig.panels.characterPanel.tabs.push(
+                                    CharacterTabConfigUtils.createEmpty({}),
+                                );
+                            },
                         });
                     }}
                 />
@@ -879,11 +900,11 @@ const CharacterListPanelWithPanelId: React.FC<{
         height,
         modal,
         panelId,
+        reduceRoomConfig,
         setCharacterEditorModal,
         setCharacterParameterNamesEditorVisibility,
         setCharacterTagNamesEditorVisibility,
         setImportCharacterModal,
-        setRoomConfig,
         tabs,
     ]);
 };
