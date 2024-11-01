@@ -131,8 +131,11 @@ const config: Config = {
             theme: prismThemes.github,
             darkTheme: prismThemes.dracula,
         },
+        zoom: {
+            selector: '.markdown img',
+        },
     } satisfies Preset.ThemeConfig,
-    plugins: ['plugin-image-zoom'],
+    plugins: ['docusaurus-plugin-image-zoom'],
 };
 
 export default config;
