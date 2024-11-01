@@ -23,7 +23,8 @@ export const atomWithDebounceStorage = <T, Args extends unknown[]>({
     // 現状では、この subscribe を unsubscribe 手段がない。そのため、ブラウザのタブを閉じずに複数の部屋を開いて回るとパフォーマンス上の問題が生じる可能性がある。ただし、よほど数が多くならない限りは問題にならないと考えられるため、現状はこのままにしている。
     saveRequestSubject
         .pipe(
-            debounceTime(1000),
+            // 500msという値は適当。あまりに長すぎるとすぐブラウザのタブが閉じられたときに反映されなくなる可能性が高くなることに注意。
+            debounceTime(500),
             map(f => f()),
             concatAll(),
         )
