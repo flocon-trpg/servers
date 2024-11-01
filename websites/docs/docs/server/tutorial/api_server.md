@@ -1,5 +1,5 @@
 ---
-title: "2. APIサーバーを設置する"
+title: '2. APIサーバーを設置する'
 sidebar_position: 3
 ---
 
@@ -110,9 +110,9 @@ flyctl launch
 :::info
 Windows で `Error name argument or flag must be specified when not running interactively` というメッセージが出る場合は、次のいずれかの方法で回避できます。
 
-- [Windows ターミナル](https://apps.microsoft.com/store/detail/windows-terminal/9N0DX20HK701) をインストールして、Windows ターミナルから PowerShell を起動して実行する。
-- WSL を利用する。
-:::
+-   [Windows ターミナル](https://apps.microsoft.com/store/detail/windows-terminal/9N0DX20HK701) をインストールして、Windows ターミナルから PowerShell を起動して実行する。
+-   WSL を利用する。
+    :::
 
 `App Name (leave blank to use an auto-generated name)`というメッセージが表示されるので好きな App Name を入力します。自動生成でよければ空白でも構いません。
 
@@ -196,8 +196,8 @@ processes = []
 
 API サーバーの設定をします。設定には環境変数を用います。fly.io では、環境変数のセットは次の 2 つのいずれかの方法で行うことができます。併用することもできます。
 
-- `fly.toml`に記述する
-- `flyctl secrets set`コマンドを利用する
+-   `fly.toml`に記述する
+-   `flyctl secrets set`コマンドを利用する
 
 どちらを使っても動作自体に支障はありませんが、fly.io では [慎重に扱うべき値は`flyctl secrets set`を使うことを推奨しています](https://fly.io/docs/reference/secrets/)。ただし、このチュートリアルで扱う値は、すべて`fly.toml`で設定して構いません[^4]。
 
@@ -257,14 +257,14 @@ AUTO_MIGRATION="true"
 
 ```javascript
 const firebaseConfig = {
-  apiKey: "*************",
-  authDomain: "*****.firebaseapp.com",
-  databaseURL: "https://*****.firebaseio.com",
-  projectId: "my-firebase-project-id",
-  storageBucket: "*****",
-  messagingSenderId: "*****",
-  appId: "************",
-  measurementId: "*****",
+    apiKey: '*************',
+    authDomain: '*****.firebaseapp.com',
+    databaseURL: 'https://*****.firebaseio.com',
+    projectId: 'my-firebase-project-id',
+    storageBucket: '*****',
+    messagingSenderId: '*****',
+    appId: '************',
+    measurementId: '*****',
 };
 ```
 
@@ -287,7 +287,7 @@ DATABASE_URL="file:///data/main.sqlite3"
 ```
 
 :::note
-API サーバー v0.7.7 以下では、fly.io などで `DATABASE_URL` を使用できません。v0.7.8 以上を使う必要があります。 
+API サーバー v0.7.7 以下では、fly.io などで `DATABASE_URL` を使用できません。v0.7.8 以上を使う必要があります。
 :::
 
 :::tip
@@ -317,7 +317,6 @@ ENTRY_PASSWORD='{"type":"none"}'
 ```toml
 NODE_ENV="production"
 ```
-
 
 ## API サーバーをデプロイする
 
@@ -353,10 +352,14 @@ Apps 一覧が表示されるので、デプロイした app を選択します�
 
 ## 備考
 
-- [Heroku から fly.io への Migration 機能](https://fly.io/docs/rails/getting-started/migrate-from-heroku/) は Flocon では使えないようです。
+-   [Heroku から fly.io への Migration 機能](https://fly.io/docs/rails/getting-started/migrate-from-heroku/) は Flocon では使えないようです。
 
 [^1]: PowerShell を推奨している理由は、flyctl のインストールには PowerShell が必要なのと、コマンドプロンプトでは cd コマンドでドライブをまたぐ場合は`/d`スイッチが必要であり説明が少し複雑になってしまうのを避けるためです。
+
 [^2]: 空でないフォルダに Dockerfile を置いても構いませんが、Dockerfile のある場所に他のファイルが自動的に作成されるので、Dockerfile 以外にファイルのないフォルダが管理しやすくなります。
+
 [^3]: 日本からの利用者が多い場合は、物理的な距離が近い`nrt (Tokyo, Japan)`を選ぶことで通信ラグが小さくなるため、わずかですがユーザー体験の向上が期待できます。ただし、[fly.io の料金表によると、アメリカにデプロイすると日本と比べてデータ転送の無料枠が大きく料金も安くなる](https://fly.io/docs/about/pricing/#outbound-data-transfer)といったメリットがあるため、通信量が多くなると予想される場合は`sea (Seattle, Wahington (US))`などといった北米西海岸のリージョンのほうが適しているかもしれません。また、API サーバーは Firebase Authentication によってユーザーの認証を確認するため、Firebase のリージョンも少なからず影響する可能性があります。なお、API サーバーは各ブラウザと通信しますが、Web サーバーとの通信は行いません。そのため、API サーバーは Web サーバーと近い地域にデプロイする必要はありません。
+
 [^4]: `ENTRY_PASSWORD` は、パスワードという点を考えると機密情報ですが、ユーザー全員で共有される文字列であることと、部屋ごとに別途パスワードをかけることもできることから、`fly.toml` で設定しても大きな問題にはなりにくいと考えられます。もし漏洩が大きな問題になりうるケースの場合は、bcrypt を利用したうえで、`flyctl secrets set` コマンドを利用してセットしてください。
+
 [^5]: この例では `/data/main.sqlite3` としていますが、永続ストレージ内にあり、なおかつ他のファイルと重複しない限り、他のパスを指定しても構いません。

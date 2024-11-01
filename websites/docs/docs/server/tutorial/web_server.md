@@ -1,5 +1,5 @@
 ---
-title: "3. Webサーバーを設置する"
+title: '3. Webサーバーを設置する'
 sidebar_position: 4
 ---
 
@@ -72,5 +72,7 @@ API サーバーのドメインを追加する必要はありません。
 お疲れさまでした！これで Flocon のサーバー設置は完了です。この Netlify の URL にアクセスすればどなたでも Flocon を利用することができます。
 
 [^1]: 余談ですが、このサイトも Netlify で運用しています。
+
 [^2]: 多機能なエディタを利用したい場合は [Visual Studio Code](https://azure.microsoft.com/ja-jp/products/visual-studio-code/) などがおすすめです。
+
 [^3]: `Thumbs.db`など一部のファイルは自動的に除外されるようです。

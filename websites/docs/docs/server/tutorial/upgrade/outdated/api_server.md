@@ -1,5 +1,5 @@
 ---
-title: "APIサーバー (Heroku)"
+title: 'APIサーバー (Heroku)'
 sidebar_position: 1
 ---
 

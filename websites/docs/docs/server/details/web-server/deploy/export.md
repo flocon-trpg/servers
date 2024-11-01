@@ -1,5 +1,5 @@
 ---
-title: "静的ファイルを生成して設置"
+title: '静的ファイルを生成して設置'
 sidebar_position: 2
 ---
 

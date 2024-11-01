@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: "基本"
+title: '基本'
 ---
 
 # JavaScript 未経験者向けガイド
@@ -18,7 +18,7 @@ title: "基本"
 例えばキャラクター名を`山田太郎`に変更するコマンドの全文は下のようになります。
 
 ```typescript
-character.name = "山田太郎";
+character.name = '山田太郎';
 ```
 
 実際に`character`を入力しようとしてみるとオートコンプリートメニューが出ることと、`character.`まで打つと様々な選択肢がメニューとして出てくるのが確認できると思います。メニューが表示されているときにキーボードの上下を押して Enter を押すと、自動入力されます。この機能を使うと打ち間違いが少なくコマンドを記述できるので便利です。また、これらのメニューの右端あたりにカーソルを合わせると`>`のようなマークが出てきますが、これをクリックすると各選択肢の解説が表示されます。これはドキュメント代わりになるので有用だと思います。
@@ -56,15 +56,15 @@ character.name = 100;
 例えばキャラクター画像を`https://example.com/foo.png`に変更するコマンドの全文は下のようになります。
 
 ```typescript
-character.icon = { sourceType: "Default", path: "https://example.com/foo.png" };
+character.icon = { sourceType: 'Default', path: 'https://example.com/foo.png' };
 ```
 
 また、例えばキャラクター画像を Firebase Storage の`/version/1/uploader/user-name/bar.png`というファイルに変更するコマンドの全文は下のようになります。なお、`/version/1/uploader/user-name/bar.png`に相当する文字列は、アップローダーを開いてファイルの右のほうにあるメニュー開閉ボタンをクリックし`パスをクリップボードにコピー`から取得できます。
 
 ```typescript
 character.icon = {
-  sourceType: "FirebaseStorage",
-  path: "/version/1/uploader/user-name/bar.png",
+    sourceType: 'FirebaseStorage',
+    path: '/version/1/uploader/user-name/bar.png',
 };
 ```
 
@@ -76,15 +76,15 @@ path は任意の文字列を指定できます。sourceType のほうは`Defaul
 
 ```typescript
 character.portrait = {
-  sourceType: "Default",
-  path: "https://example.com/foo.png",
+    sourceType: 'Default',
+    path: 'https://example.com/foo.png',
 };
 ```
 
 ```typescript
 character.portrait = {
-  sourceType: "FirebaseStorage",
-  path: "/version/1/uploader/user-name/bar.png",
+    sourceType: 'FirebaseStorage',
+    path: '/version/1/uploader/user-name/bar.png',
 };
 ```
 
@@ -97,7 +97,7 @@ character.portrait = {
 例えばこのコマンドで HP という名前の数値パラメーターの値を 2 増やせます。HP という名前の数値パラメーターが作られていない場合は何も起こりません。
 
 ```typescript
-character.numberParameters.incrementValue("HP", 2);
+character.numberParameters.incrementValue('HP', 2);
 ```
 
 incrementValue の他にもいろいろあります。ただ、find は JavaScript 習得者向けの関数なのであまりおすすめできないかも（厳密なことを言うとこれは関数ではなくてメソッドだと思うが話がややこしくなるので以下略）。
@@ -111,10 +111,10 @@ numberParameters の他に maxNumberParameters と booleanParameters と stringP
 普通に例えばこんな感じで複数行で書けば OK。セミコロンをちゃんと書けていれば改行はしなくてもいいですが、基本的には改行したほうが読みやすいと思います。
 
 ```typescript
-character.name = "山田太郎";
-character.icon = { sourceType: "Default", path: "https://example.com/foo.png" };
-character.numberParameters.incrementValue("HP", 2);
-room.name = "新しい部屋の名前";
+character.name = '山田太郎';
+character.icon = { sourceType: 'Default', path: 'https://example.com/foo.png' };
+character.numberParameters.incrementValue('HP', 2);
+room.name = '新しい部屋の名前';
 ```
 
 ## 使用可能なコマンドを確認する
