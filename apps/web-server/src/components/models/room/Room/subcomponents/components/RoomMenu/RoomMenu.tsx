@@ -28,7 +28,7 @@ import { GenerateLogModal } from './subcomponents/components/GenerageLogModal/Ge
 import { RoomVolumeBar } from './subcomponents/components/RoomVolumeBar/RoomVolumeBar';
 import {
     bringPanelToFront,
-    manual,
+    custom,
     roomConfigAtomFamily,
 } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { defaultMemoPanelConfig } from '@/atoms/roomConfigAtom/types/memoPanelConfig';
@@ -55,7 +55,7 @@ const usePanelOpacity = (roomId: string) => {
     const setPanelOpacity = React.useCallback(
         (newValue: number) => {
             reduceRoomConfig({
-                type: manual,
+                type: custom,
                 action: roomConfig => {
                     roomConfig.panelOpacity = newValue;
                 },
@@ -71,7 +71,7 @@ const useShowBackgroundBoardViewer = (roomId: string) => {
     const setPanelOpacity = React.useCallback(
         (newValue: boolean) => {
             reduceRoomConfig({
-                type: manual,
+                type: custom,
                 action: roomConfig => {
                     roomConfig.showBackgroundBoardViewer = newValue;
                 },
@@ -559,7 +559,7 @@ const usePanelsMenuItem = () => {
                     onClick: () => {
                         const panelId = simpleId();
                         reduceRoomConfig({
-                            type: manual,
+                            type: custom,
                             action: roomConfig => {
                                 if (roomConfig == null) {
                                     return;
@@ -660,7 +660,7 @@ const usePanelsMenuItem = () => {
                     onClick: () => {
                         const panelId = simpleId();
                         reduceRoomConfig({
-                            type: manual,
+                            type: custom,
                             action: roomConfig => {
                                 if (roomConfig == null) {
                                     return;
@@ -760,7 +760,7 @@ const usePanelsMenuItem = () => {
                     onClick: () => {
                         const panelId = simpleId();
                         reduceRoomConfig({
-                            type: manual,
+                            type: custom,
                             action: roomConfig => {
                                 if (roomConfig == null) {
                                     return;
@@ -825,7 +825,7 @@ const usePanelsMenuItem = () => {
                     onClick: () => {
                         const panelId = simpleId();
                         reduceRoomConfig({
-                            type: manual,
+                            type: custom,
                             action: roomConfig => {
                                 if (roomConfig == null) {
                                     return;

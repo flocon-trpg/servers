@@ -44,7 +44,7 @@ import {
     characterPanel,
     chatPalettePanel,
     gameEffectPanel,
-    manual,
+    custom,
     memoPanel,
     messagePanel,
     minimize,
@@ -518,7 +518,7 @@ const MemoPanel: React.FC<ConfigAndKeyProps<MemoPanelConfig>> = React.memo(funct
     const onSelectedMemoIdChange = React.useCallback(
         (newId: string) => {
             reduceRoomConfig({
-                type: manual,
+                type: custom,
                 action: roomConfig => {
                     if (roomConfig == null) {
                         return;

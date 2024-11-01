@@ -11,7 +11,7 @@ import { useMyCharacters } from '../../hooks/useMyCharacters';
 import { CharacterVarInput } from '../CharacterVarInput/CharacterVarInput';
 import { GameSelector } from '../GameSelector/GameSelector';
 import { SelectedChannelType, SubmitMessage, publicChannel } from '../SubmitMessage/SubmitMessage';
-import { manual, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { custom, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
@@ -156,7 +156,7 @@ export const ChatPalettePanelContent: React.FC<ChatPalettePanelContentProps> = (
     const onConfigUpdate = React.useCallback(
         (recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void) => {
             reduceRoomConfig({
-                type: manual,
+                type: custom,
                 action: roomConfig => {
                     if (roomConfig == null) {
                         return;

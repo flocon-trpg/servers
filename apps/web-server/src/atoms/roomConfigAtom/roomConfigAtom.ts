@@ -360,7 +360,7 @@ type Vector2 = {
 export const bringPanelToFront = 'bringPanelToFront';
 export const editBoard = 'editBoard';
 export const fix = 'fix';
-export const manual = 'manual';
+export const custom = 'custom';
 export const minimize = 'minimize';
 export const movePanel = 'movePanel';
 export const resizePanel = 'resizePanel';
@@ -401,7 +401,7 @@ export type Action =
       }
     | { type: typeof fix }
     | {
-          type: typeof manual;
+          type: typeof custom;
           action: (source: RoomConfig) => RoomConfig | void;
       }
     | {
@@ -458,7 +458,7 @@ const reducer = (prev: RoomConfig, action: Action): RoomConfig => {
                 fixRoomConfigMutate(state);
             });
         }
-        case manual: {
+        case custom: {
             return produce(prev, action.action);
         }
         case minimize: {

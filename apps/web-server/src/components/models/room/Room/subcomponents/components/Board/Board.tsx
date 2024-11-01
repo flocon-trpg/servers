@@ -52,7 +52,7 @@ import {
 import { ImagePiece } from './subcomponents/components/ImagePiece/ImagePiece';
 import {
     editBoard,
-    manual,
+    custom,
     roomConfigAtomFamily,
     zoomBoard,
 } from '@/atoms/roomConfigAtom/roomConfigAtom';
@@ -1049,7 +1049,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                       key: boardId,
                       onClick: () =>
                           reduceRoomConfig({
-                              type: manual,
+                              type: custom,
                               action: roomConfig => {
                                   if (roomConfig == null) {
                                       return;

@@ -49,7 +49,7 @@ import { isDeleted, toText } from '../../utils/message';
 import { ChatInput } from '../ChatInput';
 import { MessageTabName } from './subcomponents/components/MessageTabName/MessageTabName';
 import { RoomMessage as RoomMessageNameSpace } from './subcomponents/components/RoomMessage/RoomMessage';
-import { manual, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { custom, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { MessageFilter } from '@/atoms/roomConfigAtom/types/messageFilter';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { MessageTabConfig } from '@/atoms/roomConfigAtom/types/messageTabConfig';
@@ -86,7 +86,6 @@ const contentMinHeight = 22;
 
 const none = 'none';
 const some = 'some';
-const custom = 'custom';
 type HiwaSelectValueType = typeof none | typeof some | typeof custom;
 
 const auto = 'auto';
@@ -863,7 +862,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
     const onChatInputConfigUpdate = React.useCallback(
         (recipe: (draft: Draft<MessagePanelConfig>) => void) => {
             reduceRoomConfig({
-                type: manual,
+                type: custom,
                 action: roomConfig => {
                     if (roomConfig == null) {
                         return;
@@ -900,7 +899,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                 modal.warning({
                     onOk: () => {
                         reduceRoomConfig({
-                            type: manual,
+                            type: custom,
                             action: roomConfig => {
                                 if (roomConfig == null) {
                                     return;
@@ -994,7 +993,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                 type="editable-card"
                 onDnd={action => {
                     reduceRoomConfig({
-                        type: manual,
+                        type: custom,
                         action: roomConfig => {
                             const messagePanel = roomConfig?.panels.messagePanels[panelId];
                             if (messagePanel == null) {
@@ -1010,7 +1009,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                             return;
                         }
                         reduceRoomConfig({
-                            type: manual,
+                            type: custom,
                             action: roomConfig => {
                                 if (roomConfig == null) {
                                     return;
@@ -1030,7 +1029,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                         return;
                     }
                     reduceRoomConfig({
-                        type: manual,
+                        type: custom,
                         action: roomConfig => {
                             if (roomConfig == null) {
                                 return;
@@ -1063,7 +1062,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                         return;
                     }
                     reduceRoomConfig({
-                        type: manual,
+                        type: custom,
                         action: roomConfig => {
                             if (roomConfig == null) {
                                 return;

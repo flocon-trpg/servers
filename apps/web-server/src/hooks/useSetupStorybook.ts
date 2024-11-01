@@ -8,7 +8,7 @@ import React from 'react';
 import { CombinedError } from 'urql';
 import { useMemoOne } from 'use-memo-one';
 import {
-    manual,
+    custom,
     roomConfigAtomFamily,
     setMockRoomConfig,
 } from '../atoms/roomConfigAtom/roomConfigAtom';
@@ -180,7 +180,7 @@ export const useSetupStorybook = ({
         return defaultRoomConfig(roomId);
     }, []);
     React.useEffect(() => {
-        reduceRoomConfig({ type: manual, action: () => roomConfig });
+        reduceRoomConfig({ type: custom, action: () => roomConfig });
     }, [roomConfig, reduceRoomConfig]);
 
     return React.useMemo(() => {

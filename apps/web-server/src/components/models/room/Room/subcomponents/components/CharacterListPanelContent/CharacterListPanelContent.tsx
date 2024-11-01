@@ -43,7 +43,7 @@ import { NumberParameterInput } from '../NumberParameterInput/NumberParameterInp
 import { OverriddenParameterNameEditor } from '../OverriddenParameterNameEditor/OverriddenParameterNameEditor';
 import { StringParameterInput } from '../StringParameterInput/StringParameterInput';
 import { CharacterTabName } from './subcomponents/components/CharacterTabName/CharacterTabName';
-import { manual, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { custom, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { CharacterTabConfig } from '@/atoms/roomConfigAtom/types/characterTabConfig';
 import { CharacterTabConfigUtils } from '@/atoms/roomConfigAtom/types/characterTabConfig/utils';
 import { RowKeys } from '@/atoms/roomConfigAtom/types/charactersPanelConfig';
@@ -297,7 +297,7 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
                     return;
                 }
                 reduceRoomConfig({
-                    type: manual,
+                    type: custom,
                     action: roomConfig => {
                         if (roomConfig == null) {
                             return;
@@ -743,7 +743,7 @@ const CharacterListPanelWithPanelId: React.FC<{
                                                     void modal.warning({
                                                         onOk: () => {
                                                             reduceRoomConfig({
-                                                                type: manual,
+                                                                type: custom,
                                                                 action: roomConfig => {
                                                                     if (roomConfig == null) {
                                                                         return;
@@ -809,7 +809,7 @@ const CharacterListPanelWithPanelId: React.FC<{
                                 return;
                             }
                             reduceRoomConfig({
-                                type: manual,
+                                type: custom,
                                 action: roomConfig => {
                                     if (roomConfig == null) {
                                         return;
@@ -849,7 +849,7 @@ const CharacterListPanelWithPanelId: React.FC<{
                     type="editable-card"
                     onDnd={action => {
                         reduceRoomConfig({
-                            type: manual,
+                            type: custom,
                             action: roomConfig => {
                                 if (roomConfig == null) {
                                     return;
@@ -868,7 +868,7 @@ const CharacterListPanelWithPanelId: React.FC<{
                                 return;
                             }
                             reduceRoomConfig({
-                                type: manual,
+                                type: custom,
                                 action: roomConfig => {
                                     if (roomConfig == null) {
                                         return;
@@ -888,7 +888,7 @@ const CharacterListPanelWithPanelId: React.FC<{
                             return;
                         }
                         reduceRoomConfig({
-                            type: manual,
+                            type: custom,
                             action: roomConfig => {
                                 if (roomConfig == null) {
                                     return;

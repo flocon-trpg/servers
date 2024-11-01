@@ -6,7 +6,7 @@ import { useMemoOne } from 'use-memo-one';
 import { useBoards } from '../../hooks/useBoards';
 import { useRoomId } from '../../hooks/useRoomId';
 import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
-import { manual, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { custom, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { FileView } from '@/components/models/file/FileView/FileView';
 import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
 import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
@@ -94,7 +94,7 @@ export const BoardEditorModal: React.FC = () => {
                     };
                 });
                 reduceRoomConfig({
-                    type: manual,
+                    type: custom,
                     action: roomConfig => {
                         if (modalValue.boardEditorPanelId == null) {
                             return;

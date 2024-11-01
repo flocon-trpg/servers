@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import { useAtom } from 'jotai';
 import React from 'react';
 import { useRoomId } from '../../../../../hooks/useRoomId';
-import { manual, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { custom, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { defaultChannelVolume } from '@/atoms/roomConfigAtom/types/roomConfig/resources';
 import { VolumeBar } from '@/components/ui/VolumeBar/VolumeBar';
 import { flex, flexColumn, flexRow, itemsCenter } from '@/styles/className';
@@ -12,7 +12,7 @@ const useMasterVolume = (roomId: string) => {
     const setMasterVolume = React.useCallback(
         (newValue: number) => {
             reduceRoomConfig({
-                type: manual,
+                type: custom,
                 action: roomConfig => {
                     roomConfig.masterVolume = newValue;
                 },
@@ -28,7 +28,7 @@ const useChannelVolumes = (roomId: string) => {
     const setChannelVolume = React.useCallback(
         (action: { channelKey: string; newVolume: number }) => {
             reduceRoomConfig({
-                type: manual,
+                type: custom,
                 action: roomConfig => {
                     roomConfig.channelVolumes[action.channelKey] = action.newVolume;
                 },
@@ -44,7 +44,7 @@ const useSeVolume = (roomId: string) => {
     const setSeVolume = React.useCallback(
         (newValue: number) => {
             reduceRoomConfig({
-                type: manual,
+                type: custom,
                 action: roomConfig => {
                     roomConfig.seVolume = newValue;
                 },
