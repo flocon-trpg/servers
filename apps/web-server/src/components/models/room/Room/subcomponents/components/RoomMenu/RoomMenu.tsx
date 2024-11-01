@@ -18,7 +18,6 @@ import { Input, Menu, Modal, Popover, Tooltip } from 'antd';
 import { ItemType } from 'antd/lib/menu/interface';
 import classNames from 'classnames';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react';
-import { atomFamily } from 'jotai/utils';
 import { atom } from 'jotai/vanilla';
 import React from 'react';
 import { useMutation, useQuery } from 'urql';
@@ -31,7 +30,6 @@ import {
     bringPanelToFront,
     manual,
     roomConfigAtomFamily,
-    unminimize,
 } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { defaultMemoPanelConfig } from '@/atoms/roomConfigAtom/types/memoPanelConfig';
 import { defaultMessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
@@ -52,39 +50,37 @@ import { useSingleExecuteAsync0, useSingleExecuteAsync1 } from '@/hooks/useSingl
 import { Styles } from '@/styles';
 import { flex, flexRow, itemsCenter } from '@/styles/className';
 
-const createPanelOpacityAtom = atomFamily((roomId: string) =>
-    atom(
-        async get => (await get(roomConfigAtomFamily(roomId))).panelOpacity,
-        (get, set, newValue: number) => {
-            set(roomConfigAtomFamily(roomId), {
+const usePanelOpacity = (roomId: string) => {
+    const [roomConfig, reduceRoomConfig] = useAtom(roomConfigAtomFamily(roomId));
+    const setPanelOpacity = React.useCallback(
+        (newValue: number) => {
+            reduceRoomConfig({
                 type: manual,
                 action: roomConfig => {
-                    if (roomConfig == null) {
-                        return;
-                    }
                     roomConfig.panelOpacity = newValue;
                 },
             });
         },
-    ),
-);
+        [reduceRoomConfig],
+    );
+    return [roomConfig.panelOpacity, setPanelOpacity] as const;
+};
 
-const createShowBackgroundBoardViewerAtom = atomFamily((roomId: string) =>
-    atom(
-        async get => (await get(roomConfigAtomFamily(roomId))).showBackgroundBoardViewer,
-        (get, set, newValue: boolean) => {
-            set(roomConfigAtomFamily(roomId), {
+const useShowBackgroundBoardViewer = (roomId: string) => {
+    const [roomConfig, reduceRoomConfig] = useAtom(roomConfigAtomFamily(roomId));
+    const setPanelOpacity = React.useCallback(
+        (newValue: boolean) => {
+            reduceRoomConfig({
                 type: manual,
                 action: roomConfig => {
-                    if (roomConfig == null) {
-                        return;
-                    }
                     roomConfig.showBackgroundBoardViewer = newValue;
                 },
             });
         },
-    ),
-);
+        [reduceRoomConfig],
+    );
+    return [roomConfig.showBackgroundBoardViewer, setPanelOpacity] as const;
+};
 
 const panelsOpacityModalVisibilityAtom = atom(false);
 
@@ -375,8 +371,7 @@ const PanelsOpacityModal: React.FC<{
     onClose: () => void;
 }> = ({ visible, onClose }) => {
     const roomId = useRoomId();
-    const panelOpacityAtom = React.useMemo(() => createPanelOpacityAtom(roomId), [roomId]);
-    const [panelOpacity, setPanelOpacity] = useAtom(panelOpacityAtom);
+    const [panelOpacity, setPanelOpacity] = usePanelOpacity(roomId);
     const opacityStyle: React.CSSProperties = React.useMemo(
         () => ({
             padding: '0 4px',
@@ -979,13 +974,8 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
     const roomId = useRoomId();
     const createdBy = useRoomStateValueSelector(state => state.createdBy);
 
-    const showBackgroundBoardViewerAtom = React.useMemo(
-        () => createShowBackgroundBoardViewerAtom(roomId),
-        [roomId],
-    );
-    const [showBackgroundBoardViewer, setShowBackgroundBoardViewerAtom] = useAtom(
-        showBackgroundBoardViewerAtom,
-    );
+    const [showBackgroundBoardViewer, setShowBackgroundBoardViewerAtom] =
+        useShowBackgroundBoardViewer(roomId);
 
     const [, leaveRoomMutation] = useMutation(LeaveRoomDocument);
     const [isBecomePlayerModalVisible, setIsBecomePlayerModalVisible] = React.useState(false);

@@ -37,8 +37,6 @@ import { ItemType } from 'antd/lib/menu/interface';
 import classNames from 'classnames';
 import { Draft } from 'immer';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react';
-import { atomFamily } from 'jotai/utils';
-import { atom } from 'jotai/vanilla';
 import moment from 'moment';
 import React from 'react';
 import { CombinedError, useMutation } from 'urql';
@@ -96,12 +94,6 @@ const auto = 'auto';
 const useParticipantsAsRecord = () => {
     return useRoomStateValueSelector(state => state.participants);
 };
-const createRoomMessageFontSizeDeltaAtom = atomFamily((userUid: string | undefined) =>
-    atom(async get => (await get(userConfigAtomFamily(userUid))).roomMessagesFontSizeDelta),
-);
-const createChatInputDirectionAtom = atomFamily((userUid: string | undefined) =>
-    atom(async get => (await get(userConfigAtomFamily(userUid))).chatInputDirection),
-);
 
 type TabEditorModalProps = {
     // これがundefinedの場合、Drawerのvisibleがfalseとみなされる。
@@ -464,11 +456,9 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
     const [isEditModalVisible, setIsEditModalVisible] = React.useState(false);
     const roomId = useRoomId();
     const userUid = useMyUserUid();
-    const roomMessageFontSizeDeltaAtom = React.useMemo(
-        () => createRoomMessageFontSizeDeltaAtom(userUid),
-        [userUid],
-    );
-    const roomMessagesFontSizeDelta = useAtomValue(roomMessageFontSizeDeltaAtom);
+    const userConfigAtom = userConfigAtomFamily(userUid);
+    const userConfig = useAtomValue(userConfigAtom);
+    const roomMessagesFontSizeDelta = userConfig.roomMessagesFontSizeDelta;
 
     const fontSize = UserConfigUtils.getRoomMessagesFontSize(roomMessagesFontSizeDelta ?? 0);
 
@@ -853,6 +843,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
     const tabs = roomConfig.panels.messagePanels[panelId]?.tabs;
     const userUid = useMyUserUid();
     const userConfigAtom = userConfigAtomFamily(userUid);
+    const userConfig = useAtomValue(userConfigAtom);
     const setUserConfig = useSetAtom(userConfigAtom);
 
     const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<string>();
@@ -865,10 +856,8 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
 
     const [isChannelNamesEditorVisible, setIsChannelNamesEditorVisible] = React.useState(false);
 
-    const roomMessageFontSizeDeltaAtom = createRoomMessageFontSizeDeltaAtom(userUid);
-    const roomMessagesFontSizeDelta = useAtomValue(roomMessageFontSizeDeltaAtom);
-    const chatInputDirectionAtom = createChatInputDirectionAtom(userUid);
-    const chatInputDirectionCore = useAtomValue(chatInputDirectionAtom) ?? auto;
+    const roomMessagesFontSizeDelta = userConfig.roomMessagesFontSizeDelta;
+    const chatInputDirectionCore = userConfig.chatInputDirection ?? auto;
 
     // GameSelectorの無駄なrerenderを抑止するため、useCallbackを使っている。
     const onChatInputConfigUpdate = React.useCallback(
