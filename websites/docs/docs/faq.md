@@ -1,5 +1,5 @@
 ---
-title: "Q&A"
+title: 'Q&A'
 sidebar_position: 5
 ---
 
@@ -31,9 +31,9 @@ sidebar_position: 5
 
 以下をご利用ください。
 
-- [GitHub](https://github.com/flocon-trpg/servers)のIssues
-- [Discord](http://discord.gg/cy3vhmU6Tx)
-- [Twitterアカウント](https://twitter.com/flocon_trpg)の質問箱（peing）、もしくはメンション・DMを送信
+-   [GitHub](https://github.com/flocon-trpg/servers)のIssues
+-   [Discord](http://discord.gg/cy3vhmU6Tx)
+-   [Twitterアカウント](https://twitter.com/flocon_trpg)の質問箱（peing）、もしくはメンション・DMを送信
 
 ## サーバーの設置および運用に関して
 

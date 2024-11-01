@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-title: "詳細"
+title: '詳細'
 ---
 
 （書きかけ）
@@ -11,21 +11,21 @@ title: "詳細"
 
 ## 一般的な JavaScript との言語仕様の差異
 
-| 機能                                                                                                                         | 対応状況 | 将来実装する可能性 | 備考                                                                      |
-| ---------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------ | ------------------------------------------------------------------------- |
-| var                                                                                                                          | ❌       | 低                 | 代わりに let もしくは const を使用してください                            |
+| 機能                                                                                                                         | 対応状況 | 将来実装する可能性 | 備考                                           |
+| ---------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------ | ---------------------------------------------- |
+| var                                                                                                                          | ❌       | 低                 | 代わりに let もしくは const を使用してください |
 | let                                                                                                                          | ⭕       |
 | const                                                                                                                        | ⭕       |
 | bigint                                                                                                                       | ❌       | 低                 |
 | symbol                                                                                                                       | ❌       | 低                 |
 | 正規表現                                                                                                                     | ❌       | 高                 |
 | globalThis                                                                                                                   | ⭕       |
-| [funcion キーワードを用いた関数宣言](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Statements/function)     | ❌       | 高                 | 代わりにアロー関数を使用してください                                      |
+| [funcion キーワードを用いた関数宣言](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Statements/function)     | ❌       | 高                 | 代わりにアロー関数を使用してください           |
 | [アロー関数](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Functions/Arrow_functions)                       | ⭕       |
 | if, else                                                                                                                     | ⭕       |
 | switch, case                                                                                                                 | ⭕       |
-| for 文(for in, for of も含む)                                                                                                | ❌       | 中                 |  |
-| while 文                                                                                                                     | ❌       | 中                 |  |
+| for 文(for in, for of も含む)                                                                                                | ❌       | 中                 |                                                |
+| while 文                                                                                                                     | ❌       | 中                 |                                                |
 | throw                                                                                                                        | ❌       | 中                 |
 | try, catch, finally                                                                                                          | ❌       | 中                 |
 | async, await, Promise                                                                                                        | ❌       | 低                 |
@@ -43,7 +43,7 @@ title: "詳細"
 | [オプショナルチェイニング演算子](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Operators/Optional_chaining) | ⭕       |
 | [分割代入](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment)                | ❌       | 中                 |
 | [残余引数](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Functions/rest_parameters)                         | ❌       | 中                 |
-| クラス                                                                                                                       | ❌       | 中                 | 継承などがあり、複雑な機能のため実装が難しいか                            |
+| クラス                                                                                                                       | ❌       | 中                 | 継承などがあり、複雑な機能のため実装が難しいか |
 | console                                                                                                                      | ❌       | 高                 |
 | alert                                                                                                                        | ❌       | 中                 |
 | setTimeout, setInterval                                                                                                      | ❌       | 低                 |

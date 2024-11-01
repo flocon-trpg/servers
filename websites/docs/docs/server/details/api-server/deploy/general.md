@@ -1,5 +1,5 @@
 ---
-title: "ソースコードからビルドして設置"
+title: 'ソースコードからビルドして設置'
 sidebar_position: 3
 ---
 
@@ -72,7 +72,7 @@ $ yarn workspaces focus
 :::
 
 :::tip
-[`.yarnrc.yml`](https://github.com/flocon-trpg/servers/blob/main/.yarnrc.yml) ファイルを編集して yarn PnP モードを有効化することで、ストレージの消費量を節約することもできます。設定は `yarn workspaces focus` もしくは `yarn install` を実行することで反映されます。 
+[`.yarnrc.yml`](https://github.com/flocon-trpg/servers/blob/main/.yarnrc.yml) ファイルを編集して yarn PnP モードを有効化することで、ストレージの消費量を節約することもできます。設定は `yarn workspaces focus` もしくは `yarn install` を実行することで反映されます。
 :::
 
 :::info

@@ -1,32 +1,29 @@
 ---
-title: "環境変数の一覧"
+title: '環境変数の一覧'
 sidebar_position: 3
 ---
 
-import { Fragment } from "react";
-import { ApiVarExample as Example } from "@site/src/components/ApiVarExample";
-import Admonition from "@theme/Admonition";
+import { Fragment } from 'react';
+import { ApiVarExample as Example } from '@site/src/components/ApiVarExample';
+import Admonition from '@theme/Admonition';
 
 export const DatabaseCaution = () => (
-  <Admonition type="info">
-    <h4>API サーバー v0.7.8 以上の場合</h4>
-    <p>
-      通常の用途の場合、これではなく<a href="#DATABASE_URL">DATABASE_URL</a>
-      を用いてデータベースを指定するのが最も手軽です。 もし<a href="#DATABASE_URL">
-        DATABASE_URL
-      </a>
-      を使わない場合は、<a href="#POSTGRESQL">POSTGRESQL</a>と
-      <a href="#MYSQL">MYSQL</a>と<a href="#SQLITE">SQLITE</a>のうち、少なくとも
-      1 つの値を設定する必要があります。
-    </p>
-    <h4>API サーバー v0.7.7 以下の場合</h4>
-    <p>
-      <a href="#HEROKU">HEROKU</a>をtrueにしていない場合は、
-      <a href="#POSTGRESQL">POSTGRESQL</a>と<a href="#MYSQL">MYSQL</a>と<a href="#SQLITE">
-        SQLITE
-      </a>のうち、少なくとも 1 つの値を設定する必要があります。
-    </p>
-  </Admonition>
+    <Admonition type="info">
+        <h4>API サーバー v0.7.8 以上の場合</h4>
+        <p>
+            通常の用途の場合、これではなく<a href="#DATABASE_URL">DATABASE_URL</a>
+            を用いてデータベースを指定するのが最も手軽です。 もし
+            <a href="#DATABASE_URL">DATABASE_URL</a>
+            を使わない場合は、<a href="#POSTGRESQL">POSTGRESQL</a>と<a href="#MYSQL">MYSQL</a>と
+            <a href="#SQLITE">SQLITE</a>のうち、少なくとも 1 つの値を設定する必要があります。
+        </p>
+        <h4>API サーバー v0.7.7 以下の場合</h4>
+        <p>
+            <a href="#HEROKU">HEROKU</a>をtrueにしていない場合は、
+            <a href="#POSTGRESQL">POSTGRESQL</a>と<a href="#MYSQL">MYSQL</a>と
+            <a href="#SQLITE">SQLITE</a>のうち、少なくとも 1 つの値を設定する必要があります。
+        </p>
+    </Admonition>
 );
 
 ## ACCESS_CONTROL_ALLOW_ORIGIN (省略可)
@@ -64,9 +61,9 @@ API サーバーから送信される値に`Access-Control-Allow-Origin`ヘッ�
 #### PostgreSQL
 
 <Example
-  keyName="DATABASE_URL"
-  value="postgresql://user:password@localhost:5432/dbname"
-  notRecommendedAtFlyToml
+    keyName="DATABASE_URL"
+    value="postgresql://user:password@localhost:5432/dbname"
+    notRecommendedAtFlyToml
 />
 
 なお、Heroku にデプロイしたうえで Heroku Postgres を利用する場合は自動的に値が設定されるため、手動で設定する必要はありません。
@@ -74,10 +71,10 @@ API サーバーから送信される値に`Access-Control-Allow-Origin`ヘッ�
 #### MySQL
 
 <Example
-  keyName="DATABASE_URL"
-  value="mysql://user:password@localhost:3306/dbname"
-  notRecommendedAtFlyToml
-  hideHeroku
+    keyName="DATABASE_URL"
+    value="mysql://user:password@localhost:3306/dbname"
+    notRecommendedAtFlyToml
+    hideHeroku
 />
 
 #### SQLite
@@ -141,22 +138,22 @@ API サーバー内蔵アップローダーのファイルを保存するパス�
 #### bcrypt のハッシュ値でパスワードを設定する場合
 
 <Example
-  keyName="ENTRY_PASSWORD"
-  value='{"type":"bcrypt","value":"$2b$10$ABC.defgh.igklmnopq/qwertyuiopasdfghjklzxcvbnm0123"}'
-  valueOfDotEnv='{"type":"bcrypt","value":"\$2b\$10\$ABC.defgh.igklmnopq/qwertyuiopasdfghjklzxcvbnm0123"}'
-  descriptionOfDotEnv={
-    <Fragment>
-      <code>$</code>はこの例のようにエスケープする必要があります。
-    </Fragment>
-  }
+    keyName="ENTRY_PASSWORD"
+    value='{"type":"bcrypt","value":"$2b$10$ABC.defgh.igklmnopq/qwertyuiopasdfghjklzxcvbnm0123"}'
+    valueOfDotEnv='{"type":"bcrypt","value":"\$2b\$10\$ABC.defgh.igklmnopq/qwertyuiopasdfghjklzxcvbnm0123"}'
+    descriptionOfDotEnv={
+        <Fragment>
+            <code>$</code>はこの例のようにエスケープする必要があります。
+        </Fragment>
+    }
 />
 
 `$2b$10$ABC.defgh.igklmnopq/qwertyuiopasdfghjklzxcvbnm0123`の部分は bcrypt のハッシュ値に置き換えてください。
 
 bcrypt のハッシュ値は様々な方法で生成できます。どの方法を用いても構いません。Flocon では次の 2 つの方法を提供しています。
 
-- [https://tools.flocon.app/bcrypt](https://tools.flocon.app/bcrypt) で生成する。最も手軽ですが、このページには [npm の bcryptjs パッケージ](https://www.npmjs.com/package/bcryptjs) を使っているため、API サーバーに使用している [bcrypt パッケージ](https://www.npmjs.com/package/bcrypt)では認識できないハッシュ値が生成される可能性があります。その場合は、日本語などを用いない、もしくはパスワードを短くすることで解決できる可能性があります。
-- [Flocon のソースコード](https://github.com/flocon-trpg/servers)に付属している`bcrypt-interactive`スクリプトを利用する。`apps/api-server`ディレクトリで `yarn run bcrypt-interactive`を実行すると、bcrypt ハッシュ値生成プログラムが起動します。[bcrypt パッケージ](https://www.npmjs.com/package/bcrypt) が使われますが、事前に Node.js と yarn のインストールおよび、`yarn install` コマンドを実行して数百 MB のファイルをダウンロードする必要があります。
+-   [https://tools.flocon.app/bcrypt](https://tools.flocon.app/bcrypt) で生成する。最も手軽ですが、このページには [npm の bcryptjs パッケージ](https://www.npmjs.com/package/bcryptjs) を使っているため、API サーバーに使用している [bcrypt パッケージ](https://www.npmjs.com/package/bcrypt)では認識できないハッシュ値が生成される可能性があります。その場合は、日本語などを用いない、もしくはパスワードを短くすることで解決できる可能性があります。
+-   [Flocon のソースコード](https://github.com/flocon-trpg/servers)に付属している`bcrypt-interactive`スクリプトを利用する。`apps/api-server`ディレクトリで `yarn run bcrypt-interactive`を実行すると、bcrypt ハッシュ値生成プログラムが起動します。[bcrypt パッケージ](https://www.npmjs.com/package/bcrypt) が使われますが、事前に Node.js と yarn のインストールおよび、`yarn install` コマンドを実行して数百 MB のファイルをダウンロードする必要があります。
 
 ## FIREBASE_ADMIN_SECRET (省略可){#FIREBASE_ADMIN_SECRET}
 
@@ -181,8 +178,8 @@ Firebase の `プロジェクトの設定`（Firebase 管理ページ左上に�
 ### 入力例
 
 <Example
-  keyName="FIREBASE_ADMIN_SECRET"
-  value='{"private_key":"-----BEGIN PRIVATE KEY-----\n********************\n-----END PRIVATE KEY-----\n","client_email":"************.iam.gserviceaccount.com"}'
+    keyName="FIREBASE_ADMIN_SECRET"
+    value='{"private_key":"-----BEGIN PRIVATE KEY-----\n********************\n-----END PRIVATE KEY-----\n","client_email":"************.iam.gserviceaccount.com"}'
 />
 
 `*`の部分を適切な文字列に置き換えてください。なお、実際の`private_key`の値はこの例と比べて非常に長いです。
@@ -207,7 +204,7 @@ API サーバー v0.7.2 の時点では、管理者には部屋一覧を表示�
 
 ## FIREBASE_PROJECT_ID (省略可) (v0.7.11 で追加) {#FIREBASE_PROJECT_ID}
 
-利用する Firebase プロジェクトの ID を設定できます。 
+利用する Firebase プロジェクトの ID を設定できます。
 
 API サーバー v0.7.11 以上では、`FIREBASE_PROJECT_ID` と `FIREBASE_PROJECTID` のいずれかを利用することができます。どちらを同じ動作をします。v0.7.10 では `FIREBASE_PROJECTID` のみが利用できます。
 
@@ -225,14 +222,14 @@ Firebase の設定情報にアクセスします。
 
 ```javascript
 const firebaseConfig = {
-  apiKey: "*************",
-  authDomain: "*****.firebaseapp.com",
-  databaseURL: "https://*****.firebaseio.com",
-  projectId: "my-firebase-project-id",
-  storageBucket: "*****",
-  messagingSenderId: "*****",
-  appId: "************",
-  measurementId: "*****",
+    apiKey: '*************',
+    authDomain: '*****.firebaseapp.com',
+    databaseURL: 'https://*****.firebaseio.com',
+    projectId: 'my-firebase-project-id',
+    storageBucket: '*****',
+    messagingSenderId: '*****',
+    appId: '************',
+    measurementId: '*****',
 };
 ```
 
@@ -244,8 +241,8 @@ const firebaseConfig = {
 
 `true` をセットすることで、Heroku に適したモードで API サーバーが稼働します。具体的には、次のような挙動になります。
 
-- API サーバー v0.7.7 以下ならば、`DATABASE_URL`という環境変数がある場合、データベースの URL として利用されます（v0.7.8 以上ならば `HEROKU`が`true`でなくとも[DATABASE_URL](#DATABASE_URL)を使用できます）。
-- Heroku Postgres に対応した方法でデータベースに接続されます。
+-   API サーバー v0.7.7 以下ならば、`DATABASE_URL`という環境変数がある場合、データベースの URL として利用されます（v0.7.8 以上ならば `HEROKU`が`true`でなくとも[DATABASE_URL](#DATABASE_URL)を使用できます）。
+-   Heroku Postgres に対応した方法でデータベースに接続されます。
 
 ## LOG_FORMAT (省略可) (v0.7.10 で追加){#LOG_FORMAT}
 
@@ -284,9 +281,9 @@ MySQL の設定を行うことができます。
 ### 入力例
 
 <Example
-  keyName="MYSQL"
-  value='{"clientUrl":"mysql://myuser:mypassword@localhost:5432/mydbname"}'
-  notRecommendedAtFlyToml
+    keyName="MYSQL"
+    value='{"clientUrl":"mysql://myuser:mypassword@localhost:5432/mydbname"}'
+    notRecommendedAtFlyToml
 />
 
 ## NODE_ENV (省略可)
@@ -322,20 +319,17 @@ PostgreSQL の設定を行うことができます。
 ### 入力例
 
 <Example
-  keyName="POSTGRESQL"
-  value='{"clientUrl":"postgresql://myuser:mypassword@localhost:5432/mydbname"}'
-  valueOfHeroku='{"clientUrl":"postgresql://myuser:mypassword@localhost:5432/mydbname", "driverOptions":{"connection": {"ssl": {"rejectUnauthorized": false}}}}'
-  descriptionOfHeroku={
-    <Fragment>
-      Heroku の場合は、この例のように
-      <code>
-        {
-          '"driverOptions":{"connection": {"ssl": {"rejectUnauthorized": false}}}'
-        }
-      </code>も JSON に書き加えないと正常に動作しない可能性があります。
-    </Fragment>
-  }
-  notRecommendedAtFlyToml
+    keyName="POSTGRESQL"
+    value='{"clientUrl":"postgresql://myuser:mypassword@localhost:5432/mydbname"}'
+    valueOfHeroku='{"clientUrl":"postgresql://myuser:mypassword@localhost:5432/mydbname", "driverOptions":{"connection": {"ssl": {"rejectUnauthorized": false}}}}'
+    descriptionOfHeroku={
+        <Fragment>
+            Heroku の場合は、この例のように
+            <code>{'"driverOptions":{"connection": {"ssl": {"rejectUnauthorized": false}}}'}</code>
+            も JSON に書き加えないと正常に動作しない可能性があります。
+        </Fragment>
+    }
+    notRecommendedAtFlyToml
 />
 
 ## ROOMHIST_COUNT (省略可)

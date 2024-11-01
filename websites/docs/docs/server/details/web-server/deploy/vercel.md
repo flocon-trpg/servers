@@ -1,5 +1,5 @@
 ---
-title: "Vercelに設置"
+title: 'Vercelに設置'
 sidebar_position: 1
 ---
 
@@ -15,11 +15,11 @@ sidebar_position: 1
 
 ![1.png](/img/docs/vercel/1.png)
 
-| キー                  | 値                                                     |
-| --------------------- | ------------------------------------------------------ |
-| `BUILD COMMAND`       | `yarn --cwd apps/web-server build`                     |
-| `OUTPUT DIRECTORY`    | `apps/web-server/.next`                                |
-| `INSTALL COMMAND`     | 変更しない                                             |
+| キー                  | 値                                                   |
+| --------------------- | ---------------------------------------------------- |
+| `BUILD COMMAND`       | `yarn --cwd apps/web-server build`                   |
+| `OUTPUT DIRECTORY`    | `apps/web-server/.next`                              |
+| `INSTALL COMMAND`     | 変更しない                                           |
 | `DEVELOPMENT COMMAND` | 画像では変更されていますが、変更する必要はありません |
 
 ## Environmental Variables

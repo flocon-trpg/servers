@@ -1,5 +1,5 @@
 ---
-title: "チュートリアル"
+title: 'チュートリアル'
 sidebar_position: 1
 ---
 

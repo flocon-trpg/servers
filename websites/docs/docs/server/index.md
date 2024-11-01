@@ -1,5 +1,5 @@
 ---
-title: "サーバーの設置方法"
+title: 'サーバーの設置方法'
 sidebar_position: 1
 ---
 
