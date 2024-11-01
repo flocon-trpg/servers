@@ -2,12 +2,12 @@ import React from "react";
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 
-const codeStyle = {
+const codeStyle: React.CSSProperties = {
 whiteSpace: 'nowrap', overflowX: 'auto'
-}
+} 
 
 const FlyToml = ({ keyName, value, notRecommended }) => {
-  let codeValue;
+  let codeValue: string;
   if (value.includes('"')) {
     if (value.includes("'")) {
       throw new Error("Not supported.");
@@ -35,6 +35,15 @@ const FlyToml = ({ keyName, value, notRecommended }) => {
   );
 };
 
+type Props = {
+  keyName: string;
+  value: string;
+  valueOfHeroku?: string;
+  descriptionOfHeroku?: string;
+  notRecommendedAtFlyToml?: boolean;
+  hideHeroku?: boolean;
+}
+
 export const ApiVarExample = ({
   keyName,
   value,
@@ -42,7 +51,7 @@ export const ApiVarExample = ({
   descriptionOfHeroku,
   notRecommendedAtFlyToml,
   hideHeroku,
-}) => {
+}: Props) => {
   return (
     <Tabs groupId="envType">
       <TabItem value="fly.toml" label="fly.toml">

@@ -2,8 +2,17 @@ import React from "react";
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 
-const codeStyle = {
+const codeStyle: React.CSSProperties = {
 whiteSpace: 'nowrap', overflowX: 'auto'
+}
+
+type Props = {
+  keyName: string;
+  value: string;
+  valueOfDotEnv?: string;
+  descriptionOfDotEnv?: string;
+  valueOfVercel?: string;
+  descriptionOfVercel?: string;
 }
 
 export const WebVarExample = ({
@@ -13,7 +22,7 @@ export const WebVarExample = ({
   descriptionOfDotEnv,
   valueOfVercel,
   descriptionOfVercel,
-}) => {
+}: Props) => {
   return (
     <Tabs groupId="envType">
       <TabItem value="dotenv" label=".env.local, .env">
