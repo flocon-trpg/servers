@@ -1,8 +1,15 @@
 import React from "react";
 import clsx from "clsx";
 import styles from "./HomepageFeatures.module.css";
+import Heading from '@theme/Heading';
 
-const FeatureList = [
+type FeatureItem = {
+  title: string;
+  Svg: React.ComponentType<React.ComponentProps<'svg'>>;
+  description: JSX.Element;
+};
+
+const FeatureList: FeatureItem[] = [
   {
     title: "自鯖でTRPGオンラインセッション",
     Svg: require("../../static/img/server-svgrepo-com.svg").default,
@@ -34,18 +41,18 @@ const FeatureList = [
   },
 ];
 
-function Feature({ Svg, title, description }) {
+function Feature({ Svg, title, description }: FeatureItem) {
   return (
     <div className={clsx("col col--4")}>
       <div className="text--center" style={{ padding: "20px 0" }}>
         <Svg
           className={styles.featureSvg}
-          alt={title}
+          role="img"
           style={{ width: 100, height: 100 }}
         />
       </div>
       <div className="text--center padding-horiz--md">
-        <h3>{title}</h3>
+                <Heading as="h3">{title}</Heading>
         <p>{description}</p>
       </div>
     </div>
