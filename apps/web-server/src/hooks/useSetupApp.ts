@@ -11,13 +11,12 @@ import { atom, useAtomValue } from 'jotai';
 import { atomWithObservable } from 'jotai/utils';
 import pino from 'pino';
 import React from 'react';
-import { useLatest, usePreviousDistinct } from 'react-use';
+import { usePreviousDistinct } from 'react-use';
 import { Observable, from, switchAll } from 'rxjs';
 import urljoin from 'url-join';
 import useConstant from 'use-constant';
 import { storybookAtom } from '../atoms/storybookAtom/storybookAtom';
 import { getHttpUri, getWsUri, webConfigAtom } from '../atoms/webConfigAtom/webConfigAtom';
-import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useWebConfig } from '@/hooks/useWebConfig';
 import {
     FirebaseUserState,
@@ -163,6 +162,34 @@ export const getIdTokenResultAtom = atom(async get => {
     return { getIdTokenResult, getIdToken, canGetIdToken };
 });
 
+const urqlClientAtom = atom(async get => {
+    const httpUri = await get(httpUriAtom);
+    const wsUri = await get(wsUriAtom);
+    const { getIdTokenResult, canGetIdToken } = await get(getIdTokenResultAtom);
+    if (canGetIdToken) {
+        return createUrqlClient({
+            httpUrl: httpUri,
+            wsUrl: wsUri,
+            authorization: true,
+            getUserIdTokenResult: getIdTokenResult,
+            exchanges: defaultExchanges => [devtoolsExchange, ...defaultExchanges],
+        });
+    }
+    return createUrqlClient({
+        httpUrl: httpUri,
+        wsUrl: wsUri,
+        authorization: false,
+        exchanges: defaultExchanges => [devtoolsExchange, ...defaultExchanges],
+    });
+});
+
+const reactQueryClientAtom = atom(async get => {
+    // ユーザーが変わったときにreact-queryのキャッシュを破棄させるため、firebaseUserValueAtomをgetしている。
+    await get(firebaseUserValueAtom);
+
+    return new QueryClient();
+});
+
 // アプリ内で1回のみ呼ばれることを想定。
 export const useSetupApp = () => {
     const storybook = useAtomValue(storybookAtom);
@@ -175,60 +202,11 @@ export const useSetupApp = () => {
     }, [config.logLevel, storybook.isStorybook]);
 
     const user = useAtomValue(firebaseUserAtom);
-    const userValue = useAtomValue(firebaseUserValueAtom);
     const httpUri = useAtomValue(httpUriAtom);
     const wsUri = useAtomValue(wsUriAtom);
-    const { getIdTokenResult, canGetIdToken } = useAtomValue(getIdTokenResultAtom);
-    const getIdTokenResultRef = useLatest(getIdTokenResult);
 
-    const [urqlClient, setUrqlClient] = React.useState<ReturnType<typeof createUrqlClient>>();
-    React.useEffect(() => {
-        if (canGetIdToken) {
-            setUrqlClient(
-                createUrqlClient({
-                    httpUrl: httpUri,
-                    wsUrl: wsUri,
-                    authorization: true,
-                    getUserIdTokenResult: getIdTokenResultRef.current,
-                    exchanges: defaultExchanges => [devtoolsExchange, ...defaultExchanges],
-                }),
-            );
-        } else {
-            setUrqlClient(
-                createUrqlClient({
-                    httpUrl: httpUri,
-                    wsUrl: wsUri,
-                    authorization: false,
-                    exchanges: defaultExchanges => [devtoolsExchange, ...defaultExchanges],
-                }),
-            );
-        }
-    }, [
-        httpUri,
-        wsUri,
-        getIdTokenResultRef,
-        canGetIdToken,
-        /*
-        # userValueをdepsに加えている理由
-        
-        ## 理由1
-        コンポーネントが最初にrenderされる時点では、ログインしていてもuserValueはnullishである。userValueがnullishのときは、getIdTokenを実行してもnullishな値が返される。その直後にonAuthStateChangedによってuserValueがnon-nullishとなる。
-        useQueryなどといったurqlのhooksは即時実行されるため、もしuserValueがないと、idTokenを取得できない状態でhooksが実行されPermission errorが起こって終わりになってしまう。
-        そこで、userValueが変化したときにUrqlClientのインスタンスを更新することで、urqlのhooksが今度はidTokenありの状態で再度実行されるため、正常に動作するようになるというのが理由。
-
-        ## 理由2
-        ユーザーが変わったときにUrqlのキャッシュを破棄させるため。
-        */
-        userValue,
-    ]);
-
-    const [reactQueryClient, setReactQueryClient] = React.useState<QueryClient | null>(null);
-    React.useEffect(() => {
-        setReactQueryClient(new QueryClient());
-    }, [
-        // ユーザーが変わったときにreact-queryのキャッシュを破棄させるため、userValueをdepsに加えている。
-        userValue,
-    ]);
+    const urqlClient = useAtomValue(urqlClientAtom);
+    const reactQueryClient = useAtomValue(reactQueryClientAtom);
 
     const authNotFoundState = user === 'authNotFound';
     const clientId = useConstant(() => simpleId());

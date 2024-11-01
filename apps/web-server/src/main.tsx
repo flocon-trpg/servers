@@ -79,11 +79,6 @@ const App = ({ children }: PropsWithChildren) => {
             </ThemedDiv>
         );
     }
-    if (urqlClient == null || reactQueryClient == null) {
-        return (
-            <ThemedDiv style={{ padding: 5 }}>{'しばらくお待ち下さい… / Please wait…'}</ThemedDiv>
-        );
-    }
     return (
         <AllContextProvider
             urqlClient={urqlClient}
