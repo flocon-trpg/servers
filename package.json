@@ -3,10 +3,11 @@
     "private": true,
     "workspaces": [
         "apps/*",
-        "packages/*"
+        "packages/*",
+        "websites/*"
     ],
     "scripts": {
-        "build": "yarn workspace '@flocon-trpg/api-server' run build && yarn workspace '@flocon-trpg/web-server' run build:deps",
+        "build": "yarn workspace '@flocon-trpg/api-server' run build && yarn workspace '@flocon-trpg/web-server' run build:deps && yarn workspace '@flocon-trpg/docs' run build",
         "format": "yarn lint --fix && yarn prettier && yarn sort-package-json",
         "install-husky": "husky install",
         "lint": "yarn workspaces foreach --all -p run lint",
