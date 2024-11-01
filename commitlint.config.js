@@ -11,6 +11,7 @@ module.exports = {
                 'web-server',
                 'cache',
                 'core',
+                'docs',
                 'flocon-script',
                 'prettier-config',
                 'rollup-config',
