@@ -1,6 +1,7 @@
 import { loggerRef } from '@flocon-trpg/utils';
 import { Option } from '@kizahasi/option';
 import { atom } from 'jotai';
+import { atomWithLazy, loadable } from 'jotai/utils';
 import { Subject, concatAll, debounceTime, map } from 'rxjs';
 
 /**
@@ -57,21 +58,21 @@ export const atomWithDebounceStorage = <T, Args extends unknown[]>({
     const ensureAtom = atom(get => {
         const base = get(baseAtom);
         if (base.isNone) {
-            return getItemFromStorage().then(value => ({ value }));
+            return getItemFromStorage();
         }
-        // get(ensureAtom) の値が Promise かどうかを判定する処理に instanceof Promise を使っているが、もしそのまま return base.value としてしまうと T が Promise である可能性があるせいで型エラーが発生するため、適当なオブジェクトに変換している。
-        return { value: base.value };
+        return base.value;
     });
-    return atom<Promise<T>, Args, void>(
-        async get => (await get(ensureAtom)).value,
+    return atom<T | Promise<T>, Args, void>(
+        get => get(ensureAtom),
         (get, set, ...args: Args) => {
-            const prevState = get(ensureAtom);
-            if (prevState instanceof Promise) {
+            const awaitedEnsureAtom = loadable(ensureAtom);
+            const prevState = get(awaitedEnsureAtom);
+            if (prevState.state !== 'hasData') {
                 // もし prevState を await すると、この atom の set の戻り値が Promise<void> になる。その場合は Promise<void> をawait する必要がありそう(深い論考や検証はしていないので、しなくてもいい可能性もある)だがそれは Flocon では不便なので、戻り値を Promise<void> ではなく void にするために何もせずに return している。当然ながらこの場合は set を実行しても何も起こらないという問題点があるが、Flocon のコンポーネントでは set が実行される前に get を useAtomValue などを用いてどこかで事前に実行しておりここには来ないと思われるのと、もしここに来ても致命的な事態にはならないと考えられるため問題ないと判断している。
                 loggerRef.warn('set action is ignored at atomWithDebounceStorage.');
                 return;
             }
-            const newState = atomSet(prevState.value, ...args);
+            const newState = atomSet(prevState.data, ...args);
             set(baseAtom, Option.some(newState));
             const saveRequest = async () => {
                 await setItemToStorage(newState);
