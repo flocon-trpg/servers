@@ -518,7 +518,7 @@ const reducer = (prev: RoomConfig, action: Action): RoomConfig => {
 
 const roomConfigKey = (roomId: string) => `room@${roomId}`;
 
-const tryGetRoomConfig = async (roomId: string) => {
+const tryGetSerializedRoomConfig = async (roomId: string) => {
     const raw = await localforage.getItem(roomConfigKey(roomId));
     if (typeof raw !== 'string') {
         return undefined;
@@ -532,11 +532,13 @@ const tryGetRoomConfig = async (roomId: string) => {
 };
 
 const getRoomConfig = async (roomId: string) => {
-    const result = await tryGetRoomConfig(roomId);
-    if (result == null) {
+    const serialized = await tryGetSerializedRoomConfig(roomId);
+    if (serialized == null) {
         return defaultRoomConfig(roomId);
     }
-    return deserializeRoomConfig(result, roomId);
+    const deserialized = deserializeRoomConfig(serialized, roomId);
+    fixRoomConfigMutate(deserialized);
+    return deserialized;
 };
 
 let mockRoomConfig: RoomConfig | null = null;
