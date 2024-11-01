@@ -4756,7 +4756,7 @@ __metadata:
     "@flocon-trpg/prettier-config": "workspace:^"
     "@mdx-js/react": "npm:^3.0.0"
     clsx: "npm:^2.0.0"
-    plugin-image-zoom: "github:ataft/plugin-image-zoom"
+    docusaurus-plugin-image-zoom: "npm:^2.0.0"
     prettier: "npm:3.3.3"
     prism-react-renderer: "npm:^2.3.0"
     react: "npm:^18.0.0"
@@ -13388,6 +13388,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"docusaurus-plugin-image-zoom@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "docusaurus-plugin-image-zoom@npm:2.0.0"
+  dependencies:
+    medium-zoom: "npm:^1.0.8"
+    validate-peer-dependencies: "npm:^2.2.0"
+  peerDependencies:
+    "@docusaurus/theme-classic": ">=3.0.0"
+  checksum: 10/dd82db7adb1f59d65324fdc4b203b094908a96a427fe461ea191e67fb0110eabeb9ae2b9ad0f2cd5d00b9ac507a96ea2f89236ca06361445972d0a33a604a722
+  languageName: node
+  linkType: hard
+
 "dom-accessibility-api@npm:^0.5.6, dom-accessibility-api@npm:^0.5.9":
   version: 0.5.14
   resolution: "dom-accessibility-api@npm:0.5.14"
@@ -21949,15 +21961,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"plugin-image-zoom@github:ataft/plugin-image-zoom":
-  version: 1.1.0
-  resolution: "plugin-image-zoom@https://github.com/ataft/plugin-image-zoom.git#commit=8e1b866c79ed6d42cefc4c52f851f1dfd1d0c7de"
-  dependencies:
-    medium-zoom: "npm:^1.0.8"
-  checksum: 10/4109252b53304cd1d50f975943f80ec3901c3c37b113519d6ed3b40e8e214378989f0b49cc3a0532c74ec072e48abf7d9daf4b0df7e9f070e6ad82727eecf256
-  languageName: node
-  linkType: hard
-
 "polished@npm:^4.2.2":
   version: 4.2.2
   resolution: "polished@npm:4.2.2"
@@ -24479,6 +24482,15 @@ __metadata:
   version: 4.0.0
   resolution: "resolve-from@npm:4.0.0"
   checksum: 10/91eb76ce83621eea7bbdd9b55121a5c1c4a39e54a9ce04a9ad4517f102f8b5131c2cf07622c738a6683991bf54f2ce178f5a42803ecbd527ddc5105f362cc9e3
+  languageName: node
+  linkType: hard
+
+"resolve-package-path@npm:^4.0.3":
+  version: 4.0.3
+  resolution: "resolve-package-path@npm:4.0.3"
+  dependencies:
+    path-root: "npm:^0.1.1"
+  checksum: 10/90996616a8142daf6cc158eaf78f4e89dcb62eb6fe544e0d37aa33a231d133f8867bb514ba4c5e2e042c8f014852e977073f94df556ea76687437bbc74a33c20
   languageName: node
   linkType: hard
 
@@ -27950,6 +27962,16 @@ __metadata:
     "@types/istanbul-lib-coverage": "npm:^2.0.1"
     convert-source-map: "npm:^1.6.0"
   checksum: 10/95811ff2f17a31432c3fc7b3027b7e8c2c6ca5e60a7811c5050ce51920ab2b80df29feb04c52235bbfdaa9a6809acd5a5dd9668292e98c708617c19e087c3f68
+  languageName: node
+  linkType: hard
+
+"validate-peer-dependencies@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "validate-peer-dependencies@npm:2.2.0"
+  dependencies:
+    resolve-package-path: "npm:^4.0.3"
+    semver: "npm:^7.3.8"
+  checksum: 10/2569ade8dd58391d8d6e2d57dfac2cd5ce1e32113d6b579c5059535054effbbff6db331f41aa35d38b4ea93580dc070be3d16a03d888d36edc1bdbd677f32a78
   languageName: node
   linkType: hard
 
