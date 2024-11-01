@@ -6,13 +6,14 @@ import 'firebase/storage';
 
 import { loggerRef } from '@flocon-trpg/utils';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
-import { App as AntdApp, Layout } from 'antd';
+import { App as AntdApp } from 'antd';
 import { enableMapSet } from 'immer';
 import React, { PropsWithChildren, StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { AllContextProvider } from './components/behaviors/AllContextProvider';
 import { AntdThemeConfigProvider } from './components/behaviors/AntdThemeConfigProvider';
 import { LayoutWithNoHook } from './components/ui/Layout/Layout';
+import { SuspenseWithFallback } from './components/ui/SuspenseWithFallback/SuspenseWithFallback';
 import { useOnFirebaseAppChange, useSetupApp } from './hooks/useSetupApp';
 import { routeTree } from './routeTree.gen';
 
@@ -89,7 +90,11 @@ const App = ({ children }: PropsWithChildren) => {
             reactQueryClient={reactQueryClient}
             roomClient={null}
         >
-            {children}
+            <SuspenseWithFallback
+                modifyFallback={element => <ThemedDiv style={{ padding: 5 }}>{element}</ThemedDiv>}
+            >
+                {children}
+            </SuspenseWithFallback>
         </AllContextProvider>
     );
 };

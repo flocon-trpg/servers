@@ -176,7 +176,6 @@ export const useSetupApp = () => {
 
     const user = useAtomValue(firebaseUserAtom);
     const userValue = useAtomValue(firebaseUserValueAtom);
-    const myUserUid = useMyUserUid();
     const httpUri = useAtomValue(httpUriAtom);
     const wsUri = useAtomValue(wsUriAtom);
     const { getIdTokenResult, canGetIdToken } = useAtomValue(getIdTokenResultAtom);

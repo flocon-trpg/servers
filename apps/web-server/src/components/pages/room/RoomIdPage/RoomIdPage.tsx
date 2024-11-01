@@ -31,6 +31,7 @@ import { Center } from '@/components/ui/Center/Center';
 import { GraphQLErrorResult } from '@/components/ui/GraphQLErrorResult/GraphQLErrorResult';
 import { Layout, loginAndEntry, success } from '@/components/ui/Layout/Layout';
 import { LoadingResult } from '@/components/ui/LoadingResult/LoadingResult';
+import { SuspenseWithFallback } from '@/components/ui/SuspenseWithFallback/SuspenseWithFallback';
 import { RoomClientContext, RoomClientContextValue } from '@/contexts/RoomClientContext';
 import { useRoomClient } from '@/hooks/roomClientHooks';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
@@ -427,7 +428,9 @@ export const RoomId: React.FC<{ id: string | null }> = ({ id }) => {
 
     return (
         <Layout requires={loginAndEntry} hideHeader={success}>
-            <RoomClientInitializer roomId={id} />
+            <SuspenseWithFallback>
+                <RoomClientInitializer roomId={id} />
+            </SuspenseWithFallback>
         </Layout>
     );
 };

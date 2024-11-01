@@ -65,6 +65,7 @@ import {
     debouncedWindowInnerWidthAtom,
 } from '@/components/pages/room/RoomIdPage/RoomIdPage';
 import { DraggableCard, horizontalPadding } from '@/components/ui/DraggableCard/DraggableCard';
+import { SuspenseWithFallback } from '@/components/ui/SuspenseWithFallback/SuspenseWithFallback';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
@@ -151,13 +152,15 @@ const ActiveBoardPanel: React.FC = React.memo(function ActiveBoardPanel() {
             minWidth={150}
             zIndex={config.zIndex}
         >
-            <Board
-                canvasWidth={config.width}
-                canvasHeight={config.height}
-                type="activeBoard"
-                isBackground={false}
-                config={config}
-            />
+            <SuspenseWithFallback>
+                <Board
+                    canvasWidth={config.width}
+                    canvasHeight={config.height}
+                    type="activeBoard"
+                    isBackground={false}
+                    config={config}
+                />
+            </SuspenseWithFallback>
         </DraggableCard>
     );
 });
@@ -224,13 +227,15 @@ const BoardEditorPanel: React.FC<ConfigAndKeyProps<BoardEditorPanelConfig>> = Re
                 minWidth={150}
                 zIndex={config.zIndex}
             >
-                <Board
-                    canvasWidth={config.width}
-                    canvasHeight={config.height}
-                    type="boardEditor"
-                    boardEditorPanelId={keyName}
-                    config={config}
-                />
+                <SuspenseWithFallback>
+                    <Board
+                        canvasWidth={config.width}
+                        canvasHeight={config.height}
+                        type="boardEditor"
+                        boardEditorPanelId={keyName}
+                        config={config}
+                    />
+                </SuspenseWithFallback>
             </DraggableCard>
         );
     },
@@ -311,7 +316,9 @@ const ChatPalettePanel: React.FC<ConfigAndKeyProps<ChatPalettePanelConfig>> = Re
                 minWidth={150}
                 zIndex={config.zIndex}
             >
-                <ChatPalettePanelContent roomId={roomId} panelId={keyName} />
+                <SuspenseWithFallback>
+                    <ChatPalettePanelContent roomId={roomId} panelId={keyName} />
+                </SuspenseWithFallback>
             </DraggableCard>
         );
     },
@@ -391,7 +398,9 @@ const CharacterPanel: React.FC = React.memo(function CharacterPanel() {
             minWidth={150}
             zIndex={config.zIndex}
         >
-            <CharacterListPanelContent height={config.height} />
+            <SuspenseWithFallback>
+                <CharacterListPanelContent height={config.height} />
+            </SuspenseWithFallback>
         </DraggableCard>
     );
 });
@@ -456,7 +465,9 @@ const GameEffectPanel: React.FC = React.memo(function GameEffectPanel() {
             minWidth={150}
             zIndex={config.zIndex}
         >
-            <SoundPlayerPanelContent />
+            <SuspenseWithFallback>
+                <SoundPlayerPanelContent />
+            </SuspenseWithFallback>
         </DraggableCard>
     );
 });
@@ -542,10 +553,12 @@ const MemoPanel: React.FC<ConfigAndKeyProps<MemoPanelConfig>> = React.memo(funct
             minWidth={150}
             zIndex={config.zIndex}
         >
-            <MemosPanelContent
-                selectedMemoId={config.selectedMemoId}
-                onSelectedMemoIdChange={onSelectedMemoIdChange}
-            />
+            <SuspenseWithFallback>
+                <MemosPanelContent
+                    selectedMemoId={config.selectedMemoId}
+                    onSelectedMemoIdChange={onSelectedMemoIdChange}
+                />
+            </SuspenseWithFallback>
         </DraggableCard>
     );
 });
@@ -624,7 +637,9 @@ const ParticipantPanel: React.FC = () => {
             minWidth={150}
             zIndex={config.zIndex}
         >
-            <ParticipantListPanelContent />
+            <SuspenseWithFallback>
+                <ParticipantListPanelContent />
+            </SuspenseWithFallback>
         </DraggableCard>
     );
 };
@@ -693,7 +708,9 @@ const PieceValuePanel: React.FC = () => {
             {activeBoardId == null ? (
                 'ボードビュアーにボードが表示されていないため、無効化されています'
             ) : (
-                <PieceListPanelContent boardId={activeBoardId} />
+                <SuspenseWithFallback>
+                    <PieceListPanelContent boardId={activeBoardId} />
+                </SuspenseWithFallback>
             )}
         </DraggableCard>
     );
@@ -762,7 +779,9 @@ const RollCallPanel: React.FC = () => {
             zIndex={config.zIndex}
             highlightKey={highlightKey.rollCallPanel}
         >
-            <RollCall rollCalls={rollCalls ?? {}} />
+            <SuspenseWithFallback>
+                <RollCall rollCalls={rollCalls ?? {}} />
+            </SuspenseWithFallback>
         </DraggableCard>
     );
 };
@@ -839,7 +858,9 @@ const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.
                 minWidth={150}
                 zIndex={config.zIndex}
             >
-                <RoomMessagesPanelContent panelId={keyName} height={config.height} />
+                <SuspenseWithFallback>
+                    <RoomMessagesPanelContent panelId={keyName} height={config.height} />
+                </SuspenseWithFallback>
             </DraggableCard>
         );
     },
@@ -904,19 +925,23 @@ export const Room: React.FC<Props> = ({ debug }) => {
         <AntdLayout>
             <RoomGlobalStyle />
             <AntdLayout.Content>
-                <RoomMenu />
+                <SuspenseWithFallback>
+                    <RoomMenu />
+                </SuspenseWithFallback>
                 <div className={classNames(relative)}>
                     {showBackgroundBoardViewer && (
-                        <Board
-                            canvasWidth={debug?.window?.innerWidth ?? innerWidth}
-                            canvasHeight={
-                                (debug?.window?.innerHeight ?? innerHeight) -
-                                40 /* TODO: 40という値は適当 */
-                            }
-                            type="activeBoard"
-                            isBackground={true}
-                            config={activeBoardBackgroundConfig}
-                        />
+                        <SuspenseWithFallback>
+                            <Board
+                                canvasWidth={debug?.window?.innerWidth ?? innerWidth}
+                                canvasHeight={
+                                    (debug?.window?.innerHeight ?? innerHeight) -
+                                    40 /* TODO: 40という値は適当 */
+                                }
+                                type="activeBoard"
+                                isBackground={true}
+                                config={activeBoardBackgroundConfig}
+                            />
+                        </SuspenseWithFallback>
                     )}
                     <BoardEditorPanels />
                     <ActiveBoardPanel />
