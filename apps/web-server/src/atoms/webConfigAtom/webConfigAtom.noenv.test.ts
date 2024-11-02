@@ -9,6 +9,7 @@ import { useAtom, useSetAtom } from 'jotai';
 import { describe, expect, it } from 'vitest';
 import { fakeEnvText, fakeEnvTextSource } from './fakeEnvText';
 import { mockImportMetaEnvAtom, mockPublicEnvTxtAtom, webConfigAtom } from './webConfigAtom';
+import { WebConfig } from '@/configType';
 
 // これを実行しないと、OSに設定されている環境変数や .env ファイルが読み込まれてしまう。実行するタイミングはどこでも構わないはず。
 const preventUsingImportMetaEnv = () => {
@@ -36,7 +37,10 @@ describe('webConfigAtom (process.env does not exist)', () => {
         });
         await waitForWebConfig();
 
-        expect(webConfigAtomResult.current[0]?.value).toBeUndefined();
+        expect(webConfigAtomResult.current[0]?.value).toEqual({
+            isUnlistedFirebaseStorageEnabled: false,
+            isPublicFirebaseStorageEnabled: false,
+        } satisfies WebConfig);
     });
 
     it('tests with non-empty env.txt', async () => {
