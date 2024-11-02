@@ -51,8 +51,8 @@ import {
 } from './subcomponents/components/CanvasOrDiceOrStringPiece/CanvasOrDiceOrStringPiece';
 import { ImagePiece } from './subcomponents/components/ImagePiece/ImagePiece';
 import {
-    editBoard,
     custom,
+    editBoard,
     roomConfigAtomFamily,
     zoomBoard,
 } from '@/atoms/roomConfigAtom/roomConfigAtom';
