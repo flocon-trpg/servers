@@ -1,4 +1,4 @@
-import { FirebaseConfig } from '@flocon-trpg/core';
+import { FirebaseConfig, env } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
 import { Link } from '@tanstack/react-router';
 import { Alert, Card, Divider, Popover } from 'antd';
@@ -6,14 +6,6 @@ import { useAtomValue } from 'jotai';
 import React, { PropsWithChildren } from 'react';
 import { EnvsMonitorAtomReturnType, envsMonitorAtom } from '@/atoms/webConfigAtom/webConfigAtom';
 import { HelpMessageTooltip } from '@/components/ui/HelpMessageTooltip/HelpMessageTooltip';
-import {
-    NEXT_PUBLIC_API_HTTP,
-    NEXT_PUBLIC_API_WS,
-    NEXT_PUBLIC_AUTH_PROVIDERS,
-    NEXT_PUBLIC_FIREBASE_CONFIG,
-    NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED,
-    NEXT_PUBLIC_LOG_LEVEL,
-} from '@/env';
 
 const ValueView: React.FC<PropsWithChildren<{ code?: boolean }>> = ({ children, code }) => {
     // TODO: ダークモード以外にも対応するときは、背景色を変える
@@ -360,7 +352,7 @@ const EnvsMonitorCardContent: React.FC<EnvsMonitorContentProps> = ({ envsMonitor
 
     return (
         <div>
-            <h4>{NEXT_PUBLIC_FIREBASE_CONFIG}</h4>
+            <h4>{env.NEXT_PUBLIC_FIREBASE_CONFIG}</h4>
             <p>
                 <ParsedFirebaseConfigValueView
                     value={
@@ -375,13 +367,13 @@ const EnvsMonitorCardContent: React.FC<EnvsMonitorContentProps> = ({ envsMonitor
             </p>
             {envsMonitor.value.firebaseConfig.final == null && (
                 <Alert
-                    message={`Flocon の Web サーバーを動かすには ${NEXT_PUBLIC_FIREBASE_CONFIG} で Firebase の設定が必要です。`}
+                    message={`Flocon の Web サーバーを動かすには ${env.NEXT_PUBLIC_FIREBASE_CONFIG} で Firebase の設定が必要です。`}
                     type="error"
                     showIcon
                 />
             )}
             <Divider />
-            <h4>{NEXT_PUBLIC_API_HTTP}</h4>
+            <h4>{env.NEXT_PUBLIC_API_HTTP}</h4>
             <p>
                 <ParsedValueView value={envsMonitor.value.http.final} />
                 <Popover trigger="click" content={httpPopoverContent}>
@@ -390,13 +382,13 @@ const EnvsMonitorCardContent: React.FC<EnvsMonitorContentProps> = ({ envsMonitor
             </p>
             {envsMonitor.value.http.final == null && (
                 <Alert
-                    message={`Flocon の Web サーバーを動かすには通常は ${NEXT_PUBLIC_API_HTTP} で  API サーバーの URL を HTTPS もしくは HTTP で設定する必要があります。`}
+                    message={`Flocon の Web サーバーを動かすには通常は ${env.NEXT_PUBLIC_API_HTTP} で  API サーバーの URL を HTTPS もしくは HTTP で設定する必要があります。`}
                     type="warning"
                     showIcon
                 />
             )}
             <Divider />
-            <h4>{NEXT_PUBLIC_API_WS}</h4>
+            <h4>{env.NEXT_PUBLIC_API_WS}</h4>
             <p>
                 <ParsedValueView value={envsMonitor.value.ws.final} />
                 <Popover trigger="click" content={wsPopoverContent}>
@@ -405,13 +397,13 @@ const EnvsMonitorCardContent: React.FC<EnvsMonitorContentProps> = ({ envsMonitor
             </p>
             {envsMonitor.value.ws.final == null && (
                 <Alert
-                    message={`Flocon の Web サーバーを動かすには通常は ${NEXT_PUBLIC_API_WS} で API サーバーの WebSocket の URL を設定する必要があります。URL は通常、wss:// か ws:// で始まります。`}
+                    message={`Flocon の Web サーバーを動かすには通常は ${env.NEXT_PUBLIC_API_WS} で API サーバーの WebSocket の URL を設定する必要があります。URL は通常、wss:// か ws:// で始まります。`}
                     type="warning"
                     showIcon
                 />
             )}
             <Divider />
-            <h4>{NEXT_PUBLIC_AUTH_PROVIDERS}</h4>
+            <h4>{env.NEXT_PUBLIC_AUTH_PROVIDERS}</h4>
             <p>
                 <ParsedValueView value={envsMonitor.value.authProviders.final} />
                 <Popover
@@ -423,7 +415,7 @@ const EnvsMonitorCardContent: React.FC<EnvsMonitorContentProps> = ({ envsMonitor
                 </Popover>
             </p>
             <Divider />
-            <h4>{NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED}</h4>
+            <h4>{env.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED}</h4>
             <p>
                 <ParsedValueView value={envsMonitor.value.isUnlistedFirebaseStorageEnabled.final} />
                 <Popover trigger="click" content={unlistedFirebaseStorageEnabledPopoverContent}>
@@ -431,7 +423,7 @@ const EnvsMonitorCardContent: React.FC<EnvsMonitorContentProps> = ({ envsMonitor
                 </Popover>
             </p>
             <Divider />
-            <h4>{NEXT_PUBLIC_LOG_LEVEL}</h4>
+            <h4>{env.NEXT_PUBLIC_LOG_LEVEL}</h4>
             <p>
                 <ParsedValueView value={envsMonitor.value.logLevel.final} />
                 <Popover trigger="click" content={logLevelPopoverContent}>

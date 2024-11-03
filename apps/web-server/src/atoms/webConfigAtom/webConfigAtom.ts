@@ -1,4 +1,4 @@
-import { FirebaseConfig, firebaseConfig } from '@flocon-trpg/core';
+import { FirebaseConfig, env, firebaseConfig } from '@flocon-trpg/core';
 import {
     PinoLogLevel,
     loggerRef,
@@ -10,7 +10,6 @@ import { Option } from '@kizahasi/option';
 import { Result } from '@kizahasi/result';
 import { atom } from 'jotai/vanilla';
 import { MockableWebConfig, WebConfig } from '../../configType';
-import { NEXT_PUBLIC_LOG_LEVEL } from '../../env';
 import { fetchEnvTxtAtom } from '../fetchEnvTxtAtom/fetchEnvTxtAtom';
 import { storybookAtom } from '../storybookAtom/storybookAtom';
 import { DotenvParseOutput, parse } from '@/utils/dotEnvParse';
@@ -83,7 +82,7 @@ class Env {
         if (this.source.logLevel == null) {
             return { source: undefined, parsed: undefined };
         }
-        const parsed = parsePinoLogLevel(this.source.logLevel, NEXT_PUBLIC_LOG_LEVEL);
+        const parsed = parsePinoLogLevel(this.source.logLevel, env.NEXT_PUBLIC_LOG_LEVEL);
 
         return {
             source: this.source.logLevel,

@@ -1,29 +1,20 @@
 // @vitest-environment jsdom
 
-import { fakeFirebaseConfig1 } from '@flocon-trpg/core';
+import { env, fakeFirebaseConfig1 } from '@flocon-trpg/core';
 import { delay } from '@flocon-trpg/utils';
 import { Option } from '@kizahasi/option';
 import { act, renderHook } from '@testing-library/react';
 import { useAtom, useSetAtom } from 'jotai';
 import { describe, expect, it } from 'vitest';
-import {
-    NEXT_PUBLIC_API_HTTP,
-    NEXT_PUBLIC_API_WS,
-    NEXT_PUBLIC_AUTH_PROVIDERS,
-    NEXT_PUBLIC_FIREBASE_CONFIG,
-    NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED,
-    email,
-    google,
-} from '../../env';
 import { fakeEnvText } from './fakeEnvText';
 import { mockImportMetaEnvAtom, mockPublicEnvTxtAtom, webConfigAtom } from './webConfigAtom';
 
 const fakeEnvFile = {
-    [NEXT_PUBLIC_API_HTTP]: 'https://processenv.example.com/',
-    [NEXT_PUBLIC_API_WS]: 'wss://processenv.example.com/',
-    [NEXT_PUBLIC_AUTH_PROVIDERS]: 'google,email',
-    [NEXT_PUBLIC_FIREBASE_CONFIG]: fakeFirebaseConfig1[1],
-    [NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED]: 'true',
+    [env.NEXT_PUBLIC_API_HTTP]: 'https://processenv.example.com/',
+    [env.NEXT_PUBLIC_API_WS]: 'wss://processenv.example.com/',
+    [env.NEXT_PUBLIC_AUTH_PROVIDERS]: 'google,email',
+    [env.NEXT_PUBLIC_FIREBASE_CONFIG]: fakeFirebaseConfig1[1],
+    [env.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED]: 'true',
 } as const;
 
 // webConfigAtom は async に値を取得する atom であるため、少し待つ必要がある。
@@ -51,11 +42,13 @@ describe('webConfigAtom (process.env exists)', () => {
         }
 
         expect(webConfigAtomResult.current[0].value.http).toEqual(
-            fakeEnvFile[NEXT_PUBLIC_API_HTTP],
+            fakeEnvFile[env.NEXT_PUBLIC_API_HTTP],
         );
-        expect(webConfigAtomResult.current[0].value.ws).toEqual(fakeEnvFile[NEXT_PUBLIC_API_WS]);
+        expect(webConfigAtomResult.current[0].value.ws).toEqual(
+            fakeEnvFile[env.NEXT_PUBLIC_API_WS],
+        );
         expect(webConfigAtomResult.current[0].value.authProviders?.sort()).toEqual(
-            [email, google].sort(),
+            [env.authProviders.email, env.authProviders.google].sort(),
         );
         expect(webConfigAtomResult.current[0].value.firebaseConfig).toEqual(fakeFirebaseConfig1[0]);
         expect(webConfigAtomResult.current[0].value.isUnlistedFirebaseStorageEnabled).toBe(true);
@@ -83,11 +76,13 @@ describe('webConfigAtom (process.env exists)', () => {
         }
 
         expect(webConfigAtomResult.current[0].value.http).toEqual(
-            fakeEnvFile[NEXT_PUBLIC_API_HTTP],
+            fakeEnvFile[env.NEXT_PUBLIC_API_HTTP],
         );
-        expect(webConfigAtomResult.current[0].value.ws).toEqual(fakeEnvFile[NEXT_PUBLIC_API_WS]);
+        expect(webConfigAtomResult.current[0].value.ws).toEqual(
+            fakeEnvFile[env.NEXT_PUBLIC_API_WS],
+        );
         expect(webConfigAtomResult.current[0].value.authProviders?.sort()).toEqual(
-            [email, google].sort(),
+            [env.authProviders.email, env.authProviders.google].sort(),
         );
         expect(webConfigAtomResult.current[0].value.firebaseConfig).toEqual(fakeFirebaseConfig1[0]);
         expect(webConfigAtomResult.current[0].value.isUnlistedFirebaseStorageEnabled).toBe(true);

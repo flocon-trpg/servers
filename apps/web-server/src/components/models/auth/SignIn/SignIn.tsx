@@ -1,4 +1,5 @@
 import { FirebaseError } from '@firebase/util';
+import { env } from '@flocon-trpg/core';
 import { useNavigate } from '@tanstack/react-router';
 import { Alert, Button, Form, Input, Tooltip } from 'antd';
 import classNames from 'classnames';
@@ -26,7 +27,6 @@ import { storybookAtom } from '@/atoms/storybookAtom/storybookAtom';
 import { AwaitableButton } from '@/components/ui/AwaitableButton/AwaitableButton';
 import { Center } from '@/components/ui/Center/Center';
 import { Layout } from '@/components/ui/Layout/Layout';
-import { anonymous, email, facebook, github, google, phone, twitter } from '@/env';
 import { firebaseAuthAtom } from '@/hooks/useSetupApp';
 import { useWebConfig } from '@/hooks/useWebConfig';
 import { flex, flexColumn, flexRow } from '@/styles/className';
@@ -246,25 +246,25 @@ const Email: React.FC = () => {
 };
 
 const areProvidersEmpty = (providers: string[]): boolean => {
-    if (providers.includes(anonymous)) {
+    if (providers.includes(env.authProviders.anonymous)) {
         return false;
     }
-    if (providers.includes(email)) {
+    if (providers.includes(env.authProviders.email)) {
         return false;
     }
-    if (providers.includes(facebook)) {
+    if (providers.includes(env.authProviders.facebook)) {
         return false;
     }
-    if (providers.includes(github)) {
+    if (providers.includes(env.authProviders.github)) {
         return false;
     }
-    if (providers.includes(google)) {
+    if (providers.includes(env.authProviders.google)) {
         return false;
     }
-    if (providers.includes(phone)) {
+    if (providers.includes(env.authProviders.phone)) {
         return false;
     }
-    if (providers.includes(twitter)) {
+    if (providers.includes(env.authProviders.twitter)) {
         return false;
     }
     return true;
@@ -330,12 +330,12 @@ const SignInContent: React.FC = () => {
                 >
                     {'< トップページに戻る'}
                 </a>
-                {(areProvidersEmptyValue || authProviders.includes(email)) && (
+                {(areProvidersEmptyValue || authProviders.includes(env.authProviders.email)) && (
                     <Button style={{ margin }} onClick={() => setEmailMode(true)}>
                         {`メールアドレス・パスワード${suffix}`}
                     </Button>
                 )}
-                {(areProvidersEmptyValue || authProviders.includes(google)) && (
+                {(areProvidersEmptyValue || authProviders.includes(env.authProviders.google)) && (
                     <AwaitableButton
                         style={{ margin }}
                         onClick={() => loginWithAuthProvider(googleProvider)}
@@ -343,7 +343,7 @@ const SignInContent: React.FC = () => {
                         {`Googleアカウント${suffix}`}
                     </AwaitableButton>
                 )}
-                {(areProvidersEmptyValue || authProviders.includes(twitter)) && (
+                {(areProvidersEmptyValue || authProviders.includes(env.authProviders.twitter)) && (
                     <AwaitableButton
                         style={{ margin }}
                         onClick={() => loginWithAuthProvider(twitterProvider)}
@@ -351,7 +351,7 @@ const SignInContent: React.FC = () => {
                         {`Twitterアカウント${suffix}`}
                     </AwaitableButton>
                 )}
-                {(areProvidersEmptyValue || authProviders.includes(facebook)) && (
+                {(areProvidersEmptyValue || authProviders.includes(env.authProviders.facebook)) && (
                     <AwaitableButton
                         style={{ margin }}
                         onClick={() => loginWithAuthProvider(facebookProvider)}
@@ -359,7 +359,7 @@ const SignInContent: React.FC = () => {
                         {`Facebookアカウント${suffix}`}
                     </AwaitableButton>
                 )}
-                {(areProvidersEmptyValue || authProviders.includes(github)) && (
+                {(areProvidersEmptyValue || authProviders.includes(env.authProviders.github)) && (
                     <AwaitableButton
                         style={{ margin }}
                         onClick={() => loginWithAuthProvider(githubProvider)}
@@ -367,7 +367,7 @@ const SignInContent: React.FC = () => {
                         {`GitHubアカウント${suffix}`}
                     </AwaitableButton>
                 )}
-                {(areProvidersEmptyValue || authProviders.includes(phone)) && (
+                {(areProvidersEmptyValue || authProviders.includes(env.authProviders.phone)) && (
                     <AwaitableButton
                         style={{ margin }}
                         onClick={async () =>
@@ -379,7 +379,8 @@ const SignInContent: React.FC = () => {
                         {`電話認証${suffix}`}
                     </AwaitableButton>
                 )}
-                {(areProvidersEmptyValue || authProviders.includes(anonymous)) && (
+                {(areProvidersEmptyValue ||
+                    authProviders.includes(env.authProviders.anonymous)) && (
                     <Tooltip title="アカウントを作成せずに匿名でログインします。匿名ユーザーのデータは消失しやすいため、あくまでお試しとして使うことを推奨します。非匿名アカウントに後からアップグレードすることもできます。">
                         <Button
                             style={{ margin }}
