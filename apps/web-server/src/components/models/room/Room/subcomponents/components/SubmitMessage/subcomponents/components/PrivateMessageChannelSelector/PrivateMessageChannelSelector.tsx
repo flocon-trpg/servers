@@ -28,7 +28,7 @@ export const PrivateMessageChannelSelector: React.FC<Props> = ({
         <div className={classNames(flexNone, flex, flexRow, itemsCenter)}>
             <InputDescription style={descriptionStyle}>宛先</InputDescription>
             <ParticipantsSelect
-                placeholder='秘話の宛先（1人も指定されていない場合は独り言になります）'
+                placeholder="秘話の宛先（1人も指定されていない場合は独り言になります）"
                 selectedParticipantIds={participantIdsOfSendTo}
                 onChange={newIds => {
                     const newSet = new Set(newIds);

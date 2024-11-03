@@ -86,27 +86,27 @@ const BalloonCore: React.FC<BalloonCoreProps> = ({
                         >
                             <ReactKonva.Tag
                                 strokeWidth={0}
-                                fill='#303030'
-                                shadowColor='black'
+                                fill="#303030"
+                                shadowColor="black"
                                 shadowBlur={5}
                                 shadowOffsetX={5}
                                 shadowOffsetY={5}
                                 shadowOpacity={0.3}
                                 pointerWidth={6}
                                 pointerHeight={6}
-                                pointerDirection='down'
-                                lineJoin='round'
+                                pointerDirection="down"
+                                lineJoin="round"
                             />
                             <ReactKonva.Text
                                 text={item}
-                                fontFamily='Noto Sans JP Regular'
+                                fontFamily="Noto Sans JP Regular"
                                 fontSize={14}
                                 padding={4}
-                                fill='white'
-                                verticalAlign='middle'
+                                fill="white"
+                                verticalAlign="middle"
                                 width={width}
                                 height={balloonCoreTextHeight - 7}
-                                wrap='word'
+                                wrap="word"
                                 ellipsis
                             />
                         </ReactKonva.Label>
@@ -287,7 +287,7 @@ export const ImagePiece: React.FC<Props> = props => {
                           : undefined
                 }
                 onBalloonChange={balloonExists => {
-                    setOpacitySpringProps.start({
+                    void setOpacitySpringProps.start({
                         opacity: balloonExists ? 1 : (props.opacity ?? 1),
                     });
                 }}

@@ -3,7 +3,7 @@ import { Result } from '@kizahasi/result';
 import { LocalDate, LocalDateTime, LocalTime, OffsetDateTime, parse as parse$2 } from '@ltd/j-toml';
 import { FObject, FBoolean, ScriptError, beginCast, FFunction, FRecord, FString, FType, FNumber, FRecordRef, test, arrayClass, createConsoleClass, exec } from '@flocon-trpg/flocon-script';
 import { recordToArray, mapRecord, keyNames, recordToMap, mapToRecord, groupJoinMap, both, right, left, recordForEach, chooseRecord, loggerRef, isReadonlyNonEmptyArray, groupJoinArray, pairwiseIterable, DualKeyMap } from '@flocon-trpg/utils';
-import { cloneDeep, groupBy, maxBy } from 'lodash';
+import { cloneDeep, groupBy, maxBy } from 'es-toolkit';
 import { deserializeUpOperation, apply as apply$6, serializeTwoWayOperation, diff as diff$5, deserializeTwoWayOperation, toUpOperation as toUpOperation$3, serializeUpOperation, deserializeDownOperation, applyBack as applyBack$5, composeDownOperation as composeDownOperation$4, serializeDownOperation, applyBackAndRestore, transformUpOperation, toDownOperation as toDownOperation$3, applyAndRestore, transformTwoWayOperation } from '@kizahasi/ot-string';
 import truncate from 'truncate-utf8-bytes';
 import { produce } from 'immer';
@@ -193,7 +193,6 @@ const forceMaxLength100String = (source) => {
 /** @deprecated Use `optional` method in zod. */
 const maybe = (source) => source.optional();
 
-/* eslint-disable @typescript-eslint/no-namespace */
 var PublicChannelKey;
 (function (PublicChannelKey) {
     (function (Without$System) {
@@ -220,7 +219,9 @@ var PublicChannelKey;
 // NOT cryptographically secure
 const simpleId = () => {
     const idLength = 9;
-    let result = Math.random().toString(36).substr(2, idLength);
+    let result = Math.random()
+        .toString(36)
+        .substring(2, 2 + idLength);
     while (result.length < idLength) {
         result = result + '0';
     }
@@ -1398,6 +1399,8 @@ const isIdRecord = (source) => {
 };
 const record$1 = (value) => z.record(value.optional());
 
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 const atomic = 'atomic';
 const replace = 'replace';
 const ot = 'ot';
@@ -3299,6 +3302,10 @@ const mapRecordDownOperation = ({ source, mapState, mapOperation, }) => {
     });
 };
 
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 const $v = '$v';
 const $r = '$r';
 const isKeyToIgnore = (key) => key === $v || key === $r;

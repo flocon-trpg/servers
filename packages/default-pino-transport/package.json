@@ -1,6 +1,7 @@
 {
     "name": "@flocon-trpg/default-pino-transport",
     "version": "0.9.2",
+    "private": true,
     "license": "MIT",
     "author": "kizahasi",
     "main": "dist/cjs/index.js",
@@ -25,16 +26,14 @@
         "@flocon-trpg/prettier-config": "workspace:^",
         "@flocon-trpg/rollup-config": "workspace:^",
         "@flocon-trpg/tsconfig": "workspace:^",
-        "@typescript-eslint/eslint-plugin": "5.62.0",
-        "@typescript-eslint/parser": "5.62.0",
-        "eslint": "8.57.1",
+        "eslint": "9.13.0",
         "eslint-config-prettier": "9.1.0",
-        "eslint-import-resolver-typescript": "3.6.3",
-        "eslint-plugin-import": "2.30.0",
+        "eslint-plugin-import": "2.31.0",
         "prettier": "3.3.3",
         "rimraf": "5.0.10",
-        "rollup": "4.23.0",
-        "typescript": "5.6.2"
+        "rollup": "4.24.0",
+        "typescript": "5.6.2",
+        "typescript-eslint": "8.11.0"
     },
     "engines": {
         "node": ">=18 <21"

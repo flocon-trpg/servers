@@ -1,5 +1,5 @@
 import { Result } from '@kizahasi/result';
-import { ComponentMeta } from '@storybook/react';
+import { Meta } from '@storybook/react';
 import { useSetAtom } from 'jotai';
 import React from 'react';
 import { SignIn } from './SignIn';
@@ -61,8 +61,20 @@ export const Default: React.FC<{
         setStorybook({
             isStorybook: true,
             mock: {
-                auth: { ...mockAuth, currentUser: { ...mockUser, isAnonymous: amIAnonymous } },
-                webConfig: Result.ok(mockWebConfig),
+                auth: {
+                    ...mockAuth,
+                    currentUser: { ...mockUser, isAnonymous: amIAnonymous },
+                    onAuthStateChanged: observer => {
+                        const unsubscribe = () => undefined;
+                        if (typeof observer === 'function') {
+                            observer(mockUser);
+                            return unsubscribe;
+                        }
+                        observer.next(mockUser);
+                        return unsubscribe;
+                    },
+                },
+                webConfig: mockWebConfig,
             },
         });
     }, [amIAnonymous, authProviders, setStorybook]);
@@ -78,7 +90,7 @@ export const Default: React.FC<{
     );
 };
 
-export default {
+const meta = {
     title: 'models/auth/SignIn',
     component: Default,
     args: {
@@ -92,4 +104,6 @@ export default {
         [Env.phone]: false,
         [Env.twitter]: false,
     },
-} as ComponentMeta<typeof Default>;
+} satisfies Meta<typeof Default>;
+
+export default meta;

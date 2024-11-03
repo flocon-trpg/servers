@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { Fieldset } from './Fieldset';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
@@ -6,7 +6,7 @@ import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 export const Default: React.FC<{ compact: boolean }> = ({ compact }) => {
     return (
         <StorybookProvider compact={compact} roomClientContextValue={null}>
-            <Fieldset legend='タイトル'>
+            <Fieldset legend="タイトル">
                 <div style={{ width: 400, height: 300, background: 'green', color: 'white' }}>
                     children
                 </div>
@@ -15,17 +15,20 @@ export const Default: React.FC<{ compact: boolean }> = ({ compact }) => {
     );
 };
 
-export default {
+const meta = {
     title: 'UI/Fieldset',
     component: Default,
     args: {
         compact: false,
     },
-} as ComponentMeta<typeof Default>;
+} satisfies Meta<typeof Default>;
 
-const Template: ComponentStory<typeof Default> = args => <Default {...args} />;
+export default meta;
 
-export const Compact = Template.bind({});
-Compact.args = {
-    compact: true,
+type Story = StoryObj<typeof meta>;
+
+export const Compact: Story = {
+    args: {
+        compact: true,
+    },
 };

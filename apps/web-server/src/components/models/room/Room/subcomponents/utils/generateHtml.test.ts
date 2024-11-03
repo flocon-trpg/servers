@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { HtmlObject, div, generateHtml } from './generateHtml';
 
 describe('generateHtml', () => {

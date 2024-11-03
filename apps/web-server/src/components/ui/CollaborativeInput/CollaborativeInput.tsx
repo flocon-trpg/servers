@@ -345,12 +345,14 @@ export const CollaborativeInput: React.FC<Props> = ({
                 previousValue: params.previousValue,
                 currentValue: params.currentValue,
             });
-            multiline
-                ? onChange(params)
-                : onChange({
-                      ...params,
-                      currentValue: params.currentValue.replaceAll('\r', '').replaceAll('\n', ''),
-                  });
+            if (multiline) {
+                onChange(params);
+            } else {
+                onChange({
+                    ...params,
+                    currentValue: params.currentValue.replaceAll('\r', '').replaceAll('\n', ''),
+                });
+            }
         },
         setValueToComponent: ({ value, component }) => {
             const prev = component.getText();

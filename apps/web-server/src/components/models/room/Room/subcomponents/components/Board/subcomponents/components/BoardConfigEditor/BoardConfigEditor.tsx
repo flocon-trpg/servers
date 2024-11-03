@@ -1,8 +1,9 @@
 import { Checkbox, InputNumber } from 'antd';
+import { useSetAtom } from 'jotai';
 import React from 'react';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { useRoomId } from '../../../../../hooks/useRoomId';
+import { editBoard, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { BoardConfig } from '@/atoms/roomConfigAtom/types/boardConfig';
-import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
 import { ColorPickerButton } from '@/components/ui/ColorPickerButton/ColorPickerButton';
 import {
     Table,
@@ -11,7 +12,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/Table/Table';
-import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { Styles } from '@/styles';
 import { rgba } from '@/utils/rgba';
 import { BoardType } from '@/utils/types';
@@ -25,7 +25,9 @@ export const BoardConfigEditor: React.FC<{
     boardType: BoardType;
     boardConfig: BoardConfig;
 }> = ({ boardId, boardType, boardConfig }) => {
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
     const createLabelVisibilityCheckbox = (
         label: string,
@@ -42,18 +44,13 @@ export const BoardConfigEditor: React.FC<{
                 <Checkbox
                     checked={boardConfig[key]}
                     onChange={e => {
-                        setRoomConfig(roomConfig => {
-                            if (roomConfig == null) {
-                                return;
-                            }
-                            RoomConfigUtils.editBoard(
-                                roomConfig,
-                                boardId,
-                                boardType,
-                                boardConfig => {
-                                    boardConfig[key] = e.target.checked;
-                                },
-                            );
+                        reduceRoomConfig({
+                            type: editBoard,
+                            boardId,
+                            boardType,
+                            action: boardConfig => {
+                                boardConfig[key] = e.target.checked;
+                            },
                         });
                     }}
                 >
@@ -70,48 +67,38 @@ export const BoardConfigEditor: React.FC<{
                 <Checkbox
                     checked={boardConfig.showGrid}
                     onChange={e => {
-                        setRoomConfig(roomConfig => {
-                            if (roomConfig == null) {
-                                return;
-                            }
-                            RoomConfigUtils.editBoard(
-                                roomConfig,
-                                boardId,
-                                boardType,
-                                boardConfig => {
-                                    boardConfig.showGrid = e.target.checked;
-                                },
-                            );
+                        reduceRoomConfig({
+                            type: editBoard,
+                            boardId,
+                            boardType,
+                            action: boardConfig => {
+                                boardConfig.showGrid = e.target.checked;
+                            },
                         });
                     }}
                 >
                     表示
                 </Checkbox>
             </TableRow>
-            <TableRow label='線の太さ'>
+            <TableRow label="線の太さ">
                 <InputNumber
                     value={boardConfig.gridLineTension}
                     onChange={e => {
                         if (e == null) {
                             return;
                         }
-                        setRoomConfig(roomConfig => {
-                            if (roomConfig == null) {
-                                return;
-                            }
-                            RoomConfigUtils.editBoard(
-                                roomConfig,
-                                boardId,
-                                boardType,
-                                boardConfig => {
-                                    boardConfig.gridLineTension = e;
-                                },
-                            );
+                        reduceRoomConfig({
+                            type: editBoard,
+                            boardId,
+                            boardType,
+                            action: boardConfig => {
+                                boardConfig.gridLineTension = e;
+                            },
                         });
                     }}
                 />
             </TableRow>
-            <TableRow label='色'>
+            <TableRow label="色">
                 {/* ↓ trigger='click' にすると、SketchPickerを開いている状態でPopover全体を閉じたときに次にSketchPickerが開かず（開き直したら直る）操作性が悪いため、'click'は用いていない */}
                 <ColorPickerButton
                     buttonStyle={NonTransparentStyle}
@@ -121,18 +108,13 @@ export const BoardConfigEditor: React.FC<{
                         if (boardId == null) {
                             return;
                         }
-                        setRoomConfig(roomConfig => {
-                            if (roomConfig == null) {
-                                return;
-                            }
-                            RoomConfigUtils.editBoard(
-                                roomConfig,
-                                boardId,
-                                boardType,
-                                boardConfig => {
-                                    boardConfig.gridLineColor = rgba(e.rgb);
-                                },
-                            );
+                        reduceRoomConfig({
+                            type: editBoard,
+                            boardId,
+                            boardType,
+                            action: boardConfig => {
+                                boardConfig.gridLineColor = rgba(e.rgb);
+                            },
                         });
                     }}
                 />

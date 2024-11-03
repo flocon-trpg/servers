@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { describe, expect, it } from 'vitest';
 import { moveElement } from './moveElement';
 
 const numberToString = (source: number): string => {
