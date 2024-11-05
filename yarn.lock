@@ -17,7 +17,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@adobe/css-tools@npm:^4.0.1, @adobe/css-tools@npm:^4.4.0":
+"@adobe/css-tools@npm:^4.4.0":
   version: 4.4.0
   resolution: "@adobe/css-tools@npm:4.4.0"
   checksum: 10/9c6315fe9efa5075d6ddb6ded7a1424bc9c41a01f2314b6bdcc368723985fe161008d03ddcc2b27b2da50cb9c14190fbce965d15cefe5f9a31bdd43f35b52115
@@ -5076,13 +5076,11 @@ __metadata:
     "@tanstack/react-router": "npm:^1.69.1"
     "@tanstack/router-devtools": "npm:^1.76.1"
     "@tanstack/router-plugin": "npm:1.76.0"
-    "@testing-library/jest-dom": "npm:5.17.0"
     "@testing-library/react": "npm:14.3.1"
     "@types/color": "npm:3.0.6"
     "@types/color-name": "npm:1.1.5"
     "@types/howler": "npm:2.2.12"
     "@types/html-escaper": "npm:3.0.2"
-    "@types/jest": "npm:29.5.14"
     "@types/quill": "npm:2.0.14"
     "@types/react": "npm:18.3.12"
     "@types/react-color": "npm:3.0.12"
@@ -8316,23 +8314,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/jest-dom@npm:5.17.0":
-  version: 5.17.0
-  resolution: "@testing-library/jest-dom@npm:5.17.0"
-  dependencies:
-    "@adobe/css-tools": "npm:^4.0.1"
-    "@babel/runtime": "npm:^7.9.2"
-    "@types/testing-library__jest-dom": "npm:^5.9.1"
-    aria-query: "npm:^5.0.0"
-    chalk: "npm:^3.0.0"
-    css.escape: "npm:^1.5.1"
-    dom-accessibility-api: "npm:^0.5.6"
-    lodash: "npm:^4.17.15"
-    redent: "npm:^3.0.0"
-  checksum: 10/5a75f2094f935d2da58ea1d2b3d0c9f58dc0bca2592f2ca8125176596b4adba88b742b7553ef228e2085eadcb498ce6cece3e78402e34e6af7b6bc26bf0a0baa
-  languageName: node
-  linkType: hard
-
 "@testing-library/jest-dom@npm:6.5.0":
   version: 6.5.0
   resolution: "@testing-library/jest-dom@npm:6.5.0"
@@ -8868,7 +8849,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jest@npm:*, @types/jest@npm:29.5.14":
+"@types/jest@npm:29.5.14":
   version: 29.5.14
   resolution: "@types/jest@npm:29.5.14"
   dependencies:
@@ -9311,15 +9292,6 @@ __metadata:
   version: 2.0.1
   resolution: "@types/stack-utils@npm:2.0.1"
   checksum: 10/205fdbe3326b7046d7eaf5e494d8084f2659086a266f3f9cf00bccc549c8e36e407f88168ad4383c8b07099957ad669f75f2532ed4bc70be2b037330f7bae019
-  languageName: node
-  linkType: hard
-
-"@types/testing-library__jest-dom@npm:^5.9.1":
-  version: 5.14.3
-  resolution: "@types/testing-library__jest-dom@npm:5.14.3"
-  dependencies:
-    "@types/jest": "npm:*"
-  checksum: 10/86342db2c02c22f56543beebe9d2456166e78169c062ead771f098fe01ef921a736be7cf68a5a414b1c0cb3eebc678bdd2fd00b6219d863b7e12a2294754a3d9
   languageName: node
   linkType: hard
 
@@ -13400,7 +13372,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dom-accessibility-api@npm:^0.5.6, dom-accessibility-api@npm:^0.5.9":
+"dom-accessibility-api@npm:^0.5.9":
   version: 0.5.14
   resolution: "dom-accessibility-api@npm:0.5.14"
   checksum: 10/19d7a7de931fcc7d9d67c270341220c6bda97124c3b1444b2bea6e8c6c3964ee09c339e3e69be5b830e3fcb60258d43e6377039974b69c5cec2f75db0114ac59
@@ -18954,7 +18926,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:^4.17.15, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:~4.17.0, lodash@npm:~4.17.21":
+"lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:~4.17.0, lodash@npm:~4.17.21":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: 10/c08619c038846ea6ac754abd6dd29d2568aa705feb69339e836dfa8d8b09abbb2f859371e86863eda41848221f9af43714491467b5b0299122431e202bb0c532
