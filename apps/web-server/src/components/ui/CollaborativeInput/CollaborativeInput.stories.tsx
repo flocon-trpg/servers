@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import classNames from 'classnames';
 import React from 'react';
 import { interval } from 'rxjs';
@@ -68,7 +68,7 @@ const Main: React.FC<{
     );
 };
 
-export default {
+const meta = {
     title: 'UI/CollaborativeInput',
     component: Main,
     args: {
@@ -77,25 +77,30 @@ export default {
         multiline: false,
         disabled: false,
         testUpdate: false,
-        testBottomElements: true,
+        testBottomElement: true,
     },
-} as ComponentMeta<typeof Main>;
+} satisfies Meta<typeof Main>;
 
-const Template: ComponentStory<typeof Main> = args => <Main {...args} />;
+export default meta;
 
-export const Default = Template.bind({});
+type Story = StoryObj<typeof meta>;
 
-export const DefaultMultiline = Template.bind({});
-DefaultMultiline.args = {
-    multiline: true,
+export const Default: Story = {};
+
+export const DefaultMultiline: Story = {
+    args: {
+        multiline: true,
+    },
 };
 
-export const Short = Template.bind({});
-Short.args = {
-    bufferDuration: 'short',
+export const Short: Story = {
+    args: {
+        bufferDuration: 'short',
+    },
 };
 
-export const NoBuffer = Template.bind({});
-NoBuffer.args = {
-    bufferDuration: null,
+export const NoBuffer: Story = {
+    args: {
+        bufferDuration: null,
+    },
 };

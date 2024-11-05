@@ -24,8 +24,8 @@ const FirebaseStorageLink: React.FC<{
     if (fullPath == null) {
         return (
             <Alert
-                type='warning'
-                message='fullPathの値がundefinedです。Firebase Storage インスタンスがnullの可能性があります。'
+                type="warning"
+                message="fullPathの値がundefinedです。Firebase Storage インスタンスがnullの可能性があります。"
             />
         );
     }
@@ -35,7 +35,7 @@ const FirebaseStorageLink: React.FC<{
     }
 
     return (
-        <a href={queryResult.data} target='_blank' rel='noopener noreferrer'>
+        <a href={queryResult.data} target="_blank" rel="noopener noreferrer">
             {fileName(fullPath)}
         </a>
     );
@@ -57,7 +57,7 @@ const FloconUploaderLink: React.FC<{
         return <span>{filename}</span>;
     }
 
-    return <a onClick={() => open(fileItem)}>{fileName(fileItem.screenname)}</a>;
+    return <a onClick={() => open?.(fileItem)}>{fileName(fileItem.screenname)}</a>;
 };
 
 type OnPathChange = (newValue: FilePath | FilePathState | null) => void;
@@ -113,8 +113,8 @@ export const FileView: React.FC<Props> = props => {
                 const a = (ellipsis: boolean) => (
                     <a
                         href={filePath.path}
-                        target='_blank'
-                        rel='noopener noreferrer'
+                        target="_blank"
+                        rel="noopener noreferrer"
                         style={
                             ellipsis
                                 ? {
@@ -154,7 +154,7 @@ export const FileView: React.FC<Props> = props => {
                     {filePath != null && (
                         <Button
                             onClick={() => {
-                                onPathChange && onPathChange(null);
+                                onPathChange?.(null);
                             }}
                         >
                             クリア
@@ -164,7 +164,7 @@ export const FileView: React.FC<Props> = props => {
                         visible={modalVisible}
                         onClose={() => setModalVisible(false)}
                         onSelect={newValue => {
-                            onPathChange && onPathChange(newValue);
+                            onPathChange?.(newValue);
                             setModalVisible(false);
                         }}
                         defaultFileTypeFilter={defaultFileTypeFilter}

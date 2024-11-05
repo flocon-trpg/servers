@@ -1,18 +1,18 @@
 import { State, boardTemplate, simpleId } from '@flocon-trpg/core';
 import { Divider, InputNumber, Modal, ModalProps } from 'antd';
-import { atom, useAtom } from 'jotai';
+import { atom, useAtom, useSetAtom } from 'jotai';
 import React from 'react';
 import { useMemoOne } from 'use-memo-one';
 import { useBoards } from '../../hooks/useBoards';
+import { useRoomId } from '../../hooks/useRoomId';
 import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { custom, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { FileView } from '@/components/models/file/FileView/FileView';
 import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
 import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import { CopyToClipboardButton } from '@/components/ui/CopyToClipboardButton/CopyToClipboardButton';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { Table, TableRow } from '@/components/ui/Table/Table';
-import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { create, update } from '@/utils/constants';
 import { FilePathModule } from '@/utils/file/filePath';
@@ -69,7 +69,9 @@ export const BoardEditorModal: React.FC = () => {
     const myUserUid = useMyUserUid();
     const setRoomState = useSetRoomStateWithImmer();
     const [modalValue, setModalValue] = useAtom(boardEditorModalAtom);
-    const setRoomConfigAtom = useImmerSetAtom(roomConfigAtom);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const boards = useBoards();
     const createMode: CreateModeParams<BoardState | undefined> | undefined = useMemoOne(() => {
         if (modalValue?.type !== create) {
@@ -91,20 +93,23 @@ export const BoardEditorModal: React.FC = () => {
                         ownerParticipantId: myUserUid,
                     };
                 });
-                setRoomConfigAtom(roomConfig => {
-                    if (modalValue.boardEditorPanelId == null) {
-                        return;
-                    }
-                    const originBoardEditorPanel =
-                        roomConfig?.panels.boardEditorPanels[modalValue.boardEditorPanelId];
-                    if (originBoardEditorPanel == null) {
-                        return;
-                    }
-                    originBoardEditorPanel.activeBoardId = id;
+                reduceRoomConfig({
+                    type: custom,
+                    action: roomConfig => {
+                        if (modalValue.boardEditorPanelId == null) {
+                            return;
+                        }
+                        const originBoardEditorPanel =
+                            roomConfig?.panels.boardEditorPanels[modalValue.boardEditorPanelId];
+                        if (originBoardEditorPanel == null) {
+                            return;
+                        }
+                        originBoardEditorPanel.activeBoardId = id;
+                    },
                 });
             },
         };
-    }, [modalValue, myUserUid, setRoomConfigAtom, setRoomState]);
+    }, [modalValue, myUserUid, reduceRoomConfig, setRoomState]);
     const updateMode: UpdateModeParams<BoardState | undefined> | undefined = useMemoOne(() => {
         if (modalValue?.type !== update) {
             return undefined;
@@ -183,10 +188,10 @@ export const BoardEditorModal: React.FC = () => {
             <div>
                 <Divider />
                 <Table>
-                    <TableRow label='名前'>
+                    <TableRow label="名前">
                         <CollaborativeInput
-                            bufferDuration='default'
-                            size='small'
+                            bufferDuration="default"
+                            size="small"
                             value={board.name}
                             onChange={e => {
                                 if (e.previousValue === e.currentValue) {
@@ -201,7 +206,7 @@ export const BoardEditorModal: React.FC = () => {
                             }}
                         />
                     </TableRow>
-                    <TableRow label='背景画像'>
+                    <TableRow label="背景画像">
                         <FileView
                             style={{ maxWidth: 450 }}
                             maxWidthOfLink={null}
@@ -219,9 +224,9 @@ export const BoardEditorModal: React.FC = () => {
                             uploaderFileBrowserHeight={null}
                         />
                     </TableRow>
-                    <TableRow label='背景画像の拡大率'>
+                    <TableRow label="背景画像の拡大率">
                         <InputNumber
-                            size='small'
+                            size="small"
                             value={board.backgroundImageZoom * 100}
                             min={0}
                             formatter={value => `${value}%`}
@@ -247,10 +252,10 @@ export const BoardEditorModal: React.FC = () => {
                             }
                         />
                     </TableRow>
-                    <TableRow label='セルの大きさ'>
+                    <TableRow label="セルの大きさ">
                         {/* cellWidth === cellHeight という前提だが、もし異なる場合は代表してcellWidthの値を用いることにしている */}
                         <InputNumber
-                            size='small'
+                            size="small"
                             value={board.cellWidth}
                             onChange={newValue =>
                                 typeof newValue === 'number'
@@ -265,10 +270,10 @@ export const BoardEditorModal: React.FC = () => {
                             }
                         />
                     </TableRow>
-                    <TableRow label='セルの基準点'>
+                    <TableRow label="セルの基準点">
                         <span>x=</span>
                         <InputNumber
-                            size='small'
+                            size="small"
                             value={board.cellOffsetX}
                             onChange={newValue =>
                                 typeof newValue === 'number'
@@ -283,7 +288,7 @@ export const BoardEditorModal: React.FC = () => {
                         />
                         <span style={{ marginLeft: 10 }}>y=</span>
                         <InputNumber
-                            size='small'
+                            size="small"
                             value={board.cellOffsetY}
                             onChange={newValue =>
                                 typeof newValue === 'number'
@@ -300,8 +305,8 @@ export const BoardEditorModal: React.FC = () => {
                 </Table>
                 <Divider dashed />
                 <CopyToClipboardButton
-                    clipboardText={async () => {
-                        return JSON.stringify(board);
+                    clipboardText={() => {
+                        return Promise.resolve(JSON.stringify(board));
                     }}
                 >
                     クリップボードにエクスポート

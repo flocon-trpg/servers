@@ -1,6 +1,7 @@
 {
     "name": "@flocon-trpg/sdk-react",
     "version": "0.1.0",
+    "private": true,
     "license": "MIT",
     "author": "kizahasi",
     "main": "dist/cjs/index.js",
@@ -16,7 +17,8 @@
         "prettier": "yarn prettier:base --write --cache",
         "prettier-check": "yarn prettier:base --check",
         "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\"",
-        "test": "jest"
+        "test": "jest",
+        "test-ci": "jest --ci --coverage"
     },
     "dependencies": {
         "@flocon-trpg/sdk": "workspace:^",
@@ -30,22 +32,20 @@
         "@flocon-trpg/rollup-config": "workspace:^",
         "@flocon-trpg/tsconfig": "workspace:^",
         "@testing-library/react": "14.3.1",
-        "@types/jest": "29.5.13",
-        "@typescript-eslint/eslint-plugin": "5.62.0",
-        "@typescript-eslint/parser": "5.62.0",
-        "eslint": "8.57.1",
+        "@types/jest": "29.5.14",
+        "eslint": "9.13.0",
         "eslint-config-prettier": "9.1.0",
-        "eslint-import-resolver-typescript": "3.6.3",
-        "eslint-plugin-import": "2.30.0",
-        "eslint-plugin-react": "7.37.1",
-        "eslint-plugin-react-hooks": "4.6.2",
+        "eslint-plugin-import": "2.31.0",
+        "eslint-plugin-react": "7.37.2",
+        "eslint-plugin-react-hooks": "5.1.0-rc-fb9a90fa48-20240614",
         "jest": "29.7.0",
         "jest-environment-jsdom": "29.7.0",
         "prettier": "3.3.3",
         "rimraf": "5.0.10",
-        "rollup": "4.23.0",
+        "rollup": "4.24.0",
         "ts-jest": "29.2.5",
-        "typescript": "5.6.2"
+        "typescript": "5.6.2",
+        "typescript-eslint": "8.11.0"
     },
     "engines": {
         "node": ">=18 <21"

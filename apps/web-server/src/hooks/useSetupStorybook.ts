@@ -2,13 +2,16 @@ import { Auth } from '@firebase/auth';
 import { FirebaseStorage } from '@firebase/storage';
 import { State as S, UpOperation as U, apply, roomTemplate, toOtError } from '@flocon-trpg/core';
 import { createTestRoomClient } from '@flocon-trpg/sdk';
-import { Result } from '@kizahasi/result';
 import { produce } from 'immer';
 import { useSetAtom } from 'jotai';
 import React from 'react';
 import { CombinedError } from 'urql';
 import { useMemoOne } from 'use-memo-one';
-import { roomConfigAtom } from '../atoms/roomConfigAtom/roomConfigAtom';
+import {
+    custom,
+    roomConfigAtomFamily,
+    setMockRoomConfig,
+} from '../atoms/roomConfigAtom/roomConfigAtom';
 import { defaultRoomConfig } from '../atoms/roomConfigAtom/types/roomConfig';
 import { storybookAtom } from '../atoms/storybookAtom/storybookAtom';
 import { WebConfig } from '../configType';
@@ -18,11 +21,12 @@ import {
     mockAuth,
     mockStorage,
     mockUser,
+    mockUserConfig,
     mockWebConfig,
 } from '../mocks';
 import { FirebaseUserState } from '../utils/firebase/firebaseUserState';
 import { Recipe, SetAction } from '../utils/types';
-import { useMockUserConfig } from './useMockUserConfig';
+import { setMockUserConfig } from '@/atoms/userConfigAtom/userConfigAtom';
 import { NotificationType } from '@/components/models/room/Room/subcomponents/components/Notification/Notification';
 import { RoomClientContextValue } from '@/contexts/RoomClientContext';
 
@@ -41,7 +45,7 @@ export const useSetupStorybook = ({
         auth?: Auth;
         user?: FirebaseUserState;
         storage?: FirebaseStorage;
-        webConfig?: Result<WebConfig>;
+        webConfig?: WebConfig;
     };
     // custom が nullish ならば、Partial<Parameters<typeof createMockRoom>[0]> の値から createMockRoom を実行して RoomState が作成される。update はどちらの場合でも用いられる。
     room?: Partial<Parameters<typeof createMockRoom>[0]> & {
@@ -54,15 +58,40 @@ export const useSetupStorybook = ({
         doNotQuery?: boolean;
     };
 } = {}) => {
+    React.useEffect(() => {
+        setMockRoomConfig(defaultRoomConfig(roomId));
+        return () => {
+            setMockRoomConfig(null);
+        };
+    }, []);
+    React.useEffect(() => {
+        setMockUserConfig(mockUserConfig);
+        return () => {
+            setMockUserConfig(null);
+        };
+    }, []);
+
     const setStorybook = useSetAtom(storybookAtom);
     React.useEffect(() => {
         setStorybook({
             isStorybook: true,
             mock: {
-                auth: basicMockProp?.auth ?? { ...mockAuth, currentUser: mockUser },
+                auth: basicMockProp?.auth ?? {
+                    ...mockAuth,
+                    currentUser: mockUser,
+                    onAuthStateChanged: observer => {
+                        const unsubscribe = () => undefined;
+                        if (typeof observer === 'function') {
+                            observer(mockUser);
+                            return unsubscribe;
+                        }
+                        observer.next(mockUser);
+                        return unsubscribe;
+                    },
+                },
                 storage: basicMockProp?.storage ?? mockStorage,
                 user: basicMockProp?.user ?? mockUser,
-                webConfig: basicMockProp?.webConfig ?? Result.ok(mockWebConfig),
+                webConfig: basicMockProp?.webConfig ?? mockWebConfig,
             },
         });
     }, [
@@ -130,7 +159,6 @@ export const useSetupStorybook = ({
         next();
     }, [testRoomClient.source.roomState, room]);
 
-    useMockUserConfig();
     React.useEffect(() => {
         testRoomClient.source.roomMessageClient.clear();
         if (roomMessagesConfigProp?.doNotQuery === true) {
@@ -146,13 +174,14 @@ export const useSetupStorybook = ({
         roomMessagesConfigProp?.doNotQuery,
         testRoomClient.source.roomMessageClient,
     ]);
-    const setRoomConfig = useSetAtom(roomConfigAtom);
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const roomConfig = React.useMemo(() => {
         return defaultRoomConfig(roomId);
     }, []);
     React.useEffect(() => {
-        setRoomConfig(roomConfig);
-    }, [roomConfig, setRoomConfig]);
+        reduceRoomConfig({ type: custom, action: () => roomConfig });
+    }, [roomConfig, reduceRoomConfig]);
 
     return React.useMemo(() => {
         const roomClientContextValue: RoomClientContextValue = {

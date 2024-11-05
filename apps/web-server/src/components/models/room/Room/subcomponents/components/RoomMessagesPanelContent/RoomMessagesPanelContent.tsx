@@ -36,8 +36,7 @@ import {
 import { ItemType } from 'antd/lib/menu/interface';
 import classNames from 'classnames';
 import { Draft } from 'immer';
-import { useAtomValue } from 'jotai/react';
-import { atom } from 'jotai/vanilla';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai/react';
 import moment from 'moment';
 import React from 'react';
 import { CombinedError, useMutation } from 'urql';
@@ -50,13 +49,13 @@ import { isDeleted, toText } from '../../utils/message';
 import { ChatInput } from '../ChatInput';
 import { MessageTabName } from './subcomponents/components/MessageTabName/MessageTabName';
 import { RoomMessage as RoomMessageNameSpace } from './subcomponents/components/RoomMessage/RoomMessage';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { custom, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { MessageFilter } from '@/atoms/roomConfigAtom/types/messageFilter';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { MessageTabConfig } from '@/atoms/roomConfigAtom/types/messageTabConfig';
 import { MessageTabConfigUtils } from '@/atoms/roomConfigAtom/types/messageTabConfig/utils';
 import { column, row } from '@/atoms/userConfigAtom/types';
-import { userConfigAtom } from '@/atoms/userConfigAtom/userConfigAtom';
+import { userConfigAtomFamily } from '@/atoms/userConfigAtom/userConfigAtom';
 import { UserConfigUtils } from '@/atoms/userConfigAtom/utils';
 import {
     NotificationMain,
@@ -72,9 +71,10 @@ import { InputDescription } from '@/components/ui/InputDescription/InputDescript
 import { InputModal } from '@/components/ui/InputModal/InputModal';
 import { JumpToBottomVirtuoso } from '@/components/ui/JumpToBottomVirtuoso/JumpToBottomVirtuoso';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
-import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
-import { firebaseUserValueAtom } from '@/pages/_app';
+import { firebaseUserValueAtom } from '@/hooks/useSetupApp';
+import { useSingleExecuteAsync1 } from '@/hooks/useSingleExecuteAsync';
 import { Styles } from '@/styles';
 import { cancelRnd, flex, flexColumn, flexNone, flexRow, itemsCenter } from '@/styles/className';
 import { moveElement } from '@/utils/moveElement';
@@ -86,7 +86,6 @@ const contentMinHeight = 22;
 
 const none = 'none';
 const some = 'some';
-const custom = 'custom';
 type HiwaSelectValueType = typeof none | typeof some | typeof custom;
 
 const auto = 'auto';
@@ -94,8 +93,6 @@ const auto = 'auto';
 const useParticipantsAsRecord = () => {
     return useRoomStateValueSelector(state => state.participants);
 };
-const roomMessageFontSizeDeltaAtom = atom(get => get(userConfigAtom)?.roomMessagesFontSizeDelta);
-const chatInputDirectionAtom = atom(get => get(userConfigAtom)?.chatInputDirection);
 
 type TabEditorModalProps = {
     // これがundefinedの場合、Drawerのvisibleがfalseとみなされる。
@@ -149,7 +146,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
         <Modal
             className={cancelRnd}
             open={config != null}
-            title='タブの編集'
+            title="タブの編集"
             closable
             onCancel={() => onClose()}
             width={500}
@@ -163,7 +160,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
             }
         >
             <Table>
-                <TableRow label='タブ名'>
+                <TableRow label="タブ名">
                     <Input
                         value={config?.tabName ?? ''}
                         onChange={e => onChange({ tabName: e.target.value })}
@@ -172,15 +169,15 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                         <>
                             <br />
                             <Alert
-                                type='info'
+                                type="info"
                                 showIcon
-                                message='タブ名が空白であるため、自動的に決定された名前が表示されます。'
+                                message="タブ名が空白であるため、自動的に決定された名前が表示されます。"
                             />
                         </>
                     )}
                 </TableRow>
                 <TableDivider />
-                <TableRow label='特殊チャンネル'>
+                <TableRow label="特殊チャンネル">
                     <Checkbox
                         checked={config?.showNotification ?? false}
                         onChange={e => onChange({ showNotification: e.target.checked })}
@@ -203,7 +200,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                     </Checkbox>
                 </TableRow>
                 <TableDivider dashed />
-                <TableRow label='一般チャンネル'>
+                <TableRow label="一般チャンネル">
                     <Checkbox
                         checked={config?.showPublic1 ?? false}
                         onChange={e => onChange({ showPublic1: e.target.checked })}
@@ -275,7 +272,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                     </Checkbox>
                 </TableRow>
                 <TableDivider dashed />
-                <TableRow label='秘話'>
+                <TableRow label="秘話">
                     <Radio.Group
                         style={{ marginBottom: 5 }}
                         value={hiwaSelectValue}
@@ -336,7 +333,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                                 );
                             })}
                     {hiwaSelectValue === custom && participantsMap.size <= 1 && (
-                        <Alert type='info' showIcon message='自分以外の入室者がいません。' />
+                        <Alert type="info" showIcon message="自分以外の入室者がいません。" />
                     )}
                 </TableRow>
             </Table>
@@ -359,7 +356,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorProps> = (props: ChannelName
         <Modal
             className={cancelRnd}
             open={visible}
-            title='チャンネル名の編集'
+            title="チャンネル名の編集"
             closable
             onCancel={() => onClose()}
             width={500}
@@ -381,7 +378,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorProps> = (props: ChannelName
                             label={`チャンネル${i}`}
                         >
                             <CollaborativeInput
-                                bufferDuration='default'
+                                bufferDuration="default"
                                 value={publicChannelNames == null ? '' : publicChannelNames[key]}
                                 onChange={e => {
                                     if (e.previousValue === e.currentValue) {
@@ -421,11 +418,46 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
 
     const firebaseUser = useAtomValue(firebaseUserValueAtom);
     const [, editMessageMutation] = useMutation(EditMessageDocument);
+    const editMessageAwaited = useSingleExecuteAsync1(
+        async ({
+            text,
+            messageId,
+            onResolve,
+        }: {
+            text: string;
+            messageId: string;
+            onResolve: () => void;
+        }) => {
+            if (roomId == null) {
+                return;
+            }
+            await editMessageMutation({
+                messageId,
+                roomId,
+                text,
+            }).then(() => onResolve());
+        },
+    );
     const [, deleteMessageMutation] = useMutation(DeleteMessageDocument);
+    const deleteMessageAwaited = useSingleExecuteAsync1(async (messageId: string) => {
+        if (roomId == null) {
+            return;
+        }
+        await deleteMessageMutation({ messageId, roomId });
+    });
     const [, makeMessageNotSecret] = useMutation(MakeMessageNotSecretDocument);
+    const makeMessageNotSecretAwaited = useSingleExecuteAsync1(async (messageId: string) => {
+        if (roomId == null) {
+            return;
+        }
+        await makeMessageNotSecret({ messageId, roomId });
+    });
     const [isEditModalVisible, setIsEditModalVisible] = React.useState(false);
     const roomId = useRoomId();
-    const roomMessagesFontSizeDelta = useAtomValue(roomMessageFontSizeDeltaAtom);
+    const userUid = useMyUserUid();
+    const userConfigAtom = userConfigAtomFamily(userUid);
+    const userConfig = useAtomValue(userConfigAtom);
+    const roomMessagesFontSizeDelta = userConfig.roomMessagesFontSizeDelta;
 
     const fontSize = UserConfigUtils.getRoomMessagesFontSize(roomMessagesFontSizeDelta ?? 0);
 
@@ -522,11 +554,12 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
             ? {
                   key: '公開@RoomMessageComponent',
                   label: '公開',
+                  disabled: makeMessageNotSecretAwaited.isExecuting,
                   onClick: () => {
-                      if (roomId == null) {
+                      if (makeMessageNotSecretAwaited.execute == null) {
                           return;
                       }
-                      makeMessageNotSecret({ messageId: userMessage.messageId, roomId });
+                      makeMessageNotSecretAwaited.execute(userMessage.messageId);
                   },
               }
             : null;
@@ -543,11 +576,12 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
             ? {
                   key: '削除@RoomMessageComponent',
                   label: '削除',
+                  disabled: deleteMessageAwaited.isExecuting,
                   onClick: () => {
-                      if (roomId == null) {
+                      if (deleteMessageAwaited.execute == null) {
                           return;
                       }
-                      deleteMessageMutation({ messageId: userMessage.messageId, roomId });
+                      deleteMessageAwaited.execute(userMessage.messageId);
                   },
               }
             : null;
@@ -647,27 +681,31 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                         }
                         trigger={['click']}
                     >
-                        <Button type='text' size='small'>
+                        <Button type="text" size="small">
                             <Icon.EllipsisOutlined />
                         </Button>
                     </Dropdown>
                 )}
             </div>
             <InputModal
-                title='メッセージの編集'
+                title="メッセージの編集"
                 visible={isEditModalVisible}
                 isTextArea={true}
+                disabled={() => editMessageAwaited.isExecuting}
                 onOk={(value, setValue) => {
-                    if (userMessage == null || roomId == null) {
+                    if (editMessageAwaited.execute == null) {
                         return;
                     }
-                    editMessageMutation({
-                        messageId: userMessage.messageId,
-                        roomId,
+                    if (userMessage == null) {
+                        return;
+                    }
+                    editMessageAwaited.execute({
                         text: value,
-                    }).then(() => {
-                        setIsEditModalVisible(false);
-                        setValue('');
+                        messageId: userMessage.messageId,
+                        onResolve: () => {
+                            setIsEditModalVisible(false);
+                            setValue('');
+                        },
                     });
                 }}
                 onClose={setValue => {
@@ -798,12 +836,14 @@ type Props = {
 export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: Props) => {
     const { modal } = App.useApp();
 
-    const tabsAtom = React.useMemo(() => {
-        return atom(get => get(roomConfigAtom)?.panels.messagePanels?.[panelId]?.tabs);
-    }, [panelId]);
-    const tabs = useAtomValue(tabsAtom);
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
-    const setUserConfig = useImmerSetAtom(userConfigAtom);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const [roomConfig, reduceRoomConfig] = useAtom(roomConfigAtom);
+    const tabs = roomConfig.panels.messagePanels[panelId]?.tabs;
+    const userUid = useMyUserUid();
+    const userConfigAtom = userConfigAtomFamily(userUid);
+    const userConfig = useAtomValue(userConfigAtom);
+    const setUserConfig = useSetAtom(userConfigAtom);
 
     const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<string>();
     const editingTabConfig = React.useMemo(() => {
@@ -815,25 +855,27 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
 
     const [isChannelNamesEditorVisible, setIsChannelNamesEditorVisible] = React.useState(false);
 
-    const roomId = useRoomId();
-    const roomMessagesFontSizeDelta = useAtomValue(roomMessageFontSizeDeltaAtom);
-    const chatInputDirectionCore = useAtomValue(chatInputDirectionAtom) ?? auto;
+    const roomMessagesFontSizeDelta = userConfig.roomMessagesFontSizeDelta;
+    const chatInputDirectionCore = userConfig.chatInputDirection ?? auto;
 
     // GameSelectorの無駄なrerenderを抑止するため、useCallbackを使っている。
     const onChatInputConfigUpdate = React.useCallback(
         (recipe: (draft: Draft<MessagePanelConfig>) => void) => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                const messagePanel = roomConfig.panels.messagePanels[panelId];
-                if (messagePanel == null) {
-                    return;
-                }
-                recipe(messagePanel);
+            reduceRoomConfig({
+                type: custom,
+                action: roomConfig => {
+                    if (roomConfig == null) {
+                        return;
+                    }
+                    const messagePanel = roomConfig.panels.messagePanels[panelId];
+                    if (messagePanel == null) {
+                        return;
+                    }
+                    recipe(messagePanel);
+                },
             });
         },
-        [panelId, setRoomConfig],
+        [panelId, reduceRoomConfig],
     );
 
     const chatInputDirection =
@@ -856,15 +898,18 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
             const onTabDelete = () => {
                 modal.warning({
                     onOk: () => {
-                        setRoomConfig(roomConfig => {
-                            if (roomConfig == null) {
-                                return;
-                            }
-                            const messagePanel = roomConfig.panels.messagePanels[panelId];
-                            if (messagePanel == null) {
-                                return;
-                            }
-                            messagePanel.tabs.splice(tabIndex, 1);
+                        reduceRoomConfig({
+                            type: custom,
+                            action: roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                const messagePanel = roomConfig.panels.messagePanels[panelId];
+                                if (messagePanel == null) {
+                                    return;
+                                }
+                                messagePanel.tabs.splice(tabIndex, 1);
+                            },
                         });
                     },
                     okCancel: true,
@@ -922,8 +967,8 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                                         // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
                                         padding: '0 2px',
                                     }}
-                                    type='text'
-                                    size='small'
+                                    type="text"
+                                    size="small"
                                     onClick={e => e.stopPropagation()}
                                 >
                                     <Icon.EllipsisOutlined />
@@ -945,14 +990,17 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                 items={tabItems}
                 style={{ flexBasis: `${tabsHeight}px`, margin: `0 ${marginX}px 4px ${marginX}px` }}
                 dndType={`MessagePanelTab@${panelId}`}
-                type='editable-card'
+                type="editable-card"
                 onDnd={action => {
-                    setRoomConfig(roomConfig => {
-                        const messagePanel = roomConfig?.panels.messagePanels[panelId];
-                        if (messagePanel == null) {
-                            return;
-                        }
-                        moveElement(messagePanel.tabs, tab => tab.key, action);
+                    reduceRoomConfig({
+                        type: custom,
+                        action: roomConfig => {
+                            const messagePanel = roomConfig?.panels.messagePanels[panelId];
+                            if (messagePanel == null) {
+                                return;
+                            }
+                            moveElement(messagePanel.tabs, tab => tab.key, action);
+                        },
                     });
                 }}
                 onEdit={(e, type) => {
@@ -960,7 +1008,29 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                         if (typeof e !== 'string') {
                             return;
                         }
-                        setRoomConfig(roomConfig => {
+                        reduceRoomConfig({
+                            type: custom,
+                            action: roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                const messagePanel = roomConfig.panels.messagePanels[panelId];
+                                if (messagePanel == null) {
+                                    return;
+                                }
+                                const indexToSplice = messagePanel.tabs.findIndex(
+                                    tab => tab.key === editingTabConfigKey,
+                                );
+                                if (indexToSplice >= 0) {
+                                    messagePanel.tabs.splice(indexToSplice, 1);
+                                }
+                            },
+                        });
+                        return;
+                    }
+                    reduceRoomConfig({
+                        type: custom,
+                        action: roomConfig => {
                             if (roomConfig == null) {
                                 return;
                             }
@@ -968,29 +1038,13 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                             if (messagePanel == null) {
                                 return;
                             }
-                            const indexToSplice = messagePanel.tabs.findIndex(
-                                tab => tab.key === editingTabConfigKey,
-                            );
-                            if (indexToSplice >= 0) {
-                                messagePanel.tabs.splice(indexToSplice, 1);
-                            }
-                        });
-                        return;
-                    }
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        const messagePanel = roomConfig.panels.messagePanels[panelId];
-                        if (messagePanel == null) {
-                            return;
-                        }
-                        messagePanel.tabs.push(MessageTabConfigUtils.createEmpty({}));
+                            messagePanel.tabs.push(MessageTabConfigUtils.createEmpty({}));
+                        },
                     });
                 }}
             />
         );
-    }, [contentHeight, editingTabConfigKey, modal, panelId, setRoomConfig, tabs, tabsHeight]);
+    }, [contentHeight, editingTabConfigKey, modal, panelId, reduceRoomConfig, tabs, tabsHeight]);
 
     if (roomId == null || draggableTabs == null) {
         return null;
@@ -1007,19 +1061,22 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                     if (editingTabConfigKey == null) {
                         return;
                     }
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        const messagePanel = roomConfig.panels.messagePanels[panelId];
-                        if (messagePanel == null) {
-                            return;
-                        }
-                        [...messagePanel.tabs].forEach((tab, i) => {
-                            if (tab.key === editingTabConfigKey) {
-                                messagePanel.tabs[i] = newValue;
+                    reduceRoomConfig({
+                        type: custom,
+                        action: roomConfig => {
+                            if (roomConfig == null) {
+                                return;
                             }
-                        });
+                            const messagePanel = roomConfig.panels.messagePanels[panelId];
+                            if (messagePanel == null) {
+                                return;
+                            }
+                            [...messagePanel.tabs].forEach((tab, i) => {
+                                if (tab.key === editingTabConfigKey) {
+                                    messagePanel.tabs[i] = newValue;
+                                }
+                            });
+                        },
                     });
                 }}
             />
@@ -1030,7 +1087,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
             <div className={classNames(flex, flexRow, itemsCenter)}>
                 <Button
                     style={{ margin: `4px ${marginX}px 4px ${marginX}px`, width: 170 }}
-                    size='small'
+                    size="small"
                     onClick={() => setIsChannelNamesEditorVisible(true)}
                 >
                     チャンネルの名前を編集
@@ -1038,7 +1095,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                 <div style={{ width: 16 }} />
                 <InputDescription>フォントサイズ</InputDescription>
                 <Button
-                    size='small'
+                    size="small"
                     onClick={() => {
                         setUserConfig(userConfig => {
                             if (userConfig == null) {
@@ -1052,7 +1109,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                     <Icons.MinusOutlined />
                 </Button>
                 <Button
-                    size='small'
+                    size="small"
                     onClick={() => {
                         setUserConfig(userConfig => {
                             if (userConfig == null) {

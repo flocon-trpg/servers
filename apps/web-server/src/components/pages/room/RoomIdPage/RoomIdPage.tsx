@@ -9,39 +9,36 @@ import {
     RoomAsListItemFragment,
     WritingMessageStatusInputType,
 } from '@flocon-trpg/typed-document-node';
-import { Alert, Button, Card, Input, Result, Spin } from 'antd';
+import { Link } from '@tanstack/react-router';
+import { Alert, Card, Input, Result, Spin } from 'antd';
 import classNames from 'classnames';
-import { produce } from 'immer';
 import { useAtomValue, useSetAtom } from 'jotai/react';
 import { selectAtom } from 'jotai/utils';
 import { atom } from 'jotai/vanilla';
-import { useRouter } from 'next/router';
 import React, { PropsWithChildren } from 'react';
 import { useDebounce, usePrevious } from 'react-use';
 import { CombinedError, useClient, useMutation } from 'urql';
 import { useMemoOne } from 'use-memo-one';
 import { hideAllOverlayActionAtom } from '@/atoms/hideAllOverlayActionAtom/hideAllOverlayActionAtom';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
-import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
 import { AntdThemeConfigProvider } from '@/components/behaviors/AntdThemeConfigProvider';
 import { Room } from '@/components/models/room/Room/Room';
 import { roomPrivateMessageInputAtom } from '@/components/models/room/Room/subcomponents/atoms/roomPrivateMessageInputAtom/roomPrivateMessageInputAtom';
 import { roomPublicMessageInputAtom } from '@/components/models/room/Room/subcomponents/atoms/roomPublicMessageInputAtom/roomPublicMessageInputAtom';
 import { NotificationType } from '@/components/models/room/Room/subcomponents/components/Notification/Notification';
 import { useUpdateWritingMessageStatus } from '@/components/models/room/Room/subcomponents/hooks/useUpdateWritingMessageStatus';
+import { AwaitableButton } from '@/components/ui/AwaitableButton/AwaitableButton';
 import { Center } from '@/components/ui/Center/Center';
 import { GraphQLErrorResult } from '@/components/ui/GraphQLErrorResult/GraphQLErrorResult';
 import { Layout, loginAndEntry, success } from '@/components/ui/Layout/Layout';
 import { LoadingResult } from '@/components/ui/LoadingResult/LoadingResult';
+import { SuspenseWithFallback } from '@/components/ui/SuspenseWithFallback/SuspenseWithFallback';
 import { RoomClientContext, RoomClientContextValue } from '@/contexts/RoomClientContext';
 import { useRoomClient } from '@/hooks/roomClientHooks';
-import { useGetIdToken } from '@/hooks/useGetIdToken';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomGraphQLStatus } from '@/hooks/useRoomGraphQLStatus';
 import { useRoomState } from '@/hooks/useRoomState';
-import { firebaseUserValueAtom } from '@/pages/_app';
+import { firebaseUserValueAtom, getIdTokenResultAtom } from '@/hooks/useSetupApp';
 import { flex, flexColumn, itemsCenter } from '@/styles/className';
-import { getRoomConfig } from '@/utils/localStorage/roomConfig';
 
 const debouncedWindowInnerWidthAtomCore = atom(0);
 const debouncedWindowInnerHeightAtomCore = atom(0);
@@ -96,11 +93,10 @@ const useOnResize = () => {
 };
 
 const LinkToRoot: React.FC = () => {
-    const router = useRouter();
     return (
-        <a style={{ padding: 12 }} onClick={() => router.push('/')}>
+        <Link to="/" style={{ padding: 12 }}>
             {'トップページに戻る'}
-        </a>
+        </Link>
     );
 };
 
@@ -183,7 +179,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
     };
     return (
         <Spin spinning={disableJoinActions}>
-            {errorMessage == null ? null : <Alert message={errorMessage} type='error' showIcon />}
+            {errorMessage == null ? null : <Alert message={errorMessage} type="error" showIcon />}
             <div
                 style={{
                     display: 'grid',
@@ -199,7 +195,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                     style={{ gridColumn: 2, gridRow: 1 }}
                     onChange={e => setName(e.target.value)}
                     value={name}
-                    placeholder='名前'
+                    placeholder="名前"
                 />
                 <div style={{ gridColumn: 1, gridRow: 3, marginRight: 8, justifySelf: 'right' }}>
                     参加者として入室
@@ -209,20 +205,20 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                         style={{ gridColumn: 2, gridRow: 3 }}
                         onChange={e => setPlayerPassword(e.target.value)}
                         value={playerPassword}
-                        placeholder='参加パスワード'
+                        placeholder="参加パスワード"
                     />
                 ) : (
                     <div style={{ gridColumn: 2, gridRow: 3, marginLeft: 4, fontSize: 'small' }}>
                         (参加パスワードなしで入室できます)
                     </div>
                 )}
-                <Button
+                <AwaitableButton
                     style={{ gridColumn: 3, gridRow: 3 }}
-                    type='primary'
+                    type="primary"
                     onClick={onJoinAsPlayerButtonClick}
                 >
                     入室
-                </Button>
+                </AwaitableButton>
                 <div style={{ gridColumn: 1, gridRow: 4, marginRight: 8, justifySelf: 'right' }}>
                     観戦者として入室
                 </div>
@@ -231,52 +227,23 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                         style={{ gridColumn: 2, gridRow: 4 }}
                         onChange={e => setSpectatorPassword(e.target.value)}
                         value={spectatorPassword}
-                        placeholder='観戦パスワード'
+                        placeholder="観戦パスワード"
                     />
                 ) : (
                     <div style={{ gridColumn: 2, gridRow: 4, marginLeft: 4, fontSize: 'small' }}>
                         (観戦パスワードなしで入室できます)
                     </div>
                 )}
-                <Button
+                <AwaitableButton
                     style={{ gridColumn: 3, gridRow: 4 }}
-                    type='primary'
+                    type="primary"
                     onClick={onJoinAsSpectatorButtonClick}
                 >
                     入室
-                </Button>
+                </AwaitableButton>
             </div>
         </Spin>
     );
-};
-
-// localForageを用いてRoomConfigを読み込み、atomと紐付ける。
-// Roomが変わるたびに、useRoomConfigが更新される必要がある。RoomのComponentのどこか一箇所でuseRoomConfigを呼び出すだけでよい。
-const useRoomConfig = (roomId: string): boolean => {
-    const [result, setResult] = React.useState<boolean>(false);
-    const setRoomConfig = useSetAtom(roomConfigAtom);
-
-    React.useEffect(() => {
-        let unmounted = false;
-        const main = async () => {
-            setRoomConfig(null);
-            const roomConfig = await getRoomConfig(roomId);
-            if (unmounted) {
-                return;
-            }
-            // immerを使わなくても問題ないが、コード変更があったときにエンバグする可能性を減らすことを狙ってimmerを使っている
-            setRoomConfig(
-                produce(roomConfig, roomConfig => RoomConfigUtils.fixRoomConfig(roomConfig)),
-            );
-            setResult(true);
-        };
-        main();
-        return () => {
-            unmounted = true;
-        };
-    }, [roomId, setRoomConfig]);
-
-    return result;
 };
 
 const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
@@ -295,7 +262,6 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     const hideAllOverlay = useSetAtom(hideAllOverlayActionAtom);
 
     useOnResize();
-    useRoomConfig(roomId);
 
     React.useEffect(() => {
         hideAllOverlay();
@@ -336,7 +302,7 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
         return (
             <ResultContainer>
                 <GraphQLErrorResult
-                    title='Subscription エラーが発生しました。ブラウザを更新してください。'
+                    title="Subscription エラーが発生しました。ブラウザを更新してください。"
                     error={graphQLStatus.RoomEventSubscription.error}
                 />
             </ResultContainer>
@@ -352,7 +318,7 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
         case 'nonJoined':
             return (
                 <Center setPaddingY>
-                    <Card title='入室'>
+                    <Card title="入室">
                         <JoinRoomForm
                             roomState={roomState.nonJoinedRoom}
                             onJoin={() => roomClient?.recreate()}
@@ -364,9 +330,9 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
             const notFoundResult = (
                 <ResultContainer>
                     <Result
-                        status='404'
-                        title='該当する部屋が見つかりませんでした。'
-                        subTitle='部屋が存在しているか、適切な権限があるかどうか確認してください。'
+                        status="404"
+                        title="該当する部屋が見つかりませんでした。"
+                        subTitle="部屋が存在しているか、適切な権限があるかどうか確認してください。"
                     />
                 </ResultContainer>
             );
@@ -383,7 +349,7 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
                     return (
                         <ResultContainer>
                             <GraphQLErrorResult
-                                title='GetRoomQuery でエラーが発生しました。ブラウザを更新してください。'
+                                title="GetRoomQuery でエラーが発生しました。ブラウザを更新してください。"
                                 error={roomState.error.error}
                             />
                         </ResultContainer>
@@ -399,7 +365,7 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
                 case 'transformationError':
                     return (
                         <ResultContainer>
-                            <Result title='transformationError が発生しました。ブラウザを更新してください。' />
+                            <Result title="transformationError が発生しました。ブラウザを更新してください。" />
                         </ResultContainer>
                     );
             }
@@ -408,7 +374,7 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
         case 'deleted':
             return (
                 <ResultContainer>
-                    <Result status='warning' title='この部屋は削除されました。' />
+                    <Result status="warning" title="この部屋は削除されました。" />
                 </ResultContainer>
             );
     }
@@ -421,7 +387,7 @@ const useCreateRoomClientForContext = ({
 }): RoomClientContextValue | null => {
     const urqlClient = useClient();
     const userUid = useMyUserUid();
-    const { canGetIdToken } = useGetIdToken();
+    const { canGetIdToken } = useAtomValue(getIdTokenResultAtom);
     const client = useMemoOne(() => {
         return createGraphQLClientForRoomClient(urqlClient);
     }, [urqlClient]);
@@ -451,21 +417,20 @@ const RoomClientInitializer: React.FC<{ roomId: string }> = ({ roomId }) => {
     );
 };
 
-export const RoomId: React.FC = () => {
-    const router = useRouter();
-    const id = router.query.id;
-
-    if (Array.isArray(id) || id == null) {
+export const RoomId: React.FC<{ id: string | null }> = ({ id }) => {
+    if (id == null) {
         return (
             <Layout>
-                <Result status='error' title='パラメーターが不正です。' />
+                <Result status="error" title="パラメーターが不正です。" />
             </Layout>
         );
     }
 
     return (
         <Layout requires={loginAndEntry} hideHeader={success}>
-            <RoomClientInitializer roomId={id} />
+            <SuspenseWithFallback>
+                <RoomClientInitializer roomId={id} />
+            </SuspenseWithFallback>
         </Layout>
     );
 };

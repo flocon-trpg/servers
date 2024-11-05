@@ -45,7 +45,7 @@ export const parseToml = (toml: string) => {
     return Result.ok(core.value as unknown);
 };
 
-export const isValidVarToml = (toml: string): Result<undefined> => {
+export const isValidVarToml = (toml: string): Result<void> => {
     const parsed = parseTomlCore(toml);
     if (parsed.isError) {
         return parsed;

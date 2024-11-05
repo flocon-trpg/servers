@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import build from 'pino-abstract-transport';
 
 // これらの文字列を変更したら、@flocon-trpg/logger-base の文字列も変更すること！

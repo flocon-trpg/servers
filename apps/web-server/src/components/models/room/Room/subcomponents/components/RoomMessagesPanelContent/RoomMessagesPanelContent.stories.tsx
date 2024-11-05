@@ -1,5 +1,5 @@
 import { getExactlyOneKey } from '@flocon-trpg/utils';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { RoomMessagesPanelContent } from './RoomMessagesPanelContent';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
@@ -31,7 +31,7 @@ export const Default: React.FC<
     );
 };
 
-export default {
+const meta = {
     title: 'models/room/Room/RoomMessagesPanelContent',
     component: Default,
     args: {
@@ -39,16 +39,20 @@ export default {
         setGeneralMessages: true,
         fetchingMessages: false,
     },
-} as ComponentMeta<typeof Default>;
+} satisfies Meta<typeof Default>;
 
-const Template: ComponentStory<typeof Default> = args => <Default {...args} />;
+export default meta;
 
-export const Fetching = Template.bind({});
-Fetching.args = {
-    fetchingMessages: true,
+type Story = StoryObj<typeof meta>;
+
+export const Fetching: Story = {
+    args: {
+        fetchingMessages: true,
+    },
 };
 
-export const Empty = Template.bind({});
-Empty.args = {
-    setGeneralMessages: false,
+export const Empty: Story = {
+    args: {
+        setGeneralMessages: false,
+    },
 };

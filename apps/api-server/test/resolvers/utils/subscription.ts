@@ -3,8 +3,12 @@ import { recordForEach } from '@flocon-trpg/utils';
 import { RoomMessagesClient, privateMessage, publicMessage } from '@flocon-trpg/web-server-utils';
 import { Option } from '@kizahasi/option';
 import { OperationResult } from '@urql/core';
-import _ from 'lodash';
+import { compact } from 'es-toolkit';
 import { Source, pipe, subscribe } from 'wonka';
+
+const mapCompact = <T, U>(array: readonly T[], mapping: (value: T) => U) => {
+    return compact(array.map(mapping));
+};
 
 export class TestRoomEventSubscription {
     #values: RoomEventSubscription[] = [];
@@ -58,10 +62,10 @@ export class TestRoomEventSubscription {
 
     public toBeExactlyOneDeleteRoomEvent({ deletedBy }: { deletedBy: string }) {
         expect(this.#values).toHaveLength(1);
-        const deleteRoomOperationEvents = _(this.#values)
-            .map(x => x.roomEvent?.deleteRoomOperation)
-            .compact()
-            .value();
+        const deleteRoomOperationEvents = mapCompact(
+            this.#values,
+            x => x.roomEvent?.deleteRoomOperation,
+        );
         expect(deleteRoomOperationEvents).toHaveLength(1);
         const actualEvent = deleteRoomOperationEvents[0]!;
         expect(actualEvent.deletedBy).toBe(deletedBy);
@@ -75,10 +79,10 @@ export class TestRoomEventSubscription {
         userUid: string;
     }) {
         expect(this.#values).toHaveLength(1);
-        const roomConnectionEvents = _(this.#values)
-            .map(x => x.roomEvent?.roomConnectionEvent)
-            .compact()
-            .value();
+        const roomConnectionEvents = mapCompact(
+            this.#values,
+            x => x.roomEvent?.roomConnectionEvent,
+        );
         expect(roomConnectionEvents).toHaveLength(1);
         const actualEvent = roomConnectionEvents[0]!;
         expect(actualEvent.isConnected ? 'connect' : 'disconnect').toBe(event);
@@ -87,10 +91,7 @@ export class TestRoomEventSubscription {
 
     public toBeExactlyOneRoomOperationEvent() {
         expect(this.#values).toHaveLength(1);
-        const roomOperationEvents = _(this.#values)
-            .map(x => x.roomEvent?.roomOperation)
-            .compact()
-            .value();
+        const roomOperationEvents = mapCompact(this.#values, x => x.roomEvent?.roomOperation);
         expect(roomOperationEvents).toHaveLength(1);
         return roomOperationEvents[0]!;
     }

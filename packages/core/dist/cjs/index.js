@@ -5,7 +5,7 @@ var result = require('@kizahasi/result');
 var jToml = require('@ltd/j-toml');
 var floconScript = require('@flocon-trpg/flocon-script');
 var utils = require('@flocon-trpg/utils');
-var lodash = require('lodash');
+var esToolkit = require('es-toolkit');
 var otString = require('@kizahasi/ot-string');
 var truncate = require('truncate-utf8-bytes');
 var immer = require('immer');
@@ -20,14 +20,42 @@ const authToken = 'authToken';
 const $free = '$free';
 const $system = '$system';
 
+const env = {
+    // @flocon-trpg/web-server にはこれらを import せずに環境変数のキーを文字列として直接入力している箇所があるため、そちらも合わせる必要があることに注意。
+    NEXT_PUBLIC_FIREBASE_CONFIG: 'NEXT_PUBLIC_FIREBASE_CONFIG',
+    NEXT_PUBLIC_API_HTTP: 'NEXT_PUBLIC_API_HTTP',
+    NEXT_PUBLIC_API_WS: 'NEXT_PUBLIC_API_WS',
+    NEXT_PUBLIC_AUTH_PROVIDERS: 'NEXT_PUBLIC_AUTH_PROVIDERS',
+    NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED: 'NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED',
+    NEXT_PUBLIC_LOG_LEVEL: 'NEXT_PUBLIC_LOG_LEVEL',
+    firebaseConfig: {
+        apiKey: 'apiKey',
+        authDomain: 'authDomain',
+        projectId: 'projectId',
+        storageBucket: 'storageBucket',
+        messagingSenderId: 'messagingSenderId',
+        appId: 'appId',
+    },
+    authProviders: {
+        // TODO: これら以外にも対応させる
+        anonymous: 'anonymous',
+        email: 'email',
+        google: 'google',
+        facebook: 'facebook',
+        github: 'github',
+        twitter: 'twitter',
+        phone: 'phone',
+    },
+};
+
 const firebaseConfig = zod.z.object({
     // databaseURLというキーはおそらくFirestoreを有効化しないと含まれないため、除外している。
-    apiKey: zod.z.string(),
-    authDomain: zod.z.string(),
-    projectId: zod.z.string(),
-    storageBucket: zod.z.string(),
-    messagingSenderId: zod.z.string(),
-    appId: zod.z.string(),
+    [env.firebaseConfig.apiKey]: zod.z.string(),
+    [env.firebaseConfig.authDomain]: zod.z.string(),
+    [env.firebaseConfig.projectId]: zod.z.string(),
+    [env.firebaseConfig.storageBucket]: zod.z.string(),
+    [env.firebaseConfig.messagingSenderId]: zod.z.string(),
+    [env.firebaseConfig.appId]: zod.z.string(),
 });
 
 const strIndex5Array = ['1', '2', '3', '4', '5'];
@@ -199,7 +227,6 @@ const forceMaxLength100String = (source) => {
 /** @deprecated Use `optional` method in zod. */
 const maybe = (source) => source.optional();
 
-/* eslint-disable @typescript-eslint/no-namespace */
 exports.PublicChannelKey = void 0;
 (function (PublicChannelKey) {
     (function (Without$System) {
@@ -226,7 +253,9 @@ exports.PublicChannelKey = void 0;
 // NOT cryptographically secure
 const simpleId = () => {
     const idLength = 9;
-    let result = Math.random().toString(36).substr(2, idLength);
+    let result = Math.random()
+        .toString(36)
+        .substring(2, 2 + idLength);
     while (result.length < idLength) {
         result = result + '0';
     }
@@ -1404,6 +1433,8 @@ const isIdRecord = (source) => {
 };
 const record$1 = (value) => zod.z.record(value.optional());
 
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 const atomic = 'atomic';
 const replace = 'replace';
 const ot = 'ot';
@@ -2140,7 +2171,7 @@ class FRoom extends floconScript.FObject {
     constructor(source, myUserUid) {
         super();
         this.myUserUid = myUserUid;
-        this._room = lodash.cloneDeep(source);
+        this._room = esToolkit.cloneDeep(source);
     }
     get room() {
         return this._room;
@@ -3305,6 +3336,10 @@ const mapRecordDownOperation = ({ source, mapState, mapOperation, }) => {
     });
 };
 
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 const $v = '$v';
 const $r = '$r';
 const isKeyToIgnore = (key) => key === $v || key === $r;
@@ -4281,7 +4316,7 @@ const indexObjectTemplateValue = {
 const dummyVersion = undefined;
 const indexObjectTemplate = createObjectValueTemplate(indexObjectTemplateValue, dummyVersion, dummyVersion);
 const indexObjectsToArray = (record) => {
-    const groupBy$index = utils.recordToMap(lodash.groupBy(utils.recordToArray(record), ({ value }) => value[$index].toString()));
+    const groupBy$index = utils.recordToMap(esToolkit.groupBy(utils.recordToArray(record), ({ value }) => value[$index].toString()));
     const result$1 = [];
     for (let i = 0; groupBy$index.size >= 1; i++) {
         const groupValue = groupBy$index.get(i.toString());
@@ -6038,7 +6073,7 @@ const getOpenRollCalls = (source) => {
  */
 const getOpenRollCall = (source) => {
     const activeRollCalls = getOpenRollCalls(source);
-    return lodash.maxBy(activeRollCalls, ({ value }) => value.createdAt);
+    return esToolkit.maxBy(activeRollCalls, ({ value }) => value.createdAt);
 };
 
 const isOpenRollCall = (source) => {
@@ -7050,6 +7085,7 @@ exports.dicePieceTemplate = template$j;
 exports.dieValueTemplate = template$k;
 exports.diff = diff;
 exports.downOperation = downOperation;
+exports.env = env;
 exports.exactDbState = exactDbState;
 exports.exactDownOperation = exactDownOperation;
 exports.execCharacterCommand = execCharacterCommand;

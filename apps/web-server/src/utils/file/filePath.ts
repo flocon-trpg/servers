@@ -1,7 +1,7 @@
 import * as Core from '@flocon-trpg/core';
 import { FilePathFragment, FilePathInput, FileSourceType } from '@flocon-trpg/typed-document-node';
 import { FirebaseStorage, getDownloadURL, ref } from 'firebase/storage';
-import { WebConfig } from '../../configType';
+import { MockableWebConfig } from '../../configType';
 import {
     files,
     getFloconUploaderFile as getFloconUploaderFileCore,
@@ -133,7 +133,7 @@ export namespace FilePathModule {
         autoRedirect,
     }: {
         path: FilePathLikeOrThumb;
-        config: WebConfig;
+        config: MockableWebConfig;
         storage: FirebaseStorage;
         getIdToken: () => Promise<string | null>;
         autoRedirect?: boolean;

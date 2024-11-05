@@ -63,8 +63,8 @@ export const StringParameterInput: React.FC<Props> = ({
         <CollaborativeInput
             style={{ width: inputWidth }}
             className={classNames(flex1)}
-            size='small'
-            bufferDuration='default'
+            size="small"
+            bufferDuration="default"
             disabled={disabled}
             value={parameter?.value ?? ''}
             onChange={e => {
@@ -122,7 +122,7 @@ export const StringParameterInput: React.FC<Props> = ({
             }
             checkedChildren={<EyeOutlined />}
             unCheckedChildren={<EyeInvisibleOutlined />}
-            size='small'
+            size="small"
             onChange={e => {
                 const operation: CharacterUpOperation = {
                     $v: 2,
@@ -136,9 +136,10 @@ export const StringParameterInput: React.FC<Props> = ({
                     },
                 };
                 onOperate(apply(operation));
+                return Promise.resolve();
             }}
-            shape='circle'
-            defaultType='dashed'
+            shape="circle"
+            defaultType="dashed"
         />
     );
     return (

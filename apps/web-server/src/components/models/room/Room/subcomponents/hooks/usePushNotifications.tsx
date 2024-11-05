@@ -10,6 +10,7 @@ import {
 import { App, Button } from 'antd';
 import classNames from 'classnames';
 import { Howl } from 'howler';
+import { useSetAtom } from 'jotai';
 import React from 'react';
 import { useLatest } from 'react-use';
 import { NotificationMain } from '../components/Notification/Notification';
@@ -17,15 +18,15 @@ import { RoomMessage } from '../components/RoomMessagesPanelContent/subcomponent
 import { useMessageFilter } from './useMessageFilter';
 import { useParticipants } from './useParticipants';
 import { usePublicChannelNames } from './usePublicChannelNames';
+import { useRoomId } from './useRoomId';
 import { useRoomMessages } from './useRoomMessages';
 import { panelHighlightKeysAtom } from '@/atoms/panelHighlightKeysAtom/panelHighlightKeysAtom';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
-import { MessageFilterUtils } from '@/atoms/roomConfigAtom/types/messageFilter/utils';
 import {
-    defaultMasterVolume,
-    defaultSeVolume,
-} from '@/atoms/roomConfigAtom/types/roomConfig/resources';
-import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
+    bringPanelToFront,
+    rollCallPanel,
+    roomConfigAtomFamily,
+} from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { MessageFilterUtils } from '@/atoms/roomConfigAtom/types/messageFilter/utils';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
@@ -39,13 +40,13 @@ function useMessageNotifications(): void {
     const publicChannelNameRef = useLatest(publicChannelNames);
     const participantsMap = useParticipants();
     const participantsMapRef = useLatest(participantsMap);
-    const masterVolume = useAtomSelector(roomConfigAtom, state => state?.masterVolume);
-    const seVolume = useAtomSelector(roomConfigAtom, state => state?.seVolume);
-    const volumeRef = React.useRef(
-        (masterVolume ?? defaultMasterVolume) * (seVolume ?? defaultSeVolume),
-    );
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const masterVolume = useAtomSelector(roomConfigAtom, state => state.masterVolume);
+    const seVolume = useAtomSelector(roomConfigAtom, state => state.seVolume);
+    const volumeRef = React.useRef(masterVolume * seVolume);
     React.useEffect(() => {
-        volumeRef.current = (masterVolume ?? defaultMasterVolume) * (seVolume ?? defaultSeVolume);
+        volumeRef.current = masterVolume * seVolume;
     }, [masterVolume, seVolume]);
 
     const myUserUid = useMyUserUid();
@@ -144,8 +145,10 @@ function useMessageNotifications(): void {
     }, [messageDiff, messageFilterRef, notification, participantsMapRef, publicChannelNameRef]);
 }
 
-function useRollCallNotifications(): void {
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+function useRollCallNotificationsAndAutoOpenRollCallPanel(): void {
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const myUserUid = useMyUserUid();
     const rollCalls = useRoomStateValueSelector(roomState => roomState.rollCalls);
     const openRollCall = React.useMemo(() => getOpenRollCall(rollCalls ?? {}), [rollCalls]);
@@ -174,6 +177,12 @@ function useRollCallNotifications(): void {
         if (openRollCallRef.current.participants?.[myUserUid]?.answeredAt != null) {
             return;
         }
+        // 点呼が始まった瞬間に自動的に点呼ウィンドウを開いてほしいという要望があったので開くようにしている
+        reduceRoomConfig({
+            type: bringPanelToFront,
+            panelType: { type: rollCallPanel },
+            action: { unminimizePanel: true },
+        });
         const key = keyNames('RollCallNotification', simpleId());
         notification.open({
             key,
@@ -183,15 +192,13 @@ function useRollCallNotifications(): void {
             message: (
                 <div className={classNames(flex, flexColumn)} style={{ gap: 8 }}>
                     <div>{'点呼が行われています。'}</div>
+                    {/* CONSIDER: 点呼が始まったときに点呼ウィンドウが自動的に開くようになっているため、点呼ウィンドウを開くボタンは必要ないと思われる。通知自体も必要ないかもしれない。 */}
                     <Button
                         onClick={() => {
-                            setRoomConfig(roomConfig => {
-                                if (roomConfig == null) {
-                                    return;
-                                }
-                                RoomConfigUtils.bringPanelToFront(roomConfig, {
-                                    type: 'rollCallPanel',
-                                });
+                            reduceRoomConfig({
+                                type: bringPanelToFront,
+                                panelType: { type: rollCallPanel },
+                                action: { unminimizePanel: true },
                             });
                             setPanelHightlightKeys(keys => {
                                 keys.rollCallPanel = simpleId();
@@ -212,11 +219,11 @@ function useRollCallNotifications(): void {
         openRollCallId,
         openRollCallRef,
         setPanelHightlightKeys,
-        setRoomConfig,
+        reduceRoomConfig,
     ]);
 }
 
-export function usePushNotifications(): void {
+export function usePushNotificationsAndAutoOpenPanel(): void {
     useMessageNotifications();
-    useRollCallNotifications();
+    useRollCallNotificationsAndAutoOpenRollCallPanel();
 }
