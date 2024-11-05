@@ -20,7 +20,6 @@ export class User {
     @Property({ type: 'string', index: true })
     public baasType: BaasType;
 
-    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ index: true })
     public isEntry: boolean = false;
 

@@ -754,10 +754,10 @@ const keyNames = (...keys) => {
 };
 
 const defaultLogLevel = 'info';
-const toLogFn = (logger, pinoLevel) => {
-    function print(arg1, ...arg2) {
+const printFn = (logger, methodName) => {
+    function result(arg1, ...arg2) {
         if (typeof arg1 === 'string') {
-            logger[pinoLevel](arg1, ...arg2);
+            logger[methodName](arg1, ...arg2);
             return;
         }
         const [msg, ...args] = [...arg2];
@@ -765,9 +765,30 @@ const toLogFn = (logger, pinoLevel) => {
             // TypeScript の型に従ってコードを書いている限り、ここには来ないはず。
             throw new Error('When the first argument is an object, the second argument must be a string.');
         }
-        logger[pinoLevel](arg1, msg, ...args);
+        logger[methodName](arg1, msg, ...args);
     }
-    return print;
+    return result;
+};
+// Promise の catch で受け取った値は型が不明なので、それをログに含めるときに便利な関数。
+// もし msg を optional にすると、obj == null かつ msg === undefined のときに出力するエラーメッセージがないのと、msg を空にすることは通常はないので、msg は optional にしていない。printFn の msg のほうも optional でなくするのもいいかもしれない。
+const autoDetectObjFn = (logger, methodName) => (obj, msg, ...args) => {
+    if (obj instanceof Error) {
+        printFn(logger, methodName)(obj, msg, ...args);
+        return;
+    }
+    if (typeof obj === 'string') {
+        if (msg == null) {
+            printFn(logger, methodName)(obj, ...args);
+            return;
+        }
+        printFn(logger, methodName)(`${msg} (Error: ${obj})`, ...args);
+        return;
+    }
+    if (obj == null) {
+        printFn(logger, methodName)(msg, ...args);
+        return;
+    }
+    printFn(logger, methodName)(`${msg} (not supported obj type. typeof obj is ${typeof obj})`, ...args);
 };
 const createDefaultLogger = (args) => {
     return (args?.isBrowser ?? browserOrNode.isBrowser)
@@ -780,38 +801,51 @@ const createDefaultLogger = (args) => {
 let currentLogger = null;
 /** pino のロガーを取得もしくは変更できます。 */
 const loggerRef = {
+    /** pino のインスタンスを get もしくは set できます。 */
     get value() {
         if (currentLogger == null) {
             currentLogger = createDefaultLogger();
         }
         return currentLogger;
     },
+    /** pino のインスタンスを get もしくは set できます。 */
     set value(value) {
         currentLogger = value;
     },
     get debug() {
-        return toLogFn(this.value, 'debug');
+        return printFn(this.value, 'debug');
     },
     get error() {
-        return toLogFn(this.value, 'error');
+        return printFn(this.value, 'error');
     },
     get fatal() {
-        return toLogFn(this.value, 'fatal');
+        return printFn(this.value, 'fatal');
     },
     get info() {
-        return toLogFn(this.value, 'info');
+        return printFn(this.value, 'info');
     },
     infoAsNotice(msg) {
         return this.info({ [loggerBase.notice]: true }, msg);
     },
     get warn() {
-        return toLogFn(this.value, 'warn');
+        return printFn(this.value, 'warn');
     },
     get silent() {
-        return toLogFn(this.value, 'silent');
+        return printFn(this.value, 'silent');
     },
     get trace() {
-        return toLogFn(this.value, 'trace');
+        return printFn(this.value, 'trace');
+    },
+    get autoDetectObj() {
+        return {
+            debug: autoDetectObjFn(this.value, 'debug'),
+            error: autoDetectObjFn(this.value, 'error'),
+            fatal: autoDetectObjFn(this.value, 'fatal'),
+            info: autoDetectObjFn(this.value, 'info'),
+            warn: autoDetectObjFn(this.value, 'warn'),
+            silent: autoDetectObjFn(this.value, 'silent'),
+            trace: autoDetectObjFn(this.value, 'trace'),
+        };
     },
 };
 

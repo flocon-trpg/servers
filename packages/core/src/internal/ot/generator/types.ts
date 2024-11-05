@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { mapRecord } from '@flocon-trpg/utils';
 import { z } from 'zod';
 import * as NullableTextOperation from '../nullableTextOperation';

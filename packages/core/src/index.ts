@@ -36,6 +36,8 @@ export {
 
 export { testCommand, execCharacterCommand } from './internal/command/main';
 
+export { env } from './internal/env';
+
 export { Expression, plain, expr1, analyze } from './internal/expression';
 
 export {

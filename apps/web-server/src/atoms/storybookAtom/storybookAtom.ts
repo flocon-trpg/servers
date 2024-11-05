@@ -1,6 +1,5 @@
 import { Auth } from '@firebase/auth';
 import { FirebaseStorage } from '@firebase/storage';
-import { Result } from '@kizahasi/result';
 import { atom } from 'jotai/vanilla';
 import { WebConfig } from '../../configType';
 import { FirebaseUserState } from '../../utils/firebase/firebaseUserState';
@@ -16,7 +15,7 @@ export type StorybookAtomValueType =
               auth?: Auth;
               user?: FirebaseUserState;
               storage?: FirebaseStorage;
-              webConfig?: Result<WebConfig>;
+              webConfig?: WebConfig;
           };
       };
 

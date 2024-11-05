@@ -5,8 +5,9 @@ import { soundEffect } from '@flocon-trpg/web-server-utils';
 import { Howl } from 'howler';
 import React from 'react';
 import { useLatest, usePrevious } from 'react-use';
+import { useRoomId } from './useRoomId';
 import { useRoomMessages } from './useRoomMessages';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { useSrcFromFilePath } from '@/hooks/srcHooks';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
@@ -30,8 +31,10 @@ type SoundEffect = {
 function usePlaySoundEffectCore(value?: SoundEffect): void {
     const valueRef = useLatest(value);
 
-    const masterVolume = useAtomSelector(roomConfigAtom, state => state?.masterVolume) ?? 0;
-    const seVolume = useAtomSelector(roomConfigAtom, state => state?.seVolume) ?? 0;
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const masterVolume = useAtomSelector(roomConfigAtom, state => state.masterVolume);
+    const seVolume = useAtomSelector(roomConfigAtom, state => state.seVolume);
     const volumeConfig = masterVolume * seVolume;
 
     const volumeConfigRef = React.useRef(volumeConfig);

@@ -1,8 +1,8 @@
 import { Master, Player, State, getOpenRollCall, roomTemplate, simpleId } from '@flocon-trpg/core';
 import { recordToArray } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
+import { maxBy } from 'es-toolkit';
 import { produce } from 'immer';
-import { maxBy } from 'lodash';
 import { PerformRollCallFailureType } from '@/enums/PerformRollCallFailureType';
 
 const maxRollCallHistoryCount = 3;

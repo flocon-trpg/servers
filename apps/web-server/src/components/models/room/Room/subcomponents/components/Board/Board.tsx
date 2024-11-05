@@ -50,11 +50,15 @@ import {
     shapePiece,
 } from './subcomponents/components/CanvasOrDiceOrStringPiece/CanvasOrDiceOrStringPiece';
 import { ImagePiece } from './subcomponents/components/ImagePiece/ImagePiece';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import {
+    custom,
+    editBoard,
+    roomConfigAtomFamily,
+    zoomBoard,
+} from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { ActiveBoardPanelConfig } from '@/atoms/roomConfigAtom/types/activeBoardPanelConfig';
 import { BoardConfig, defaultBoardConfig } from '@/atoms/roomConfigAtom/types/boardConfig';
 import { BoardEditorPanelConfig } from '@/atoms/roomConfigAtom/types/boardEditorPanelConfig';
-import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
 import { AllContextProvider } from '@/components/behaviors/AllContextProvider';
 import { NotificationType } from '@/components/models/room/Room/subcomponents/components/Notification/Notification';
 import { useRoomMessages } from '@/components/models/room/Room/subcomponents/hooks/useRoomMessages';
@@ -62,7 +66,6 @@ import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcompo
 import { AnimatedImageAsAnyProps } from '@/components/ui/AnimatedKonvaAsAnyProps/AnimatedKonvaAsAnyProps';
 import { success, useImageFromFilePath } from '@/hooks/imageHooks';
 import { useAllContext } from '@/hooks/useAllContext';
-import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { Styles } from '@/styles';
@@ -107,26 +110,31 @@ const setDragEndResultToPieceState = ({
     }
 };
 
-const background = 'background';
-const character = 'character';
-const portrait = 'portrait';
-const dicePiece = 'dicePiece';
-const stringPiece = 'stringPiece';
-const imagePiece = 'imagePiece';
+// コードを書く際に関数内で例えば character という名前の変数を定義したい場面が多々あるため、衝突しないように末尾に Type をつけている。
+const backgroundType = 'background';
+const characterType = 'character';
+const portraitType = 'portrait';
+const dicePieceType = 'dicePiece';
+const stringPieceType = 'stringPiece';
+const imagePieceType = 'imagePiece';
 
 type SelectedPieceId =
     | {
-          type: typeof character;
+          type: typeof characterType;
           characterId: string;
           pieceId: string;
       }
     | {
-          type: typeof portrait;
+          type: typeof portraitType;
           characterId: string;
           pieceId: string;
       }
     | {
-          type: typeof shapePiece | typeof dicePiece | typeof imagePiece | typeof stringPiece;
+          type:
+              | typeof shapePiece
+              | typeof dicePieceType
+              | typeof imagePieceType
+              | typeof stringPieceType;
           pieceId: string;
       };
 
@@ -195,7 +203,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
 
     const setBoardTooltip = useSetAtom(boardTooltipAtom);
 
-    const mouseOverOnRef = React.useRef<MouseOverOn>({ type: background });
+    const mouseOverOnRef = React.useRef<MouseOverOn>({ type: backgroundType });
     const { stoppedCursor, onMove } = useGetStoppedCursor();
     React.useEffect(() => {
         if (stoppedCursor == null) {
@@ -213,7 +221,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const backgroundImage = useImageFromFilePath(board.backgroundImage);
     const backgroundImageResult =
         backgroundImage.type === success ? backgroundImage.image : undefined;
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const setRoomState = useSetRoomStateWithImmer();
     const publicMessages = useRoomMessages({ filter: publicMessageFilter });
     const myUserUid = useMyUserUid();
@@ -322,14 +331,14 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         resizable={!piece.isPositionLocked}
                         listening
                         isSelected={
-                            selectedPieceId?.type === 'character' &&
+                            selectedPieceId?.type === characterType &&
                             selectedPieceId.characterId === characterId &&
                             selectedPieceId.pieceId === pieceId
                         }
                         onClick={() => {
                             unsetPopoverEditor();
                             setSelectedPieceId({
-                                type: 'character',
+                                type: characterType,
                                 characterId,
                                 pieceId,
                             });
@@ -339,7 +348,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                 pageX: e.evt.pageX,
                                 pageY: e.evt.pageY,
                                 clickOn: {
-                                    type: 'character',
+                                    type: characterType,
                                     character,
                                     characterId,
                                     boardId,
@@ -349,14 +358,14 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         }}
                         onMouseEnter={() =>
                             (mouseOverOnRef.current = {
-                                type: 'character',
+                                type: characterType,
                                 character,
                                 characterId,
                                 boardId,
                                 pieceId,
                             })
                         }
-                        onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
+                        onMouseLeave={() => (mouseOverOnRef.current = { type: backgroundType })}
                         onDragEnd={e => {
                             setRoomState(roomState => {
                                 const characterPiece =
@@ -400,14 +409,14 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         resizable={!piece.isPositionLocked}
                         listening
                         isSelected={
-                            selectedPieceId?.type === 'portrait' &&
+                            selectedPieceId?.type === portraitType &&
                             selectedPieceId.characterId === characterId &&
                             selectedPieceId.pieceId === pieceId
                         }
                         onClick={() => {
                             unsetPopoverEditor();
                             setSelectedPieceId({
-                                type: 'portrait',
+                                type: portraitType,
                                 characterId,
                                 pieceId: pieceId,
                             });
@@ -417,7 +426,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                 pageX: e.evt.pageX,
                                 pageY: e.evt.pageY,
                                 clickOn: {
-                                    type: 'portrait',
+                                    type: portraitType,
                                     character,
                                     characterId,
                                     pieceId,
@@ -427,14 +436,14 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         }}
                         onMouseEnter={() =>
                             (mouseOverOnRef.current = {
-                                type: 'portrait',
+                                type: portraitType,
                                 character,
                                 characterId,
                                 boardId,
                                 pieceId,
                             })
                         }
-                        onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
+                        onMouseLeave={() => (mouseOverOnRef.current = { type: backgroundType })}
                         onDragEnd={e => {
                             setRoomState(roomState => {
                                 const portraitPiece =
@@ -474,13 +483,13 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     resizable={!piece.isPositionLocked}
                     listening
                     isSelected={
-                        selectedPieceId?.type === 'imagePiece' &&
+                        selectedPieceId?.type === imagePieceType &&
                         selectedPieceId.pieceId === pieceId
                     }
                     onClick={() => {
                         unsetPopoverEditor();
                         setSelectedPieceId({
-                            type: 'imagePiece',
+                            type: imagePieceType,
                             pieceId,
                         });
                     }}
@@ -488,18 +497,18 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         setBoardPopoverEditor({
                             pageX: e.evt.pageX,
                             pageY: e.evt.pageY,
-                            clickOn: { type: 'imagePiece', piece, boardId, pieceId },
+                            clickOn: { type: imagePieceType, piece, boardId, pieceId },
                         });
                     }}
                     onMouseEnter={() =>
                         (mouseOverOnRef.current = {
-                            type: 'imagePiece',
+                            type: imagePieceType,
                             piece,
                             boardId,
                             pieceId,
                         })
                     }
-                    onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
+                    onMouseLeave={() => (mouseOverOnRef.current = { type: backgroundType })}
                     onDragEnd={e => {
                         setRoomState(roomState => {
                             const imagePiece = roomState.boards?.[boardId]?.imagePieces?.[pieceId];
@@ -520,17 +529,18 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     key={pieceId}
                     label={boardConfig.showDicePieceLabel ? piece.name : undefined}
                     opacity={1}
-                    state={{ type: dicePiece, state: piece }}
+                    state={{ type: dicePieceType, state: piece }}
                     draggable={!piece.isPositionLocked}
                     resizable={!piece.isPositionLocked}
                     listening
                     isSelected={
-                        selectedPieceId?.type === 'dicePiece' && selectedPieceId.pieceId === pieceId
+                        selectedPieceId?.type === dicePieceType &&
+                        selectedPieceId.pieceId === pieceId
                     }
                     onClick={() => {
                         unsetPopoverEditor();
                         setSelectedPieceId({
-                            type: 'dicePiece',
+                            type: dicePieceType,
                             pieceId,
                         });
                     }}
@@ -538,13 +548,13 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         setBoardPopoverEditor({
                             pageX: e.evt.pageX,
                             pageY: e.evt.pageY,
-                            clickOn: { type: 'dicePiece', piece, pieceId, boardId },
+                            clickOn: { type: dicePieceType, piece, pieceId, boardId },
                         });
                     }}
                     onMouseEnter={() =>
-                        (mouseOverOnRef.current = { type: 'dicePiece', piece, pieceId, boardId })
+                        (mouseOverOnRef.current = { type: dicePieceType, piece, pieceId, boardId })
                     }
-                    onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
+                    onMouseLeave={() => (mouseOverOnRef.current = { type: backgroundType })}
                     onDragEnd={e => {
                         setRoomState(roomState => {
                             const dicePiece = roomState.boards?.[boardId]?.dicePieces?.[pieceId];
@@ -588,7 +598,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 onMouseEnter={() =>
                     (mouseOverOnRef.current = { type: 'shapePiece', piece, pieceId, boardId })
                 }
-                onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
+                onMouseLeave={() => (mouseOverOnRef.current = { type: backgroundType })}
                 onDragEnd={e => {
                     setRoomState(roomState => {
                         const shapePiece = roomState.boards?.[boardId]?.shapePieces?.[pieceId];
@@ -609,7 +619,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     label={boardConfig.showStringPieceLabel ? piece.name : undefined}
                     opacity={1}
                     state={{
-                        type: 'stringPiece',
+                        type: stringPieceType,
                         state: piece,
                         createdByMe: isMyCharacter(piece.ownerCharacterId),
                     }}
@@ -617,13 +627,13 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     resizable={!piece.isPositionLocked}
                     listening
                     isSelected={
-                        selectedPieceId?.type === 'stringPiece' &&
+                        selectedPieceId?.type === stringPieceType &&
                         selectedPieceId.pieceId === pieceId
                     }
                     onClick={() => {
                         unsetPopoverEditor();
                         setSelectedPieceId({
-                            type: 'stringPiece',
+                            type: stringPieceType,
                             pieceId,
                         });
                     }}
@@ -631,13 +641,18 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         setBoardPopoverEditor({
                             pageX: e.evt.pageX,
                             pageY: e.evt.pageY,
-                            clickOn: { type: 'stringPiece', piece, pieceId, boardId },
+                            clickOn: { type: stringPieceType, piece, pieceId, boardId },
                         });
                     }}
                     onMouseEnter={() =>
-                        (mouseOverOnRef.current = { type: 'stringPiece', piece, pieceId, boardId })
+                        (mouseOverOnRef.current = {
+                            type: stringPieceType,
+                            piece,
+                            pieceId,
+                            boardId,
+                        })
                     }
-                    onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
+                    onMouseLeave={() => (mouseOverOnRef.current = { type: backgroundType })}
                     onDragEnd={e => {
                         setRoomState(roomState => {
                             const stringPiece =
@@ -672,7 +687,10 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             image={image}
             scaleX={Math.max(board.backgroundImageZoom, 0)}
             scaleY={Math.max(board.backgroundImageZoom, 0)}
-            onClick={(e: any) => e.evt.preventDefault()}
+            onClick={(e: any) =>
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+                e.evt.preventDefault()
+            }
         />
     ));
 
@@ -685,7 +703,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             onClick={e => {
                 setSelectedPieceId(undefined);
                 unsetPopoverEditor();
-                onClick == null ? undefined : onClick(e);
+                onClick?.(e);
             }}
             onContextMenu={e => {
                 if (onContextMenu == null) {
@@ -710,18 +728,16 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             scaleY={scale}
             onWheel={e => {
                 e.evt.preventDefault();
-                setRoomConfig(roomConfig => {
-                    if (roomConfig == null) {
-                        return;
-                    }
-                    RoomConfigUtils.zoomBoard(roomConfig, {
+                reduceRoomConfig({
+                    type: zoomBoard,
+                    action: {
                         roomId,
                         boardId,
                         boardType,
                         zoomDelta: e.evt.deltaY > 0 ? -0.25 : 0.25,
                         prevCanvasWidth: canvasWidth,
                         prevCanvasHeight: canvasHeight,
-                    });
+                    },
                 });
             }}
         >
@@ -750,19 +766,14 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             return;
                         }
                         const nonZeroScale = scale === 0 ? 0.01 : scale;
-                        setRoomConfig(roomConfig => {
-                            if (roomConfig == null) {
-                                return;
-                            }
-                            RoomConfigUtils.editBoard(
-                                roomConfig,
-                                boardId,
-                                boardType,
-                                boardConfig => {
-                                    boardConfig.offsetX -= e.evt.movementX / nonZeroScale;
-                                    boardConfig.offsetY -= e.evt.movementY / nonZeroScale;
-                                },
-                            );
+                        reduceRoomConfig({
+                            type: editBoard,
+                            boardId,
+                            boardType,
+                            action: boardConfig => {
+                                boardConfig.offsetX -= e.evt.movementX / nonZeroScale;
+                                boardConfig.offsetY -= e.evt.movementY / nonZeroScale;
+                            },
                         });
                     }}
                 >
@@ -814,11 +825,12 @@ const NonTransparentStyle: React.CSSProperties = {
 };
 
 export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) => {
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const setBoardContextMenu = useSetAtom(boardContextMenuAtom);
     const setBoardEditorModal = useSetAtom(boardEditorModalAtom);
     const setImportBoardModal = useSetAtom(importBoardModalVisibilityAtom);
-    const roomId = useRoomId();
     const boards = useBoards();
     const characters = useCharacters();
     const myUserUid = useMyUserUid();
@@ -1036,16 +1048,19 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                   return {
                       key: boardId,
                       onClick: () =>
-                          setRoomConfig(roomConfig => {
-                              if (roomConfig == null) {
-                                  return;
-                              }
-                              const boardEditorPanel =
-                                  roomConfig.panels.boardEditorPanels[boardEditorPanelId];
-                              if (boardEditorPanel == null) {
-                                  return;
-                              }
-                              boardEditorPanel.activeBoardId = boardId;
+                          reduceRoomConfig({
+                              type: custom,
+                              action: roomConfig => {
+                                  if (roomConfig == null) {
+                                      return;
+                                  }
+                                  const boardEditorPanel =
+                                      roomConfig.panels.boardEditorPanels[boardEditorPanelId];
+                                  if (boardEditorPanel == null) {
+                                      return;
+                                  }
+                                  boardEditorPanel.activeBoardId = boardId;
+                              },
                           }),
                       label: board.name === '' ? '(名前なし)' : board.name,
                   };
@@ -1141,7 +1156,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                     {boardIdToShow && (
                         <>
                             <Popover
-                                trigger='click'
+                                trigger="click"
                                 overlayClassName={cancelRnd}
                                 content={
                                     <BoardConfigEditor
@@ -1151,7 +1166,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                     />
                                 }
                                 // デフォルトではtopだが、このボタンがブラウザ画面の右端近くにあるとBoardConfigEditorが縦長になってしまい見づらい。ボタンは右下にあるため、縦長になったりはみ出したりすることが最も少ないであろうleftBottomとしている。
-                                placement='leftBottom'
+                                placement="leftBottom"
                             >
                                 <Button>表示設定</Button>
                             </Popover>
@@ -1164,18 +1179,16 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                             if (boardIdToShow == null) {
                                 return;
                             }
-                            setRoomConfig(roomConfig => {
-                                if (roomConfig == null) {
-                                    return;
-                                }
-                                RoomConfigUtils.zoomBoard(roomConfig, {
+                            reduceRoomConfig({
+                                type: zoomBoard,
+                                action: {
                                     roomId,
                                     boardId: boardIdToShow,
                                     boardType,
                                     zoomDelta: 0.25,
                                     prevCanvasWidth: canvasWidth,
                                     prevCanvasHeight: canvasHeight,
-                                });
+                                },
                             });
                         }}
                     >
@@ -1187,18 +1200,16 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                             if (boardIdToShow == null) {
                                 return;
                             }
-                            setRoomConfig(roomConfig => {
-                                if (roomConfig == null) {
-                                    return;
-                                }
-                                RoomConfigUtils.zoomBoard(roomConfig, {
+                            reduceRoomConfig({
+                                type: zoomBoard,
+                                action: {
                                     roomId,
                                     boardId: boardIdToShow,
                                     boardType,
                                     zoomDelta: -0.25,
                                     prevCanvasWidth: canvasWidth,
                                     prevCanvasHeight: canvasHeight,
-                                });
+                                },
                             });
                         }}
                     >
@@ -1211,18 +1222,13 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                             if (boardIdToShow == null) {
                                 return;
                             }
-                            setRoomConfig(roomConfig => {
-                                if (roomConfig == null) {
-                                    return;
-                                }
-                                RoomConfigUtils.editBoard(
-                                    roomConfig,
-                                    boardIdToShow,
-                                    boardType,
-                                    () => {
-                                        return defaultBoardConfig();
-                                    },
-                                );
+                            reduceRoomConfig({
+                                type: editBoard,
+                                boardId: boardIdToShow,
+                                boardType,
+                                action: () => {
+                                    return defaultBoardConfig();
+                                },
                             });
                         }}
                     >

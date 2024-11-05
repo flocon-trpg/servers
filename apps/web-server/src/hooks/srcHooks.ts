@@ -2,16 +2,14 @@ import { UseQueryResult, useQueries } from '@tanstack/react-query';
 import { useAtomValue } from 'jotai/react';
 import React from 'react';
 import { useMemoOne } from 'use-memo-one';
-import { firebaseStorageAtom } from '../pages/_app';
 import { FilePathLikeOrThumb, FilePathModule } from '../utils/file/filePath';
-import { useGetIdToken } from './useGetIdToken';
+import { firebaseStorageAtom, getIdTokenResultAtom } from './useSetupApp';
 import { useWebConfig } from './useWebConfig';
 import { idTokenIsNull, thumbs } from '@/utils/file/getFloconUploaderFile';
 
 export const loaded = 'loaded';
 export const loading = 'loading';
 export const nullishArg = 'nullishArg';
-export const invalidWebConfig = 'invalidWebConfig';
 
 type SrcArrayResult =
     | {
@@ -19,7 +17,7 @@ type SrcArrayResult =
           queriesResult: readonly UseQueryResult<FilePathModule.SrcResult, unknown>[];
       }
     | {
-          type: typeof loading | typeof nullishArg | typeof invalidWebConfig;
+          type: typeof loading | typeof nullishArg;
       };
 
 // PathArrayがnullish ⇔ 戻り値がnullishArg
@@ -29,10 +27,10 @@ export function useSrcArrayFromFilePath(
 ): SrcArrayResult {
     const config = useWebConfig();
     const storage = useAtomValue(firebaseStorageAtom);
-    const { getIdToken } = useGetIdToken();
+    const { getIdToken } = useAtomValue(getIdTokenResultAtom);
 
     const cleanPathArray =
-        pathArray == null || config?.value == null || storage == null
+        pathArray == null || storage == null
             ? []
             : pathArray.map(path => {
                   const $path = FilePathModule.ensureType(path);
@@ -52,7 +50,7 @@ export function useSrcArrayFromFilePath(
                   const queryFn = async () => {
                       const result = await FilePathModule.getSrc({
                           path,
-                          config: config.value,
+                          config,
                           storage,
                           getIdToken,
                       });
@@ -79,10 +77,7 @@ export function useSrcArrayFromFilePath(
         if (isPathArrayNullish) {
             return { type: nullishArg };
         }
-        if (config?.isError) {
-            return { type: invalidWebConfig };
-        }
-        if (config == null || storage == null) {
+        if (storage == null) {
             return { type: loading };
         }
         return { type: loaded, queriesResult };
@@ -95,7 +90,7 @@ type SrcResult =
           value: UseQueryResult<FilePathModule.SrcResult, unknown>;
       }
     | {
-          type: typeof loading | typeof nullishArg | typeof invalidWebConfig;
+          type: typeof loading | typeof nullishArg;
       };
 
 const toSrcResult = (srcArray: ReturnType<typeof useSrcArrayFromFilePath>): SrcResult => {

@@ -8,6 +8,7 @@ export { PublicChannelKey } from './internal/publicChannelKey';
 export { simpleId } from './internal/simpleId';
 export { isValidVarToml, parseToml, getVariableFromVarTomlObject, generateChatPalette, } from './internal/toml';
 export { testCommand, execCharacterCommand } from './internal/command/main';
+export { env } from './internal/env';
 export { Expression, plain, expr1, analyze } from './internal/expression';
 export { sanitizeFilename, sanitizeFoldername, trySanitizePath, joinPath, UploaderPathSource, } from './internal/uploaderPath';
 export { fakeFirebaseConfig1, fakeFirebaseConfig2 } from './internal/fake/fakeFirebaseConfig';

@@ -1,4 +1,6 @@
 import { FirebaseError } from '@firebase/util';
+import { env } from '@flocon-trpg/core';
+import { useNavigate } from '@tanstack/react-router';
 import { Alert, Button, Form, Input, Tooltip } from 'antd';
 import classNames from 'classnames';
 import {
@@ -20,14 +22,13 @@ import {
 } from 'firebase/auth';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react';
 import { atom } from 'jotai/vanilla';
-import { useRouter } from 'next/router';
 import React from 'react';
 import { storybookAtom } from '@/atoms/storybookAtom/storybookAtom';
+import { AwaitableButton } from '@/components/ui/AwaitableButton/AwaitableButton';
 import { Center } from '@/components/ui/Center/Center';
 import { Layout } from '@/components/ui/Layout/Layout';
-import { anonymous, email, facebook, github, google, phone, twitter } from '@/env';
+import { firebaseAuthAtom } from '@/hooks/useSetupApp';
 import { useWebConfig } from '@/hooks/useWebConfig';
-import { firebaseAuthAtom } from '@/pages/_app';
 import { flex, flexColumn, flexRow } from '@/styles/className';
 
 const displayName = 'new user';
@@ -40,7 +41,7 @@ const emailModeAtom = atom(false);
 const useLoginWithAuthProvider = (): ((provider: AuthProvider) => Promise<void>) => {
     const isStorybook = useAtomValue(storybookAtom).isStorybook;
     const auth = useAtomValue(firebaseAuthAtom);
-    const router = useRouter();
+    const router = useNavigate();
     const setError = useSetAtom(errorAtom);
     const result = React.useCallback(
         async (provider: AuthProvider) => {
@@ -51,7 +52,8 @@ const useLoginWithAuthProvider = (): ((provider: AuthProvider) => Promise<void>)
                 await linkWithPopup(auth.currentUser, provider)
                     .then(() => {
                         setError(undefined);
-                        router.push('/');
+                        // CONSIDER: await されていない。これで問題ないか？
+                        void router({ to: '/' });
                     })
                     .catch((error: FirebaseError) => {
                         setError(error);
@@ -64,7 +66,7 @@ const useLoginWithAuthProvider = (): ((provider: AuthProvider) => Promise<void>)
                     // なお、result.operationType、result.user.metadataを用いて判定する方法はうまくいかなかった。
 
                     setError(undefined);
-                    await router.push('/');
+                    await router({ to: '/' });
                 })
                 .catch((error: FirebaseError) => {
                     setError(error);
@@ -74,6 +76,7 @@ const useLoginWithAuthProvider = (): ((provider: AuthProvider) => Promise<void>)
     );
     if (isStorybook) {
         return () => {
+            // CONSIDER: 永遠に resolve も reject もしないようになっているが問題ないのか？
             return new Promise<void>(() => undefined);
         };
     }
@@ -84,7 +87,7 @@ const Email: React.FC = () => {
     const labelCol = 8;
     const wrapperCol = 16;
 
-    const router = useRouter();
+    const router = useNavigate();
     const setError = useSetAtom(errorAtom);
     const [isSubmitting, setIsSubmitting] = useAtom(isSubmittingAtom);
     const setEmailMode = useSetAtom(emailModeAtom);
@@ -96,7 +99,7 @@ const Email: React.FC = () => {
         setEmail('');
         setPassword('');
         setEmailMode(false);
-        await router.push('/');
+        await router({ to: '/' });
     }, [router, setEmailMode, setError]);
 
     if (auth == null) {
@@ -105,15 +108,15 @@ const Email: React.FC = () => {
 
     return (
         <Form
-            name='mailForm'
+            name="mailForm"
             labelCol={{ span: labelCol }}
             wrapperCol={{ span: wrapperCol }}
             initialValues={{ remember: true }}
             style={{ width: formWidth }}
         >
-            <Form.Item label='メールアドレス' name='email'>
+            <Form.Item label="メールアドレス" name="email">
                 <Input
-                    name='emailInput'
+                    name="emailInput"
                     value={email}
                     onChange={e => {
                         setEmail(e.target.value);
@@ -121,14 +124,14 @@ const Email: React.FC = () => {
                 />
             </Form.Item>
 
-            <Form.Item label='パスワード' name='password'>
+            <Form.Item label="パスワード" name="password">
                 <Input.Password value={password} onChange={e => setPassword(e.target.value)} />
             </Form.Item>
 
             <Form.Item wrapperCol={{ offset: labelCol, span: wrapperCol }}>
                 <div className={classNames(flex, flexRow)}>
                     {auth.currentUser?.isAnonymous === true ? (
-                        <Button
+                        <AwaitableButton
                             onClick={async () => {
                                 if (auth.currentUser == null) {
                                     return;
@@ -147,10 +150,10 @@ const Email: React.FC = () => {
                             }}
                         >
                             非匿名アカウントに変換
-                        </Button>
+                        </AwaitableButton>
                     ) : (
                         <>
-                            <Button
+                            <AwaitableButton
                                 disabled={isSubmitting}
                                 onClick={async () => {
                                     setIsSubmitting(true);
@@ -172,8 +175,8 @@ const Email: React.FC = () => {
                                 }}
                             >
                                 アカウント作成
-                            </Button>
-                            <Button
+                            </AwaitableButton>
+                            <AwaitableButton
                                 disabled={isSubmitting}
                                 onClick={async () => {
                                     setIsSubmitting(true);
@@ -191,7 +194,7 @@ const Email: React.FC = () => {
                                             .then(async () => {
                                                 await onSuccess();
                                             })
-                                            .catch(async (err: FirebaseError) => {
+                                            .catch((err: FirebaseError) => {
                                                 setError(err);
 
                                                 if (signInMethods == null) {
@@ -233,7 +236,7 @@ const Email: React.FC = () => {
                                 }}
                             >
                                 ログイン
-                            </Button>
+                            </AwaitableButton>
                         </>
                     )}
                 </div>
@@ -243,25 +246,25 @@ const Email: React.FC = () => {
 };
 
 const areProvidersEmpty = (providers: string[]): boolean => {
-    if (providers.includes(anonymous)) {
+    if (providers.includes(env.authProviders.anonymous)) {
         return false;
     }
-    if (providers.includes(email)) {
+    if (providers.includes(env.authProviders.email)) {
         return false;
     }
-    if (providers.includes(facebook)) {
+    if (providers.includes(env.authProviders.facebook)) {
         return false;
     }
-    if (providers.includes(github)) {
+    if (providers.includes(env.authProviders.github)) {
         return false;
     }
-    if (providers.includes(google)) {
+    if (providers.includes(env.authProviders.google)) {
         return false;
     }
-    if (providers.includes(phone)) {
+    if (providers.includes(env.authProviders.phone)) {
         return false;
     }
-    if (providers.includes(twitter)) {
+    if (providers.includes(env.authProviders.twitter)) {
         return false;
     }
     return true;
@@ -274,7 +277,7 @@ const SignInContent: React.FC = () => {
     }, [setIsSubmitting]);
 
     const config = useWebConfig();
-    const router = useRouter();
+    const router = useNavigate();
     const setError = useSetAtom(errorAtom);
     const auth = useAtomValue(firebaseAuthAtom);
     const [emailMode, setEmailMode] = useAtom(emailModeAtom);
@@ -292,16 +295,12 @@ const SignInContent: React.FC = () => {
     const loginWithAuthProvider = useLoginWithAuthProvider();
 
     const areProvidersEmptyValue = React.useMemo(() => {
-        const authProviders = config?.value?.authProviders ?? [];
+        const authProviders = config.authProviders ?? [];
         return areProvidersEmpty(authProviders);
-    }, [config?.value?.authProviders]);
-    const authProviders = config?.value?.authProviders ?? [];
+    }, [config.authProviders]);
+    const authProviders = config.authProviders ?? [];
 
-    if (config?.isError === true) {
-        return <div>{config.error}</div>;
-    }
-
-    if (config?.value === undefined || auth == null) {
+    if (auth == null) {
         return <div>Firebase のサービスを準備しています…</div>;
     }
 
@@ -327,59 +326,62 @@ const SignInContent: React.FC = () => {
             <>
                 <a
                     style={{ marginBottom: 12, alignSelf: 'start' }}
-                    onClick={() => router.push('/')}
+                    onClick={() => void router({ to: '/' })}
                 >
                     {'< トップページに戻る'}
                 </a>
-                {(areProvidersEmptyValue || authProviders.includes(email)) && (
+                {(areProvidersEmptyValue || authProviders.includes(env.authProviders.email)) && (
                     <Button style={{ margin }} onClick={() => setEmailMode(true)}>
                         {`メールアドレス・パスワード${suffix}`}
                     </Button>
                 )}
-                {(areProvidersEmptyValue || authProviders.includes(google)) && (
-                    <Button
+                {(areProvidersEmptyValue || authProviders.includes(env.authProviders.google)) && (
+                    <AwaitableButton
                         style={{ margin }}
                         onClick={() => loginWithAuthProvider(googleProvider)}
                     >
                         {`Googleアカウント${suffix}`}
-                    </Button>
+                    </AwaitableButton>
                 )}
-                {(areProvidersEmptyValue || authProviders.includes(twitter)) && (
-                    <Button
+                {(areProvidersEmptyValue || authProviders.includes(env.authProviders.twitter)) && (
+                    <AwaitableButton
                         style={{ margin }}
                         onClick={() => loginWithAuthProvider(twitterProvider)}
                     >
                         {`Twitterアカウント${suffix}`}
-                    </Button>
+                    </AwaitableButton>
                 )}
-                {(areProvidersEmptyValue || authProviders.includes(facebook)) && (
-                    <Button
+                {(areProvidersEmptyValue || authProviders.includes(env.authProviders.facebook)) && (
+                    <AwaitableButton
                         style={{ margin }}
                         onClick={() => loginWithAuthProvider(facebookProvider)}
                     >
                         {`Facebookアカウント${suffix}`}
-                    </Button>
+                    </AwaitableButton>
                 )}
-                {(areProvidersEmptyValue || authProviders.includes(github)) && (
-                    <Button
+                {(areProvidersEmptyValue || authProviders.includes(env.authProviders.github)) && (
+                    <AwaitableButton
                         style={{ margin }}
                         onClick={() => loginWithAuthProvider(githubProvider)}
                     >
                         {`GitHubアカウント${suffix}`}
-                    </Button>
+                    </AwaitableButton>
                 )}
-                {(areProvidersEmptyValue || authProviders.includes(phone)) && (
-                    <Button
+                {(areProvidersEmptyValue || authProviders.includes(env.authProviders.phone)) && (
+                    <AwaitableButton
                         style={{ margin }}
-                        onClick={() =>
-                            phoneProvider == null ? undefined : loginWithAuthProvider(phoneProvider)
+                        onClick={async () =>
+                            phoneProvider == null
+                                ? undefined
+                                : await loginWithAuthProvider(phoneProvider)
                         }
                     >
                         {`電話認証${suffix}`}
-                    </Button>
+                    </AwaitableButton>
                 )}
-                {(areProvidersEmptyValue || authProviders.includes(anonymous)) && (
-                    <Tooltip title='アカウントを作成せずに匿名でログインします。匿名ユーザーのデータは消失しやすいため、あくまでお試しとして使うことを推奨します。非匿名アカウントに後からアップグレードすることもできます。'>
+                {(areProvidersEmptyValue ||
+                    authProviders.includes(env.authProviders.anonymous)) && (
+                    <Tooltip title="アカウントを作成せずに匿名でログインします。匿名ユーザーのデータは消失しやすいため、あくまでお試しとして使うことを推奨します。非匿名アカウントに後からアップグレードすることもできます。">
                         <Button
                             style={{ margin }}
                             onClick={() => {
@@ -390,7 +392,7 @@ const SignInContent: React.FC = () => {
                                             photoURL: null,
                                         });
                                         setError(undefined);
-                                        await router.push('/');
+                                        await router({ to: '/' });
                                     })
                                     .catch((error: FirebaseError) => {
                                         setError(error);

@@ -92,7 +92,7 @@ export const GameSelector: React.FC<Props> = ({
         () => (
             <Select
                 style={{ flex: 1, maxWidth: inputMaxWidth }}
-                placeholder='ゲームの種類'
+                placeholder="ゲームの種類"
                 showSearch
                 value={config.selectedGameSystem}
                 onChange={value => {

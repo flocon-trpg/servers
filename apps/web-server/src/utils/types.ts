@@ -49,18 +49,6 @@ export const reset = 'reset';
 
 export type Reset = { type: typeof reset };
 
-export type FetchTextState =
-    | {
-          // fetch関数などの実行が完了していない状態。
-          fetched: false;
-      }
-    | {
-          fetched: true;
-
-          // fetch関数などを実行した結果、ファイルが見つかった場合はそのファイルの内容。見つからなかった場合はnull。
-          value: string | null;
-      };
-
 export type Recipe<T> = (state: T) => T | void;
 
 export type PieceModalState =

@@ -22,6 +22,7 @@ const WrapTabNode: React.FC<WrapTabNodeProps> = ({
             type: dndType,
             end: (_, monitor) => {
                 const dropResult = monitor.getDropResult();
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 const draggedItemKey = (dropResult as any)?.[dndItemKey] as string | undefined;
                 if (draggedItemKey == null) {
                     return;
@@ -57,6 +58,7 @@ export const DraggableTabs: React.FC<Props> = (props: Props) => {
 
     const tabBarChildren = React.useCallback(
         (node: any) => (
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
             <WrapTabNode key={node.key} index={node.key} dndType={dndType} onDnd={onDnd}>
                 {node}
             </WrapTabNode>

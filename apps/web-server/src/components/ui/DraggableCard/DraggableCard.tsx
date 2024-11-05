@@ -4,11 +4,12 @@ import { NumberSize, ResizeDirection } from 're-resizable';
 import React, { PropsWithChildren } from 'react';
 import { ControlPosition } from 'react-draggable';
 import { Rnd, Props as RndProps } from 'react-rnd';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import {
     defaultPanelOpacity,
     minPanelOpacity,
 } from '@/atoms/roomConfigAtom/types/roomConfig/resources';
+import { useRoomId } from '@/components/models/room/Room/subcomponents/hooks/useRoomId';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { Styles } from '@/styles';
 import { cancelRnd } from '@/styles/className';
@@ -62,7 +63,7 @@ export const DraggableCard: React.FC<Props> = (props: Props) => {
         if (props.highlightKey == null) {
             return;
         }
-        api.start({
+        void api.start({
             to: [
                 {
                     headerBackgroundColor: headerBackgroundActiveColor,
@@ -82,8 +83,9 @@ export const DraggableCard: React.FC<Props> = (props: Props) => {
             ? 0
             : (props.topElementContainerHeight ?? defaultTopElementContainerHeight);
 
-    const rawPanelOpacity =
-        useAtomSelector(roomConfigAtom, state => state?.panelOpacity) ?? defaultPanelOpacity;
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const rawPanelOpacity = useAtomSelector(roomConfigAtom, state => state.panelOpacity);
     let panelOpacity = rawPanelOpacity;
     panelOpacity = Math.max(minPanelOpacity, panelOpacity);
     panelOpacity = Math.min(1, panelOpacity);

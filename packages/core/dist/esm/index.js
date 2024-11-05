@@ -3,7 +3,7 @@ import { Result } from '@kizahasi/result';
 import { LocalDate, LocalDateTime, LocalTime, OffsetDateTime, parse as parse$2 } from '@ltd/j-toml';
 import { FObject, FBoolean, ScriptError, beginCast, FFunction, FRecord, FString, FType, FNumber, FRecordRef, test, arrayClass, createConsoleClass, exec } from '@flocon-trpg/flocon-script';
 import { recordToArray, mapRecord, keyNames, recordToMap, mapToRecord, groupJoinMap, both, right, left, recordForEach, chooseRecord, loggerRef, isReadonlyNonEmptyArray, groupJoinArray, pairwiseIterable, DualKeyMap } from '@flocon-trpg/utils';
-import { cloneDeep, groupBy, maxBy } from 'lodash';
+import { cloneDeep, groupBy, maxBy } from 'es-toolkit';
 import { deserializeUpOperation, apply as apply$6, serializeTwoWayOperation, diff as diff$5, deserializeTwoWayOperation, toUpOperation as toUpOperation$3, serializeUpOperation, deserializeDownOperation, applyBack as applyBack$5, composeDownOperation as composeDownOperation$4, serializeDownOperation, applyBackAndRestore, transformUpOperation, toDownOperation as toDownOperation$3, applyAndRestore, transformTwoWayOperation } from '@kizahasi/ot-string';
 import truncate from 'truncate-utf8-bytes';
 import { produce } from 'immer';
@@ -14,14 +14,42 @@ const authToken = 'authToken';
 const $free = '$free';
 const $system = '$system';
 
+const env = {
+    // @flocon-trpg/web-server にはこれらを import せずに環境変数のキーを文字列として直接入力している箇所があるため、そちらも合わせる必要があることに注意。
+    NEXT_PUBLIC_FIREBASE_CONFIG: 'NEXT_PUBLIC_FIREBASE_CONFIG',
+    NEXT_PUBLIC_API_HTTP: 'NEXT_PUBLIC_API_HTTP',
+    NEXT_PUBLIC_API_WS: 'NEXT_PUBLIC_API_WS',
+    NEXT_PUBLIC_AUTH_PROVIDERS: 'NEXT_PUBLIC_AUTH_PROVIDERS',
+    NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED: 'NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED',
+    NEXT_PUBLIC_LOG_LEVEL: 'NEXT_PUBLIC_LOG_LEVEL',
+    firebaseConfig: {
+        apiKey: 'apiKey',
+        authDomain: 'authDomain',
+        projectId: 'projectId',
+        storageBucket: 'storageBucket',
+        messagingSenderId: 'messagingSenderId',
+        appId: 'appId',
+    },
+    authProviders: {
+        // TODO: これら以外にも対応させる
+        anonymous: 'anonymous',
+        email: 'email',
+        google: 'google',
+        facebook: 'facebook',
+        github: 'github',
+        twitter: 'twitter',
+        phone: 'phone',
+    },
+};
+
 const firebaseConfig = z.object({
     // databaseURLというキーはおそらくFirestoreを有効化しないと含まれないため、除外している。
-    apiKey: z.string(),
-    authDomain: z.string(),
-    projectId: z.string(),
-    storageBucket: z.string(),
-    messagingSenderId: z.string(),
-    appId: z.string(),
+    [env.firebaseConfig.apiKey]: z.string(),
+    [env.firebaseConfig.authDomain]: z.string(),
+    [env.firebaseConfig.projectId]: z.string(),
+    [env.firebaseConfig.storageBucket]: z.string(),
+    [env.firebaseConfig.messagingSenderId]: z.string(),
+    [env.firebaseConfig.appId]: z.string(),
 });
 
 const strIndex5Array = ['1', '2', '3', '4', '5'];
@@ -193,7 +221,6 @@ const forceMaxLength100String = (source) => {
 /** @deprecated Use `optional` method in zod. */
 const maybe = (source) => source.optional();
 
-/* eslint-disable @typescript-eslint/no-namespace */
 var PublicChannelKey;
 (function (PublicChannelKey) {
     (function (Without$System) {
@@ -220,7 +247,9 @@ var PublicChannelKey;
 // NOT cryptographically secure
 const simpleId = () => {
     const idLength = 9;
-    let result = Math.random().toString(36).substr(2, idLength);
+    let result = Math.random()
+        .toString(36)
+        .substring(2, 2 + idLength);
     while (result.length < idLength) {
         result = result + '0';
     }
@@ -1398,6 +1427,8 @@ const isIdRecord = (source) => {
 };
 const record$1 = (value) => z.record(value.optional());
 
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 const atomic = 'atomic';
 const replace = 'replace';
 const ot = 'ot';
@@ -3299,6 +3330,10 @@ const mapRecordDownOperation = ({ source, mapState, mapOperation, }) => {
     });
 };
 
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 const $v = '$v';
 const $r = '$r';
 const isKeyToIgnore = (key) => key === $v || key === $r;
@@ -6990,5 +7025,5 @@ const createLogs = ({ prevState, nextState, }) => {
     };
 };
 
-export { $free, $index, $r, $system, $v, Default, FirebaseStorage, Markdown, Master, Number, OtError, Plain, Player, PublicChannelKey, Spectator, String, Uploader, admin, analyze, anonymous, apply$1 as apply, applyBack, apply$4 as applyNullableText, apply$5 as applyText, arrayToIndexObjects, atomic, authToken, template$a as bgmTemplate, template$m as boardPositionTemplate, template$5 as boardTemplate, template$i as boolParamTemplate, template$h as characterPieceTemplate, template$c as characterTemplate, client, clientTransform$1 as clientTransform, template$g as commandTemplate, composeDownOperation, createLogs, createObjectValueTemplate, createParamRecordValueTemplate, createRecordValueTemplate, createReplaceValueTemplate, createTextValueTemplate, createType, decodeDbState, decode$1 as decodeDicePiece, decodeDownOperation, decode as decodeStringPiece, deleteType, type$1 as dicePieceLog, dicePieceStrIndexes, template$j as dicePieceTemplate, template$k as dieValueTemplate, diff, downOperation, exactDbState, exactDownOperation, execCharacterCommand, expr1, fakeFirebaseConfig1, fakeFirebaseConfig2, filePathTemplate, firebaseConfig, forceMaxLength100String, generateChatPalette, getOpenRollCall, getVariableFromVarTomlObject, template$9 as imagePieceTemplate, indexObjectsToArray, isCharacterOwner, isIdRecord, isOpenRollCall, isStrIndex10, isStrIndex100, isStrIndex20, isStrIndex5, isValidVarToml, joinPath, maxLength100String, maybe, template$4 as memoTemplate, diff$3 as nullableTextDiff, template$f as numParamTemplate, object, ot, template$3 as paramNameTemplate, paramRecord, parse$1 as parseDicePiece, parseState, parse as parseStringPiece, parseToml, parseUpOperation, template$b as participantTemplate, path, template$l as pieceTemplate, plain, template$e as portraitPieceTemplate, record, replace$1 as replace, restore, restrict, dbTemplate as roomDbTemplate, template as roomTemplate, sanitizeFilename, sanitizeFoldername, serverTransform, shape, template$7 as shapePieceTemplate, template$8 as shapeTemplate, simpleId, state, strIndex100Array, strIndex10Array, strIndex20Array, strIndex5Array, template$d as strParamTemplate, type as stringPieceLog, template$6 as stringPieceTemplate, stringifyState, stringifyUpOperation, testCommand, diff$4 as textDiff, toClientState, toDownOperation, toUpOperation$1 as toNullableTextUpOperation, toOtError, toUpOperation$2 as toTextUpOperation, toUpOperation, trySanitizePath, upOperation, update$2 as update, updateType };
+export { $free, $index, $r, $system, $v, Default, FirebaseStorage, Markdown, Master, Number, OtError, Plain, Player, PublicChannelKey, Spectator, String, Uploader, admin, analyze, anonymous, apply$1 as apply, applyBack, apply$4 as applyNullableText, apply$5 as applyText, arrayToIndexObjects, atomic, authToken, template$a as bgmTemplate, template$m as boardPositionTemplate, template$5 as boardTemplate, template$i as boolParamTemplate, template$h as characterPieceTemplate, template$c as characterTemplate, client, clientTransform$1 as clientTransform, template$g as commandTemplate, composeDownOperation, createLogs, createObjectValueTemplate, createParamRecordValueTemplate, createRecordValueTemplate, createReplaceValueTemplate, createTextValueTemplate, createType, decodeDbState, decode$1 as decodeDicePiece, decodeDownOperation, decode as decodeStringPiece, deleteType, type$1 as dicePieceLog, dicePieceStrIndexes, template$j as dicePieceTemplate, template$k as dieValueTemplate, diff, downOperation, env, exactDbState, exactDownOperation, execCharacterCommand, expr1, fakeFirebaseConfig1, fakeFirebaseConfig2, filePathTemplate, firebaseConfig, forceMaxLength100String, generateChatPalette, getOpenRollCall, getVariableFromVarTomlObject, template$9 as imagePieceTemplate, indexObjectsToArray, isCharacterOwner, isIdRecord, isOpenRollCall, isStrIndex10, isStrIndex100, isStrIndex20, isStrIndex5, isValidVarToml, joinPath, maxLength100String, maybe, template$4 as memoTemplate, diff$3 as nullableTextDiff, template$f as numParamTemplate, object, ot, template$3 as paramNameTemplate, paramRecord, parse$1 as parseDicePiece, parseState, parse as parseStringPiece, parseToml, parseUpOperation, template$b as participantTemplate, path, template$l as pieceTemplate, plain, template$e as portraitPieceTemplate, record, replace$1 as replace, restore, restrict, dbTemplate as roomDbTemplate, template as roomTemplate, sanitizeFilename, sanitizeFoldername, serverTransform, shape, template$7 as shapePieceTemplate, template$8 as shapeTemplate, simpleId, state, strIndex100Array, strIndex10Array, strIndex20Array, strIndex5Array, template$d as strParamTemplate, type as stringPieceLog, template$6 as stringPieceTemplate, stringifyState, stringifyUpOperation, testCommand, diff$4 as textDiff, toClientState, toDownOperation, toUpOperation$1 as toNullableTextUpOperation, toOtError, toUpOperation$2 as toTextUpOperation, toUpOperation, trySanitizePath, upOperation, update$2 as update, updateType };
 //# sourceMappingURL=index.js.map
