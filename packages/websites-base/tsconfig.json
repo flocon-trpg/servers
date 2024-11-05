@@ -1,0 +1,6 @@
+{
+    "extends": "@flocon-trpg/tsconfig",
+    "compilerOptions": {
+        "jsx": "react-jsx"
+    }
+}
