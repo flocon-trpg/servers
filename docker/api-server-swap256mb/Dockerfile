@@ -30,6 +30,7 @@ RUN rm -rf ./.github
 RUN rm -rf ./.husky
 RUN rm -rf ./.yarn/cache
 RUN rm -rf ./apps/web-server
+RUN rm -rf ./websites
 
 
 FROM node:22-bookworm-slim
