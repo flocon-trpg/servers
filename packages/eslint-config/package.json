@@ -9,7 +9,7 @@
     "scripts": {
         "prettier": "yarn prettier:base --write --cache",
         "prettier-check": "yarn prettier:base --check",
-        "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\""
+        "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\" \"index.mjs\" \"index.d.ts\""
     },
     "devDependencies": {
         "@eslint/js": "9.14.0",
