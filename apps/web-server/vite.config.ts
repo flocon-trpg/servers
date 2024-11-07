@@ -26,6 +26,7 @@ export default defineConfig({
                 license({
                     thirdParty: {
                         output: path.resolve(
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                             import.meta.dirname,
                             './dist/licenses-npm-package.txt',
                         ),
