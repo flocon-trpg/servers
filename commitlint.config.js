@@ -18,7 +18,6 @@ module.exports = {
                 'sdk',
                 'sdk-react',
                 'sdk-urql',
-                'tools',
                 'utils',
                 'web-server-utils',
             ],

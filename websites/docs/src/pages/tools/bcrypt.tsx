@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { AntDesign } from '../../components/AntDesign';
 import { Button, Input, Layout, Select, Typography } from 'antd';
 import { hash } from 'bcryptjs';
 import { FC, useState } from 'react';
@@ -75,10 +75,14 @@ const Bcrypt: React.FC = () => {
     );
 };
 
-export const Route = createFileRoute('/bcrypt')({
-    component: () => (
-        <Layout style={{ minHeight: '100vh' }}>
-            <Bcrypt />
-        </Layout>
-    ),
-});
+const id = 'bcrypt-3Ixqgk3WJ6HRBu';
+
+export default function Home(): JSX.Element {
+    return (
+        <AntDesign id={id}>
+            <Layout style={{ minHeight: '100vh' }}>
+                <Bcrypt />
+            </Layout>
+        </AntDesign>
+    );
+}

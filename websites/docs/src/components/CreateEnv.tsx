@@ -253,7 +253,7 @@ export const CreateEnv: React.FC = () => {
                             </div>
                             <Image
                                 width={400}
-                                src="/assets/firebase-config-2.png"
+                                src="/img/tools/firebase-config-2.png"
                                 alt="Firebase構成オブジェクト2"
                                 preview={{ mask: '拡大する' }}
                             />
@@ -262,7 +262,7 @@ export const CreateEnv: React.FC = () => {
                             </div>
                             <Image
                                 width={400}
-                                src="/assets/firebase-config-3.png"
+                                src="/img/tools/firebase-config-3.png"
                                 alt="Firebase構成オブジェクト3"
                                 preview={{ mask: '拡大する' }}
                             />
@@ -273,7 +273,7 @@ export const CreateEnv: React.FC = () => {
                             </div>
                             <Image
                                 width={400}
-                                src="/assets/firebase-config-4.png"
+                                src="/img/tools/firebase-config-4.png"
                                 alt="Firebase構成オブジェクト4"
                                 preview={{ mask: '拡大する' }}
                             />
@@ -284,7 +284,7 @@ export const CreateEnv: React.FC = () => {
                             </div>
                             <Image
                                 width={400}
-                                src="/assets/firebase-config-1.png"
+                                src="/img/tools/firebase-config-1.png"
                                 alt="Firebase構成オブジェクト1"
                                 preview={{ mask: '拡大する' }}
                             />
@@ -425,7 +425,7 @@ export const CreateEnv: React.FC = () => {
                                 </div>
                                 <Image
                                     width={400}
-                                    src="/assets/firebase-auth-2.png"
+                                    src="/img/tools/firebase-auth-2.png"
                                     alt="ログインプロバイダの画像1"
                                     preview={{ mask: '拡大する' }}
                                 />
@@ -434,7 +434,7 @@ export const CreateEnv: React.FC = () => {
                                 </div>
                                 <Image
                                     width={400}
-                                    src="/assets/firebase-auth-1.png"
+                                    src="/img/tools/firebase-auth-1.png"
                                     alt="ログインプロバイダの画像2"
                                     preview={{ mask: '拡大する' }}
                                 />
