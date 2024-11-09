@@ -112,6 +112,7 @@ export const firebaseUserAtom = atomWithObservable(get => {
             new Observable<FirebaseUserState>(observer => {
                 if (auth == null) {
                     observer.next(authNotFound);
+                    observer.complete();
                     return;
                 }
                 // authは最初はnullで、その後非同期でenv.txtが読み込まれてからnon-nullになるため、サイトを開いたときは正常の場合でも上のコードによりまずauthNotFoundがセットされる。
