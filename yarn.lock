@@ -4387,6 +4387,7 @@ __metadata:
     clsx: "npm:^2.0.0"
     docusaurus-plugin-image-zoom: "npm:^2.0.0"
     jotai: "npm:^2.10.1"
+    npm-run-all2: "npm:7.0.1"
     prettier: "npm:3.3.3"
     prism-react-renderer: "npm:^2.3.0"
     react: "npm:^18.0.0"

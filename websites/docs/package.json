@@ -5,7 +5,9 @@
     "scripts": {
         "docusaurus": "docusaurus",
         "start": "docusaurus start",
-        "build": "docusaurus build",
+        "build": "run-s build:deps build:self",
+        "build:deps": "yarn workspaces foreach --recursive -pt --from '@flocon-trpg/docs' --exclude '@flocon-trpg/docs' run build",
+        "build:self": "docusaurus build",
         "swizzle": "docusaurus swizzle",
         "deploy": "docusaurus deploy",
         "clear": "docusaurus clear",
@@ -37,6 +39,7 @@
         "@docusaurus/types": "3.5.2",
         "@flocon-trpg/prettier-config": "workspace:^",
         "@types/bcryptjs": "^2.4.6",
+        "npm-run-all2": "7.0.1",
         "prettier": "3.3.3",
         "typescript": "5.5.4"
     },
