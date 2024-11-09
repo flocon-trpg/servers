@@ -73,7 +73,7 @@ const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
                 size="small"
                 bufferDuration="default"
                 value={chatPaletteText ?? ''}
-                onChange={e => onChange(e.currentValue)}
+                onChange={currentValue => onChange(currentValue)}
             />
         );
     }

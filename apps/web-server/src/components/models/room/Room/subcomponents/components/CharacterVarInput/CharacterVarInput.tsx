@@ -25,11 +25,11 @@ export const CharacterVarInput: React.FC<Props> = ({
             bufferDuration="default"
             disabled={character == null}
             value={character?.privateVarToml ?? ''}
-            onChange={e => {
+            onChange={currentValue => {
                 if (character == null) {
                     return;
                 }
-                onChange(e.currentValue);
+                onChange(currentValue);
             }}
         />
     );

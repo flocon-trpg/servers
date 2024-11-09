@@ -30,7 +30,7 @@ export const CharacterTagNamesEditorModal: React.FC = () => {
                         disabled={characterTagName == null}
                         value={characterTagName ?? ''}
                         bufferDuration="default"
-                        onChange={({ currentValue }) => {
+                        onChange={currentValue => {
                             setRoomState(roomState => {
                                 roomState[`characterTag${index}Name`] = currentValue;
                             });
