@@ -160,11 +160,11 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                     value={memo.name}
                     style={{ width: '100%' }}
                     placeholder="名前"
-                    onChange={e =>
+                    onChange={currentValue =>
                         setRoomState(prevState => {
                             const memo = prevState.memos?.[memoId];
                             if (memo != null) {
-                                memo.name = e.currentValue;
+                                memo.name = currentValue;
                             }
                         })
                     }
@@ -177,7 +177,7 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                 bufferDuration="default"
                 value={memo.text}
                 placeholder="本文"
-                onChange={e => {
+                onChange={currentValue => {
                     setRoomState(roomState => {
                         if (roomState.memos == null) {
                             roomState.memos = {};
@@ -186,7 +186,7 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                         if (memo == null) {
                             return;
                         }
-                        memo.text = e.currentValue;
+                        memo.text = currentValue;
                     });
                 }}
             />

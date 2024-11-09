@@ -26,7 +26,7 @@ export default defineConfig({
                 license({
                     thirdParty: {
                         output: path.resolve(
-                            import.meta.dirname,
+                            (import.meta as unknown as { dirname: string }).dirname,
                             './dist/licenses-npm-package.txt',
                         ),
                     },

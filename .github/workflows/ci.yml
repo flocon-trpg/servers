@@ -59,7 +59,7 @@ jobs:
                         'node:18-bullseye',
                         'node:18-bullseye-slim',
                         'node:20-bullseye-slim',
-                        'node:22-bullseye-slim',
+                        'node:22-bookworm-slim', # Dockerfile で用いられるイメージ。
                     ]
 
         runs-on: ubuntu-22.04

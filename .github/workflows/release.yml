@@ -7,8 +7,8 @@ on:
             - 'v3*.*.*'
 
 jobs:
-    git-diff-main-build:
-        name: git diff remotes/origin/main-build
+    git-diff-main:
+        name: git diff remotes/origin/main
 
         runs-on: ubuntu-22.04
 
@@ -22,16 +22,16 @@ jobs:
 
             - name: Fail if not all the files are OK
               run: |
-                  if [[ -n "$(git diff remotes/origin/main-build)" ]]; then
+                  if [[ -n "$(git diff remotes/origin/main)" ]]; then
                       echo "ERROR: The project is dirty!"
-                      git diff --stat remotes/origin/main-build
+                      git diff --stat remotes/origin/main
                     exit 1
                   else
                       echo "OK."
                   fi
 
     release:
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-22.04
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -40,10 +40,10 @@ jobs:
             - name: Build web-server
               run: yarn build
               working-directory: ./apps/web-server
-            - name: mv out directory
-              run: mv ./apps/web-server/out ./out
+            - name: mv dist directory
+              run: mv ./apps/web-server/dist ./dist
             - name: Create flocon_web_server.zip
-              run: zip -r ${GITHUB_WORKSPACE}/flocon_web_server.zip ./out
+              run: zip -r ${GITHUB_WORKSPACE}/flocon_web_server.zip ./dist
 
             - name: Generate Dockerfile
               run: yarn run gen-flyio-dockerfile

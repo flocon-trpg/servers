@@ -2,20 +2,19 @@ import { Meta, StoryObj } from '@storybook/react';
 import classNames from 'classnames';
 import React from 'react';
 import { interval } from 'rxjs';
-import { OnChangeParams } from '../CollaborativeInput/CollaborativeInput';
 import { TomlInput } from './Tomllnput';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { flex, flex1, flexColumn, flexInitial } from '@/styles/className';
 
 const Main: React.FC<{
-    bufferDuration: number | 'default' | 'short' | null;
+    bufferDuration: number | 'default' | 'short';
     placeholder?: string;
     disabled: boolean;
     testUpdate: boolean;
     initText: string;
     multiline: boolean;
 }> = ({ bufferDuration, placeholder, disabled, testUpdate, initText, multiline }) => {
-    const [changelog, setChangelog] = React.useState<OnChangeParams[]>([]);
+    const [changelog, setChangelog] = React.useState<string[]>([]);
     const [value, setValue] = React.useState<string>(initText);
     React.useEffect(() => {
         if (!testUpdate) {
@@ -43,9 +42,7 @@ const Main: React.FC<{
                 />
                 <div className={classNames(flexInitial)}>
                     {changelog.slice(-3).map((log, i) => (
-                        <div
-                            key={i}
-                        >{`previousValue: ${log.previousValue}, currentValue: ${log.currentValue}`}</div>
+                        <div key={i}>{log}</div>
                     ))}
                 </div>
             </div>
@@ -91,11 +88,5 @@ export const InvalidToml: Story = {
 export const Short: Story = {
     args: {
         bufferDuration: 'short',
-    },
-};
-
-export const NoBuffer: Story = {
-    args: {
-        bufferDuration: null,
     },
 };

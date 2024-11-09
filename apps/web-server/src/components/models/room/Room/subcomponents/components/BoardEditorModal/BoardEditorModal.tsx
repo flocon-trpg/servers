@@ -193,15 +193,12 @@ export const BoardEditorModal: React.FC = () => {
                             bufferDuration="default"
                             size="small"
                             value={board.name}
-                            onChange={e => {
-                                if (e.previousValue === e.currentValue) {
-                                    return;
-                                }
+                            onChange={currentValue => {
                                 updateBoard(board => {
                                     if (board == null) {
                                         return;
                                     }
-                                    board.name = e.currentValue;
+                                    board.name = currentValue;
                                 });
                             }}
                         />

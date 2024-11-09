@@ -454,17 +454,14 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                                         bufferDuration="default"
                                         size="small"
                                         value={character.state.name}
-                                        onChange={e => {
-                                            if (e.previousValue === e.currentValue) {
-                                                return;
-                                            }
+                                        onChange={currentValue => {
                                             setRoomState(state => {
                                                 const targetCharacter =
                                                     state.characters?.[character.stateId];
                                                 if (targetCharacter == null) {
                                                     return;
                                                 }
-                                                targetCharacter.name = e.currentValue;
+                                                targetCharacter.name = currentValue;
                                             });
                                         }}
                                     />

@@ -5,7 +5,9 @@
     "scripts": {
         "docusaurus": "docusaurus",
         "start": "docusaurus start",
-        "build": "docusaurus build",
+        "build": "run-s build:deps build:self",
+        "build:deps": "yarn workspaces foreach --recursive -pt --from '@flocon-trpg/docs' --exclude '@flocon-trpg/docs' run build",
+        "build:self": "docusaurus build",
         "swizzle": "docusaurus swizzle",
         "deploy": "docusaurus deploy",
         "clear": "docusaurus clear",
@@ -20,9 +22,13 @@
     "dependencies": {
         "@docusaurus/core": "3.5.2",
         "@docusaurus/preset-classic": "3.5.2",
+        "@flocon-trpg/core": "workspace:^",
         "@mdx-js/react": "^3.0.0",
+        "antd": "^5.21.6",
+        "bcryptjs": "^2.4.3",
         "clsx": "^2.0.0",
         "docusaurus-plugin-image-zoom": "^2.0.0",
+        "jotai": "^2.10.1",
         "prism-react-renderer": "^2.3.0",
         "react": "^18.0.0",
         "react-dom": "^18.0.0"
@@ -32,6 +38,8 @@
         "@docusaurus/tsconfig": "3.5.2",
         "@docusaurus/types": "3.5.2",
         "@flocon-trpg/prettier-config": "workspace:^",
+        "@types/bcryptjs": "^2.4.6",
+        "npm-run-all2": "7.0.1",
         "prettier": "3.3.3",
         "typescript": "5.5.4"
     },
@@ -48,6 +56,6 @@
         ]
     },
     "engines": {
-        "node": ">=18.0"
+        "node": ">=18"
     }
 }
