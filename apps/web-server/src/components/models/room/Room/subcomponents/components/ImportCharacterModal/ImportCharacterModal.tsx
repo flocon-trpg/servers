@@ -92,8 +92,8 @@ export const ImportCharacterModal: React.FC = () => {
                 <CollaborativeInput
                     multiline
                     value={value}
-                    onChange={e => {
-                        setValue(e.currentValue);
+                    onChange={currentValue => {
+                        setValue(currentValue);
                     }}
                     bufferDuration="short"
                     placeholder="ここにJSONをペーストしてください。"

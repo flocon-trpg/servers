@@ -97,16 +97,13 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                         size="small"
                         value={state.name}
                         bufferDuration={200}
-                        onChange={e => {
-                            if (e.previousValue === e.currentValue) {
-                                return;
-                            }
+                        onChange={currentValue => {
                             setRoomState(state => {
                                 const targetNumParamName = state.numParamNames?.[key];
                                 if (targetNumParamName == null) {
                                     return;
                                 }
-                                targetNumParamName.name = e.currentValue;
+                                targetNumParamName.name = currentValue;
                             });
                         }}
                     />
@@ -152,16 +149,13 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                         size="small"
                         value={state.name}
                         bufferDuration={200}
-                        onChange={e => {
-                            if (e.previousValue === e.currentValue) {
-                                return;
-                            }
+                        onChange={currentValue => {
                             setRoomState(state => {
                                 const targetBoolParamName = state.boolParamNames?.[key];
                                 if (targetBoolParamName == null) {
                                     return;
                                 }
-                                targetBoolParamName.name = e.currentValue;
+                                targetBoolParamName.name = currentValue;
                             });
                         }}
                     />
@@ -207,16 +201,13 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                         size="small"
                         value={state.name}
                         bufferDuration={200}
-                        onChange={e => {
-                            if (e.previousValue === e.currentValue) {
-                                return;
-                            }
+                        onChange={currentValue => {
                             setRoomState(state => {
                                 const targetStrParamName = state.strParamNames?.[key];
                                 if (targetStrParamName == null) {
                                     return;
                                 }
-                                targetStrParamName.name = e.currentValue;
+                                targetStrParamName.name = currentValue;
                             });
                         }}
                     />

@@ -154,7 +154,7 @@ export const useStringPieceEditor = ({
                         bufferDuration="default"
                         size="small"
                         value={state.value}
-                        onChange={({ currentValue }) => {
+                        onChange={currentValue => {
                             updateState(state => {
                                 if (state == null) {
                                     return;

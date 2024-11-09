@@ -3,8 +3,6 @@
 <!-- GitHub Actions のバッジは https://github.com/Atrox/github-actions-badge より作成 -->
 
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fflocon-trpg%2Fservers%2Fbadge%3Fref%3Dmain&style=flat)](https://actions-badge.atrox.dev/flocon-trpg/servers/goto?ref=main)
-[![Codecov](https://img.shields.io/codecov/c/github/flocon-trpg/servers?logo=codecov)](https://app.codecov.io/gh/flocon-trpg/servers)
-![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/flocon-trpg/servers)
 [![GitHub license](https://img.shields.io/github/license/flocon-trpg/servers)](./LICENSE)
 [![Discord](https://img.shields.io/discord/919950632662753280?color=5865F2&logo=discord&logoColor=fff&label=discord)](https://discord.gg/cy3vhmU6Tx)
 

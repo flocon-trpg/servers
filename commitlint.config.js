@@ -12,6 +12,7 @@ module.exports = {
                 'cache',
                 'core',
                 'docs',
+                'eslint-config',
                 'flocon-script',
                 'prettier-config',
                 'rollup-config',

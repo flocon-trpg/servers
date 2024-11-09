@@ -53,7 +53,7 @@ export const OverriddenParameterNameEditor: React.FC<Props> = ({
                         size="small"
                         value={overriddenParameterName ?? ''}
                         bufferDuration="default"
-                        onChange={({ currentValue }) => {
+                        onChange={currentValue => {
                             onOverriddenParameterNameChange(currentValue);
                         }}
                     />

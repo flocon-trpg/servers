@@ -2,7 +2,7 @@
 # docker build -t flocon-api --build-arg branch="api/v0.7.7" . 
 
 
-FROM node:20-bullseye AS build
+FROM node:22-bookworm AS build
 
 # branchという名前ですが、ブランチではなくタグも指定できます。
 # これを変更することで、デプロイするAPIサーバーのバージョンを変更できます。
@@ -27,9 +27,10 @@ RUN rm -rf ./.github
 RUN rm -rf ./.husky
 RUN rm -rf ./.yarn/cache
 RUN rm -rf ./apps/web-server
+RUN rm -rf ./websites
 
 
-FROM node:20-bullseye-slim
+FROM node:22-bookworm-slim
 
 WORKDIR /app
 
