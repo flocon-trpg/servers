@@ -14,11 +14,8 @@ export const PieceEditorMemoRow: React.FC<{
                 size="small"
                 bufferDuration="default"
                 value={state ?? ''}
-                onChange={e => {
-                    if (e.previousValue === e.currentValue) {
-                        return;
-                    }
-                    onChange(e.currentValue);
+                onChange={currentValue => {
+                    onChange(currentValue);
                 }}
             />
         </TableRow>

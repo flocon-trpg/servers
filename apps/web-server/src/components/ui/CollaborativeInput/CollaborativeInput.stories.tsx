@@ -1,49 +1,36 @@
 import { Meta, StoryObj } from '@storybook/react';
+import { Input } from 'antd';
 import classNames from 'classnames';
 import React from 'react';
-import { interval } from 'rxjs';
-import { CollaborativeInput, OnChangeParams } from './CollaborativeInput';
+import { CollaborativeInput, Props } from './CollaborativeInput';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
-import { flex, flex1, flexColumn, flexInitial } from '@/styles/className';
+import { flex, flexColumn, flexInitial } from '@/styles/className';
 
 const Main: React.FC<{
-    bufferDuration: number | 'default' | 'short' | null;
+    bufferDuration: number | 'default' | 'short';
+    multiline?: boolean;
+    disabled?: boolean;
+    size?: Props['size'];
     placeholder?: string;
-    disabled: boolean;
-    multiline: boolean;
-    testUpdate: boolean;
     testBottomElement: boolean;
-}> = ({ bufferDuration, placeholder, disabled, multiline, testUpdate, testBottomElement }) => {
-    const [changelog, setChangelog] = React.useState<OnChangeParams[]>([]);
-    const [value, setValue] = React.useState<string>('init text');
+}> = ({ bufferDuration, multiline, disabled, size, placeholder, testBottomElement }) => {
+    const [value, setValue] = React.useState<string>(placeholder == null ? 'init text' : '');
     const [bottomElement, setBottomElement] = React.useState<JSX.Element>();
-    React.useEffect(() => {
-        if (!testUpdate) {
-            return;
-        }
-        const subscription = interval(4000).subscribe(i => {
-            setValue('new text ' + i);
-        });
-        return () => subscription.unsubscribe();
-    }, [testUpdate]);
 
     return (
         <StorybookProvider compact roomClientContextValue={null}>
-            <div
-                className={classNames(flex, flexColumn)}
-                style={multiline ? { height: 300 } : undefined}
-            >
+            <div className={classNames(flex, flexColumn)}>
+                <h2>CollaborativeInput</h2>
                 <CollaborativeInput
-                    className={classNames(flex1)}
-                    style={multiline ? { overflow: 'auto' } : undefined}
                     value={value}
-                    multiline={multiline}
                     onChange={e => {
-                        setChangelog(state => [...state, e]);
+                        setValue(e);
                     }}
                     bufferDuration={bufferDuration}
-                    placeholder={placeholder}
+                    multiline={multiline}
                     disabled={disabled}
+                    size={size}
+                    placeholder={placeholder}
                     onSkipping={
                         testBottomElement
                             ? e =>
@@ -56,13 +43,12 @@ const Main: React.FC<{
                     }
                 />
                 {testBottomElement ? bottomElement : null}
-                <div className={classNames(flexInitial)}>
-                    {changelog.slice(-3).map((log, i) => (
-                        <div
-                            key={i}
-                        >{`previousValue: ${log.previousValue}, currentValue: ${log.currentValue}`}</div>
-                    ))}
-                </div>
+                <h2>↓ これでCollaborativeInput.roomStateTextを変更できる</h2>
+                {multiline === true ? (
+                    <Input.TextArea value={value} onChange={e => setValue(e.target.value)} />
+                ) : (
+                    <Input value={value} onChange={e => setValue(e.target.value)} />
+                )}
             </div>
         </StorybookProvider>
     );
@@ -73,10 +59,6 @@ const meta = {
     component: Main,
     args: {
         bufferDuration: 'default',
-        placeholder: 'placeholderです',
-        multiline: false,
-        disabled: false,
-        testUpdate: false,
         testBottomElement: true,
     },
 } satisfies Meta<typeof Main>;
@@ -86,10 +68,17 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+export const PlaceHolder: Story = { args: { placeholder: 'placeholder' } };
 
-export const DefaultMultiline: Story = {
+export const Medium: Story = { args: { size: 'medium' } };
+
+export const Small: Story = { args: { size: 'small' } };
+
+export const VerySmall: Story = { args: { size: 'verySmall' } };
+
+export const FiveSeconds: Story = {
     args: {
-        multiline: true,
+        bufferDuration: 5000,
     },
 };
 
@@ -99,8 +88,18 @@ export const Short: Story = {
     },
 };
 
-export const NoBuffer: Story = {
+export const Disabled: Story = {
     args: {
-        bufferDuration: null,
+        disabled: true,
     },
+};
+
+export const Multiline: Story = {
+    args: {
+        multiline: true,
+    },
+};
+
+export const MultilinePlaceHolder: Story = {
+    args: { multiline: true, placeholder: 'placeholder' },
 };

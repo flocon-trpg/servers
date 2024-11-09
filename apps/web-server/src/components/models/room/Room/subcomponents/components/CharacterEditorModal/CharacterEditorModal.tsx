@@ -466,15 +466,12 @@ export const CharacterEditorModal: React.FC = () => {
                                     bufferDuration="default"
                                     size="small"
                                     value={character.name}
-                                    onChange={e => {
-                                        if (e.previousValue === e.currentValue) {
-                                            return;
-                                        }
+                                    onChange={currentValue => {
                                         updateCharacter(character => {
                                             if (character == null) {
                                                 return;
                                             }
-                                            character.name = e.currentValue;
+                                            character.name = currentValue;
                                         });
                                     }}
                                 />
@@ -719,12 +716,12 @@ export const CharacterEditorModal: React.FC = () => {
                                 size="small"
                                 bufferDuration="default"
                                 value={character.memo}
-                                onChange={e => {
+                                onChange={currentValue => {
                                     updateCharacter(character => {
                                         if (character == null) {
                                             return;
                                         }
-                                        character.memo = e.currentValue;
+                                        character.memo = currentValue;
                                     });
                                 }}
                             />

@@ -28,7 +28,7 @@ const NameRow = <T extends BoardPositionState>({ value, onChange }: PropsBase<T>
                 onChange={e => {
                     const newValue = produce(value, state => {
                         // nameがない状態をあらわす値として '' と undefined の2種類が混在するのは後々仕様変更があった際に困るかもしれないため、undefinedで統一させるようにしている
-                        state.name = e.currentValue === '' ? undefined : e.currentValue;
+                        state.name = e === '' ? undefined : e;
                     });
                     onChange(newValue);
                 }}

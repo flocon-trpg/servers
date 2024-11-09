@@ -380,12 +380,9 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorProps> = (props: ChannelName
                             <CollaborativeInput
                                 bufferDuration="default"
                                 value={publicChannelNames == null ? '' : publicChannelNames[key]}
-                                onChange={e => {
-                                    if (e.previousValue === e.currentValue) {
-                                        return;
-                                    }
+                                onChange={currentValue => {
                                     operateAsStateWithImmer(state => {
-                                        state[key] = e.currentValue;
+                                        state[key] = currentValue;
                                     });
                                 }}
                             />

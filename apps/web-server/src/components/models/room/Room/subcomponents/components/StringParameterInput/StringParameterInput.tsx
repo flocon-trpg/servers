@@ -67,14 +67,14 @@ export const StringParameterInput: React.FC<Props> = ({
             bufferDuration="default"
             disabled={disabled}
             value={parameter?.value ?? ''}
-            onChange={e => {
+            onChange={currentValue => {
                 // valueで??演算子を使用しているため、e.previousValueは使えない。そのため代わりにparameter?.valueを使用している
                 const previousValue = parameter?.value;
 
-                if (previousValue === e.currentValue) {
+                if (previousValue === currentValue) {
                     return;
                 }
-                const diff2 = nullableTextDiff({ prev: previousValue, next: e.currentValue });
+                const diff2 = nullableTextDiff({ prev: previousValue, next: currentValue });
                 const operation: CharacterUpOperation = {
                     $v: 2,
                     $r: 1,
