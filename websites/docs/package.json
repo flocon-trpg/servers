@@ -38,7 +38,7 @@
         "@docusaurus/tsconfig": "3.5.2",
         "@docusaurus/types": "3.5.2",
         "@flocon-trpg/prettier-config": "workspace:^",
-        "@types/bcryptjs": "^2.4.6",
+        "@types/bcryptjs": "2.4.6",
         "npm-run-all2": "7.0.1",
         "prettier": "3.3.3",
         "typescript": "5.5.4"

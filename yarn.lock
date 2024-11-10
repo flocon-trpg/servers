@@ -4381,7 +4381,7 @@ __metadata:
     "@flocon-trpg/core": "workspace:^"
     "@flocon-trpg/prettier-config": "workspace:^"
     "@mdx-js/react": "npm:^3.0.0"
-    "@types/bcryptjs": "npm:^2.4.6"
+    "@types/bcryptjs": "npm:2.4.6"
     antd: "npm:^5.21.6"
     bcryptjs: "npm:^2.4.3"
     clsx: "npm:^2.0.0"
@@ -8079,7 +8079,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/bcryptjs@npm:^2.4.6":
+"@types/bcryptjs@npm:2.4.6":
   version: 2.4.6
   resolution: "@types/bcryptjs@npm:2.4.6"
   checksum: 10/00153c460bd6bfc68e7670993a1ad8bd511413fd08e8a983cde1a8bf5a08afc5a51613c92ca4ad350d5a924499afed57f008a66a9abc1fd83879061596814124
