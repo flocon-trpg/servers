@@ -359,7 +359,6 @@ type Vector2 = {
 
 export const bringPanelToFront = 'bringPanelToFront';
 export const editBoard = 'editBoard';
-export const fix = 'fix';
 export const custom = 'custom';
 export const minimize = 'minimize';
 export const movePanel = 'movePanel';
@@ -399,7 +398,6 @@ export type Action =
           boardType: BoardType;
           action: (source: BoardConfig) => BoardConfig | void;
       }
-    | { type: typeof fix }
     | {
           type: typeof custom;
           action: (source: RoomConfig) => RoomConfig | void;
@@ -448,14 +446,6 @@ const reducer = (prev: RoomConfig, action: Action): RoomConfig => {
                     return;
                 }
                 editBoardMutate(state, action.boardId, action.boardType, action.action);
-            });
-        }
-        case fix: {
-            return produce(prev, state => {
-                if (state == null) {
-                    return;
-                }
-                fixRoomConfigMutate(state);
             });
         }
         case custom: {
