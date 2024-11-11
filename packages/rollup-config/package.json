@@ -5,7 +5,8 @@
     "license": "MIT",
     "author": "kizahasi",
     "scripts": {
-        "build": "tsc",
+        "build": "yarn run build:self",
+        "build:self": "tsc",
         "lint": "eslint \"**/*.ts\" --cache",
         "prettier": "yarn prettier:base --write --cache",
         "prettier-check": "yarn prettier:base --check",

@@ -7,7 +7,7 @@
         "websites/*"
     ],
     "scripts": {
-        "build": "yarn workspace '@flocon-trpg/api-server' run build && yarn workspace '@flocon-trpg/web-server' run build:deps && yarn workspace '@flocon-trpg/docs' run build",
+        "build": "yarn workspaces foreach --all -p --topological-dev run build:self",
         "format": "yarn lint --fix && yarn prettier && yarn sort-package-json",
         "install-husky": "husky install",
         "lint": "yarn workspaces foreach --all -p run lint",
