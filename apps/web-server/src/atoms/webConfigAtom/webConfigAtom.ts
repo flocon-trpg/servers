@@ -24,7 +24,7 @@ type EnvValue<TParsed> =
           parsed: TParsed;
       };
 
-type EnvSource = {
+type EnvsSource = {
     firebaseConfig?: string;
     http?: string;
     ws?: string;
@@ -33,7 +33,7 @@ type EnvSource = {
     logLevel?: string;
 };
 
-type EnvJson = {
+type EnvsJson = {
     firebaseConfig?: FirebaseConfig;
     http?: string;
     ws?: string;
@@ -43,7 +43,7 @@ type EnvJson = {
 };
 
 class Env {
-    constructor(private readonly source: EnvSource) {}
+    constructor(private readonly source: EnvsSource) {}
 
     get firebaseConfig(): EnvValue<Result<FirebaseConfig> | undefined> {
         if (this.source.firebaseConfig == null) {
@@ -126,7 +126,7 @@ const tryToString = (value: unknown): string | undefined => {
     return undefined;
 };
 
-const toEnvSource = (env: DotenvParseOutput | undefined): EnvSource => {
+const toEnvSource = (env: DotenvParseOutput | undefined): EnvsSource => {
     // TODO: ↓のコメントはNext.jsの話で、Viteだとどうなるかわからないので調査して修正する
     /* 
     Because of Next.js restrictions, we cannot do like these:
@@ -157,7 +157,7 @@ const toEnvSource = (env: DotenvParseOutput | undefined): EnvSource => {
     const importMetaEnv = import.meta.env;
 
     // https://vite.dev/guide/env-and-mode#env-files によると、import.meta.env の値が number や boolean になることはないため、tryToString を使うことで値が抜け落ちることはない。
-    const result: EnvSource = {
+    const result: EnvsSource = {
         firebaseConfig:
             env == null
                 ? tryToString(importMetaEnv.NEXT_PUBLIC_FIREBASE_CONFIG)
@@ -208,9 +208,9 @@ const envsAtom = atom<Promise<Envs>>(async get => {
     };
 });
 
-const toEnvJson = (envs: Envs): EnvJson => {
+const toEnvsJson = (envs: Envs): EnvsJson => {
     const keys = ['importMetaEnv', 'publicEnvTxt'] as const;
-    const result: EnvJson = {};
+    const result: EnvsJson = {};
     for (const key of keys) {
         result.authProviders = result.authProviders ?? envs?.[key]?.authProviders.parsed;
         result.firebaseConfig = result.firebaseConfig ?? envs?.[key]?.firebaseConfig.parsed?.value;
@@ -224,38 +224,38 @@ const toEnvJson = (envs: Envs): EnvJson => {
     return result;
 };
 
-const envJsonAtom = atom(async get => {
+const envsJsonAtom = atom(async get => {
     const envs = await get(envsAtom);
-    return toEnvJson(envs);
+    return { envs, envsJson: toEnvsJson(envs) };
 });
 
-type NonParsedMonitorElement<HasPublicEnvTxt extends boolean> = {
+type EnvsMonitorNonParsedElement<HasPublicEnvTxt extends boolean> = {
     importMetaEnv: string | undefined;
     publicEnvTxt: HasPublicEnvTxt extends true ? string | undefined : undefined;
     final: string | undefined;
 };
 
-type ParsedMonitorElement<HasPublicEnvTxt extends boolean, TParsed, TParsedFinal = TParsed> = {
+type EnvsMonitorParsedElement<HasPublicEnvTxt extends boolean, TParsed, TParsedFinal = TParsed> = {
     importMetaEnv: EnvValue<TParsed>;
     publicEnvTxt: HasPublicEnvTxt extends true ? EnvValue<TParsed> : undefined;
     final: TParsedFinal;
 };
 
-type Monitor<HasPublicEnvTxt extends boolean> = {
-    firebaseConfig: ParsedMonitorElement<
+type EnvsMonitor<HasPublicEnvTxt extends boolean> = {
+    firebaseConfig: EnvsMonitorParsedElement<
         HasPublicEnvTxt,
         Result<FirebaseConfig> | undefined,
         FirebaseConfig | undefined
     >;
-    http: NonParsedMonitorElement<HasPublicEnvTxt>;
-    ws: NonParsedMonitorElement<HasPublicEnvTxt>;
-    authProviders: ParsedMonitorElement<HasPublicEnvTxt, string[] | undefined>;
-    isUnlistedFirebaseStorageEnabled: ParsedMonitorElement<
+    http: EnvsMonitorNonParsedElement<HasPublicEnvTxt>;
+    ws: EnvsMonitorNonParsedElement<HasPublicEnvTxt>;
+    authProviders: EnvsMonitorParsedElement<HasPublicEnvTxt, string[] | undefined>;
+    isUnlistedFirebaseStorageEnabled: EnvsMonitorParsedElement<
         HasPublicEnvTxt,
         Result<boolean>,
         boolean | undefined
     >;
-    logLevel: ParsedMonitorElement<
+    logLevel: EnvsMonitorParsedElement<
         HasPublicEnvTxt,
         Result<PinoLogLevel | undefined>,
         PinoLogLevel | undefined
@@ -265,16 +265,15 @@ type Monitor<HasPublicEnvTxt extends boolean> = {
 export type EnvsMonitorAtomReturnType =
     | {
           publicEnvTxtFetched: true;
-          value: Monitor<true>;
+          value: EnvsMonitor<true>;
       }
     | {
           publicEnvTxtFetched: false;
-          value: Monitor<false>;
+          value: EnvsMonitor<false>;
       };
 
 export const envsMonitorAtom = atom<Promise<EnvsMonitorAtomReturnType>>(async get => {
-    const envs = await get(envsAtom);
-    const envJson = toEnvJson(envs);
+    const { envs, envsJson } = await get(envsJsonAtom);
 
     // この関数から何も処理せずにそのまま { envs, envJson } を返す手もあるが、そうすると Storybook で { envs, envJson } のモックを作るのが面倒になるためここで処理を行っている。
 
@@ -285,32 +284,32 @@ export const envsMonitorAtom = atom<Promise<EnvsMonitorAtomReturnType>>(async ge
                 firebaseConfig: {
                     importMetaEnv: envs.importMetaEnv.firebaseConfig,
                     publicEnvTxt: envs.publicEnvTxt.firebaseConfig,
-                    final: envJson.firebaseConfig,
+                    final: envsJson.firebaseConfig,
                 },
                 authProviders: {
                     importMetaEnv: envs.importMetaEnv.authProviders,
                     publicEnvTxt: envs.publicEnvTxt.authProviders,
-                    final: envJson.authProviders,
+                    final: envsJson.authProviders,
                 },
                 isUnlistedFirebaseStorageEnabled: {
                     importMetaEnv: envs.importMetaEnv.isUnlistedFirebaseStorageEnabled,
                     publicEnvTxt: envs.publicEnvTxt.isUnlistedFirebaseStorageEnabled,
-                    final: envJson.isUnlistedFirebaseStorageEnabled,
+                    final: envsJson.isUnlistedFirebaseStorageEnabled,
                 },
                 logLevel: {
                     importMetaEnv: envs.importMetaEnv.logLevel,
                     publicEnvTxt: envs.publicEnvTxt.logLevel,
-                    final: envJson.logLevel,
+                    final: envsJson.logLevel,
                 },
                 http: {
                     importMetaEnv: envs.importMetaEnv.http,
                     publicEnvTxt: envs.publicEnvTxt.http,
-                    final: envJson.http,
+                    final: envsJson.http,
                 },
                 ws: {
                     importMetaEnv: envs.importMetaEnv.ws,
                     publicEnvTxt: envs.publicEnvTxt.ws,
-                    final: envJson.ws,
+                    final: envsJson.ws,
                 },
             },
         } satisfies EnvsMonitorAtomReturnType;
@@ -322,32 +321,32 @@ export const envsMonitorAtom = atom<Promise<EnvsMonitorAtomReturnType>>(async ge
             firebaseConfig: {
                 importMetaEnv: envs.importMetaEnv.firebaseConfig,
                 publicEnvTxt: undefined,
-                final: envJson.firebaseConfig,
+                final: envsJson.firebaseConfig,
             },
             authProviders: {
                 importMetaEnv: envs.importMetaEnv.authProviders,
                 publicEnvTxt: undefined,
-                final: envJson.authProviders,
+                final: envsJson.authProviders,
             },
             isUnlistedFirebaseStorageEnabled: {
                 importMetaEnv: envs.importMetaEnv.isUnlistedFirebaseStorageEnabled,
                 publicEnvTxt: undefined,
-                final: envJson.isUnlistedFirebaseStorageEnabled,
+                final: envsJson.isUnlistedFirebaseStorageEnabled,
             },
             logLevel: {
                 importMetaEnv: envs.importMetaEnv.logLevel,
                 publicEnvTxt: undefined,
-                final: envJson.logLevel,
+                final: envsJson.logLevel,
             },
             http: {
                 importMetaEnv: envs.importMetaEnv.http,
                 publicEnvTxt: undefined,
-                final: envJson.http,
+                final: envsJson.http,
             },
             ws: {
                 importMetaEnv: envs.importMetaEnv.ws,
                 publicEnvTxt: undefined,
-                final: envJson.ws,
+                final: envsJson.ws,
             },
         },
     } satisfies EnvsMonitorAtomReturnType;
@@ -371,7 +370,7 @@ export const webConfigAtom = atom<Promise<WebConfigAtomReturnType>>(async get =>
             value: storybook.mock.webConfig,
         };
     }
-    const mergedEnv = await get(envJsonAtom);
+    const { envsJson: mergedEnv } = await get(envsJsonAtom);
     const result: WebConfig = {
         authProviders: mergedEnv.authProviders,
         firebaseConfig: mergedEnv.firebaseConfig,
