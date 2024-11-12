@@ -192,8 +192,9 @@ export const CreateEnv: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', padding: 8 }}>
             <div>
                 <p>
-                    Webサーバー
-                    v0.7.2以降に対応しています。それより前のバージョンには対応していません。
+                    {
+                        'Webサーバー v0.7.2以降に対応しています。それより前のバージョンには対応していません。'
+                    }
                 </p>
                 <h1>使い方</h1>
                 <ol>
@@ -248,8 +249,9 @@ export const CreateEnv: React.FC = () => {
                     <Collapse style={{ marginTop: collapsePadding }}>
                         <Collapse.Panel header="Firebase構成オブジェクトを参照する方法" key="2">
                             <div>
-                                まず、Firebase管理画面から歯車アイコンをクリックして「プロジェクトの設定」を開きます。下の方にある、青い丸に白抜き文字で
-                                {'</>'}と書かれているボタンをクリックします。
+                                {
+                                    'まず、Firebase管理画面から歯車アイコンをクリックして「プロジェクトの設定」を開きます。下の方にある、青い丸に白抜き文字で </> と書かれているボタンをクリックします。'
+                                }
                             </div>
                             <Image
                                 width={400}
@@ -258,7 +260,9 @@ export const CreateEnv: React.FC = () => {
                                 preview={{ mask: '拡大する' }}
                             />
                             <div style={{ paddingTop: spaceBetweenCollapseContent }}>
-                                サイトの説明に従って、「アプリのニックネーム」を入力して「アプリを登録」ボタンを押します。ご自身がわかりやすい名前で構わないと思います。
+                                {
+                                    'サイトの説明に従って、「アプリのニックネーム」を入力して「アプリを登録」ボタンを押します。ご自身がわかりやすい名前で構わないと思います。'
+                                }
                             </div>
                             <Image
                                 width={400}
@@ -267,9 +271,9 @@ export const CreateEnv: React.FC = () => {
                                 preview={{ mask: '拡大する' }}
                             />
                             <div style={{ paddingTop: spaceBetweenCollapseContent }}>
-                                下の画像のように「Firebase SDK
-                                の追加」画面が表示されますが、ここに表示されている内容は後から参照できますのでそのまま下のほうにある「コンソールに進む」ボタンを押してください。「npm
-                                install firebase」のコマンド等も実行する必要はありません。
+                                {
+                                    '下の画像のように「Firebase SDK の追加」画面が表示されますが、ここに表示されている内容は後から参照できますのでそのまま下のほうにある「コンソールに進む」ボタンを押してください。「npm install firebase」のコマンド等も実行する必要はありません。'
+                                }
                             </div>
                             <Image
                                 width={400}
@@ -318,7 +322,7 @@ export const CreateEnv: React.FC = () => {
                             setAutoWsState(newValue.target.checked);
                         }}
                     >
-                        「APIサーバーのURL（http, https）」から自動的に推測する（推奨）
+                        {'「APIサーバーのURL（http, https）」から自動的に推測する（推奨）'}
                     </Checkbox>
                     {autoWsState ? (
                         <Input disabled value={apiWs} />
@@ -339,7 +343,7 @@ export const CreateEnv: React.FC = () => {
                         </Form>
                     )}
                     <h2 style={{ paddingTop: headerPadding }}>
-                        Firebase Storage版アップローダーを有効化する
+                        {'Firebase Storage版アップローダーを有効化する'}
                     </h2>
                     <Checkbox
                         checked={firebaseStorageEnabled}
@@ -350,15 +354,19 @@ export const CreateEnv: React.FC = () => {
                         有効化する
                     </Checkbox>
                     <h2 style={{ paddingTop: headerPadding }}>
-                        ブラウザで表示させるFirebase Authenticationのログインプロバイダ（任意）
+                        {'ブラウザで表示させるFirebase Authenticationのログインプロバイダ（任意）'}
                     </h2>
                     <p>
                         <strong>
-                            この設定は任意です。全てのチェックボックスを空にしたままでも構いません。
+                            {
+                                'この設定は任意です。全てのチェックボックスを空にしたままでも構いません。'
+                            }
                         </strong>
                     </p>
                     <p>
-                        チェックが入っていないログインプロバイダは、Floconのログイン画面において非表示になります。ただし全てのチェックボックスが空の場合は、全てのログインプロバイダが表示されます。
+                        {
+                            'チェックが入っていないログインプロバイダは、Floconのログイン画面において非表示になります。ただし全てのチェックボックスが空の場合は、全てのログインプロバイダが表示されます。'
+                        }
                     </p>
                     <Checkbox
                         value={email}
@@ -420,8 +428,9 @@ export const CreateEnv: React.FC = () => {
                         <Collapse.Panel header="有効化したログインプロバイダを確認する方法" key="1">
                             <div>
                                 <div>
-                                    有効化したログインプロバイダは、Firebase
-                                    Authenticationの管理画面から参照できます。公式ドキュメントに従ってサーバーをセットアップしている場合は、おそらく下の画像のようになっていると思います。この画像では「メール/パスワード」と「Google」が有効化されています。
+                                    {
+                                        '有効化したログインプロバイダは、Firebase Authenticationの管理画面から参照できます。公式ドキュメントに従ってサーバーをセットアップしている場合は、おそらく下の画像のようになっていると思います。この画像では「メール/パスワード」と「Google」が有効化されています。'
+                                    }
                                 </div>
                                 <Image
                                     width={400}
@@ -430,7 +439,9 @@ export const CreateEnv: React.FC = () => {
                                     preview={{ mask: '拡大する' }}
                                 />
                                 <div>
-                                    ログインプロバイダを1つも有効化していない場合は、下の画像のようになります。この場合は少なくとも1つを管理画面から有効化してください。
+                                    {
+                                        'ログインプロバイダを1つも有効化していない場合は、下の画像のようになります。この場合は少なくとも1つを管理画面から有効化してください。'
+                                    }
                                 </div>
                                 <Image
                                     width={400}
@@ -462,11 +473,12 @@ export const CreateEnv: React.FC = () => {
                         >
                             <Space direction="vertical">
                                 <Radio value={envTxt}>
-                                    静的ファイルを用い、設定には<code>env.txt</code>を使用する（例:
-                                    Netlifyのドラッグ＆ドロップによるデプロイ）
+                                    {
+                                        '静的ファイルを用い、設定には<code>env.txt</code>を使用する（例: Netlifyのドラッグ＆ドロップによるデプロイ）'
+                                    }
                                 </Radio>
                                 <Radio value={hostingService}>
-                                    Next.js に対応したホスティングサービス（例: Vercel）
+                                    {'Next.js に対応したホスティングサービス（例: Vercel）'}
                                 </Radio>
                             </Space>
                         </Radio.Group>
@@ -484,7 +496,9 @@ export const CreateEnv: React.FC = () => {
                             </>
                         ) : (
                             <>
-                                ホスティングサービスの設定画面を開き、次のように環境変数を設定してください。
+                                {
+                                    'ホスティングサービスの設定画面を開き、次のように環境変数を設定してください。'
+                                }
                                 <Table
                                     columns={[
                                         { title: 'キー', dataIndex: 'key', key: 'key' },
