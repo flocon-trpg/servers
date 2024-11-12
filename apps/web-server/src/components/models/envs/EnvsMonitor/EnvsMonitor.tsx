@@ -1,10 +1,11 @@
 import { FirebaseConfig, env } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
 import { Link } from '@tanstack/react-router';
-import { Alert, Card, Divider, Popover } from 'antd';
+import { Card, Divider, Popover } from 'antd';
 import { useAtomValue } from 'jotai';
 import React, { PropsWithChildren } from 'react';
 import { EnvsMonitorAtomReturnType, envsMonitorAtom } from '@/atoms/webConfigAtom/webConfigAtom';
+import { AlertCounter } from '@/components/ui/AlertCounter/AlertCounter';
 import { HelpMessageTooltip } from '@/components/ui/HelpMessageTooltip/HelpMessageTooltip';
 
 const ValueView: React.FC<PropsWithChildren<{ code?: boolean }>> = ({ children, code }) => {
@@ -17,7 +18,7 @@ const ValueView: React.FC<PropsWithChildren<{ code?: boolean }>> = ({ children, 
 };
 
 const ErrorValueView: React.FC<{ message: string }> = ({ message }) => {
-    return <Alert message={`エラー: ${message}`} type="error" showIcon />;
+    return <AlertCounter.Alert message={`エラー: ${message}`} type="error" showIcon />;
 };
 
 const SourceValueView: React.FC<{ value: string | undefined }> = ({ value }) => {
@@ -366,7 +367,7 @@ const EnvsMonitorCardContent: React.FC<EnvsMonitorContentProps> = ({ envsMonitor
                 </Popover>
             </p>
             {envsMonitor.value.firebaseConfig.final == null && (
-                <Alert
+                <AlertCounter.Alert
                     message={`Flocon の Web サーバーを動かすには ${env.NEXT_PUBLIC_FIREBASE_CONFIG} で Firebase の設定が必要です。`}
                     type="error"
                     showIcon
@@ -381,7 +382,7 @@ const EnvsMonitorCardContent: React.FC<EnvsMonitorContentProps> = ({ envsMonitor
                 </Popover>
             </p>
             {envsMonitor.value.http.final == null && (
-                <Alert
+                <AlertCounter.Alert
                     message={`Flocon の Web サーバーを動かすには通常は ${env.NEXT_PUBLIC_API_HTTP} で  API サーバーの URL を HTTPS もしくは HTTP で設定する必要があります。`}
                     type="warning"
                     showIcon
@@ -396,7 +397,7 @@ const EnvsMonitorCardContent: React.FC<EnvsMonitorContentProps> = ({ envsMonitor
                 </Popover>
             </p>
             {envsMonitor.value.ws.final == null && (
-                <Alert
+                <AlertCounter.Alert
                     message={`Flocon の Web サーバーを動かすには通常は ${env.NEXT_PUBLIC_API_WS} で API サーバーの WebSocket の URL を設定する必要があります。URL は通常、wss:// か ws:// で始まります。`}
                     type="warning"
                     showIcon
