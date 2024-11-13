@@ -85,7 +85,7 @@ const StringPieceContent: React.FC<StringPieceContentProps> = props => {
                 });
             },
         }),
-        [text]
+        [text],
     );
     const [textSpringProps] = useSpring(
         () => ({
@@ -112,7 +112,7 @@ const StringPieceContent: React.FC<StringPieceContentProps> = props => {
                 });
             },
         }),
-        [text]
+        [text],
     );
 
     return (
@@ -123,7 +123,7 @@ const StringPieceContent: React.FC<StringPieceContentProps> = props => {
                 width={props.w}
                 height={props.h}
                 strokeWidth={2}
-                stroke='#606060B0'
+                stroke="#606060B0"
                 cornerRadius={5}
             />
             {/* TODO: fontSizeの決め方が適当。fontSizeはユーザーが自由に変更できるようにするべき */}
@@ -134,10 +134,10 @@ const StringPieceContent: React.FC<StringPieceContentProps> = props => {
                 width={props.w}
                 height={props.h}
                 fontSize={props.w / 2.5}
-                fontFamily='Noto Sans JP Regular'
+                fontFamily="Noto Sans JP Regular"
                 fill={props.state.isValuePrivate ? 'gray' : 'black'}
-                align='center'
-                verticalAlign='middle'
+                align="center"
+                verticalAlign="middle"
             />
         </>
     );
@@ -271,7 +271,7 @@ const DicePieceContent: React.FC<DicePieceContentProps> = ({ state, w, h, opacit
             return null;
     }
 
-    const background = <ReactKonva.Rect x={0} y={0} width={w} height={h} fill='transparent' />;
+    const background = <ReactKonva.Rect x={0} y={0} width={w} height={h} fill="transparent" />;
 
     if (count === 0) {
         return (

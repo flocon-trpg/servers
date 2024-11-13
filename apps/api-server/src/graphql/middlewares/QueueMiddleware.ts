@@ -9,14 +9,15 @@ export const QueueMiddleware: MiddlewareFn<ResolverContext> = async ({ context }
     switch (result.type) {
         case queueLimitReached:
             throw new Error(
-                'PromiseQueue rejected your operation. Server is too busy or there is a bug. / リクエストされた処理は拒否されました。サーバーに負荷がかかっているか、ソースコードにバグがあります。'
+                'PromiseQueue rejected your operation. Server is too busy or there is a bug. / リクエストされた処理は拒否されました。サーバーに負荷がかかっているか、ソースコードにバグがあります。',
             );
         case timeout:
             throw new Error(
-                'PromiseQueue timeout. Requested operation is too heavy or there is a bug. / リクエストされた処理がタイムアウトしました。処理が非常に重いか、ソースコードにバグがあります。'
+                'PromiseQueue timeout. Requested operation is too heavy or there is a bug. / リクエストされた処理がタイムアウトしました。処理が非常に重いか、ソースコードにバグがあります。',
             );
         default:
             break;
     }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return result.value;
 };

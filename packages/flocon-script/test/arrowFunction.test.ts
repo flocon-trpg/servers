@@ -8,7 +8,7 @@ describe('arrow functions', () => {
 let f = x => x + 1;
 f(10);
     `,
-            globalThis
+            globalThis,
         );
         expect(actual.result).toEqual(11);
         expect(actual.getGlobalThis()).toEqual(globalThisClone);
@@ -21,7 +21,7 @@ f(10);
 let f = (x, y = 20) => x + y + 1;
 [f(10), f(10, 30)];
     `,
-            globalThis
+            globalThis,
         );
         expect(actual.result).toEqual([31, 41]);
         expect(actual.getGlobalThis()).toEqual(globalThisClone);
@@ -34,7 +34,7 @@ let f = (x, y = 20) => x + y + 1;
 let f = (x, y = x) => x + y + 1;
 [f(10), f(10, 30)];
     `,
-            globalThis
+            globalThis,
         );
         expect(actual.result).toEqual([21, 41]);
         expect(actual.getGlobalThis()).toEqual(globalThisClone);
@@ -49,11 +49,11 @@ let f = (x, y = x) => x + y + 1;
 let f = ([x,y, ,w]) => x + y + 0 + w;
 f([10, 20, 30, 40]);
     `,
-                globalThis
+                globalThis,
             );
             expect(actual.result).toEqual(70);
             expect(actual.getGlobalThis()).toEqual(globalThisClone);
-        }
+        },
     );
 
     it.each([{ x: 0 }, { x: 0, y: 0 }])(
@@ -65,11 +65,11 @@ f([10, 20, 30, 40]);
 let f = ([x, y, ...z]) => ({ sum: x + y + 1, rest: z });
 f([10, 20, 30, 40]);
     `,
-                globalThis
+                globalThis,
             );
             expect(actual.result).toEqual({ sum: 31, rest: [30, 40] });
             expect(actual.getGlobalThis()).toEqual(globalThisClone);
-        }
+        },
     );
 
     it.each([{ x: 0 }, { x: 0, y: 0 }])(
@@ -81,10 +81,10 @@ f([10, 20, 30, 40]);
 let f = ([x, y, ...z]) => ({ sum: x + y + 1, rest: z });
 f([10, 20]);
     `,
-                globalThis
+                globalThis,
             );
             expect(actual.result).toEqual({ sum: 31, rest: [] });
             expect(actual.getGlobalThis()).toEqual(globalThisClone);
-        }
+        },
     );
 });

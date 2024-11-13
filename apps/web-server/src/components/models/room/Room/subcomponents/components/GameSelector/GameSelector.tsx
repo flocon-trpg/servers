@@ -48,7 +48,7 @@ const HelpMessage = ({ gameSystemId }: HelpMessageProps) => {
 type Props = {
     config: ChatPalettePanelConfig | MessagePanelConfig;
     onConfigUpdate: (
-        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void
+        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void,
     ) => void;
     inputMaxWidth?: number;
     descriptionStyle?: React.CSSProperties;
@@ -74,7 +74,7 @@ export const GameSelector: React.FC<Props> = ({
                         </Select.Option>
                     );
                 }),
-        [availableGameSystems.data?.result.value]
+        [availableGameSystems.data?.result.value],
     );
     React.useEffect(() => {
         if (availableGameSystems.error == null) {
@@ -92,7 +92,7 @@ export const GameSelector: React.FC<Props> = ({
         () => (
             <Select
                 style={{ flex: 1, maxWidth: inputMaxWidth }}
-                placeholder='ゲームの種類'
+                placeholder="ゲームの種類"
                 showSearch
                 value={config.selectedGameSystem}
                 onChange={value => {
@@ -114,7 +114,7 @@ export const GameSelector: React.FC<Props> = ({
                 {sortedAvailableGameSystems}
             </Select>
         ),
-        [config.selectedGameSystem, inputMaxWidth, onConfigUpdate, sortedAvailableGameSystems]
+        [config.selectedGameSystem, inputMaxWidth, onConfigUpdate, sortedAvailableGameSystems],
     );
 
     return (

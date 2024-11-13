@@ -1,17 +1,15 @@
+import { UseQueryResult, useQueries } from '@tanstack/react-query';
 import { useAtomValue } from 'jotai/react';
 import React from 'react';
-import { UseQueryResult, useQueries } from 'react-query';
 import { useMemoOne } from 'use-memo-one';
-import { firebaseStorageAtom } from '../pages/_app';
 import { FilePathLikeOrThumb, FilePathModule } from '../utils/file/filePath';
-import { useGetIdToken } from './useGetIdToken';
+import { firebaseStorageAtom, getIdTokenResultAtom } from './useSetupApp';
 import { useWebConfig } from './useWebConfig';
 import { idTokenIsNull, thumbs } from '@/utils/file/getFloconUploaderFile';
 
 export const loaded = 'loaded';
 export const loading = 'loading';
 export const nullishArg = 'nullishArg';
-export const invalidWebConfig = 'invalidWebConfig';
 
 type SrcArrayResult =
     | {
@@ -19,20 +17,20 @@ type SrcArrayResult =
           queriesResult: readonly UseQueryResult<FilePathModule.SrcResult, unknown>[];
       }
     | {
-          type: typeof loading | typeof nullishArg | typeof invalidWebConfig;
+          type: typeof loading | typeof nullishArg;
       };
 
 // PathArrayがnullish ⇔ 戻り値がnullishArg
 // pathArray.length = queriesResult.length
 export function useSrcArrayFromFilePath(
-    pathArray: ReadonlyArray<FilePathLikeOrThumb> | null | undefined
+    pathArray: ReadonlyArray<FilePathLikeOrThumb> | null | undefined,
 ): SrcArrayResult {
     const config = useWebConfig();
     const storage = useAtomValue(firebaseStorageAtom);
-    const { getIdToken } = useGetIdToken();
+    const { getIdToken } = useAtomValue(getIdTokenResultAtom);
 
     const cleanPathArray =
-        pathArray == null || config?.value == null || storage == null
+        pathArray == null || storage == null
             ? []
             : pathArray.map(path => {
                   const $path = FilePathModule.ensureType(path);
@@ -52,15 +50,15 @@ export function useSrcArrayFromFilePath(
                   const queryFn = async () => {
                       const result = await FilePathModule.getSrc({
                           path,
-                          config: config.value,
+                          config,
                           storage,
                           getIdToken,
                       });
                       if (result === idTokenIsNull) {
                           return Promise.reject(
                               new Error(
-                                  'Firebase Authentication の IdToken を取得できませんでした。'
-                              )
+                                  'Firebase Authentication の IdToken を取得できませんでした。',
+                              ),
                           );
                       }
                       return result;
@@ -71,7 +69,7 @@ export function useSrcArrayFromFilePath(
                   return { queryKey, queryFn, cacheTime };
               });
 
-    const queriesResult = useQueries(cleanPathArray);
+    const queriesResult = useQueries({ queries: cleanPathArray });
 
     const isPathArrayNullish = pathArray == null;
 
@@ -79,10 +77,7 @@ export function useSrcArrayFromFilePath(
         if (isPathArrayNullish) {
             return { type: nullishArg };
         }
-        if (config?.isError) {
-            return { type: invalidWebConfig };
-        }
-        if (config == null || storage == null) {
+        if (storage == null) {
             return { type: loading };
         }
         return { type: loaded, queriesResult };
@@ -95,7 +90,7 @@ type SrcResult =
           value: UseQueryResult<FilePathModule.SrcResult, unknown>;
       }
     | {
-          type: typeof loading | typeof nullishArg | typeof invalidWebConfig;
+          type: typeof loading | typeof nullishArg;
       };
 
 const toSrcResult = (srcArray: ReturnType<typeof useSrcArrayFromFilePath>): SrcResult => {
@@ -105,7 +100,7 @@ const toSrcResult = (srcArray: ReturnType<typeof useSrcArrayFromFilePath>): SrcR
     const result = srcArray.queriesResult[0];
     if (result == null) {
         throw new Error(
-            'This should not happen. pathArray.length might be 0, which is not expected.'
+            'This should not happen. pathArray.length might be 0, which is not expected.',
         );
     }
     return { type: loaded, value: result };
@@ -127,6 +122,6 @@ export function useSrcFromFilePath(path: FilePathLikeOrThumb | null | undefined)
             src,
             queryResult,
         }),
-        [queryResult, src]
+        [queryResult, src],
     );
 }

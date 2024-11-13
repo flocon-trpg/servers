@@ -24,7 +24,7 @@ export const createRoomClient = <TCustomMessage = any, TGraphQLError = any>({
     const roomStateManager = new RoomStateManager({
         client,
         subscription: client.roomEventSubscription.pipe(
-            mergeMap(e => (e.roomEvent == null ? [] : [e.roomEvent]))
+            mergeMap(e => (e.roomEvent == null ? [] : [e.roomEvent])),
         ),
         clientId,
         userUid,
@@ -34,21 +34,21 @@ export const createRoomClient = <TCustomMessage = any, TGraphQLError = any>({
         client,
         roomEventSubscription: client.roomEventSubscription.pipe(
             mergeMap(e =>
-                e?.roomEvent?.roomMessageEvent == null ? [] : [e.roomEvent.roomMessageEvent]
-            )
+                e?.roomEvent?.roomMessageEvent == null ? [] : [e.roomEvent.roomMessageEvent],
+            ),
         ),
     });
 
     const writingMessageStatusResult = subscribeWritingMessageStatus({
         subscription: client.roomEventSubscription.pipe(
-            mergeMap(e => (e.roomEvent == null ? [] : [e.roomEvent]))
+            mergeMap(e => (e.roomEvent == null ? [] : [e.roomEvent])),
         ),
     });
 
     const subscribeRoomConnectionsResult = subscribeRoomConnections({
         client,
         subscription: client.roomEventSubscription.pipe(
-            mergeMap(e => (e.roomEvent == null ? [] : [e.roomEvent]))
+            mergeMap(e => (e.roomEvent == null ? [] : [e.roomEvent])),
         ),
     });
 
@@ -58,7 +58,7 @@ export const createRoomClient = <TCustomMessage = any, TGraphQLError = any>({
         .asObservable()
         .pipe(
             filter(x => x.type === 'joined'),
-            take(1)
+            take(1),
         )
         .subscribe({
             next: () => {

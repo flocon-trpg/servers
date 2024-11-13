@@ -1,8 +1,8 @@
 import { Master, Player, State, getOpenRollCall, roomTemplate, simpleId } from '@flocon-trpg/core';
 import { recordToArray } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
+import { maxBy } from 'es-toolkit';
 import { produce } from 'immer';
-import { maxBy } from 'lodash';
 import { PerformRollCallFailureType } from '@/enums/PerformRollCallFailureType';
 
 const maxRollCallHistoryCount = 3;
@@ -15,7 +15,7 @@ type RollCallState = NonNullable<RollCallsState[string]>;
 export const performRollCall = (
     source: RoomState,
     myUserUid: string,
-    soundEffect: RollCallState['soundEffect']
+    soundEffect: RollCallState['soundEffect'],
 ): Result<RoomState, PerformRollCallFailureType> => {
     const me = source.participants?.[myUserUid];
     switch (me?.role) {
@@ -25,13 +25,13 @@ export const performRollCall = (
         default:
             return Result.error(PerformRollCallFailureType.NotAuthorizedParticipant);
     }
-    const openRollCall = getOpenRollCall(source.rollCalls);
+    const openRollCall = getOpenRollCall(source.rollCalls ?? {});
     if (openRollCall != null) {
         return Result.error(PerformRollCallFailureType.HasOpenRollCall);
     }
     const maxCreatedAt = maxBy(
         recordToArray(source.rollCalls ?? {}),
-        ({ value }) => value.createdAt
+        ({ value }) => value.createdAt,
     )?.value.createdAt;
     if (maxCreatedAt != null) {
         const elapsed = new Date().getTime() - maxCreatedAt;
@@ -40,7 +40,7 @@ export const performRollCall = (
         }
     }
     const result = produce(source, source => {
-        const openRollCall = getOpenRollCall(source.rollCalls);
+        const openRollCall = getOpenRollCall(source.rollCalls ?? {});
         if (openRollCall != null) {
             return;
         }

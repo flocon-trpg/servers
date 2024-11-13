@@ -1,92 +1,17 @@
-/** @jsxImportSource @emotion/react */
-import { SerializedStyles, css } from '@emotion/react';
 import { loggerRef } from '@flocon-trpg/utils';
-import { diff, serializeUpOperation, toUpOperation } from '@kizahasi/ot-string';
-import Quill from 'quill';
-import QuillDelta from 'quill-delta';
-import React from 'react';
-import { useQuill } from 'react-quilljs';
-import { useLatest, usePrevious } from 'react-use';
-// react-quilljs などを使わず直接 Quill を使うと、next build 時に ReferenceError: document is not defined というエラーが出てビルドできない。おそらくawait importでも回避できそうだが、react-quilljs を利用することで解決している。
-import { Subject, Subscription, debounceTime } from 'rxjs';
-import useConstant from 'use-constant';
-
-/*
-quill.bubble.css:389 に、下のようにplaceholderに関するstyleが記述されている。
-
-.ql-editor.ql-blank::before {
-    color: rgba(0,0,0,0.6);
-    content: attr(data-placeholder);
-    font-style: italic;
-    left: 15px;
-    pointer-events: none;
-    position: absolute;
-    right: 15px;
-}
-
-だが、これには次の問題点があるので一部変更している。
-- color: デフォルトだと黒っぽくてほぼ見えない。変更後の色は適当なので後で見直したほうがいいかも。
-- font-style: 日本語などは斜体にならないため、英数字と混ざると不格好である。
-
-borderはantdになるべく合わせている。
-*/
-const generateBaseCss = ({ size }: { size: 'verySmall' | 'small' | 'medium' }) => {
-    let fontSize: string;
-    let padding: string;
-    let paddingX: string;
-    switch (size) {
-        case 'verySmall': {
-            fontSize = '0.7rem';
-            padding = '2px 4px';
-            paddingX = '4px';
-            break;
-        }
-        case 'small': {
-            fontSize = '0.75rem';
-            padding = '2px 4px';
-            paddingX = '4px';
-            break;
-        }
-        case 'medium': {
-            fontSize = '0.8rem';
-            padding = '4px 8px';
-            paddingX = '8px';
-            break;
-        }
-    }
-    return css`
-        .ql-editor.ql-blank::before {
-            color: rgb(140, 140, 140);
-            font-style: normal;
-            left: ${paddingX};
-            right: ${paddingX};
-        }
-
-        .ql-editor {
-            font-size: ${fontSize};
-            padding: ${padding};
-            border: 1px solid #434343;
-            border-radius: 2px;
-        }
-    `;
-};
-
-const verySmallCss = generateBaseCss({ size: 'verySmall' });
-
-const smallCss = generateBaseCss({ size: 'small' });
-
-const mediumCss = generateBaseCss({ size: 'medium' });
-
-const disabledCss = css`
-    * {
-        background-color: rgb(40, 40, 40);
-        cursor: not-allowed;
-    }
-
-    .ql-editor {
-        color: gray;
-    }
-`;
+import {
+    UpOperation,
+    UpOperationUnit,
+    apply,
+    diff,
+    serializeUpOperation,
+    toUpOperation,
+    transformUpOperation,
+} from '@kizahasi/ot-string';
+import classNames from 'classnames';
+import React, { useState } from 'react';
+import { useInterval, useLatest } from 'react-use';
+import './CollaborativeInput.css';
 
 export type OnSkippingParams =
     | {
@@ -100,143 +25,24 @@ export type OnSkippingParams =
           currentValue?: undefined;
       };
 
-export type OnChangeParams = {
-    previousValue: string;
-    currentValue: string;
-};
-
-const createDelta = ({ prev, next }: { prev: string; next: string }): QuillDelta => {
-    /*
-    単純にdiffを取ってDeltaを生成しているだけ。そのため、厳密には編集者が編集した部分と異なる部分が編集されたとみなされる可能性がある。
-    例えば'abababab'という文字を他の人が'ababab'にした場合、どこのabが削除されたかはdiffを取るだけではわからない。自分のカーソルの位置を|として'abab|abab'となっている場合、どこのabが削除されたかによって次のカーソルの位置は本来は変わるはずである。この場合は'ab|abab'もしくは'abab|ab'のいずれかが考えられる（厳密には他にも例えばababが削除されて別の場所にabが挿入されるケースもあるため、これら以外の場合も取りうる）。
-    だが、このようなことが起こるのはそう多くないと考えられるし、起こっても不便さは感じないと思われるので問題なしとしている。
-    */
-
-    const result = new QuillDelta();
-    const diffResult = diff({ prevState: prev, nextState: next });
-    const upOperation = toUpOperation(diffResult);
-    const serializedUpOperation = serializeUpOperation(upOperation);
-    for (const unit of serializedUpOperation) {
-        switch (unit.t) {
-            case 'r':
-                result.retain(unit.r);
-                break;
-            case 'd':
-                result.delete(unit.d);
-                break;
-            case 'i':
-                result.insert(unit.i);
-                break;
-        }
-    }
-    return result;
-};
-
-function useBuffer<TValue, TComponent>({
-    value,
-    bufferDuration,
-    onChangeOutput,
-    setValueToComponent,
-}: {
-    value: TValue;
-    bufferDuration: number | null;
-    onChangeOutput: (params: { previousValue: TValue; currentValue: TValue }) => void;
-    setValueToComponent: (params: { value: TValue; component: TComponent }) => void;
-}) {
-    if (bufferDuration != null && bufferDuration < 0) {
-        throw new Error('bufferDuration < 0');
-    }
-
-    const onChangeRef = useLatest(onChangeOutput);
-    const setValueToComponentRef = useLatest(setValueToComponent);
-
-    const ref = React.useRef<TComponent | null>(null);
-    const subject = useConstant(() => new Subject<TValue>());
-    const latestOnChangeInputValueRef = React.useRef(value);
-    const onChangeInput: (value: TValue) => void = useConstant(() => {
-        return x => {
-            latestOnChangeInputValueRef.current = x;
-            subject.next(x);
-        };
-    });
-    const [, setSubscription] = React.useState<Subscription>();
-    const [changeParams, setChangeParams] = React.useState<{
-        previousValue?: TValue;
-        currentValue: TValue;
-    }>({ currentValue: value });
-    const changeParamsRef = useLatest(changeParams);
-    const [subscriptionUpdateKey, setSubscriptionUpdateKey] = React.useState(0);
-
-    React.useEffect(() => {
-        if (ref.current != null) {
-            setValueToComponentRef.current({ value, component: ref.current });
-        }
-
-        setSubscriptionUpdateKey(oldState => oldState + 1);
-        setChangeParams({ currentValue: value });
-    }, [setValueToComponentRef, value]);
-
-    React.useEffect(() => {
-        const newSubscription = (
-            bufferDuration == null ? subject : subject.pipe(debounceTime(bufferDuration))
-        ).subscribe(newValue => {
-            setChangeParams(oldResult => {
-                return {
-                    previousValue: oldResult.currentValue,
-                    currentValue: newValue,
-                };
-            });
-        });
-        setSubscription(oldSubscription => {
-            oldSubscription?.unsubscribe();
-            return newSubscription;
-        });
-        return () => {
-            newSubscription.unsubscribe();
-        };
-    }, [subject, bufferDuration, subscriptionUpdateKey]);
-
-    React.useEffect(() => {
-        if (changeParams.previousValue !== undefined) {
-            onChangeRef.current({
-                previousValue: changeParams.previousValue,
-                currentValue: changeParams.currentValue,
-            });
-        }
-    }, [changeParams, onChangeRef]);
-
-    // unmount時にonChangeを実行させている
-    React.useEffect(() => {
-        const $changeParamsRef = changeParamsRef;
-        const $latestOnChangeInputValueRef = latestOnChangeInputValueRef;
-        const $onChangeRef = onChangeRef;
-        return () => {
-            const previousValue = $changeParamsRef.current.currentValue;
-            const currentValue = $latestOnChangeInputValueRef.current;
-            if (previousValue !== currentValue) {
-                $onChangeRef.current({ previousValue, currentValue });
-            }
-        };
-    }, [changeParamsRef, onChangeRef]);
-
-    return {
-        onChangeInput,
-        ref,
-    };
-}
-
 export type Props = {
+    /** 現在の部屋の State 由来の文字列。この値が変わっても CollaborativeInput にはすぐには反映されず、適当なときに CollaborativeInput コンポーネント内の input 等に反映されなおかつ `onChange` が実行されます。これらの文字列は一致します。 */
     value: string;
-    onChange: (e: OnChangeParams) => void;
+
+    /** `value` が変更されるべきときに実行されます。これが実行されたとき、`value` を即座にその値に変更してください。もしそうしないと、例えば `value` が 'a' のときに 'onChange('b')' が実行されたとき、もし `value` を 'b' に変更する前に Collaborative 内で定期実行される突合処理(`matchData` 関数)が実行されてしまうと、「`value` が API サーバー等により 'a' に戻った」と判断され、`onChange('a')` が実行されてしまい、望まない状態を引き起こします。 */
+    onChange: (newValue: string) => void;
+
     // コードエディターなどを作る際に「解析中」のメッセージを出せるようにするためのプロパティ。
     // 当初は createBottomElement という名前であり戻り値の型も void ではなく JSX.Element | null で、返された値をCollaborativeInput 側で表示するようにしていた。
     // だが、そうするとメインのElementとBottomElementの2つを返すことになるため、React.Fragmentもしくはdivで包む必要がある。どちらの場合でもstyleやclassNameの設定で混乱する可能性があるため、ボツにした。
     onSkipping?: (params: OnSkippingParams) => void;
-    onGetQuill?: (nextQuill: Quill | undefined) => void;
+
+    /** 0以下の値にしてはならない。0より大きい値であっても小さい値にしてしまうと、文字列比較が頻繁に行われてしまいパフォーマンスが悪化するのでこれも避けるべき。*/
+    bufferDuration: number | 'default' | 'short';
+
     // trueならばtextareaのように、そうでなければinputのようにふるまう
     multiline?: boolean;
-    bufferDuration: number | 'default' | 'short' | null;
-    // placeholderの変更は反映されない。最初の値が常に使われる。
+
     placeholder?: string;
     disabled?: boolean;
     className?: string;
@@ -244,215 +50,290 @@ export type Props = {
     size?: 'verySmall' | 'small' | 'medium' | undefined;
 };
 
-const useWarnPlaceholderChanges = ({
-    quill,
-    placeholderProp,
-}: {
-    quill: Quill | undefined;
-    placeholderProp: string | undefined;
-}) => {
-    const currentQuillRef = React.useRef(quill);
-    const prevQuill = usePrevious(quill);
-    const prevQuillRef = React.useRef(prevQuill);
-    const currentPlaceholderRef = useLatest(placeholderProp);
-    const prevPlaceholder = usePrevious(placeholderProp);
-    const prevPlaceholderRef = useLatest(prevPlaceholder);
+namespace ClassNames {
+    export const collaborativeInput = 'collaborative-input';
+    const small = 'small';
+    const verySmall = 'very-small';
+    const medium = 'medium';
+    export const getSize = (size: Props['size']) => {
+        switch (size) {
+            case 'verySmall':
+                return verySmall;
+            case 'small':
+                return small;
+            case 'medium':
+                return medium;
+            default:
+                return medium;
+        }
+    };
+    export const disabled = 'disabled';
+}
 
-    React.useEffect(() => {
-        if (prevQuillRef.current !== currentQuillRef.current) {
-            return;
-        }
-        if (prevPlaceholderRef.current !== currentPlaceholderRef.current) {
-            loggerRef.warn(
-                'placeholderプロパティの値が更新されましたが、CollaborativeInputではplaceholderの更新に対応していないため無視されます。'
-            );
-        }
-    }, [currentPlaceholderRef, prevPlaceholderRef]);
+const useParseBufferDuration = (value: Props['bufferDuration']): number => {
+    if (value === 'default') {
+        return 1000;
+    }
+    if (value === 'short') {
+        return 333;
+    }
+    if (value <= 0) {
+        throw new Error(`bufferDuration must be greater than 0. but got ${value}`);
+    }
+    return value;
 };
 
+// TODO: 文字列に変化がないときは処理を高速化できると思われる。文字列に変化がないときでもこの関数はよく呼ばれるため、高速化が望まれる。
+const ot = ({
+    rootText,
+    currentMyText,
+    currentTheirText,
+}: {
+    rootText: string;
+    currentMyText: string;
+    currentTheirText: string;
+}) => {
+    const first = diff({ prevState: rootText, nextState: currentTheirText });
+    const second = diff({ prevState: rootText, nextState: currentMyText });
+
+    const firstUpOperation = toUpOperation(first);
+    const secondUpOperation = toUpOperation(second);
+    const xform = transformUpOperation({ first: firstUpOperation, second: secondUpOperation });
+    if (xform.isError) {
+        loggerRef.fatal(
+            {
+                rootText,
+                currentMyText,
+                currentTheirText,
+                first: firstUpOperation,
+                second: secondUpOperation,
+                error: xform.error,
+            },
+            'OT failed at CollaborativeInput.tsx',
+        );
+        throw new Error('OT failed at CollaborativeInput.tsx. See the log for details.');
+    }
+    const result = apply({ prevState: currentMyText, upOperation: xform.value.firstPrime });
+    if (result.isError) {
+        loggerRef.fatal(
+            {
+                rootText,
+                currentMyText,
+                currentTheirText,
+                first: firstUpOperation,
+                second: secondUpOperation,
+                error: result.error,
+            },
+            'Applying operation is failed at CollaborativeInput.tsx',
+        );
+        throw new Error(
+            'Applying operation is failed at CollaborativeInput.tsx. See the log for details.',
+        );
+    }
+    return { state: result.value, upOperation: xform.value.firstPrime };
+};
+
+function* toOperationUnitByChar(operation: readonly UpOperationUnit[]) {
+    for (const unit of operation) {
+        switch (unit.t) {
+            case 'r':
+                for (let i = 0; i < unit.r; i++) {
+                    yield { type: 'retain' } as const;
+                }
+                break;
+            case 'i':
+                for (const char of unit.i) {
+                    yield { type: 'insert', char } as const;
+                }
+                break;
+            case 'd':
+                for (let i = 0; i < unit.d; i++) {
+                    yield { type: 'delete' } as const;
+                }
+                break;
+        }
+    }
+}
+
+const moveCursorByUpOperation = (
+    input: HTMLInputElement | HTMLTextAreaElement,
+    operation: UpOperation,
+    newValue: string,
+) => {
+    if (input.selectionStart == null) {
+        return;
+    }
+
+    // value のセットの前にカーソル位置を取得しないとカーソル位置がリセットされてしまうのでここで取得。
+    const selectionStart = input.selectionStart;
+    const selectionEnd = input.selectionEnd;
+
+    input.value = newValue;
+
+    let oldSelectionStart = 0;
+    let newSelectionStart = 0;
+
+    for (const unit of toOperationUnitByChar(serializeUpOperation(operation))) {
+        switch (unit.type) {
+            case 'retain':
+                oldSelectionStart++;
+                newSelectionStart++;
+                break;
+            case 'insert':
+                newSelectionStart++;
+                break;
+            case 'delete':
+                oldSelectionStart++;
+                break;
+        }
+        if (oldSelectionStart >= selectionStart) {
+            break;
+        }
+    }
+
+    if (selectionEnd != null) {
+        let oldSelectionEnd = 0;
+        let newSelectionEnd = 0;
+
+        for (const unit of toOperationUnitByChar(serializeUpOperation(operation))) {
+            switch (unit.type) {
+                case 'retain':
+                    oldSelectionEnd++;
+                    newSelectionEnd++;
+                    break;
+                case 'insert':
+                    newSelectionEnd++;
+                    break;
+                case 'delete':
+                    oldSelectionEnd++;
+                    break;
+            }
+            if (oldSelectionEnd >= selectionEnd) {
+                break;
+            }
+        }
+
+        if (selectionStart !== newSelectionStart || selectionEnd !== newSelectionEnd) {
+            input.setSelectionRange(newSelectionStart, newSelectionEnd);
+        }
+        return;
+    }
+
+    if (selectionStart !== newSelectionStart) {
+        input.setSelectionRange(newSelectionStart, newSelectionStart);
+    }
+};
+
+/**
+ * 他のユーザーと文字列を共同で編集可能なコンポーネントを表します。カーソルの位置も適当な位置に自動で移動されます。
+ */
 export const CollaborativeInput: React.FC<Props> = ({
     value,
     onChange,
-    onSkipping: onSkippingProp,
-    onGetQuill,
-    multiline: multilineProp,
+    onSkipping,
     bufferDuration: bufferDurationProp,
+    multiline,
     placeholder,
-    disabled: disabledProp,
-    className,
+    disabled,
+    className: classNameProp,
     style,
     size,
 }) => {
-    const multiline = multilineProp === true;
-    const disabled = disabledProp === true;
+    // コンポーネントの ref
+    const inputRef = React.useRef<HTMLInputElement | null>(null);
+    const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
 
-    const [isOnComposition, setIsOnComposition] = React.useState(false);
-    const prevIsOnComposition = usePrevious(isOnComposition);
-    const isOnCompositionRef = useLatest(isOnComposition);
-    const valueRef = useLatest(value);
-    const onGetQuillRef = useLatest(onGetQuill);
-
-    const { quill, quillRef } = useQuill({
-        modules: {
-            toolbar: false,
-            // https://github.com/quilljs/quill/issues/1432#issuecomment-486659920
-            keyboard:
-                multiline === true
-                    ? undefined
-                    : {
-                          bindings: {
-                              enter: {
-                                  key: 13,
-                                  handler: () => false,
-                              },
-                          },
-                      },
-        },
-        placeholder,
-        // プレーンテキスト以外を無効化している
-        formats: [],
-        theme: 'bubble',
-    });
-    const prevQuill = usePrevious(quill);
-
-    let bufferDuration: number | null;
-    switch (bufferDurationProp) {
-        case 'default':
-            bufferDuration = 500;
-            break;
-        case 'short':
-            bufferDuration = 100;
-            break;
-        default:
-            bufferDuration = bufferDurationProp === 0 ? null : bufferDurationProp;
-            break;
-    }
-
-    const onSkipping = (params: OnSkippingParams): void => {
-        if (onSkippingProp == null) {
-            return;
-        }
-        onSkippingProp(params);
-    };
+    // props から受け取った関数の ref
+    const onChangeRef = useLatest(onChange);
     const onSkippingRef = useLatest(onSkipping);
 
-    const { ref: bufferRef, onChangeInput } = useBuffer<string, Quill>({
-        value,
-        bufferDuration,
-        onChangeOutput: params => {
-            onSkippingRef.current({
-                isSkipping: false,
-                previousValue: params.previousValue,
-                currentValue: params.currentValue,
-            });
-            multiline
-                ? onChange(params)
-                : onChange({
-                      ...params,
-                      currentValue: params.currentValue.replaceAll('\r', '').replaceAll('\n', ''),
-                  });
-        },
-        setValueToComponent: ({ value, component }) => {
-            const prev = component.getText();
-            const delta = createDelta({ prev, next: value });
-            component.updateContents(delta);
-        },
-    });
+    const valueRef = useLatest(value);
 
-    React.useEffect(() => {
-        bufferRef.current = quill ?? null;
-        if (onGetQuillRef.current != null) {
-            onGetQuillRef.current(quill);
+    const [inputText, setInputText] = useState(value);
+    const inputTextRef = useLatest(inputText);
+
+    const [inputTextAtLastDataMatch, setInputTextAtLastDataMatch] = useState(value);
+    const inputTextAtLastDataMatchRef = useLatest(inputTextAtLastDataMatch);
+
+    const isSkipping = inputText !== inputTextAtLastDataMatch;
+
+    const [valueAtLastDataMatch, setValueAtLastDataMatch] = useState(value);
+    const valueAtLastDataMatchRef = useLatest(valueAtLastDataMatch);
+
+    const matchData = React.useCallback(() => {
+        const { state: nextInputText, upOperation } = ot({
+            rootText: valueAtLastDataMatchRef.current,
+            currentMyText: inputTextRef.current,
+            currentTheirText: valueRef.current,
+        });
+        if (valueRef.current !== nextInputText) {
+            onChangeRef.current(nextInputText);
         }
-    }, [bufferRef, onGetQuillRef, quill]);
+        setInputText(nextInputText);
+        setInputTextAtLastDataMatch(nextInputText);
+        setValueAtLastDataMatch(nextInputText);
+        if (inputRef.current != null) {
+            moveCursorByUpOperation(inputRef.current, upOperation, nextInputText);
+        }
+        if (textareaRef.current != null) {
+            moveCursorByUpOperation(textareaRef.current, upOperation, nextInputText);
+        }
+    }, [inputTextRef, valueRef, onChangeRef, valueAtLastDataMatchRef]);
 
-    const prevTextRef = React.useRef<string>();
     React.useEffect(() => {
-        if (quill == null) {
+        if (isSkipping) {
+            onSkippingRef.current?.({ isSkipping });
             return;
         }
+        onSkippingRef.current?.({
+            isSkipping,
+            previousValue: inputTextAtLastDataMatchRef.current,
+            currentValue: inputTextRef.current,
+        });
+    }, [inputTextRef, isSkipping, onSkippingRef, inputTextAtLastDataMatchRef]);
 
-        const onTextChange = () => {
-            const prevText = prevTextRef.current;
-            if (prevText == null) {
-                return;
-            }
-            const currentText = quill.getText();
-            if (prevText !== currentText) {
-                onSkippingRef.current({ isSkipping: true });
-                onChangeInput(currentText);
-            }
-            prevTextRef.current = currentText;
-        };
-        if (prevQuill !== quill) {
-            quill.setText(valueRef.current);
-            prevTextRef.current = quill.getText();
-            quill.on('text-change', () => {
-                if (isOnCompositionRef.current) {
-                    // 漢字変換前のひらがなの入力などの際は関数を実行しない(onCompositionEndが実行された際に実行する)ようにする処理。
-                    // これにより、漢字変換前のひらがなが、しばしば二重で入力されることがある不具合を回避している。
-                    return;
-                }
-                onTextChange();
-            });
-        }
-        if (prevIsOnComposition === true && isOnComposition === false) {
-            // 漢字変換前のひらがななどを入力していた場合は、onCompositionEndが実行された際に初めて変更を送信する処理。
-            onTextChange();
-        }
-    }, [
-        isOnComposition,
-        isOnCompositionRef,
-        onChangeInput,
-        onSkippingRef,
-        prevIsOnComposition,
-        prevQuill,
-        quill,
-        valueRef,
-    ]);
+    const bufferDuration = useParseBufferDuration(bufferDurationProp);
+    // bufferDuration ミリ秒ごとに matchData を実行することで CollaborativeInput の機能を実現させているという仕組み。「文字列の変更があり、なおかつ変更がおさまったときにのみ matchData を実行する」という方法も考えられるが、その場合はロジックが複雑になるため、単純な方法を採用している。
+    useInterval(matchData, bufferDuration);
 
-    React.useEffect(() => {
-        if (quill == null) {
-            return;
-        }
-        if (disabled) {
-            quill.disable();
-        } else {
-            quill.enable();
-        }
-    }, [disabled, quill]);
+    const className = classNames(
+        ClassNames.collaborativeInput,
+        ClassNames.getSize(size),
+        disabled ? ClassNames.disabled : null,
+        classNameProp,
+    );
 
-    useWarnPlaceholderChanges({ quill, placeholderProp: placeholder });
-
-    let sizeCss: SerializedStyles;
-    switch (size) {
-        case 'verySmall':
-            sizeCss = verySmallCss;
-            break;
-        case 'small':
-            sizeCss = smallCss;
-            break;
-        default:
-            sizeCss = mediumCss;
-    }
-    const cssValue = React.useMemo(() => {
-        return css([sizeCss, disabled ? disabledCss : null]);
-    }, [sizeCss, disabled]);
-
-    const onCompositionStart = React.useCallback(() => setIsOnComposition(true), []);
-    const onCompositionEnd = React.useCallback(() => setIsOnComposition(false), []);
-    /* 
-    refのあるdivにはQuillによってclassが自動的にセットされる。もしcssをrefのあるdivと同じ場所に置くと、cssValueが変わったときにrefのあるdivに入っていたclassが消失してしまう。
-    それを防ぐため、cssとrefは別の場所に置いている。
-    */
-    return (
-        <div css={cssValue} style={style} className={className}>
-            <div
-                ref={quillRef}
-                spellCheck={false}
-                onCompositionStart={onCompositionStart}
-                onCompositionEnd={onCompositionEnd}
+    // Ant Design の Input コンポーネントでは uncontrolled だと何故かうまく扱えなかったため、代わりに input 要素を直接使っている。
+    if (multiline === true) {
+        // Ant Design の Input コンポーネントは上のコメントのとおり正常に動作しなかったため、Input.TextArea も同様と考えて代わりに textarea 要素を直接使っている。
+        return (
+            <textarea
+                ref={textareaRef}
+                defaultValue={value}
+                placeholder={placeholder}
+                disabled={disabled}
+                className={className}
+                style={style}
+                onChange={e => {
+                    const newValue = e.target.value;
+                    setInputText(newValue);
+                }}
             />
-        </div>
+        );
+    }
+    return (
+        <input
+            type="text"
+            ref={inputRef}
+            defaultValue={value}
+            placeholder={placeholder}
+            disabled={disabled}
+            className={className}
+            style={style}
+            onChange={e => {
+                const newValue = e.target.value;
+                setInputText(newValue);
+            }}
+        />
     );
 };

@@ -25,7 +25,7 @@ export const subscribeWritingMessageStatus = ({
         return result;
     };
     const result = new BehaviorEvent<ReadonlyMap<string, WritingMessageStatusType>>(
-        convertMap(map)
+        convertMap(map),
     );
     const subscriptionSubscription = subscription.subscribe({
         next: status => {

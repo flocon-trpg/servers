@@ -23,7 +23,7 @@ export const IsPositionLockedSelector = <T extends StateBase>({ value, onChange 
             });
             onChangeRef.current(newValue);
         },
-        [onChangeRef, valueRef]
+        [onChangeRef, valueRef],
     );
 
     return (

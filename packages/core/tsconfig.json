@@ -1,9 +1,19 @@
 {
-    "extends": "@flocon-trpg/tsconfig",
-    "compilerOptions": {
-        "baseUrl": ".",
-        "paths": {
-            "@/*": ["./src/internal/*"]
-        }
-    }
+    "extends": "@flocon-trpg/tsconfig"
+
+    /* 
+    State<typeof someTemplate> などのようにして型情報を得るときに、someTemplate のメンバーでパスに @ を含んだ import が使われている場合に、型情報が any となってしまう問題がある。
+    例えば次のコードにおける fooTemplate を @ を含んだパスで import すると State<typeof x> などが any になってしまう。なお、createObjectValueTemplate などは @ で import しても問題ないと思われる。
+    const x = createObjectValueTemplate({
+        name: createReplaceValueTemplate(fooTemplate)
+    })
+    該当するケース以外では @ を使っても問題ないが、事故を防ぐため、この問題が解決されるまで無効化している。
+    */
+
+    // "compilerOptions": {
+    //     "baseUrl": ".",
+    //     "paths": {
+    //         "@/*": ["./src/internal/*"]
+    //     }
+    // }
 }

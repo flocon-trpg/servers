@@ -1,5 +1,4 @@
-import { createDefaultLogger } from '@flocon-trpg/utils';
-import { loggerRef } from '@flocon-trpg/utils';
+import { createDefaultLogger, loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import { pino } from 'pino';
 import { LogConfig } from './config/types';

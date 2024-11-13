@@ -3,7 +3,7 @@ import { UpOperation, characterTemplate, roomTemplate, update } from '@flocon-tr
 // TODO: 削除する
 export const characterUpdateOperation = (
     characterId: string,
-    operation: UpOperation<typeof characterTemplate>
+    operation: UpOperation<typeof characterTemplate>,
 ): UpOperation<typeof roomTemplate> => {
     return {
         $v: 2,

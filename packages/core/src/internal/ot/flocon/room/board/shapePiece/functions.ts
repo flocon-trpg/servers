@@ -1,5 +1,5 @@
 import { Result } from '@kizahasi/result';
-import { State, TwoWayOperation, UpOperation } from '../../../../generator';
+import { State, TwoWayOperation, UpOperation } from '../../../../generator/types';
 import { isIdRecord } from '../../../../record';
 import * as RecordOperation from '../../../../recordOperation';
 import { RequestedBy, canChangeOwnerParticipantId } from '../../../../requestedBy';
@@ -21,7 +21,7 @@ export const toClientState = (source: State<typeof template>): State<typeof temp
 
 export const serverTransform =
     (
-        requestedBy: RequestedBy
+        requestedBy: RequestedBy,
     ): ServerTransform<
         State<typeof template>,
         TwoWayOperation<typeof template>,

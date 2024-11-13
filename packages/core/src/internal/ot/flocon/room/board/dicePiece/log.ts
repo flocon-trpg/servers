@@ -1,13 +1,14 @@
 import { chooseRecord } from '@flocon-trpg/utils';
 import { z } from 'zod';
+import { maybe } from '../../../../../maybe';
+import { toUpOperation } from '../../../../generator/functions';
 import {
     State,
     TwoWayOperation,
     createObjectValueTemplate,
     state,
-    toUpOperation,
     upOperation,
-} from '../../../../generator';
+} from '../../../../generator/types';
 import { record } from '../../../../record';
 import {
     recordUpOperationElementFactory,
@@ -20,7 +21,6 @@ import * as PieceBaseTypes from '../../../piece/types';
 import * as DieValue from './dieValue/functions';
 import * as DieValueTypes from './dieValue/types';
 import * as DicePieceValueTypes from './types';
-import { maybe } from '@/maybe';
 
 const dieValueUpOperation = createOperation(1, 1, {
     dieType: z.object({ newValue: DieValueTypes.dieType }),
@@ -45,11 +45,11 @@ const update = z
                 dice: record(
                     recordUpOperationElementFactory(
                         state(DieValueTypes.template),
-                        dieValueUpOperation
-                    )
+                        dieValueUpOperation,
+                    ),
                 ),
             })
-            .partial()
+            .partial(),
     );
 
 export const type = z.union([
@@ -72,7 +72,7 @@ export type Type = z.TypeOf<typeof type>;
 
 export const ofOperation = (
     operation: TwoWayOperation<typeof DicePieceValueTypes.template>,
-    currentState: State<typeof DicePieceValueTypes.template>
+    currentState: State<typeof DicePieceValueTypes.template>,
 ): Type => {
     const result = {
         ...toUpOperation(DicePieceValueTypes.template)(operation),

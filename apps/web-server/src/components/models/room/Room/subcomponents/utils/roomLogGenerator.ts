@@ -23,7 +23,7 @@ import {
 } from '../components/RoomMessagesPanelContent/subcomponents/components/RoomMessage/RoomMessage';
 import { HtmlObject, div, generateHtml, span } from './generateHtml';
 import { isDeleted, toText } from './message';
-import { WebConfig } from '@/configType';
+import { MockableWebConfig } from '@/configType';
 import { Styles } from '@/styles';
 import { analyzeUrl } from '@/utils/analyzeUrl';
 import { FilePath, FilePathModule } from '@/utils/file/filePath';
@@ -195,7 +195,7 @@ const createRoomMessageArray = (
         messages: RoomMessages;
         participants: ReadonlyMap<string, ParticipantState>;
         filter: RoomMessageFilter;
-    } & PublicChannelNames
+    } & PublicChannelNames,
 ): RoomMessage[] => {
     const { messages, participants, filter } = props;
 
@@ -284,7 +284,7 @@ const createRoomMessageArray = (
             const channelName = RoomMessage.toChannelName(
                 { type: publicMessage, value: msg },
                 props,
-                new Map()
+                new Map(),
             );
 
             if (isDeleted(msg)) {
@@ -347,7 +347,7 @@ export const generateAsStaticHtml = (
     params: GenerateLogParams & {
         showCreatedAt: boolean;
         showUsernameAlways: boolean;
-    }
+    },
 ) => {
     const elements = createRoomMessageArray(params)
         .sort((x, y) => x.createdAt - y.createdAt)
@@ -441,7 +441,7 @@ export const generateAsStaticHtml = (
                               {
                                   type: span,
                                   children: `${moment(new Date(msg.createdAt)).format(
-                                      'MM/DD HH:mm:ss'
+                                      'MM/DD HH:mm:ss',
                                   )}`,
                                   className: 'date',
                               },
@@ -528,8 +528,8 @@ class ImageDownloader {
     private readonly uploaderImages = new Map<string, ImageResult | null>();
 
     public constructor(
-        private readonly config: WebConfig,
-        private readonly storage: FirebaseStorageType
+        private readonly config: MockableWebConfig,
+        private readonly storage: FirebaseStorageType,
     ) {}
 
     private findCache(filePath: FilePath) {
@@ -566,7 +566,7 @@ class ImageDownloader {
 
     public async download(
         filePath: FilePath,
-        getIdToken: () => Promise<string | null>
+        getIdToken: () => Promise<string | null>,
     ): Promise<ImageResult | null> {
         const cache = this.findCache(filePath);
         if (cache !== undefined) {
@@ -644,7 +644,7 @@ class ArrayProgressCalculator {
     public constructor(
         private arrayCount: number,
         private rangeMin: number,
-        private rangeMax: number
+        private rangeMax: number,
     ) {
         if (this.rangeMin >= this.rangeMax) {
             throw new Error('this.rangeMin >= this.rangeMax');
@@ -677,7 +677,7 @@ export const generateAsRichLog = async ({
     onProgressChange,
 }: {
     params: GenerateLogParams;
-    config: WebConfig;
+    config: MockableWebConfig;
     storage: FirebaseStorageType;
     getIdToken: () => Promise<string | null>;
     onProgressChange: (p: RichLogProgress) => void;
@@ -716,7 +716,7 @@ export const generateAsRichLog = async ({
         throw new Error(thisShouldNotHappen);
     }
     const roomMessageArray = createRoomMessageArray(params).sort(
-        (x, y) => x.createdAt - y.createdAt
+        (x, y) => x.createdAt - y.createdAt,
     );
     const arrayProgressCalculator = new ArrayProgressCalculator(roomMessageArray.length, 6, 93);
     const messageDivs: string[] = [];
@@ -729,7 +729,7 @@ export const generateAsRichLog = async ({
         if (msg.value.createdBy?.characterImage != null) {
             const image = await imageDownloader.download(
                 msg.value.createdBy.characterImage,
-                getIdToken
+                getIdToken,
             );
             if (image != null) {
                 imgAvatarFolder.file(image.filename, image.blob);
@@ -746,7 +746,7 @@ ${escape(msg.value.commandResult)}`
             msg.value.commandResult == null ? '' : 'is-command'
         }">
     <img class="avatar" src="${
-        msg.value.commandResult == null ? avatar ?? './img/noname.png' : './img/dice.png'
+        msg.value.commandResult == null ? (avatar ?? './img/noname.png') : './img/dice.png'
     }">
     <div class="flex flex-column">
         <div class="flex-none flex flex-row">
@@ -754,7 +754,7 @@ ${escape(msg.value.commandResult)}`
             ${escape(
                 msg.value.createdBy?.rolePlayPart ??
                     msg.value.createdBy?.participantNamePart ??
-                    'システムメッセージ'
+                    'システムメッセージ',
             )}
             </div>
             <div style="width: 6px"></div>
@@ -762,7 +762,7 @@ ${escape(msg.value.commandResult)}`
                 ${escape(
                     msg.type === privateMessage
                         ? `秘話: ${msg.value.channelName}`
-                        : msg.value.channelName
+                        : msg.value.channelName,
                 )}
             </div>
         </div>

@@ -3,28 +3,28 @@
     "private": true,
     "workspaces": [
         "apps/*",
-        "packages/*"
+        "packages/*",
+        "websites/*"
     ],
     "scripts": {
-        "build": "yarn workspace '@flocon-trpg/api-server' run build && yarn workspace '@flocon-trpg/web-server' run build:deps",
-        "format": "yarn lint --fix && yarn prettier && yarn build && yarn sort-package-json && yarn generate-disclaimer",
-        "generate-disclaimer": "yarn licenses generate-disclaimer --production --recursive --exclude='@types/*,husky,less,npm-run-all,sass,serve' > ./apps/web-server/public/licenses-npm-package.txt",
+        "build": "yarn workspaces foreach --all -p --topological-dev run build:self",
+        "format": "yarn lint --fix && yarn prettier && yarn sort-package-json",
         "install-husky": "husky install",
-        "lint": "yarn workspaces foreach -pv run lint",
-        "prettier": "yarn prettier:base --write --cache && yarn workspaces foreach -pv run prettier",
-        "prettier-check": "yarn prettier:base --check && yarn workspaces foreach -pv run prettier-check",
+        "lint": "yarn workspaces foreach --all -p run lint",
+        "prettier": "yarn prettier:base --write --cache && yarn workspaces foreach --all -p run prettier",
+        "prettier-check": "yarn prettier:base --check && yarn workspaces foreach --all -p run prettier-check",
         "prettier:base": "prettier \"**/*.{json,yml,md}\"",
         "sort-package-json": "sort-package-json \"package.json\" \"apps/*/package.json\" \"packages/*/package.json\"",
-        "test": "yarn workspaces foreach -pv run test",
-        "test-node14": "yarn workspaces foreach -pv --exclude '{@flocon-trpg/servers,@flocon-trpg/web-server}' run test"
+        "test": "yarn workspaces foreach --all -p run test",
+        "test-ci": "yarn workspaces foreach --all -p run test-ci"
     },
     "devDependencies": {
-        "@commitlint/cli": "17.4.4",
-        "@commitlint/config-conventional": "17.4.4",
+        "@commitlint/cli": "19.5.0",
+        "@commitlint/config-conventional": "19.5.0",
         "@flocon-trpg/prettier-config": "workspace:^",
         "husky": "8.0.3",
-        "prettier": "2.8.4",
-        "sort-package-json": "2.4.1"
+        "prettier": "3.3.3",
+        "sort-package-json": "2.10.1"
     },
-    "packageManager": "yarn@3.4.1"
+    "packageManager": "yarn@4.5.1"
 }

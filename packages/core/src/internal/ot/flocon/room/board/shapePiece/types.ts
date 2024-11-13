@@ -3,7 +3,7 @@ import {
     createObjectValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
-} from '../../../../generator';
+} from '../../../../generator/types';
 import * as Piece from '../../../piece/types';
 import * as Shape from '../../../shape/types';
 
@@ -21,5 +21,5 @@ export const template = createObjectValueTemplate(
         shapes: createRecordValueTemplate(Shape.template),
     },
     1,
-    1
+    1,
 );

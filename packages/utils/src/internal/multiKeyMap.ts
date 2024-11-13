@@ -1,5 +1,5 @@
 import { Option, Some } from '@kizahasi/option';
-import { choose } from './iterable';
+import { chooseIterable } from './iterable';
 import { Tree } from './tree';
 
 /** 複数のkeyを使用できるMap */
@@ -45,7 +45,7 @@ export class MultiKeyMap<TKey, TValue> {
 
     public replace<TReplaced extends TValue | undefined>(
         key: readonly TKey[],
-        replacer: (oldValue: TValue | undefined) => TReplaced
+        replacer: (oldValue: TValue | undefined) => TReplaced,
     ): TReplaced {
         const result = this.#source.ensure(
             key,
@@ -56,7 +56,7 @@ export class MultiKeyMap<TKey, TValue> {
                 }
                 return Option.some(newValue) as Some<TValue>;
             },
-            () => Option.none()
+            () => Option.none(),
         );
         return (result.isNone ? undefined : result.value) as TReplaced;
     }
@@ -74,7 +74,7 @@ export class MultiKeyMap<TKey, TValue> {
     }
 
     public traverse(): Iterable<{ absolutePath: readonly TKey[]; value: TValue }> {
-        return choose(this.#source.traverse(), element => {
+        return chooseIterable(this.#source.traverse(), element => {
             if (element.value.isNone) {
                 return Option.none();
             }
@@ -90,7 +90,10 @@ export class MultiKeyMap<TKey, TValue> {
     }
 
     public map<TValue2>(
-        mapping: (oldValue: { value: TValue; absolutePath: readonly TKey[] }) => TValue2 | undefined
+        mapping: (oldValue: {
+            value: TValue;
+            absolutePath: readonly TKey[];
+        }) => TValue2 | undefined,
     ): MultiKeyMap<TKey, TValue2> {
         const newSource = this.#source.map(oldValue => {
             if (oldValue.value.isNone) {

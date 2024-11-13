@@ -11,7 +11,7 @@ import { useMyCharacters } from '../../hooks/useMyCharacters';
 import { CharacterVarInput } from '../CharacterVarInput/CharacterVarInput';
 import { GameSelector } from '../GameSelector/GameSelector';
 import { SelectedChannelType, SubmitMessage, publicChannel } from '../SubmitMessage/SubmitMessage';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { custom, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
@@ -19,7 +19,6 @@ import { CollaborativeInput } from '@/components/ui/CollaborativeInput/Collabora
 import { UISelector } from '@/components/ui/UISelector/UISelector';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { useBufferValue } from '@/hooks/useBufferValue';
-import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { flex, flex1, flexColumn, flexNone, flexRow, itemsCenter } from '@/styles/className';
 
 const descriptionStyle: React.CSSProperties = {
@@ -53,7 +52,7 @@ const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
             bufferedChatPaletteText == null
                 ? null
                 : bufferedChatPaletteText.replace(/(\r\n|\r)/g, '\n').split('\n'),
-        [bufferedChatPaletteText]
+        [bufferedChatPaletteText],
     );
 
     const baseStyle: React.CSSProperties = {
@@ -71,10 +70,10 @@ const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
                 className={className}
                 style={{ overflow: 'auto' }}
                 multiline
-                size='small'
-                bufferDuration='default'
+                size="small"
+                bufferDuration="default"
                 value={chatPaletteText ?? ''}
-                onChange={e => onChange(e.currentValue)}
+                onChange={currentValue => onChange(currentValue)}
             />
         );
     }
@@ -126,11 +125,12 @@ export const ChatPalettePanelContent: React.FC<ChatPalettePanelContentProps> = (
 
     const setPublicMessageInput = useSetAtom(roomPublicMessageInputAtom);
     const setPrivateMessageInput = useSetAtom(roomPrivateMessageInputAtom);
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
     const config = useAtomSelector(
         roomConfigAtom,
-        state => state?.panels.chatPalettePanels?.[panelId]
+        state => state?.panels.chatPalettePanels?.[panelId],
     );
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const subject = React.useMemo(() => new Subject<string>(), []);
     const myCharacters = useMyCharacters();
     const [selectedChannelType, setSelectedChannelType] =
@@ -155,18 +155,21 @@ export const ChatPalettePanelContent: React.FC<ChatPalettePanelContentProps> = (
 
     const onConfigUpdate = React.useCallback(
         (recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void) => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                const chatPalettePanel = roomConfig.panels.chatPalettePanels[panelId];
-                if (chatPalettePanel == null) {
-                    return;
-                }
-                recipe(chatPalettePanel);
+            reduceRoomConfig({
+                type: custom,
+                action: roomConfig => {
+                    if (roomConfig == null) {
+                        return;
+                    }
+                    const chatPalettePanel = roomConfig.panels.chatPalettePanels[panelId];
+                    if (chatPalettePanel == null) {
+                        return;
+                    }
+                    recipe(chatPalettePanel);
+                },
             });
         },
-        [panelId, setRoomConfig]
+        [panelId, reduceRoomConfig],
     );
 
     if (config == null) {
@@ -183,7 +186,7 @@ export const ChatPalettePanelContent: React.FC<ChatPalettePanelContentProps> = (
                 <div style={descriptionStyle}>キャラクター</div>
                 <Select
                     style={{ flex: 1, maxWidth: miniInputMaxWidth }}
-                    placeholder='キャラクター'
+                    placeholder="キャラクター"
                     value={config.selectedCharacterId}
                     onChange={value => {
                         if (value == null) {
@@ -283,7 +286,7 @@ export const ChatPalettePanelContent: React.FC<ChatPalettePanelContentProps> = (
                 onSelectedChannelTypeChange={setSelectedChannelType}
                 config={config}
                 onConfigUpdate={onConfigUpdate}
-                selectedCharacterType='some'
+                selectedCharacterType="some"
                 autoSubmitter={subject}
             />
         </div>

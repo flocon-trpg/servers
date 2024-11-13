@@ -1,5 +1,5 @@
 import { Result } from '@kizahasi/result';
-import { State, TwoWayOperation, UpOperation } from '../../../generator';
+import { State, TwoWayOperation, UpOperation } from '../../../generator/types';
 import * as ParamRecordOperation from '../../../paramRecordOperation';
 import { isIdRecord } from '../../../record';
 import * as RecordOperation from '../../../recordOperation';
@@ -36,7 +36,7 @@ export const toClientState =
     (
         isAuthorized: boolean,
         requestedBy: RequestedBy,
-        currentRoomState: State<typeof Room.template>
+        currentRoomState: State<typeof Room.template>,
     ) =>
     (source: State<typeof template>): State<typeof template> => {
         return {
@@ -107,7 +107,7 @@ export const serverTransform =
     (
         isAuthorized: boolean,
         requestedBy: RequestedBy,
-        currentRoomState: State<typeof Room.template>
+        currentRoomState: State<typeof Room.template>,
     ): ServerTransform<
         State<typeof template>,
         TwoWayOperation<typeof template>,

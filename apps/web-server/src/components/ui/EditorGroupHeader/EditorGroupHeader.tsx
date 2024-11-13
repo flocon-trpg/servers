@@ -1,6 +1,6 @@
 import React, { PropsWithChildren } from 'react';
 
-// eslint-disable-next-line @typescript-eslint/ban-types
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type Props = {};
 
 export const EditorGroupHeader: React.FC<PropsWithChildren<Props>> = ({

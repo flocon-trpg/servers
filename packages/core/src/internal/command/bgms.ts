@@ -11,7 +11,7 @@ import {
 import { isStrIndex5 } from '../indexes';
 import * as BgmTypes from '../ot/flocon/room/bgm/types';
 import * as RoomTypes from '../ot/flocon/room/types';
-import { State } from '../ot/generator';
+import { State } from '../ot/generator/types';
 import { FBgm } from './bgm';
 
 export class FBgms extends FObject {

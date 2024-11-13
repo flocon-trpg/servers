@@ -1,5 +1,6 @@
 import * as Icon from '@ant-design/icons';
 import React, { PropsWithChildren } from 'react';
+import { AlertCounter } from '../AlertCounter/AlertCounter';
 import { Props as ErrorProps, GraphQLErrorAlert } from '../GraphQLErrorAlert/GraphQLErrorAlert';
 
 type Props = {
@@ -17,10 +18,13 @@ export const GraphQLAlert: React.FC<PropsWithChildren<Props>> = ({
     if (error == null) {
         if (loading === true) {
             return (
-                <span>
-                    <Icon.LoadingOutlined />
-                    {loadingTitle ?? '読み込み中…'}
-                </span>
+                <AlertCounter.CountAsLoading>
+                    {' '}
+                    <span>
+                        <Icon.LoadingOutlined />
+                        {loadingTitle ?? '読み込み中…'}
+                    </span>
+                </AlertCounter.CountAsLoading>
             );
         }
         return <>{children}</>;

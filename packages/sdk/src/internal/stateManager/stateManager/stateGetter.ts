@@ -10,6 +10,11 @@ type PostingState<TState, TOperation, TMetadata> = {
 };
 
 export class StateGetter<TState, TOperation, TMetadata> {
+    /**
+     * クライアントから見た、API サーバーにおける最新の State。
+     *
+     * ただし、通信のラグなどの影響で、実際の最新の状態より少し古い可能性があります。
+     */
     public syncedState: TState;
 
     private _diff: Diff<TState, TOperation>;
@@ -31,6 +36,9 @@ export class StateGetter<TState, TOperation, TMetadata> {
         this._diff = diff;
     }
 
+    /**
+     * クライアントの画面に表示すべき State。
+     */
     public get uiState(): TState {
         if (this._uiStateCore.isNone) {
             return this._postingState?.state ?? this.syncedState;
@@ -42,10 +50,12 @@ export class StateGetter<TState, TOperation, TMetadata> {
         this._uiStateCore = Option.some(value);
     }
 
+    /** `uiState` を `syncedState` の状態に戻します。 */
     public clearUiState() {
         this._uiStateCore = Option.none();
     }
 
+    /** API サーバーに Operation の post を開始した時点の State。 */
     public get postingState(): Readonly<PostingState<TState, TOperation, TMetadata>> | undefined {
         return this._postingState;
     }
@@ -62,8 +72,11 @@ export class StateGetter<TState, TOperation, TMetadata> {
         this._postingState = undefined;
     }
 
-    // まだpostしていないoperationを表す。
-    // 詳しく書くと、post中の場合は、post後にクライアント側でたまっているoperationを表す。post中でないときは、単にクライアント側でたまっているoperationを表す。
+    /**
+     * まだpostしていないoperation。
+     *
+     * post中の場合は、post後にクライアント側でたまっているoperationを表します。post中でないときは、単にクライアント側でたまっているoperationを表します。
+     */
     public getLocalOperation(): TOperation | undefined {
         if (this._uiStateCore.isNone) {
             return undefined;

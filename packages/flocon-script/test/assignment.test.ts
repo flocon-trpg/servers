@@ -22,7 +22,7 @@ let right = ${right};
 let assignmentResult = (left ${operator} right);
 [left, right, assignmentResult]
         `,
-        {}
+        {},
     );
     expect(actual.result).toEqual([expected, right, expected]);
 });

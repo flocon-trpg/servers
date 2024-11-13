@@ -9,7 +9,7 @@ import {
     beginCast,
 } from '@flocon-trpg/flocon-script';
 import * as StrParam from '../ot/flocon/room/character/strParam/types';
-import { State } from '../ot/generator';
+import { State } from '../ot/generator/types';
 
 const value = 'value';
 const isValueSecret = 'isValueSecret';
@@ -42,7 +42,7 @@ export class FStrParam extends FObject {
                 return;
             default:
                 throw new ScriptError(
-                    `${typeof key === 'symbol' ? 'symbol' : key}への値のセットは制限されています。`
+                    `${typeof key === 'symbol' ? 'symbol' : key}への値のセットは制限されています。`,
                 );
         }
     }

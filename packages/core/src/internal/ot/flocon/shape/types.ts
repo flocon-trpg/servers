@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { maybe } from '../../../maybe';
-import { createObjectValueTemplate, createReplaceValueTemplate } from '../../generator';
+import { createObjectValueTemplate, createReplaceValueTemplate } from '../../generator/types';
 import { shape } from '../../shape';
 
 export const template = createObjectValueTemplate(
@@ -11,5 +11,5 @@ export const template = createObjectValueTemplate(
         strokeWidth: createReplaceValueTemplate(maybe(z.number())),
     },
     1,
-    1
+    1,
 );

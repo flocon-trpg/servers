@@ -2,7 +2,7 @@ import { GroupJoinResult } from './types';
 
 export const groupJoinMap = <TKey, TLeft, TRight>(
     left: ReadonlyMap<TKey, TLeft>,
-    right: ReadonlyMap<TKey, TRight>
+    right: ReadonlyMap<TKey, TRight>,
 ): Map<TKey, GroupJoinResult<TLeft, TRight>> => {
     const result = new Map<TKey, GroupJoinResult<TLeft, TRight>>();
     const rightClone = new Map(right);

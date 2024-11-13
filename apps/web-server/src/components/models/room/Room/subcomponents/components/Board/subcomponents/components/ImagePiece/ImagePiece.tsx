@@ -86,27 +86,27 @@ const BalloonCore: React.FC<BalloonCoreProps> = ({
                         >
                             <ReactKonva.Tag
                                 strokeWidth={0}
-                                fill='#303030'
-                                shadowColor='black'
+                                fill="#303030"
+                                shadowColor="black"
                                 shadowBlur={5}
                                 shadowOffsetX={5}
                                 shadowOffsetY={5}
                                 shadowOpacity={0.3}
                                 pointerWidth={6}
                                 pointerHeight={6}
-                                pointerDirection='down'
-                                lineJoin='round'
+                                pointerDirection="down"
+                                lineJoin="round"
                             />
                             <ReactKonva.Text
                                 text={item}
-                                fontFamily='Noto Sans JP Regular'
+                                fontFamily="Noto Sans JP Regular"
                                 fontSize={14}
                                 padding={4}
-                                fill='white'
-                                verticalAlign='middle'
+                                fill="white"
+                                verticalAlign="middle"
                                 width={width}
                                 height={balloonCoreTextHeight - 7}
-                                wrap='word'
+                                wrap="word"
                                 ellipsis
                             />
                         </ReactKonva.Label>
@@ -202,7 +202,7 @@ const Balloon: React.FC<BalloonProps> = ({ message, x, y, width, onBalloonChange
     ];
 
     const [areAllTextsUndefined, setAreAllTextUndefined] = React.useState(
-        [text0, text1, text2, text3, text4].every(t => t === undefined)
+        [text0, text1, text2, text3, text4].every(t => t === undefined),
     );
     React.useEffect(() => {
         setAreAllTextUndefined([text0, text1, text2, text3, text4].every(t => t === undefined));
@@ -254,7 +254,7 @@ export const ImagePiece: React.FC<Props> = props => {
                 opacity: props.opacity,
             },
         }),
-        [props.opacity, props.filePath.path, props.filePath.sourceType]
+        [props.opacity, props.filePath.path, props.filePath.sourceType],
     );
     const imageElement = image.type === success ? image.image : undefined;
 
@@ -283,12 +283,12 @@ export const ImagePiece: React.FC<Props> = props => {
                     props.message == null
                         ? undefined
                         : messageFilterRef.current(props.message)
-                        ? props.message
-                        : undefined
+                          ? props.message
+                          : undefined
                 }
                 onBalloonChange={balloonExists => {
-                    setOpacitySpringProps.start({
-                        opacity: balloonExists ? 1 : props.opacity ?? 1,
+                    void setOpacitySpringProps.start({
+                        opacity: balloonExists ? 1 : (props.opacity ?? 1),
                     });
                 }}
             />

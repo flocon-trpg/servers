@@ -86,7 +86,7 @@ const fVariableDeclaration = (statement: VariableDeclaration) => {
     if (statement.kind === 'var') {
         throw new ScriptError(
             `'${statement.kind}' is not supported. Use 'let' instead.`,
-            toRange(statement)
+            toRange(statement),
         );
     }
     const declarations = statement.declarations.map(d => {

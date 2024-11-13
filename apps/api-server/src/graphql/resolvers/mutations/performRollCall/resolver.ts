@@ -63,7 +63,7 @@ export class PerformRollCallResolver {
     public async performRollCall(
         @Arg('input') input: PerformRollCallInput,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<PerformRollCallResult> {
         const myUserUid = ensureUserUid(context);
         const result = await operateAsAdminAndFlush({

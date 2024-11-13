@@ -1,12 +1,12 @@
 import { FirebaseStorage, ListResult, StorageReference, ref } from '@firebase/storage';
 import { FirebaseError } from '@firebase/util';
+import { QueryKey, useQuery } from '@tanstack/react-query';
 import { listAll } from 'firebase/storage';
 import { useAtomValue } from 'jotai';
 import React from 'react';
-import { QueryKey, useQuery } from 'react-query';
 import { useMyUserUid } from './useMyUserUid';
+import { firebaseStorageAtom } from './useSetupApp';
 import { useWebConfig } from './useWebConfig';
-import { firebaseStorageAtom } from '@/pages/_app';
 import { Path } from '@/utils/file/firebaseStorage';
 
 /** 再帰的に Firebase Storage の listAll 関数を実行します。
@@ -15,7 +15,7 @@ import { Path } from '@/utils/file/firebaseStorage';
  */
 const listAllRecursive = async (
     storageRef: StorageReference,
-    next: (listResult: ListResult) => void
+    next: (listResult: ListResult) => void,
 ): Promise<void> => {
     const list = await listAll(storageRef);
     next(list);
@@ -109,7 +109,7 @@ export type FetchResult<T> =
 
 const toFetchResult = (
     data: FetchResultSourceData,
-    error: FirebaseError | null | undefined
+    error: FirebaseError | null | undefined,
 ): FetchResult<File[]> => {
     if (error != null) {
         return { type: fetchError, error };
@@ -122,7 +122,7 @@ const toFetchResult = (
 
 export const mapFetchResult = <T1, T2>(
     source: FetchResult<T1>,
-    mapping: (x: T1) => T2
+    mapping: (x: T1) => T2,
 ): FetchResult<T2> => {
     if (source.type === success) {
         return { type: success, value: mapping(source.value) };
@@ -134,18 +134,16 @@ export const useFirebaseStorageListAllQuery = () => {
     const storage = useAtomValue(firebaseStorageAtom);
     const myUserUid = useMyUserUid();
     const webConfig = useWebConfig();
-    const isPublicFirebaseStorageEnabled =
-        webConfig?.value?.isPublicFirebaseStorageEnabled === true;
-    const isUnlistedFirebaseStorageEnabled =
-        webConfig?.value?.isUnlistedFirebaseStorageEnabled === true;
+    const isPublicFirebaseStorageEnabled = webConfig.isPublicFirebaseStorageEnabled === true;
+    const isUnlistedFirebaseStorageEnabled = webConfig.isUnlistedFirebaseStorageEnabled === true;
 
-    const publicFiles = useQuery(
-        queryKey({
+    const publicFiles = useQuery({
+        queryKey: queryKey({
             storage,
             myUserUid,
             isPublicFirebaseStorageEnabled,
         }),
-        async () => {
+        queryFn: async () => {
             if (storage == null) {
                 return { type: appError, error: storageIsNullish } as const;
             }
@@ -164,16 +162,16 @@ export const useFirebaseStorageListAllQuery = () => {
                 }
             });
             return { type: success, value: result } as const;
-        }
-    );
+        },
+    });
 
-    const unlistedFiles = useQuery(
-        queryKey({
+    const unlistedFiles = useQuery({
+        queryKey: queryKey({
             storage,
             myUserUid,
             isUnlistedFirebaseStorageEnabled,
         }),
-        async () => {
+        queryFn: async () => {
             if (storage == null) {
                 return { type: appError, error: storageIsNullish } as const;
             }
@@ -192,8 +190,8 @@ export const useFirebaseStorageListAllQuery = () => {
                 }
             });
             return { type: success, value: result } as const;
-        }
-    );
+        },
+    });
 
     return React.useMemo(() => {
         const refetchPublicFiles = publicFiles.refetch;
@@ -201,11 +199,11 @@ export const useFirebaseStorageListAllQuery = () => {
         return {
             public: toFetchResult(
                 publicFiles.data,
-                publicFiles.error as FirebaseError | null | undefined
+                publicFiles.error as FirebaseError | null | undefined,
             ),
             unlisted: toFetchResult(
                 unlistedFiles.data,
-                unlistedFiles.error as FirebaseError | null | undefined
+                unlistedFiles.error as FirebaseError | null | undefined,
             ),
 
             refetch: async () => {

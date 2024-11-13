@@ -14,6 +14,6 @@ export const useAddNotification = () => {
                 createdAt: new Date().getTime(),
             });
         },
-        [roomClientRef]
+        [roomClientRef],
     );
 };

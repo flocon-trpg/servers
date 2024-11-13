@@ -25,16 +25,16 @@ type Options = $Options<IDatabaseDriver<Connection>>;
 const createMySQLOptionsResult = (
     mysqlConfig: MysqlDatabaseConfig | undefined,
     databaseArg: typeof mysql | null,
-    dirName: DirName
+    dirName: DirName,
 ): Result<Options> => {
     if (mysqlConfig == null) {
         if (databaseArg === mysql) {
             return Result.error(
-                `使用するデータベースとしてMySQLが指定されましたが、設定が見つかりませんでした。${MYSQL}の値を設定する必要があります。`
+                `使用するデータベースとしてMySQLが指定されましたが、設定が見つかりませんでした。${MYSQL}の値を設定する必要があります。`,
             );
         }
         return Result.error(
-            `使用するデータベースとしてPostgreSQLが指定されましたが、${MYSQL}の値が設定されていません。`
+            `使用するデータベースとしてPostgreSQLが指定されましたが、${MYSQL}の値が設定されていません。`,
         );
     }
     const result = createMySQLOptions({
@@ -48,7 +48,7 @@ const createMySQLOptionsResult = (
 
 const createSQLiteOptionsResult = (
     sqliteConfig: SqliteDatabaseConfig,
-    dirName: DirName
+    dirName: DirName,
 ): Ok<Options> => {
     const result = createSQLiteOptions({ sqliteConfig, dirName });
     return Result.ok(result);
@@ -58,7 +58,7 @@ const createPostgresOptionsResult = (
     postgresConfig: PostgresqlDatabaseConfig | undefined,
     serverConfig: ServerConfigForMigration,
     databaseArg: typeof postgresql | null,
-    dirName: DirName
+    dirName: DirName,
 ): Result<Options> => {
     if (serverConfig.heroku) {
         if (serverConfig.databaseUrl != null) {
@@ -73,17 +73,17 @@ const createPostgresOptionsResult = (
             return Result.ok(result);
         }
         AppConsole.infoAsNoticeJa(
-            `${HEROKU}の値がtrueですが、${DATABASE_URL}の値が見つかりませんでした。Heroku以外で動かしている可能性があります。${DATABASE_URL}によるデータベースの参照はスキップされます。`
+            `${HEROKU}の値がtrueですが、${DATABASE_URL}の値が見つかりませんでした。Heroku以外で動かしている可能性があります。${DATABASE_URL}によるデータベースの参照はスキップされます。`,
         );
     }
     if (postgresConfig == null) {
         if (databaseArg === postgresql) {
             return Result.error(
-                `使用するデータベースとしてPostgreSQLが指定されましたが、設定が見つかりませんでした。${POSTGRESQL}の値を設定する必要があります。Herokuの場合はHeroku Postgresをインストールしていてなおかつ${DATABASE_URL}の値が設定されていることを確認してください。`
+                `使用するデータベースとしてPostgreSQLが指定されましたが、設定が見つかりませんでした。${POSTGRESQL}の値を設定する必要があります。Herokuの場合はHeroku Postgresをインストールしていてなおかつ${DATABASE_URL}の値が設定されていることを確認してください。`,
             );
         }
         return Result.error(
-            `使用するデータベースとしてPostgreSQLが指定されましたが、${POSTGRESQL}の値が設定されていません。もし${DATABASE_URL}を利用する場合は、--db パラメーターを指定せずに起動してください。`
+            `使用するデータベースとしてPostgreSQLが指定されましたが、${POSTGRESQL}の値が設定されていません。もし${DATABASE_URL}を利用する場合は、--db パラメーターを指定せずに起動してください。`,
         );
     }
     const result = createPostgreSQLOptions({
@@ -148,7 +148,7 @@ type ExactlyOneServerConfig =
       };
 
 const isExactlyOneServerConfig = (
-    serverConfig: ServerConfigForMigration
+    serverConfig: ServerConfigForMigration,
 ): ExactlyOneServerConfig => {
     if (serverConfig.mysql == null) {
         if (serverConfig.postgresql == null) {
@@ -214,7 +214,7 @@ const seeDatabaseUrl = 'seeDatabaseUrl';
 const createORMOptionsWithoutDatabaseUrl = (
     serverConfig: ServerConfigForMigration,
     databaseArg: typeof postgresql | typeof sqlite | typeof mysql | null,
-    dirName: DirName
+    dirName: DirName,
 ): Result<Options | typeof seeDatabaseUrl> => {
     switch (databaseArg) {
         case null: {
@@ -224,14 +224,14 @@ const createORMOptionsWithoutDatabaseUrl = (
                     return createMySQLOptionsResult(
                         exactlyOneServerConfigResult.mysql,
                         databaseArg,
-                        dirName
+                        dirName,
                     );
                 case postgresql:
                     return createPostgresOptionsResult(
                         exactlyOneServerConfigResult.postgresql,
                         serverConfig,
                         databaseArg,
-                        dirName
+                        dirName,
                     );
                 case sqlite:
                     return createSQLiteOptionsResult(exactlyOneServerConfigResult.sqlite, dirName);
@@ -241,21 +241,21 @@ const createORMOptionsWithoutDatabaseUrl = (
                             return Result.ok(seeDatabaseUrl);
                         }
                         return Result.error(
-                            `Because ${POSTGRESQL} and ${SQLITE} are set in config, you must use --db parameter to specify a database to use.`
+                            `Because ${POSTGRESQL} and ${SQLITE} are set in config, you must use --db parameter to specify a database to use.`,
                         );
                     }
                     if (exactlyOneServerConfigResult.postgresql == null) {
                         return Result.error(
-                            `Because ${MYSQL} and ${SQLITE} are set in config, you must use --db parameter to specify a database to use.`
+                            `Because ${MYSQL} and ${SQLITE} are set in config, you must use --db parameter to specify a database to use.`,
                         );
                     }
                     if (exactlyOneServerConfigResult.sqlite == null) {
                         return Result.error(
-                            `Because ${MYSQL} and ${POSTGRESQL} are set in config, you must use --db parameter to specify a database to use.`
+                            `Because ${MYSQL} and ${POSTGRESQL} are set in config, you must use --db parameter to specify a database to use.`,
                         );
                     }
                     return Result.error(
-                        `Because ${MYSQL}, ${POSTGRESQL}, and ${SQLITE} are set in config, you must use --db parameter to specify a database to use.`
+                        `Because ${MYSQL}, ${POSTGRESQL}, and ${SQLITE} are set in config, you must use --db parameter to specify a database to use.`,
                     );
                 }
             }
@@ -263,7 +263,7 @@ const createORMOptionsWithoutDatabaseUrl = (
         case mysql: {
             if (serverConfig.mysql == null) {
                 return Result.error(
-                    `使用するデータベースとしてMySQLが指定されましたが、${MYSQL}の値が設定されていません。もし${DATABASE_URL}を利用する場合は、--db パラメーターを指定せずに起動してください。`
+                    `使用するデータベースとしてMySQLが指定されましたが、${MYSQL}の値が設定されていません。もし${DATABASE_URL}を利用する場合は、--db パラメーターを指定せずに起動してください。`,
                 );
             }
             return createMySQLOptionsResult(serverConfig.mysql, databaseArg, dirName);
@@ -271,7 +271,7 @@ const createORMOptionsWithoutDatabaseUrl = (
         case sqlite: {
             if (serverConfig.sqlite == null) {
                 return Result.error(
-                    `使用するデータベースとしてSQLiteが指定されましたが、${SQLITE}の値が設定されていません。もし${DATABASE_URL}を利用する場合は、--db パラメーターを指定せずに起動してください。`
+                    `使用するデータベースとしてSQLiteが指定されましたが、${SQLITE}の値が設定されていません。もし${DATABASE_URL}を利用する場合は、--db パラメーターを指定せずに起動してください。`,
                 );
             }
             return createSQLiteOptionsResult(serverConfig.sqlite, dirName);
@@ -281,7 +281,7 @@ const createORMOptionsWithoutDatabaseUrl = (
                 serverConfig.postgresql,
                 serverConfig,
                 databaseArg,
-                dirName
+                dirName,
             );
         }
     }
@@ -296,12 +296,12 @@ const createORMOptionsWithoutDatabaseUrl = (
 export const createORMOptions = (
     serverConfig: ServerConfigForMigration,
     databaseArg: typeof postgresql | typeof sqlite | typeof mysql | null,
-    dirName: DirName
+    dirName: DirName,
 ): Result<Options> => {
     const ormOptionsBaseResult = createORMOptionsWithoutDatabaseUrl(
         serverConfig,
         databaseArg,
-        dirName
+        dirName,
     );
     if (ormOptionsBaseResult.isError) {
         return ormOptionsBaseResult;
@@ -325,7 +325,7 @@ export const createORMOptions = (
                         dirName,
                         dbName: undefined,
                         driverOptions: undefined,
-                    })
+                    }),
                 );
             case postgresql:
                 return Result.ok(
@@ -338,7 +338,7 @@ export const createORMOptions = (
                                   connection: { ssl: { rejectUnauthorized: false } },
                               }
                             : undefined,
-                    })
+                    }),
                 );
             case sqlite:
                 return Result.ok(
@@ -347,14 +347,14 @@ export const createORMOptions = (
                             dbName: databaseUrlResult.value.sqlite.dbName,
                         },
                         dirName,
-                    })
+                    }),
                 );
         }
     }
 
     if (serverConfig.databaseUrl != null) {
         AppConsole.infoAsNoticeJa(
-            `${MYSQL}, ${POSTGRESQL}, ${SQLITE} においてデータベースが設定されているため、${DATABASE_URL} の値は無視されました。`
+            `${MYSQL}, ${POSTGRESQL}, ${SQLITE} においてデータベースが設定されているため、${DATABASE_URL} の値は無視されました。`,
         );
     }
 

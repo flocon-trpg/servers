@@ -1,5 +1,5 @@
 import { Result } from '@kizahasi/result';
-import { State, TwoWayOperation, UpOperation } from '../../../generator';
+import { State, TwoWayOperation, UpOperation } from '../../../generator/types';
 import { isIdRecord } from '../../../record';
 import * as TextOperation from '../../../textOperation';
 import { ServerTransform } from '../../../util/type';

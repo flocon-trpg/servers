@@ -1,10 +1,10 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
+import { ColorResult, SketchPicker, SketchPickerProps } from '@hello-pangea/color-picker';
 import { Button, ButtonProps, Popover, PopoverProps } from 'antd';
 import classNames from 'classnames';
 import Color from 'color';
 import React from 'react';
-import { ColorResult, SketchPicker, SketchPickerProps } from 'react-color';
 import { Styles } from '@/styles';
 import {
     cancelRnd,
@@ -73,7 +73,7 @@ export const ColorPickerButton: React.FC<Props> = ({
                         flexRow,
                         itemsCenter,
                         justifyItemsCenter,
-                        justifyCenter
+                        justifyCenter,
                     )}
                     style={{ backgroundColor }}
                 >

@@ -23,7 +23,7 @@ test.each`
 let target = ${target};
 (${operator}target);
         `,
-        { Symbol: symbolClass }
+        { Symbol: symbolClass },
     );
     expect(actual.result).toBe(expected);
 });

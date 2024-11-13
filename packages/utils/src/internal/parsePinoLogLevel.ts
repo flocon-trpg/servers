@@ -17,6 +17,6 @@ export const parsePinoLogLevel = (source: string, envName: string): Result<PinoL
     }
 
     return Result.error(
-        `${envName} value is invalid. Supported values: "fatal", "error", "warn", "info", "debug", "trace", "silent".`
+        `${envName} value is invalid. Supported values: "fatal", "error", "warn", "info", "debug", "trace", "silent".`,
     );
 };

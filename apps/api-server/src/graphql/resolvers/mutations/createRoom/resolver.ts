@@ -77,7 +77,7 @@ export class CreateRoomResolver {
     @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async createRoom(
         @Arg('input') input: CreateRoomInput,
-        @Ctx() context: ResolverContext
+        @Ctx() context: ResolverContext,
     ): Promise<typeof CreateRoomResult> {
         const em = context.em;
         const authorizedUser = ensureAuthorizedUser(context);
@@ -121,8 +121,8 @@ export class CreateRoomResolver {
         });
 
         const newParticipant = new Participant$MikroORM.Participant();
-        (newParticipant.name = input.participantName),
-            (newParticipant.role = ParticipantRoleType.Master);
+        newParticipant.name = input.participantName;
+        newParticipant.role = ParticipantRoleType.Master;
         em.persist(newParticipant);
         newRoom.participants.add(newParticipant);
         authorizedUser.participants.add(newParticipant);

@@ -72,7 +72,7 @@ export const IsCellModeSelector = <T extends StateBase>({
             }
             onChange(newValue);
         },
-        [onChangeCallbackDepsRef]
+        [onChangeCallbackDepsRef],
     );
 
     return (

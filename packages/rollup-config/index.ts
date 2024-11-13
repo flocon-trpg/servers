@@ -6,7 +6,7 @@ import { ExternalOption, OutputOptions, RollupOptions } from 'rollup';
  * ```javascript
 const { config } = require('@flocon-trpg/rollup-config');
 // https://rollupjs.org/guide/en/#importing-packagejson
-const external = Object.keys(require('./package.json').dependencies);
+const external = Object.keys(require('./package.json').dependencies ?? { });
 module.exports = config({ external });
  * ```
  */

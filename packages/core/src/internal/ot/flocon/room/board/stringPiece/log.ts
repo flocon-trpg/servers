@@ -1,16 +1,16 @@
 import { z } from 'zod';
-import { createType, deleteType, updateType } from '../../../piece/log';
-import * as PieceBaseTypes from '../../../piece/types';
-import * as StringPieceValueTypes from './types';
-import { maybe } from '@/maybe';
+import { maybe } from '../../../../../maybe';
+import { toUpOperation } from '../../../../generator/functions';
 import {
     State,
     TwoWayOperation,
     createObjectValueTemplate,
     state,
-    toUpOperation,
     upOperation,
-} from '@/ot/generator';
+} from '../../../../generator/types';
+import { createType, deleteType, updateType } from '../../../piece/log';
+import * as PieceBaseTypes from '../../../piece/types';
+import * as StringPieceValueTypes from './types';
 
 const update = z
     .object({
@@ -27,7 +27,7 @@ const update = z
                 isValuePrivateChanged: z.object({ newValue: maybe(z.string()) }),
                 isValueChanged: z.boolean(),
             })
-            .partial()
+            .partial(),
     );
 
 export const type = z.union([
@@ -50,7 +50,7 @@ export type Type = z.TypeOf<typeof type>;
 
 export const ofOperation = (
     operation: TwoWayOperation<typeof StringPieceValueTypes.template>,
-    currentState: State<typeof StringPieceValueTypes.template>
+    currentState: State<typeof StringPieceValueTypes.template>,
 ): Type => {
     const result = {
         ...toUpOperation(StringPieceValueTypes.template)(operation),

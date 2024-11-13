@@ -17,48 +17,35 @@ jobs:
 
         strategy:
             matrix:
-                node: ['14.x', '16.x', '18.x']
+                node: ['18.x', '20.x', '22.x']
                 os: [ubuntu-22.04]
                 include:
-                    - node: '16.x'
+                    - node: '18.x'
                       os: 'windows-2019'
-                    - node: '16.x'
-                      os: 'macOS-11'
 
         runs-on: ${{ matrix.os }}
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Use Node ${{ matrix.node }}
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node }}
                   cache: yarn
 
             - run: node --version
 
-            - run: yarn install
+            - run: yarn
 
-            - name: Test for Node 16 or higher
-              if: ${{ matrix.node != '14.x' }}
-              run: yarn test --ci --coverage --runInBand
+            - run: yarn build
+
+            - name: Test
+              run: yarn test-ci
               env:
                   REDIS_TEST: 0
                   MYSQL_TEST: 0
                   POSTGRESQL_TEST: 0
-
-            - name: Test for Node 14
-              if: ${{ matrix.node == '14.x' }}
-              run: yarn test-node14 --ci --coverage --runInBand
-              env:
-                  REDIS_TEST: 0
-                  MYSQL_TEST: 0
-                  POSTGRESQL_TEST: 0
-
-            - name: Next export
-              run: yarn run export
-              working-directory: ./apps/web-server
 
     tests-with-docker:
         name: 'Full tests on ${{ matrix.container }} and Codecov'
@@ -66,14 +53,21 @@ jobs:
 
         strategy:
             matrix:
-                container: ['node:14-buster', 'node:16-buster', 'node:18-buster']
+                container:
+                    # bullseye-slim だと `gpg: not found` というエラーが出て Codecov にアップロードできない。別途 gpg をインストールする手もあるが、現状は Codecov にアップロードする際は bullseye を用いている。
+                    [
+                        'node:18-bullseye',
+                        'node:18-bullseye-slim',
+                        'node:20-bullseye-slim',
+                        'node:22-bookworm-slim', # Dockerfile で用いられるイメージ。
+                    ]
 
         runs-on: ubuntu-22.04
         container: ${{ matrix.container }}
 
         services:
             mysql:
-                image: mysql:8.0
+                image: mysql:8.4
                 env:
                     MYSQL_ROOT_PASSWORD: root_password
                     MYSQL_USER: test
@@ -109,12 +103,13 @@ jobs:
 
         steps:
             - name: Checkout repo
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - run: node --version
 
-            - name: Install
-              run: yarn
+            - run: yarn
+
+            - run: yarn build
 
             - name: Migration-up MySQL
               run: yarn migration-up --db mysql
@@ -134,37 +129,31 @@ jobs:
                           "clientUrl": "postgresql://test:test@postgres:5432/test"
                       }
 
-            - name: Test for Node 16 or higher
-              if: ${{ matrix.container != 'node:14-buster' }}
-              run: yarn test --ci --coverage --runInBand
-
-            - name: Test for Node 14
-              if: ${{ matrix.container == 'node:14-buster' }}
-              run: yarn test-node14 --ci --coverage --runInBand
+            - name: Test
+              run: yarn test-ci
 
             - name: Upload coverages to Codecov
-              if: ${{ matrix.container == 'node:16-buster' }}
-              uses: codecov/codecov-action@v3
+              if: ${{ matrix.container == 'node:18-bullseye' }}
+              uses: codecov/codecov-action@v4
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
 
-    # 以下のテストを行っている。
+    # 以下のテストを行っている。PnP モードありでのテストは現在行っていない。
     # - DATABASE_URL を用いて API サーバーが起動することの確認
     # - AUTO_MIGRATION が正常に動くことの確認
-    # - PnP を有効にした状態で API サーバーが起動することの確認
     check-api-server:
         name: 'Check API server (PnP=${{ matrix.pnp }})'
 
         strategy:
             matrix:
-                pnp: [true, false]
+                pnp: [false]
 
         runs-on: ubuntu-22.04
-        container: node:18-buster
+        container: node:18-bullseye-slim
 
         services:
             mysql:
-                image: mysql:8.0
+                image: mysql:8.4
                 env:
                     MYSQL_ROOT_PASSWORD: root_password
                     MYSQL_USER: test
@@ -193,7 +182,7 @@ jobs:
 
         steps:
             - name: Checkout repo
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - run: node --version
 
@@ -203,8 +192,9 @@ jobs:
 
             - run: cat ./.yarnrc.yml
 
-            - name: Install
-              run: yarn
+            - run: yarn
+
+            - run: yarn build
 
             - name: Try starting api-server with SQLite
               run: timeout -k 3 10 yarn start || if test $? -eq 124; then echo OK; else exit $?; fi
@@ -237,15 +227,17 @@ jobs:
         runs-on: ubuntu-22.04
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
-            - name: Use Node 18.x
-              uses: actions/setup-node@v3
+            - name: Use Node 20.x
+              uses: actions/setup-node@v4
               with:
-                  node-version: 18.x
+                  node-version: 20.x
                   cache: yarn
 
             - run: yarn
+
+            - run: yarn build
 
             - name: Lint
               run: yarn lint
@@ -256,35 +248,6 @@ jobs:
             - name: sort-package-json(check)
               run: yarn sort-package-json --check
 
-    check-artifacts:
-        name: Check artifacts
-
-        runs-on: ubuntu-22.04
-
-        steps:
-            - name: List git config
-              run: git config -l
-
-            - uses: actions/checkout@v3
-
-            - name: Use Node 18.x
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 18.x
-                  cache: yarn
-
-            - run: yarn
-
-            # 必要のない web-server のビルドも行われる。web-server のみを除外するとその除外処理でミスが生じる余地があるため、web-server も含めてまとめてビルドしている。
-            - name: Generate dist
-              run: yarn build
-
-            - name: Clean CRLF
-              run: git config --local core.autocrlf input && git add . && git reset
-
-            - name: Fail if not all the artifacts are OK
-              uses: numtide/clean-git-action@v1
-
     publish-storybook:
         name: Publish Storybook to Chromatic
         if: ${{ !contains(github.event.head_commit.message, '[light ci]') && github.event_name == 'push' }}
@@ -294,21 +257,23 @@ jobs:
         runs-on: ubuntu-22.04
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
               with:
                   # Requires full git history: https://github.com/chromaui/action#getting-started
                   fetch-depth: 0
 
-            - name: Use Node 18.x
-              uses: actions/setup-node@v3
+            - name: Use Node 20.x
+              uses: actions/setup-node@v4
               with:
-                  node-version: 18.x
+                  node-version: 20.x
                   cache: yarn
 
             - run: yarn
 
+            - run: yarn build
+
             - name: Publish to Chromatic
-              uses: chromaui/action@v1
+              uses: chromaui/action@latest
               with:
                   workingDir: ./apps/web-server
                   projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}

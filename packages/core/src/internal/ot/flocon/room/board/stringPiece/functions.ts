@@ -1,11 +1,11 @@
 import { Result } from '@kizahasi/result';
-import { State, TwoWayOperation, UpOperation } from '../../../../generator';
+import { State, TwoWayOperation, UpOperation } from '../../../../generator/types';
 import { isIdRecord } from '../../../../record';
 import {
     RequestedBy,
     anyValue,
+    canChangeCharacterValue,
     canChangeOwnerCharacterId,
-    isCharacterOwner,
 } from '../../../../requestedBy';
 import * as TextOperation from '../../../../textOperation';
 import * as ReplaceOperation from '../../../../util/replaceOperation';
@@ -17,7 +17,7 @@ import { template } from './types';
 export const toClientState =
     (requestedBy: RequestedBy, currentRoomState: State<typeof Room.template>) =>
     (source: State<typeof template>): State<typeof template> => {
-        const isAuthorized = isCharacterOwner({
+        const isAuthorized = canChangeCharacterValue({
             requestedBy,
             characterId: source.ownerCharacterId ?? anyValue,
             currentRoomState,
@@ -31,7 +31,7 @@ export const toClientState =
 export const serverTransform =
     (
         requestedBy: RequestedBy,
-        currentRoomState: State<typeof Room.template>
+        currentRoomState: State<typeof Room.template>,
     ): ServerTransform<
         State<typeof template>,
         TwoWayOperation<typeof template>,

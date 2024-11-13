@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createObjectValueTemplate, createReplaceValueTemplate } from '@/ot/generator';
+import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../../generator/types';
 
 export const template = createObjectValueTemplate(
     {
@@ -7,5 +7,5 @@ export const template = createObjectValueTemplate(
         answeredAt: createReplaceValueTemplate(z.number().optional()),
     },
     1,
-    1
+    1,
 );

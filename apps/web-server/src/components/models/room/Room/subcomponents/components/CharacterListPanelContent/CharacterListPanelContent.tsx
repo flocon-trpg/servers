@@ -32,6 +32,7 @@ import { IconView } from '../../../../../file/IconView/IconView';
 import { useCharacterTagNames } from '../../hooks/useCharacterTagNames';
 import { useCharacters } from '../../hooks/useCharacters';
 import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hooks/useParamNames';
+import { useRoomId } from '../../hooks/useRoomId';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { BooleanParameterInput } from '../BooleanParameterInput/BooleanParameterInput';
 import { characterEditorModalAtom } from '../CharacterEditorModal/CharacterEditorModal';
@@ -42,7 +43,7 @@ import { NumberParameterInput } from '../NumberParameterInput/NumberParameterInp
 import { OverriddenParameterNameEditor } from '../OverriddenParameterNameEditor/OverriddenParameterNameEditor';
 import { StringParameterInput } from '../StringParameterInput/StringParameterInput';
 import { CharacterTabName } from './subcomponents/components/CharacterTabName/CharacterTabName';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { custom, roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { CharacterTabConfig } from '@/atoms/roomConfigAtom/types/characterTabConfig';
 import { CharacterTabConfigUtils } from '@/atoms/roomConfigAtom/types/characterTabConfig/utils';
 import { RowKeys } from '@/atoms/roomConfigAtom/types/charactersPanelConfig';
@@ -52,7 +53,6 @@ import { DraggableTabs } from '@/components/ui/DraggableTabs/DraggableTabs';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import {
     characterIsNotPrivate,
@@ -95,7 +95,7 @@ const createBooleanParameterColumn = ({
     }
     const booleanToNumber = (
         value: boolean | null | undefined,
-        sortOrder: SortOrder | undefined
+        sortOrder: SortOrder | undefined,
     ) => {
         if (value == null) {
             return sortOrder === 'ascend' ? 2 : -2;
@@ -108,12 +108,11 @@ const createBooleanParameterColumn = ({
         sorter: (x, y, sortOrder) =>
             booleanToNumber(x.character.state.boolParams?.[key]?.value, sortOrder) -
             booleanToNumber(y.character.state.boolParams?.[key]?.value, sortOrder),
-        // eslint-disable-next-line react/display-name
         render: (_: unknown, { character, onOperateCharacter }: DataSource) => {
             return (
                 <div className={classNames(flex, flexRow)}>
                     <OverriddenParameterNameEditor
-                        type='table'
+                        type="table"
                         overriddenParameterName={
                             character.state.boolParams?.[key]?.overriddenParameterName
                         }
@@ -125,7 +124,7 @@ const createBooleanParameterColumn = ({
                                         return;
                                     }
                                     boolParam.overriddenParameterName = newName;
-                                })
+                                }),
                             )
                         }
                     />
@@ -170,12 +169,11 @@ const createNumberParameterColumn = ({
             );
         },
         sortDirections: ['descend', 'ascend'],
-        // eslint-disable-next-line react/display-name
         render: (_: unknown, { character, onOperateCharacter }: DataSource) => {
             return (
                 <div className={classNames(flex, flexRow)}>
                     <OverriddenParameterNameEditor
-                        type='table'
+                        type="table"
                         overriddenParameterName={
                             character.state.numParams?.[key]?.overriddenParameterName
                         }
@@ -187,7 +185,7 @@ const createNumberParameterColumn = ({
                                         return;
                                     }
                                     numParam.overriddenParameterName = newName;
-                                })
+                                }),
                             )
                         }
                     />
@@ -231,12 +229,11 @@ const createStringParameterColumn = ({
             const yValue = y.character.state.strParams?.[key]?.value ?? '';
             return xValue.localeCompare(yValue);
         },
-        // eslint-disable-next-line react/display-name
         render: (_: unknown, { character, onOperateCharacter }: DataSource) => {
             return (
                 <div className={classNames(flex, flexRow)}>
                     <OverriddenParameterNameEditor
-                        type='table'
+                        type="table"
                         overriddenParameterName={
                             character.state.strParams?.[key]?.overriddenParameterName
                         }
@@ -248,7 +245,7 @@ const createStringParameterColumn = ({
                                         return;
                                     }
                                     strParam.overriddenParameterName = newName;
-                                })
+                                }),
                             )
                         }
                     />
@@ -284,7 +281,9 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
     // キャラクターウィンドウは現時点では最大1個までしか存在しないため、静的な文字列で構わない
     const type = 'TableHeaderCell';
 
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const keySorter = React.useMemo(() => new KeySorter(RowKeys.all), []);
 
     const [, drag] = useDrag(
@@ -292,25 +291,29 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
             type,
             end: (_, monitor) => {
                 const dropResult = monitor.getDropResult();
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 const draggedItemRowKey = (dropResult as any)?.[dndItemKey] as string | undefined;
                 if (draggedItemRowKey == null) {
                     return;
                 }
-                setRoomConfig(roomConfig => {
-                    if (roomConfig == null) {
-                        return;
-                    }
-                    const newRowKeysOrder = keySorter.move(
-                        roomConfig.panels.characterPanel.rowKeysOrder,
-                        { from: rowKey, to: draggedItemRowKey }
-                    );
-                    if (newRowKeysOrder != null) {
-                        roomConfig.panels.characterPanel.rowKeysOrder = newRowKeysOrder;
-                    }
+                reduceRoomConfig({
+                    type: custom,
+                    action: roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        const newRowKeysOrder = keySorter.move(
+                            roomConfig.panels.characterPanel.rowKeysOrder,
+                            { from: rowKey, to: draggedItemRowKey },
+                        );
+                        if (newRowKeysOrder != null) {
+                            roomConfig.panels.characterPanel.rowKeysOrder = newRowKeysOrder;
+                        }
+                    },
                 });
             },
         },
-        [setRoomConfig, rowKey]
+        [reduceRoomConfig, rowKey],
     );
     const [, drop] = useDrop({
         accept: type,
@@ -357,8 +360,8 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
                 <Button
                     ref={drag}
                     style={{ cursor: 'move' }}
-                    type='text'
-                    size='small'
+                    type="text"
+                    size="small"
                     onClick={e => e.stopPropagation()}
                 >
                     <Icon.MenuOutlined
@@ -391,13 +394,15 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
     const numParamNames = useNumParamNames();
     const strParamNames = useStrParamNames();
 
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
     const rowKeysOrderSource = useAtomSelector(
         roomConfigAtom,
-        roomConfig => roomConfig?.panels.characterPanel.rowKeysOrder
+        roomConfig => roomConfig?.panels.characterPanel.rowKeysOrder,
     );
     const rowKeysOrder = React.useMemo(
         () => new KeySorter(RowKeys.all).generate(rowKeysOrderSource ?? []),
-        [rowKeysOrderSource]
+        [rowKeysOrderSource],
     );
     const columns: ColumnType<DataSource>[] | null = React.useMemo(() => {
         if (boolParamNames == null || numParamNames == null || strParamNames == null) {
@@ -412,12 +417,11 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                             title: <TableHeaderCell title={null} rowKey={rowKey} />,
                             key: 'menu',
                             width: 36,
-                            // eslint-disable-next-line react/display-name
                             render: (_: unknown, { character }: DataSource) => (
-                                <Tooltip title='編集'>
+                                <Tooltip title="編集">
                                     <Button
                                         style={{ alignSelf: 'center' }}
-                                        size='small'
+                                        size="small"
                                         onClick={() =>
                                             setCharacterEditorModal({
                                                 type: update,
@@ -433,11 +437,10 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                         };
                     case RowKeys.Name:
                         return {
-                            title: <TableHeaderCell title='名前' rowKey={rowKey} />,
+                            title: <TableHeaderCell title="名前" rowKey={rowKey} />,
                             key: 'name',
                             sorter: (x, y) =>
                                 x.character.state.name.localeCompare(y.character.state.name),
-                            // eslint-disable-next-line react/display-name
                             render: (_: unknown, { character }: DataSource) => (
                                 <div className={classNames(flex, flexRow, itemsCenter)}>
                                     {character.state.image == null ? (
@@ -448,20 +451,17 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                                     <div style={{ width: 4 }} />
                                     <CollaborativeInput
                                         style={{ minWidth: 100, width: '100%' }}
-                                        bufferDuration='default'
-                                        size='small'
+                                        bufferDuration="default"
+                                        size="small"
                                         value={character.state.name}
-                                        onChange={e => {
-                                            if (e.previousValue === e.currentValue) {
-                                                return;
-                                            }
+                                        onChange={currentValue => {
                                             setRoomState(state => {
                                                 const targetCharacter =
                                                     state.characters?.[character.stateId];
                                                 if (targetCharacter == null) {
                                                     return;
                                                 }
-                                                targetCharacter.name = e.currentValue;
+                                                targetCharacter.name = currentValue;
                                             });
                                         }}
                                     />
@@ -476,10 +476,9 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                                 (x.character.state.isPrivate ? 1 : 0) -
                                 (y.character.state.isPrivate ? 1 : 0),
                             width: 36,
-                            // eslint-disable-next-line react/display-name
                             render: (_: unknown, { character }: DataSource) => (
                                 <ToggleButton
-                                    size='small'
+                                    size="small"
                                     checked={!character.state.isPrivate}
                                     disabled={
                                         character.createdByMe
@@ -494,7 +493,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                                             ? characterIsPrivate({ isCreate: false })
                                             : characterIsNotPrivate({ isCreate: false })
                                     }
-                                    onChange={newValue => {
+                                    onChange={async newValue => {
                                         setRoomState(roomState => {
                                             const targetCharacter =
                                                 roomState.characters?.[character.stateId];
@@ -504,8 +503,8 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                                             targetCharacter.isPrivate = !newValue;
                                         });
                                     }}
-                                    shape='circle'
-                                    defaultType='dashed'
+                                    shape="circle"
+                                    defaultType="dashed"
                                 />
                             ),
                         };
@@ -524,7 +523,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                 }
 
                 loggerRef.warn(
-                    `"${rowKey}" は使用可能なキーではありません。KeySorterの設定に誤りがある可能性があります。`
+                    `"${rowKey}" は使用可能なキーではありません。KeySorterの設定に誤りがある可能性があります。`,
                 );
                 return null;
             })
@@ -575,7 +574,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
         <AntdTable
             columns={columns}
             dataSource={charactersDataSource}
-            size='small'
+            size="small"
             pagination={false}
             // 列をドラッグして動かすときにTooltipをドラッグするとキャラクターウィンドウが開いてしまう。簡単な方法でTooltipを調整する手段はなさそうなので、非表示にすることで解決している
             showSorterTooltip={false}
@@ -620,14 +619,14 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                     <span>{tagName}</span>
                 </Checkbox>
                 <br />
-            </React.Fragment>
+            </React.Fragment>,
         );
     });
 
     return (
         <Modal
             open={config != null}
-            title='タブの編集'
+            title="タブの編集"
             closable
             onCancel={() => onClose()}
             width={500}
@@ -641,7 +640,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
             }
         >
             <Table>
-                <TableRow label='タブ名'>
+                <TableRow label="タブ名">
                     <Input
                         value={config?.tabName ?? ''}
                         onChange={e =>
@@ -650,13 +649,13 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                             })
                         }
                     />
-                    {config?.tabName ?? '' !== '' ? null : (
+                    {(config?.tabName ?? '' !== '') ? null : (
                         <>
                             <br />
                             <Alert
-                                type='info'
+                                type="info"
                                 showIcon
-                                message='タブ名が空白であるため、自動的に決定された名前が表示されます。'
+                                message="タブ名が空白であるため、自動的に決定された名前が表示されます。"
                             />
                         </>
                     )}
@@ -687,13 +686,15 @@ const CharacterListPanelWithPanelId: React.FC<{
     height: number;
 }> = ({ panelId, height }) => {
     const { modal } = App.useApp();
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
     const tabs = useAtomSelector(
         roomConfigAtom,
-        roomConfig => roomConfig?.panels.characterPanel.tabs
+        roomConfig => roomConfig?.panels.characterPanel.tabs,
     );
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
     const setCharacterParameterNamesEditorVisibility = useSetAtom(
-        characterParameterNamesEditorVisibilityAtom
+        characterParameterNamesEditorVisibilityAtom,
     );
     const setCharacterTagNamesEditorVisibility = useSetAtom(characterTagNamesEditorVisibilityAtom);
     const setCharacterEditorModal = useSetAtom(characterEditorModalAtom);
@@ -736,16 +737,19 @@ const CharacterListPanelWithPanelId: React.FC<{
                                                 icon: <Icon.DeleteOutlined />,
                                                 label: '削除',
                                                 onClick: () =>
-                                                    modal.warning({
+                                                    void modal.warning({
                                                         onOk: () => {
-                                                            setRoomConfig(roomConfig => {
-                                                                if (roomConfig == null) {
-                                                                    return;
-                                                                }
-                                                                roomConfig.panels.characterPanel.tabs.splice(
-                                                                    tabIndex,
-                                                                    1
-                                                                );
+                                                            reduceRoomConfig({
+                                                                type: custom,
+                                                                action: roomConfig => {
+                                                                    if (roomConfig == null) {
+                                                                        return;
+                                                                    }
+                                                                    roomConfig.panels.characterPanel.tabs.splice(
+                                                                        tabIndex,
+                                                                        1,
+                                                                    );
+                                                                },
                                                             });
                                                         },
                                                         okCancel: true,
@@ -768,8 +772,8 @@ const CharacterListPanelWithPanelId: React.FC<{
                                         // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
                                         padding: '0 2px',
                                     }}
-                                    type='text'
-                                    size='small'
+                                    type="text"
+                                    size="small"
                                     onClick={e => e.stopPropagation()}
                                 >
                                     <Icon.EllipsisOutlined />
@@ -801,51 +805,58 @@ const CharacterListPanelWithPanelId: React.FC<{
                             if (editingTabConfigKey == null) {
                                 return;
                             }
-                            setRoomConfig(roomConfig => {
-                                if (roomConfig == null) {
-                                    return;
-                                }
-                                const targetTabConfig = roomConfig.panels.characterPanel.tabs.find(
-                                    tab => tab.key === editingTabConfigKey
-                                );
-                                if (targetTabConfig == null) {
-                                    return;
-                                }
-                                recipe(targetTabConfig);
+                            reduceRoomConfig({
+                                type: custom,
+                                action: roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    const targetTabConfig =
+                                        roomConfig.panels.characterPanel.tabs.find(
+                                            tab => tab.key === editingTabConfigKey,
+                                        );
+                                    if (targetTabConfig == null) {
+                                        return;
+                                    }
+                                    recipe(targetTabConfig);
+                                },
                             });
                         }}
                     />
-                    <Button size='small' onClick={() => setCharacterEditorModal({ type: create })}>
+                    <Button size="small" onClick={() => setCharacterEditorModal({ type: create })}>
                         キャラクターを作成
                     </Button>
-                    <Button size='small' onClick={() => setImportCharacterModal(true)}>
+                    <Button size="small" onClick={() => setImportCharacterModal(true)}>
                         キャラクターをインポート
                     </Button>
                     <Button
-                        size='small'
+                        size="small"
                         onClick={() => setCharacterParameterNamesEditorVisibility(true)}
                     >
                         パラメーターを追加・編集・削除
                     </Button>
-                    <Button size='small' onClick={() => setCharacterTagNamesEditorVisibility(true)}>
+                    <Button size="small" onClick={() => setCharacterTagNamesEditorVisibility(true)}>
                         タグを追加・編集・削除
                     </Button>
                 </div>
                 <DraggableTabs
                     items={tabItems}
                     // キャラクターウィンドウは最大で1個までしか存在しないため、静的な値で構わない
-                    dndType='CharacterListTabs'
-                    type='editable-card'
+                    dndType="CharacterListTabs"
+                    type="editable-card"
                     onDnd={action => {
-                        setRoomConfig(roomConfig => {
-                            if (roomConfig == null) {
-                                return;
-                            }
-                            moveElement(
-                                roomConfig.panels.characterPanel.tabs,
-                                tab => tab.key,
-                                action
-                            );
+                        reduceRoomConfig({
+                            type: custom,
+                            action: roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                moveElement(
+                                    roomConfig.panels.characterPanel.tabs,
+                                    tab => tab.key,
+                                    action,
+                                );
+                            },
                         });
                     }}
                     onEdit={(e, type) => {
@@ -853,27 +864,36 @@ const CharacterListPanelWithPanelId: React.FC<{
                             if (typeof e !== 'string') {
                                 return;
                             }
-                            setRoomConfig(roomConfig => {
-                                if (roomConfig == null) {
-                                    return;
-                                }
-                                const indexToSplice =
-                                    roomConfig.panels.characterPanel.tabs.findIndex(
-                                        tab => tab.key === e
-                                    );
-                                if (indexToSplice >= 0) {
-                                    roomConfig.panels.characterPanel.tabs.splice(indexToSplice, 1);
-                                }
+                            reduceRoomConfig({
+                                type: custom,
+                                action: roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    const indexToSplice =
+                                        roomConfig.panels.characterPanel.tabs.findIndex(
+                                            tab => tab.key === e,
+                                        );
+                                    if (indexToSplice >= 0) {
+                                        roomConfig.panels.characterPanel.tabs.splice(
+                                            indexToSplice,
+                                            1,
+                                        );
+                                    }
+                                },
                             });
                             return;
                         }
-                        setRoomConfig(roomConfig => {
-                            if (roomConfig == null) {
-                                return;
-                            }
-                            roomConfig.panels.characterPanel.tabs.push(
-                                CharacterTabConfigUtils.createEmpty({})
-                            );
+                        reduceRoomConfig({
+                            type: custom,
+                            action: roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                roomConfig.panels.characterPanel.tabs.push(
+                                    CharacterTabConfigUtils.createEmpty({}),
+                                );
+                            },
                         });
                     }}
                 />
@@ -884,16 +904,16 @@ const CharacterListPanelWithPanelId: React.FC<{
         height,
         modal,
         panelId,
+        reduceRoomConfig,
         setCharacterEditorModal,
         setCharacterParameterNamesEditorVisibility,
         setCharacterTagNamesEditorVisibility,
         setImportCharacterModal,
-        setRoomConfig,
         tabs,
     ]);
 };
 
 export const CharacterListPanelContent: React.FC<{ height: number }> = ({ height }) => {
     // 現状ではCharacterListは最大でも1つしか存在しないため、panelIdは適当で構わない
-    return <CharacterListPanelWithPanelId panelId='CharacterList' height={height} />;
+    return <CharacterListPanelWithPanelId panelId="CharacterList" height={height} />;
 };

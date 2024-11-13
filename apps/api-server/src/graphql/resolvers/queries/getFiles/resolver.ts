@@ -41,7 +41,7 @@ export class GetFilesResolver {
     @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async getFiles(
         @Arg('input') input: GetFilesInput,
-        @Ctx() context: ResolverContext
+        @Ctx() context: ResolverContext,
     ): Promise<GetFilesResult> {
         const user = ensureAuthorizedUser(context);
         const fileTagsFilter = input.fileTagIds.map(
@@ -50,7 +50,7 @@ export class GetFilesResolver {
                     fileTags: {
                         id,
                     },
-                } as const)
+                }) as const,
         );
         const files = await context.em.find(File, {
             $and: [
@@ -63,17 +63,18 @@ export class GetFilesResolver {
                 },
             ],
         });
+        const filePromises = files.map(async file => ({
+            ...file,
+            screenname: file.screenname ?? 'null',
+            createdBy: await file.createdBy.loadProperty('userUid'),
+            createdAt: file.createdAt?.getTime(),
+            listType:
+                file.listPermission === FilePermissionType.Private
+                    ? FileListType.Unlisted
+                    : FileListType.Public,
+        }));
         return {
-            files: files.map(file => ({
-                ...file,
-                screenname: file.screenname ?? 'null',
-                createdBy: file.createdBy.userUid,
-                createdAt: file.createdAt?.getTime(),
-                listType:
-                    file.listPermission === FilePermissionType.Private
-                        ? FileListType.Unlisted
-                        : FileListType.Public,
-            })),
+            files: await Promise.all(filePromises),
         };
     }
 }

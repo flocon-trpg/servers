@@ -1,8 +1,8 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { useAtomValue, useSetAtom } from 'jotai/react';
 import React from 'react';
-import { useQueryClient } from 'react-query';
 import { hideAllOverlayActionAtom } from '../atoms/hideAllOverlayActionAtom/hideAllOverlayActionAtom';
-import { firebaseAuthAtom } from '../pages/_app';
+import { firebaseAuthAtom } from './useSetupApp';
 
 export function useSignOut() {
     const auth = useAtomValue(firebaseAuthAtom);
@@ -15,7 +15,7 @@ export function useSignOut() {
         }
         await auth.signOut();
         // ユーザーに依存しないキャッシュは削除しなくても構わないが、コードを単純にするため全て削除している。
-        queryClient.resetQueries();
+        await queryClient.resetQueries();
         hideAllOverlay();
         return true;
     }, [auth, hideAllOverlay, queryClient]);

@@ -1,37 +1,32 @@
 {
     "name": "@flocon-trpg/rollup-config",
     "version": "1.0.0",
+    "private": true,
     "license": "MIT",
     "author": "kizahasi",
     "scripts": {
-        "build": "tsc",
+        "build": "yarn run build:self",
+        "build:self": "tsc",
+        "lint": "eslint \"**/*.ts\" --cache",
         "prettier": "yarn prettier:base --write --cache",
         "prettier-check": "yarn prettier:base --check",
         "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\""
     },
     "dependencies": {
-        "@rollup/plugin-typescript": "11.0.0"
+        "@rollup/plugin-typescript": "11.1.6"
     },
     "devDependencies": {
         "@flocon-trpg/eslint-config": "workspace:^",
         "@flocon-trpg/prettier-config": "workspace:^",
         "@flocon-trpg/tsconfig": "workspace:^",
-        "@typescript-eslint/eslint-plugin": "5.52.0",
-        "@typescript-eslint/parser": "5.52.0",
-        "eslint": "8.34.0",
-        "eslint-config-prettier": "8.6.0",
-        "eslint-import-resolver-typescript": "3.5.3",
-        "eslint-plugin-import": "2.27.5",
-        "prettier": "2.8.4",
-        "typescript": "4.9.5"
+        "eslint": "9.14.0",
+        "eslint-config-prettier": "9.1.0",
+        "eslint-plugin-import": "2.31.0",
+        "prettier": "3.3.3",
+        "typescript": "5.6.2",
+        "typescript-eslint": "8.13.0"
     },
     "peerDependencies": {
-        "@typescript-eslint/eslint-plugin": "^5.39.0",
-        "@typescript-eslint/parser": "^5.39.0",
-        "eslint": "^8.25.0",
-        "eslint-config-prettier": "^8.5.0",
-        "eslint-import-resolver-typescript": "^3.5.1",
-        "eslint-plugin-import": "^2.26.0",
-        "rollup": "^3.2.2"
+        "rollup": "^4.0.0"
     }
 }

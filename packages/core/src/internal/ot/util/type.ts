@@ -1,23 +1,19 @@
-import {
-    ApplyError,
-    ComposeAndTransformError,
-    NonEmptyString,
-    PositiveInt,
-} from '@kizahasi/ot-string';
+import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-core';
+import { NonEmptyString } from '@kizahasi/ot-string';
 import { Result } from '@kizahasi/result';
 
-export type ScalarError = string | ApplyError<PositiveInt>;
+export type ScalarError = string | ApplyError<NonEmptyString, PositiveInt>;
 export type UpError =
     | string
-    | ApplyError<PositiveInt>
+    | ApplyError<NonEmptyString, PositiveInt>
     | ComposeAndTransformError<NonEmptyString, PositiveInt>;
 export type DownError =
     | string
-    | ApplyError<PositiveInt>
+    | ApplyError<NonEmptyString, PositiveInt>
     | ComposeAndTransformError<PositiveInt, NonEmptyString>;
 export type TwoWayError =
     | string
-    | ApplyError<PositiveInt>
+    | ApplyError<NonEmptyString, PositiveInt>
     | ComposeAndTransformError<NonEmptyString, NonEmptyString>;
 
 /**
@@ -57,7 +53,8 @@ export type ServerTransform<TServerState, TTwoWayOperation, TUpOperation> = (par
     clientOperation: TUpOperation;
 }) => Result<TTwoWayOperation | undefined, TwoWayError>;
 
-export type ClientTransform<TOperation> = (params: {
+export type ClientTransform<TState, TOperation> = (params: {
+    state: TState;
     first: TOperation;
     second: TOperation;
 }) => Result<{ firstPrime: TOperation | undefined; secondPrime: TOperation | undefined }, UpError>;

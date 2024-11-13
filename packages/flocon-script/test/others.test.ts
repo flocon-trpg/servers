@@ -6,7 +6,7 @@ test.each([{}, { x: 0 }, { y: 0 }])('let x = 1; x.toString()', globalThis => {
 let x = 1;
 x.toString();
 `,
-        globalThis
+        globalThis,
     );
     expect(actual.result).toBe('1');
     expect(actual.getGlobalThis()).toEqual(globalThis);
@@ -22,11 +22,11 @@ x.toString();
 let y = 2;
 y.toString();
 `,
-            globalThis
+            globalThis,
         );
         expect(actual.result).toBe('2');
         expect(actual.getGlobalThis()).toEqual(globalThis);
-    }
+    },
 );
 
 test.each([{ x: 0 }, { x: 0, y: 1 }])('x.toString() with globalThis', globalThis => {
@@ -40,7 +40,7 @@ test.each([{}, { x: 0 }])('let x = { a: 1 }; x.a;', globalThis => {
 let x = { a: 1 };
 x.a;
         `,
-        globalThis
+        globalThis,
     );
     expect(actual.result).toBe(1);
     expect(actual.getGlobalThis()).toEqual(globalThis);
@@ -53,7 +53,7 @@ let x = { a: 1 };
 x.a = 2;
 x.a;
         `,
-        globalThis
+        globalThis,
     );
     expect(actual.result).toBe(2);
     expect(actual.getGlobalThis()).toEqual(globalThis);
@@ -67,7 +67,7 @@ let key = 'a';
 x[key] = 2;
 [x, x[key]];
         `,
-        globalThis
+        globalThis,
     );
     expect(actual.result).toEqual([{ a: 2 }, 2]);
     expect(actual.getGlobalThis()).toEqual(globalThis);
@@ -79,7 +79,7 @@ test.each([{ a: 0 }, { a: 0, b: -1 }])('a = 1;', globalThis => {
 a = 1;
 a;
         `,
-        globalThis
+        globalThis,
     );
     expect(actual.result).toBe(1);
     expect(actual.getGlobalThis()).toEqual({ ...globalThis, a: 1 });

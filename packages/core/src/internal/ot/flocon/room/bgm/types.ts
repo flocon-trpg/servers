@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../generator';
+import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../generator/types';
 import { filePathValue } from '../../filePath/types';
 
 export const template = createObjectValueTemplate(
@@ -9,5 +9,5 @@ export const template = createObjectValueTemplate(
         volume: createReplaceValueTemplate(z.number()),
     },
     1,
-    1
+    1,
 );

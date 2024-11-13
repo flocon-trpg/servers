@@ -20,7 +20,7 @@ switch (i) {
 }
 result;
         `,
-            {}
+            {},
         );
         let expected = 'default';
         switch (i) {
@@ -47,7 +47,7 @@ switch (i) {
 }
 result;
         `,
-            {}
+            {},
         );
         expect(actual.result).toBe(i === 0 ? '0' : 'default');
     });

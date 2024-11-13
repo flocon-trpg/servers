@@ -7,10 +7,10 @@ import {
     SetCoreParams,
     beginCast,
 } from '@flocon-trpg/flocon-script';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'es-toolkit';
 import * as Character from '../ot/flocon/room/character/types';
 import * as Room from '../ot/flocon/room/types';
-import { State } from '../ot/generator';
+import { State } from '../ot/generator/types';
 import { FCharacter } from './character';
 import { FParamNames } from './paramNames';
 import { FParticipant } from './participant';
@@ -23,7 +23,10 @@ export class FRoom extends FObject {
     // FRoom内の State<typeof Room.template> は全てmutableとして扱う。FCharacter内のCharacter.Stateなども同様。
     private readonly _room: State<typeof Room.template>;
 
-    public constructor(source: State<typeof Room.template>, private readonly myUserUid: string) {
+    public constructor(
+        source: State<typeof Room.template>,
+        private readonly myUserUid: string,
+    ) {
         super();
         this._room = cloneDeep(source);
     }
@@ -129,7 +132,7 @@ export class FRoom extends FObject {
             default:
                 throw new ScriptError(
                     `${typeof key === 'symbol' ? 'symbol' : key}への値のセットは制限されています。`,
-                    astInfo?.range
+                    astInfo?.range,
                 );
         }
     }

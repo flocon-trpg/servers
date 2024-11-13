@@ -3,7 +3,7 @@ import {
     createObjectValueTemplate,
     createReplaceValueTemplate,
     createTextValueTemplate,
-} from '@/ot/generator';
+} from '../../../generator/types';
 
 export const Plain = 'Plain';
 export const Markdown = 'Markdown';
@@ -26,5 +26,5 @@ export const template = createObjectValueTemplate(
         textType: createReplaceValueTemplate(textType),
     },
     1,
-    1
+    1,
 );

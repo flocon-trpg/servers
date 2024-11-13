@@ -36,7 +36,7 @@ const defaultShape: Shape = {
 const defaultShapePiece = (
     piecePosition: CompositeRect,
     isCellMode: boolean,
-    ownerParticipantId: string | undefined
+    ownerParticipantId: string | undefined,
 ): ShapePieceState => ({
     ...piecePosition,
 
@@ -158,9 +158,9 @@ export const useShapePieceEditor = ({
                 <Table labelStyle={labelStyle}>
                     {/* TODO: isPrivateがまだ未実装 */}
 
-                    <TableRow label='色'>
+                    <TableRow label="色">
                         <ColorPickerButton
-                            trigger='click'
+                            trigger="click"
                             color={state.shapes?.[shapeKey]?.fill}
                             buttonContent={state.shapes?.[shapeKey]?.fill ?? '(未指定)'}
                             onChange={e =>

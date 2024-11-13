@@ -16,7 +16,7 @@ jobs:
             - name: List git config
               run: git config -l
 
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
               with:
                   fetch-depth: 0
 
@@ -31,19 +31,19 @@ jobs:
                   fi
 
     release:
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-22.04
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
             - run: yarn
 
             - name: Build web-server
-              run: yarn run export
+              run: yarn build
               working-directory: ./apps/web-server
-            - name: mv out directory
-              run: mv ./apps/web-server/out ./out
+            - name: mv dist directory
+              run: mv ./apps/web-server/dist ./dist
             - name: Create flocon_web_server.zip
-              run: zip -r ${GITHUB_WORKSPACE}/flocon_web_server.zip ./out
+              run: zip -r ${GITHUB_WORKSPACE}/flocon_web_server.zip ./dist
 
             - name: Generate Dockerfile
               run: yarn run gen-flyio-dockerfile
@@ -54,7 +54,7 @@ jobs:
               run: zip ${GITHUB_WORKSPACE}/flocon_api_server_flyio.zip ./Dockerfile
 
             - name: Release
-              uses: softprops/action-gh-release@v1
+              uses: softprops/action-gh-release@v2
               with:
                   files: |
                       flocon_web_server.zip

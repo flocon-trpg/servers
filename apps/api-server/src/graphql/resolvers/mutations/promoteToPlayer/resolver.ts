@@ -130,7 +130,7 @@ export class PromoteToPlayerResolver {
     public async promoteToPlayer(
         @Args() args: PromoteArgs,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<PromoteResult> {
         const { result, payload } = await promoteMeCore({
             ...args,

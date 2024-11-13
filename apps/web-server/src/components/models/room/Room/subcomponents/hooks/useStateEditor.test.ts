@@ -1,4 +1,7 @@
+// @vitest-environment jsdom
+
 import { act, renderHook } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { CreateModeParams, UpdateModeParams, useStateEditor } from './useStateEditor';
 
 type Props<T> = {
@@ -40,7 +43,7 @@ describe('useStateEditor', () => {
     });
 
     it('tests createMode', () => {
-        const onCreate = jest.fn<void, string[]>(() => undefined);
+        const onCreate = vi.fn<(_: string) => void>();
         const initialProps: Props<string> = {
             createMode: {
                 createInitState: () => 'init',
@@ -56,7 +59,7 @@ describe('useStateEditor', () => {
     });
 
     it('tests createMode->updateState', () => {
-        const onCreate = jest.fn<void, string[]>(() => undefined);
+        const onCreate = vi.fn<(_: string) => void>();
         const initialProps: Props<string> = {
             createMode: {
                 createInitState: () => 'init1',
@@ -76,7 +79,7 @@ describe('useStateEditor', () => {
     });
 
     it('tests createMode->ok', () => {
-        const onCreate = jest.fn<void, string[]>(() => undefined);
+        const onCreate = vi.fn<(_: string) => void>();
         let createInitState: () => string = () => 'init1';
         const initialProps: Props<string> = {
             createMode: {
@@ -134,7 +137,7 @@ describe('useStateEditor', () => {
             if (emptyModeBeforeSecondCreateMode) {
                 rerender({ createMode: undefined, updateMode: undefined });
             }
-            const onCreate = jest.fn<void, string[]>(() => undefined);
+            const onCreate = vi.fn<(_: string) => void>();
             const props2: Props<string> = {
                 createMode: {
                     createInitState: () => 'init2',
@@ -154,11 +157,11 @@ describe('useStateEditor', () => {
             // ただし、PiecePositionなど一部の値を変更したいこともあるので、その場合はupdateInitStateを使う。
             expect(result.current.state).toBe(setUpdateInitState ? 'updated-updated1' : 'updated1');
             expect(onCreate).not.toHaveBeenCalled();
-        }
+        },
     );
 
     it('tests updateMode', () => {
-        const updateWithImmer = jest.fn();
+        const updateWithImmer = vi.fn();
         const initialProps: Props<string> = {
             createMode: undefined,
             updateMode: {
@@ -174,7 +177,7 @@ describe('useStateEditor', () => {
     });
 
     it('tests updateMode->updateState', () => {
-        const onUpdate = jest.fn();
+        const onUpdate = vi.fn<(_: string) => void>();
         const initialProps: Props<string> = {
             createMode: undefined,
             updateMode: {
@@ -189,12 +192,12 @@ describe('useStateEditor', () => {
             result.current.updateState(prevState => {
                 expect(prevState).toBe('init');
                 return 'next';
-            })
+            }),
         );
         // onUpdateをトリガーとしてpropsを外部から変更するまでstateは変わらない
         expect(result.current.state).toBe('init');
         expect(onUpdate).toHaveBeenCalledTimes(1);
-        expect(onUpdate.mock.lastCall[0]).toBe('next');
+        expect(onUpdate.mock.lastCall?.[0]).toBe('next');
     });
 
     it('tests updateMode->updateMode', () => {
@@ -208,7 +211,7 @@ describe('useStateEditor', () => {
         const { result, rerender } = renderHook(props => useStateEditor<string>(props), {
             initialProps,
         });
-        const updateWithImmer = jest.fn();
+        const updateWithImmer = vi.fn();
         const nextProps: Props<string> = {
             createMode: undefined,
             updateMode: {

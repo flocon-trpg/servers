@@ -99,7 +99,7 @@ function fAssignmentExpression(expression: AssignmentExpression): FAssignmentExp
         default:
             throw new ScriptError(
                 `'${expression.left.type}' is not supported`,
-                toRange(expression)
+                toRange(expression),
             );
     }
     return {
@@ -147,6 +147,12 @@ export type FBinaryExpression = Omit<BinaryExpression, 'operator' | 'left' | 'ri
     right: FExpression;
 };
 function fBinaryExpression(expression: BinaryExpression): FBinaryExpression {
+    if (expression.left.type === 'PrivateIdentifier') {
+        throw new ScriptError(
+            `'${expression.left.type}' in BinaryExpression is not supported`,
+            expression.left.range,
+        );
+    }
     return {
         ...expression,
         operator: fBinaryOperator(expression.operator, toRange(expression)),
@@ -284,7 +290,7 @@ export function fProperty(property: Property): FProperty {
             key = fLiteral(property.key);
             break;
         default:
-            throw new ScriptError(`'${property.key}' is not supported`, toRange(property.key));
+            throw new ScriptError(`'${property.key.type}' is not supported`, toRange(property.key));
     }
     switch (property.value.type) {
         case 'ArrayPattern':
@@ -293,7 +299,7 @@ export function fProperty(property: Property): FProperty {
         case 'AssignmentPattern': {
             throw new ScriptError(
                 `'${property.value.type}' is not supported`,
-                toRange(property.value)
+                toRange(property.value),
             );
         }
         default:

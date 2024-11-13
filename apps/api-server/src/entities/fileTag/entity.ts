@@ -1,11 +1,12 @@
 import {
+    BaseEntity,
     Collection,
     Entity,
-    IdentifiedReference,
     ManyToMany,
     ManyToOne,
     PrimaryKey,
     Property,
+    Ref,
 } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { File } from '../file/entity';
@@ -23,8 +24,8 @@ export class FileTag {
     @Property()
     public name!: string;
 
-    @ManyToOne(() => User)
-    public user!: IdentifiedReference<User, 'userUid'>;
+    @ManyToOne(() => User, { ref: true })
+    public user!: Ref<User>;
 
     @ManyToMany(() => File, x => x.fileTags)
     public files = new Collection<File>(this);

@@ -92,7 +92,7 @@ describe('serverConfigParser', () => {
     it('tests FLOCON_ADMIN to be ok', () => {
         const actual = new ServerConfigParser({ FLOCON_ADMIN: 'abcdef' });
         expect(actual.serverConfig).toEqual(
-            Result.ok({ ...defaultServerConfig, admins: ['abcdef'] })
+            Result.ok({ ...defaultServerConfig, admins: ['abcdef'] }),
         );
         expect(actual.serverConfigForMigration).toEqual(Result.ok(defaultServerConfigForMigration));
     });
@@ -112,7 +112,7 @@ describe('serverConfigParser', () => {
                 Result.ok({
                     ...defaultServerConfig,
                     autoMigration: $case.expected,
-                })
+                }),
             );
         }
         expect(actual.serverConfigForMigration).toEqual(Result.ok(defaultServerConfigForMigration));
@@ -124,13 +124,13 @@ describe('serverConfigParser', () => {
             Result.ok({
                 ...defaultServerConfig,
                 databaseUrl: 'postgres://postgres:postgres',
-            })
+            }),
         );
         expect(actual.serverConfigForMigration).toEqual(
             Result.ok({
                 ...defaultServerConfigForMigration,
                 databaseUrl: 'postgres://postgres:postgres',
-            })
+            }),
         );
     });
 
@@ -145,7 +145,7 @@ describe('serverConfigParser', () => {
                 Result.ok({
                     ...defaultServerConfig,
                     disableRateLimitExperimental: $case.expected,
-                })
+                }),
             );
         }
         expect(actual.serverConfigForMigration).toEqual(Result.ok(defaultServerConfigForMigration));
@@ -172,7 +172,7 @@ describe('serverConfigParser', () => {
             Result.ok({
                 ...defaultServerConfig,
                 entryPassword: $case.expected,
-            })
+            }),
         );
         expect(actual.serverConfigForMigration).toEqual(Result.ok(defaultServerConfigForMigration));
     });
@@ -219,7 +219,7 @@ describe('serverConfigParser', () => {
             Result.ok({
                 ...defaultServerConfig,
                 firebaseAdminSecret: $case.expected,
-            })
+            }),
         );
         expect(actual.serverConfigForMigration).toEqual(Result.ok(defaultServerConfigForMigration));
     });
@@ -251,7 +251,7 @@ describe('serverConfigParser', () => {
             Result.ok({
                 ...defaultServerConfig,
                 firebaseProjectId: 'test_project_id',
-            })
+            }),
         );
         expect(actual.serverConfigForMigration).toEqual(Result.ok(defaultServerConfigForMigration));
     });
@@ -262,7 +262,7 @@ describe('serverConfigParser', () => {
             Result.ok({
                 ...defaultServerConfig,
                 firebaseProjectId: 'test_project_id',
-            })
+            }),
         );
         expect(actual.serverConfigForMigration).toEqual(Result.ok(defaultServerConfigForMigration));
     });
@@ -277,7 +277,7 @@ describe('serverConfigParser', () => {
             Result.ok({
                 ...defaultServerConfig,
                 firebaseProjectId: 'test_project_id1',
-            })
+            }),
         );
         expect(actual.serverConfigForMigration).toEqual(Result.ok(defaultServerConfigForMigration));
         expect(mock.mock.calls).toHaveLength(1);
@@ -294,7 +294,7 @@ describe('serverConfigParser', () => {
                 Result.ok({
                     ...defaultServerConfig,
                     heroku: $case.expected,
-                })
+                }),
             );
         }
         if ($case.expected === error) {
@@ -304,7 +304,7 @@ describe('serverConfigParser', () => {
                 Result.ok({
                     ...defaultServerConfigForMigration,
                     heroku: $case.expected,
-                })
+                }),
             );
         }
     });
@@ -326,13 +326,13 @@ describe('serverConfigParser', () => {
             Result.ok({
                 ...defaultServerConfig,
                 mysql: $case.expected,
-            })
+            }),
         );
         expect(actual.serverConfigForMigration).toEqual(
             Result.ok({
                 ...defaultServerConfigForMigration,
                 mysql: $case.expected,
-            })
+            }),
         );
     });
 
@@ -371,13 +371,13 @@ describe('serverConfigParser', () => {
             Result.ok({
                 ...defaultServerConfig,
                 postgresql: $case.expected,
-            })
+            }),
         );
         expect(actual.serverConfigForMigration).toEqual(
             Result.ok({
                 ...defaultServerConfigForMigration,
                 postgresql: $case.expected,
-            })
+            }),
         );
     });
 
@@ -407,7 +407,7 @@ describe('serverConfigParser', () => {
                 Result.ok({
                     ...defaultServerConfig,
                     roomHistCount: $case.expected,
-                })
+                }),
             );
         }
         expect(actual.serverConfigForMigration).toEqual(Result.ok(defaultServerConfigForMigration));
@@ -441,13 +441,13 @@ describe('serverConfigParser', () => {
             Result.ok({
                 ...defaultServerConfig,
                 sqlite: $case.expected,
-            })
+            }),
         );
         expect(actual.serverConfigForMigration).toEqual(
             Result.ok({
                 ...defaultServerConfigForMigration,
                 sqlite: $case.expected,
-            })
+            }),
         );
     });
 
@@ -479,7 +479,7 @@ describe('serverConfigParser', () => {
                     uploader: {
                         enabled: $case.expected,
                     },
-                })
+                }),
             );
         }
         expect(actual.serverConfigForMigration).toEqual(Result.ok(defaultServerConfigForMigration));
@@ -499,7 +499,7 @@ describe('serverConfigParser', () => {
                         enabled: false,
                         countQuota: $case.expected,
                     },
-                })
+                }),
             );
         }
         expect(actual.serverConfigForMigration).toEqual(Result.ok(defaultServerConfigForMigration));
@@ -519,7 +519,7 @@ describe('serverConfigParser', () => {
                         enabled: false,
                         maxFileSize: $case.expected,
                     },
-                })
+                }),
             );
         }
         expect(actual.serverConfigForMigration).toEqual(Result.ok(defaultServerConfigForMigration));
@@ -536,7 +536,7 @@ describe('serverConfigParser', () => {
                     enabled: false,
                     directory: './test_uploader_path',
                 },
-            })
+            }),
         );
         expect(actual.serverConfigForMigration).toEqual(Result.ok(defaultServerConfigForMigration));
     });
@@ -555,7 +555,7 @@ describe('serverConfigParser', () => {
                         enabled: false,
                         sizeQuota: $case.expected,
                     },
-                })
+                }),
             );
         }
         expect(actual.serverConfigForMigration).toEqual(Result.ok(defaultServerConfigForMigration));

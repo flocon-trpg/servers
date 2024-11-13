@@ -28,7 +28,12 @@ export const ImportBoardModal: React.FC = () => {
         try {
             json = JSON.parse(value);
         } catch (e) {
-            setParsed(Result.error(`JSONをパースできませんでした - ${e}`));
+            if (e instanceof Error) {
+                setParsed(Result.error(`JSONをパースできませんでした - ${e.message}`));
+            } else {
+                // 通常ここには来ないはず
+                setParsed(Result.error(`JSONをパースできませんでした`));
+            }
             return;
         }
         const decoded = boardState.safeParse(json);
@@ -85,15 +90,15 @@ export const ImportBoardModal: React.FC = () => {
                 <CollaborativeInput
                     multiline
                     value={value}
-                    onChange={e => {
-                        setValue(e.currentValue);
+                    onChange={currentValue => {
+                        setValue(currentValue);
                     }}
-                    bufferDuration='short'
-                    placeholder='ここにJSONをペーストしてください。'
+                    bufferDuration="short"
+                    placeholder="ここにJSONをペーストしてください。"
                 />
                 <div>
                     {parsed?.error != null && (
-                        <Alert type='error' showIcon message={parsed.error} />
+                        <Alert type="error" showIcon message={parsed.error} />
                     )}
                 </div>
             </div>

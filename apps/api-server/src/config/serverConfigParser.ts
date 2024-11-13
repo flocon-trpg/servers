@@ -225,7 +225,7 @@ export class ServerConfigParser {
 
         if (/[^a-zA-Z0-9 ,]/.test(adminValue)) {
             return Result.error(
-                `${FLOCON_ADMIN} contains invalid characters. Valid characters are [^a-zA-Z0-9 ,]. Make sure firebase UIDs are set. To set multiple UIDs, separate them by commas.`
+                `${FLOCON_ADMIN} contains invalid characters. Valid characters are [^a-zA-Z0-9 ,]. Make sure firebase UIDs are set. To set multiple UIDs, separate them by commas.`,
             );
         }
 
@@ -233,12 +233,12 @@ export class ServerConfigParser {
             adminValue
                 .split(',')
                 .map(s => s.trim())
-                .filter(s => s !== '')
+                .filter(s => s !== ''),
         );
     }
 
     private static entryPasswordProp(
-        env: typeof process.env
+        env: typeof process.env,
     ): Result<EntryPasswordConfig, undefined> | undefined {
         const entryPasswordObject = env[ENTRY_PASSWORD];
         if (entryPasswordObject == null) {
@@ -259,7 +259,7 @@ export class ServerConfigParser {
     }
 
     private static firebaseAdminSecretProp(
-        env: typeof process.env
+        env: typeof process.env,
     ): Result<FirebaseAdminSecretConfig, undefined> | undefined {
         const firebaseAdminSecretObject = env[FIREBASE_ADMIN_SECRET];
         if (firebaseAdminSecretObject == null) {
@@ -281,14 +281,14 @@ export class ServerConfigParser {
         const projectid = env[FIREBASE_PROJECTID];
         if (project_id != null && projectid != null) {
             loggerRef.warn(
-                `${FIREBASE_PROJECT_ID} と ${FIREBASE_PROJECTID} が両方ともセットされているため、${FIREBASE_PROJECT_ID} の値のみが参照されます。`
+                `${FIREBASE_PROJECT_ID} と ${FIREBASE_PROJECTID} が両方ともセットされているため、${FIREBASE_PROJECT_ID} の値のみが参照されます。`,
             );
         }
         return project_id ?? projectid;
     }
 
     private static mysqlProp(
-        env: typeof process.env
+        env: typeof process.env,
     ): Result<MysqlDatabaseConfig, undefined> | undefined {
         const mysqlObject = env[MYSQL];
         if (mysqlObject == null) {
@@ -306,7 +306,7 @@ export class ServerConfigParser {
     }
 
     private static postgresqlProp(
-        env: typeof process.env
+        env: typeof process.env,
     ): Result<PostgresqlDatabaseConfig, undefined> | undefined {
         const postgresqlObject = env[POSTGRESQL];
         if (postgresqlObject == null) {
@@ -324,7 +324,7 @@ export class ServerConfigParser {
     }
 
     private static sqliteProp(
-        env: typeof process.env
+        env: typeof process.env,
     ): Result<SqliteDatabaseConfig, undefined> | undefined {
         const sqliteObject = env[SQLITE];
         if (sqliteObject == null) {
@@ -349,7 +349,7 @@ export class ServerConfigParser {
     private parseErrorFromBoolean(envKey: string): Error<string> {
         // TODO: 英語でも出力する（ADMINのエラーメッセージは英語なため整合性が取れていない）
         return Result.error(
-            `${envKey} で、次のエラーが発生しました: ` + parseStringToBooleanError.ja
+            `${envKey} で、次のエラーが発生しました: ` + parseStringToBooleanError.ja,
         );
     }
 

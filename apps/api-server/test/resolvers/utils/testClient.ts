@@ -75,9 +75,9 @@ import {
     WritePublicMessageMutation,
     WritePublicMessageMutationVariables,
 } from '@flocon-trpg/typed-document-node';
-import { createClient, defaultExchanges, subscriptionExchange } from '@urql/core';
 import { createClient as createWsClient } from 'graphql-ws';
 import ws from 'isomorphic-ws';
+import { cacheExchange, createClient, fetchExchange, subscriptionExchange } from 'urql';
 import { Resources } from './resources';
 import { TestRoomEventSubscription } from './subscription';
 
@@ -93,7 +93,7 @@ const wsClient = (wsUrl: string, testAuthorizationHeaderValue: string | undefine
 const createUrqlClient = (
     httpUrl: string,
     wsUrl: string,
-    testAuthorizationHeaderValue: string | undefined
+    testAuthorizationHeaderValue: string | undefined,
 ) => {
     const headers: Record<string, string> = {};
     if (testAuthorizationHeaderValue != null) {
@@ -105,16 +105,20 @@ const createUrqlClient = (
             headers,
         },
         exchanges: [
-            ...defaultExchanges,
+            cacheExchange,
+            fetchExchange,
             subscriptionExchange({
-                forwardSubscription: operation => ({
-                    subscribe: sink => ({
-                        unsubscribe: wsClient(wsUrl, testAuthorizationHeaderValue).subscribe(
-                            operation,
-                            sink
-                        ),
-                    }),
-                }),
+                forwardSubscription: request => {
+                    const input = { ...request, query: request.query || '' };
+                    return {
+                        subscribe: sink => ({
+                            unsubscribe: wsClient(wsUrl, testAuthorizationHeaderValue).subscribe(
+                                input,
+                                sink,
+                            ),
+                        }),
+                    };
+                },
             }),
         ],
     });
@@ -144,7 +148,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -156,7 +160,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -168,7 +172,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -180,7 +184,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -192,7 +196,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -204,18 +208,17 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
 
     public entryToServerMutation({ password }: { password: string }) {
         return this.#core
-            .mutation<EntryToServerMutation, EntryToServerMutationVariables>(
-                EntryToServerDocument,
-                { password },
-                { requestPolicy: 'network-only' }
-            )
+            .mutation<
+                EntryToServerMutation,
+                EntryToServerMutationVariables
+            >(EntryToServerDocument, { password }, { requestPolicy: 'network-only' })
             .toPromise();
     }
 
@@ -250,7 +253,7 @@ export class TestClient {
                 {},
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -265,41 +268,37 @@ export class TestClient {
 
     public createRoomMutation(variables: CreateRoomMutationVariables) {
         return this.#core
-            .mutation<CreateRoomMutation, CreateRoomMutationVariables>(
-                CreateRoomDocument,
-                variables,
-                { requestPolicy: 'network-only' }
-            )
+            .mutation<
+                CreateRoomMutation,
+                CreateRoomMutationVariables
+            >(CreateRoomDocument, variables, { requestPolicy: 'network-only' })
             .toPromise();
     }
 
     public deleteMessageMutation(variables: DeleteMessageMutationVariables) {
         return this.#core
-            .mutation<DeleteMessageMutation, DeleteMessageMutationVariables>(
-                DeleteMessageDocument,
-                variables,
-                { requestPolicy: 'network-only' }
-            )
+            .mutation<
+                DeleteMessageMutation,
+                DeleteMessageMutationVariables
+            >(DeleteMessageDocument, variables, { requestPolicy: 'network-only' })
             .toPromise();
     }
 
     public editMessageMutation(variables: EditMessageMutationVariables) {
         return this.#core
-            .mutation<EditMessageMutation, EditMessageMutationVariables>(
-                EditMessageDocument,
-                variables,
-                { requestPolicy: 'network-only' }
-            )
+            .mutation<
+                EditMessageMutation,
+                EditMessageMutationVariables
+            >(EditMessageDocument, variables, { requestPolicy: 'network-only' })
             .toPromise();
     }
 
     public joinRoomAsPlayerMutation(variables: JoinRoomAsPlayerMutationVariables) {
         return this.#core
-            .mutation<JoinRoomAsPlayerMutation, JoinRoomAsPlayerMutationVariables>(
-                JoinRoomAsPlayerDocument,
-                variables,
-                { requestPolicy: 'network-only' }
-            )
+            .mutation<
+                JoinRoomAsPlayerMutation,
+                JoinRoomAsPlayerMutationVariables
+            >(JoinRoomAsPlayerDocument, variables, { requestPolicy: 'network-only' })
             .toPromise();
     }
 
@@ -310,7 +309,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -330,7 +329,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -350,7 +349,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -362,7 +361,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -374,7 +373,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -386,7 +385,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -397,8 +396,8 @@ export class TestClient {
                 RoomEventDocument,
                 {
                     id: roomId,
-                }
-            )
+                },
+            ),
         );
     }
 }

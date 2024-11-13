@@ -9,7 +9,7 @@ import {
 } from '@flocon-trpg/flocon-script';
 import * as Character from '../ot/flocon/room/character/types';
 import * as Room from '../ot/flocon/room/types';
-import { State } from '../ot/generator';
+import { State } from '../ot/generator/types';
 import { FBoolParams } from './boolParams';
 import { toFFilePath, toFilePathOrUndefined } from './filePath';
 import { FNumParams } from './numParams';
@@ -26,7 +26,7 @@ const stringParameters = 'stringParameters';
 export class FCharacter extends FObject {
     public constructor(
         public readonly character: State<typeof Character.template>,
-        private readonly room: State<typeof Room.template>
+        private readonly room: State<typeof Room.template>,
     ) {
         super();
     }
@@ -98,7 +98,7 @@ export class FCharacter extends FObject {
             default:
                 throw new ScriptError(
                     `'${typeof key === 'symbol' ? 'symbol' : key}' is not supported.`,
-                    astInfo?.range
+                    astInfo?.range,
                 );
         }
     }

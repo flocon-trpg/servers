@@ -1,13 +1,13 @@
 import * as Room from './flocon/room/types';
-import { State } from './generator';
+import { State } from './generator/types';
 
 /** 全てのStateに完全にアクセスできる。*/
 export const admin = 'admin';
 
-/* userUidに基づき、一部のStateへのアクセスを制限する。*/
+/** userUidに基づき、一部のStateへのアクセスを制限する。*/
 export const client = 'client';
 
-/* アクセス制限のあるStateへのアクセスを全て制限する。*/
+/** アクセス制限のあるStateへのアクセスを全て制限する。*/
 export const restrict = 'restrict';
 
 export type RequestedBy =
@@ -44,6 +44,7 @@ export const isAuthorized = ({
     return true;
 };
 
+/** @deprecated Use `isAuthorized` instead. */
 // 元々は isAuthorized 関数は存在せず、isAuthorized 関数に相当する処理は isOwner 関数で行っていた。だが、isOwner という名前と引数がしっくり来ない場面もあったので、isAuthorized 関数に移した。isOwner 関数は削除するとしっくり来ない場面が生じるかもしれないため、現時点では残している。
 export const isOwner = ({
     requestedBy,
@@ -98,6 +99,8 @@ export const isBoardVisible = ({
     return currentRoomState.activeBoardId === boardId;
 };
 
+export const characterNotFound = 'characterNotFound';
+
 export const isCharacterOwner = ({
     requestedBy,
     characterId,
@@ -106,7 +109,7 @@ export const isCharacterOwner = ({
     requestedBy: RequestedBy;
     characterId: string | typeof anyValue | typeof none;
     currentRoomState: State<typeof Room.template>;
-}): boolean => {
+}): boolean | typeof characterNotFound => {
     if (requestedBy.type === admin) {
         return true;
     }
@@ -114,19 +117,23 @@ export const isCharacterOwner = ({
         return characterId.type === 'anyValue';
     }
     const userUid = requestedBy.type === client ? requestedBy.userUid : undefined;
-
     const character = (currentRoomState.characters ?? {})[characterId];
-    if (character != null) {
-        if (character.ownerParticipantId == null) {
-            return true;
-        }
-        if (character.ownerParticipantId === userUid) {
-            return true;
-        }
-        return false;
+
+    if (character == null) {
+        return characterNotFound;
     }
 
+    if (character.ownerParticipantId == null) {
+        return true;
+    }
+    if (character.ownerParticipantId === userUid) {
+        return true;
+    }
     return false;
+};
+
+export const canChangeCharacterValue = (args: Parameters<typeof isCharacterOwner>[0]): boolean => {
+    return !!isCharacterOwner(args);
 };
 
 type CurrentOwnerParticipant =
@@ -184,7 +191,7 @@ export const canChangeOwnerCharacterId = ({
     } else {
         currentOwnerCharacterId = currentOwnerCharacter?.ownerCharacterId;
     }
-    return isCharacterOwner({
+    return canChangeCharacterValue({
         requestedBy,
         characterId: currentOwnerCharacterId ?? anyValue,
         currentRoomState,

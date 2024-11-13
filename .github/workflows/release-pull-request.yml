@@ -6,8 +6,8 @@ on:
             - 'release'
 
 jobs:
-    check-disclaimer:
-        name: Check licenses-npm-package.txt
+    check-artifacts:
+        name: Check artifacts
 
         runs-on: ubuntu-22.04
 
@@ -15,22 +15,22 @@ jobs:
             - name: List git config
               run: git config -l
 
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
-            - name: Use Node 18.x
-              uses: actions/setup-node@v3
+            - name: Use Node 20.x
+              uses: actions/setup-node@v4
               with:
-                  node-version: 18.x
+                  node-version: 20.x
                   cache: yarn
 
             - run: yarn
 
-            - name: Generate licenses disclaimer
-              run: yarn generate-disclaimer
+            # 必要のない web-server のビルドも行われる。web-server のみを除外するとその除外処理でミスが生じる余地があるため、web-server も含めてまとめてビルドしている。
+            - name: Generate dist
+              run: yarn build
 
-            # yarn generate-disclaimer で生成されるファイルはLFとCRLFが混在するため、改行コードを統一する処理を行っている。
             - name: Clean CRLF
               run: git config --local core.autocrlf input && git add . && git reset
 
             - name: Fail if not all the artifacts are OK
-              uses: numtide/clean-git-action@v1
+              uses: numtide/clean-git-action@v2

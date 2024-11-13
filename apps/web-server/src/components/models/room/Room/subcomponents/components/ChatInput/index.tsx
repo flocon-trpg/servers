@@ -7,7 +7,7 @@ import { GameSelector } from '../GameSelector/GameSelector';
 import { SelectedChannelType, SubmitMessage, publicChannel } from '../SubmitMessage/SubmitMessage';
 import { getSelectedCharacterType } from './getSelectedCharacterType';
 import { CharacterSelector } from './subcomponents/components/CharacterSelector/CharacterSelector';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 
 const flexBasis80: React.CSSProperties = {
@@ -34,11 +34,9 @@ export const ChatInput: React.FC<Props> = ({
     onConfigUpdate,
     topElementsDirection,
 }: Props) => {
-    const configAtom = React.useMemo(
-        () => atom(get => get(roomConfigAtom)?.panels.messagePanels?.[panelId]),
-        [panelId]
-    );
-    const config = useAtomValue(configAtom);
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const roomConfig = useAtomValue(roomConfigAtom);
+    const config = roomConfig.panels.messagePanels[panelId];
     const [selectedChannelType, setSelectedChannelType] =
         React.useState<SelectedChannelType>(publicChannel);
 

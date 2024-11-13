@@ -42,7 +42,7 @@ export class CloseRollCallResolver {
         @Arg('roomId') roomId: string,
         @Arg('rollCallId') rollCallId: string,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<CloseRollCallResult> {
         const myUserUid = ensureUserUid(context);
         const result = await operateAsAdminAndFlush({

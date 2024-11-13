@@ -1,7 +1,8 @@
+import { diff as d } from '../../../../generator/functions';
+import { State } from '../../../../generator/types';
+import { updateType } from '../../../piece/log';
 import { Type, ofOperation } from './log';
 import { template } from './types';
-import { updateType } from '@/ot/flocon/piece/log';
-import { State, diff as d } from '@/ot/generator';
 
 type StringPieceState = State<typeof template>;
 

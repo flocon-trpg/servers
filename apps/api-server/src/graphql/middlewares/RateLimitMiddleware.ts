@@ -11,13 +11,15 @@ export const RateLimitMiddleware =
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
             loggerRef.warn(
-                `RateLimitMiddlewareにおいて、decondedIdTokenが見つかりませんでした。RateLimitMiddlewareが@Authorizedとともに使われていることを確認してください。`
+                `RateLimitMiddlewareにおいて、decondedIdTokenが見つかりませんでした。RateLimitMiddlewareが@Authorizedとともに使われていることを確認してください。`,
             );
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
             return await next();
         }
         const error = await consumeFunction(context.rateLimiter, decodedIdToken.uid, consume);
         if (error != null) {
             throw new Error(error.errorMessage);
         }
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return await next();
     };

@@ -4,11 +4,9 @@ import { Howl } from 'howler';
 import React from 'react';
 import { useDeepCompareEffect, useLatest } from 'react-use';
 import { useMemoOne } from 'use-memo-one';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
-import {
-    defaultChannelVolume,
-    defaultMasterVolume,
-} from '@/atoms/roomConfigAtom/types/roomConfig/resources';
+import { useRoomId } from './useRoomId';
+import { roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { defaultChannelVolume } from '@/atoms/roomConfigAtom/types/roomConfig/resources';
 import { loaded, useSrcArrayFromFilePath } from '@/hooks/srcHooks';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
@@ -65,7 +63,7 @@ class PlaylistHowler {
             this.#howl = this.#createHowl(nextSrcAndFormat);
             loggerRef.debug(
                 { srcAndFormat: nextSrcAndFormat },
-                'Music ended. Starting the next music.'
+                'Music ended. Starting the next music.',
             );
         }
 
@@ -149,7 +147,7 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmCoreProps): void {
                 src,
                 format:
                     q.data.type === Uploader
-                        ? extname(q.data.filename).fileExtension ?? undefined
+                        ? (extname(q.data.filename).fileExtension ?? undefined)
                         : undefined,
             });
         }
@@ -216,9 +214,10 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmCoreProps): void {
 
 export function usePlayBgm(): void {
     const bgms = useRoomStateValueSelector(state => state.bgms) ?? {};
-    const masterVolume =
-        useAtomSelector(roomConfigAtom, state => state?.masterVolume) ?? defaultMasterVolume;
-    const channelVolumes = useAtomSelector(roomConfigAtom, state => state?.channelVolumes) ?? {};
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const masterVolume = useAtomSelector(roomConfigAtom, state => state.masterVolume);
+    const channelVolumes = useAtomSelector(roomConfigAtom, state => state.channelVolumes);
 
     const createPlayBgmCoreProps = (bgmKey: string): PlayBgmCoreProps => ({
         bgm: bgms[bgmKey] ?? null,

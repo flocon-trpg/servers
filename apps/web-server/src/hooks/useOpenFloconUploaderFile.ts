@@ -1,36 +1,24 @@
 import { App } from 'antd';
+import { useAtomValue } from 'jotai';
 import fileDownload from 'js-file-download';
 import React from 'react';
-import { useGetIdToken } from './useGetIdToken';
+import { getIdTokenResultAtom } from './useSetupApp';
+import { useSingleExecuteAsync1 } from './useSingleExecuteAsync';
 import { useWebConfig } from './useWebConfig';
 import { files, getFloconUploaderFile, idTokenIsNull } from '@/utils/file/getFloconUploaderFile';
 
 export const useOpenFloconUploaderFile = () => {
     const webConfig = useWebConfig();
-    const [isFetching, setIsFetching] = React.useState(false);
-    const { getIdToken } = useGetIdToken();
+    const { getIdToken } = useAtomValue(getIdTokenResultAtom);
     const { notification } = App.useApp();
-
-    const open = React.useCallback(
+    const { execute, isExecuting } = useSingleExecuteAsync1(
         async (file: { filename: string; screenname: string }) => {
-            if (webConfig?.value == null) {
-                // CONSIDER: notificationなどで通知したほうがいいか
-                return;
-            }
-            if (isFetching) {
-                notification.warning({
-                    message:
-                        '他のファイルをダウンロードしているため、ダウンロードを開始できませんでした。',
-                });
-                return;
-            }
-            setIsFetching(true);
             const blob = await getFloconUploaderFile({
                 filename: file.filename,
-                config: webConfig.value,
+                config: webConfig,
                 getIdToken,
                 mode: files,
-            }).finally(() => setIsFetching(false));
+            });
             if (blob === idTokenIsNull) {
                 // CONSIDER: notificationなどで通知したほうがいいか
                 return;
@@ -43,14 +31,21 @@ export const useOpenFloconUploaderFile = () => {
             // CONSIDER: 画像などであれば、ダウンロードするのではなく、新しいタブで開いたほうがいい
             fileDownload(blob, file.filename);
         },
-        [getIdToken, isFetching, notification, webConfig?.value]
+        {
+            onDecline: () => {
+                notification.warning({
+                    message:
+                        '他のファイルをダウンロードしているため、ダウンロードを開始できませんでした。',
+                });
+            },
+        },
     );
 
     return React.useMemo(
         () => ({
-            open,
-            isFetching,
+            open: execute,
+            isExecuting,
         }),
-        [isFetching, open]
+        [execute, isExecuting],
     );
 };

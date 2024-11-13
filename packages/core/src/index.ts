@@ -36,6 +36,8 @@ export {
 
 export { testCommand, execCharacterCommand } from './internal/command/main';
 
+export { env } from './internal/env';
+
 export { Expression, plain, expr1, analyze } from './internal/expression';
 
 export {
@@ -48,6 +50,8 @@ export {
 
 export { fakeFirebaseConfig1, fakeFirebaseConfig2 } from './internal/fake/fakeFirebaseConfig';
 
+export { $index, arrayToIndexObjects, indexObjectsToArray, IndexObject } from './internal/ot/array';
+
 export {
     Default,
     Uploader,
@@ -58,6 +62,17 @@ export {
 export {
     $v,
     $r,
+    toDownOperation,
+    toUpOperation,
+    apply,
+    applyBack,
+    composeDownOperation,
+    restore,
+    diff,
+    clientTransform,
+} from './internal/ot/generator/functions';
+
+export {
     atomic,
     // replace,
     ot,
@@ -71,20 +86,12 @@ export {
     downOperation,
     DownOperation,
     TwoWayOperation,
-    toDownOperation,
-    toUpOperation,
-    apply,
-    applyBack,
-    composeDownOperation,
-    restore,
-    diff,
-    clientTransform,
     createObjectValueTemplate,
-    createTextValueTemplate as createOtValueTemplate,
+    createTextValueTemplate,
     createParamRecordValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
-} from './internal/ot/generator';
+} from './internal/ot/generator/types';
 
 export { OmitVersion } from './internal/ot/generator/omitVersion';
 
@@ -219,15 +226,7 @@ export {
     toUpOperation as toTextUpOperation,
 } from './internal/ot/textOperation';
 
-export {
-    client,
-    admin,
-    restrict,
-    RequestedBy,
-    isCharacterOwner,
-    isBoardOwner,
-    isOwner,
-} from './internal/ot/requestedBy';
+export { client, admin, restrict, RequestedBy, isCharacterOwner } from './internal/ot/requestedBy';
 
 export { path, shape } from './internal/ot/shape';
 

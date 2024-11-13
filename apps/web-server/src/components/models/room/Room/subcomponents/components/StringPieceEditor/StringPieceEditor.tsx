@@ -29,7 +29,7 @@ const pieceSize: PixelSize = { w: 50, h: 50 };
 const defaultStringPieceValue = (
     piecePosition: CompositeRect,
     isCellMode: boolean,
-    ownerCharacterId: string | undefined
+    ownerCharacterId: string | undefined,
 ): StringPieceState => ({
     ...piecePosition,
 
@@ -149,12 +149,12 @@ export const useStringPieceEditor = ({
     } else {
         element = (
             <Table labelStyle={labelStyle}>
-                <TableRow label='値'>
+                <TableRow label="値">
                     <CollaborativeInput
-                        bufferDuration='default'
-                        size='small'
+                        bufferDuration="default"
+                        size="small"
                         value={state.value}
-                        onChange={({ currentValue }) => {
+                        onChange={currentValue => {
                             updateState(state => {
                                 if (state == null) {
                                     return;
@@ -165,7 +165,7 @@ export const useStringPieceEditor = ({
                     />
                 </TableRow>
 
-                <TableRow label='値を非公開にする'>
+                <TableRow label="値を非公開にする">
                     <Checkbox
                         checked={state.isValuePrivate}
                         onChange={e =>
@@ -217,7 +217,7 @@ export const useStringPieceEditor = ({
 
                 <PieceEditorIdRow pieceId={updateMode?.pieceId} />
 
-                <TableRow label='所有者'>
+                <TableRow label="所有者">
                     <MyCharactersSelect
                         selectedCharacterId={
                             updateMode != null ? state.ownerCharacterId : activeCharacter?.id

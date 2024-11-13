@@ -1,7 +1,6 @@
+import { ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-core';
 import {
-    ComposeAndTransformError,
     NonEmptyString,
-    PositiveInt,
     applyAndRestore,
     applyBackAndRestore,
     applyBack as applyBackCore,
@@ -9,8 +8,8 @@ import {
     composeDownOperation as composeDownOperationCore,
     composeUpOperation as composeUpOperationCore,
     deserializeDownOperation,
+    deserializeTwoWayOperation,
     deserializeUpOperation,
-    deserizalizeTwoWayOperation,
     diff as diffCore,
     serializeDownOperation,
     serializeTwoWayOperation,
@@ -102,7 +101,7 @@ export const applyBack = (state: string, action: DownOperation) => {
 
 export const composeUpOperation = (
     first: UpOperation | undefined,
-    second: UpOperation | undefined
+    second: UpOperation | undefined,
 ): Result<UpOperation | undefined, ComposeAndTransformError<NonEmptyString, PositiveInt>> => {
     const first$ = first == null ? undefined : deserializeUpOperation(first);
     const second$ = second == null ? undefined : deserializeUpOperation(second);
@@ -124,7 +123,7 @@ export const composeUpOperation = (
 
 export const composeDownOperation = (
     first: DownOperation | undefined,
-    second: DownOperation | undefined
+    second: DownOperation | undefined,
 ): Result<DownOperation | undefined, ComposeAndTransformError<PositiveInt, NonEmptyString>> => {
     const first$ = first == null ? undefined : deserializeDownOperation(first);
     const second$ = second == null ? undefined : deserializeDownOperation(second);
@@ -182,7 +181,7 @@ const serverTransformCore = ({
     second?: UpOperation;
     prevState: string;
 }) => {
-    const first$ = first == null ? undefined : deserizalizeTwoWayOperation(first);
+    const first$ = first == null ? undefined : deserializeTwoWayOperation(first);
     if (first$ === undefined) {
         const second$ = second == null ? undefined : deserializeUpOperation(second);
         if (second$ === undefined) {
@@ -301,7 +300,7 @@ export const diff = ({
         diffCore({
             prevState: prev,
             nextState: next,
-        })
+        }),
     );
 };
 
@@ -324,7 +323,7 @@ const diffToUpOperation = ({
 };
 
 export const toUpOperation = (source: TwoWayOperation): UpOperation => {
-    const twoWayOperation = deserizalizeTwoWayOperation(source);
+    const twoWayOperation = deserializeTwoWayOperation(source);
     if (twoWayOperation == null) {
         throw new Error('This should not happen');
     }
@@ -333,7 +332,7 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
 };
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
-    const twoWayOperation = deserizalizeTwoWayOperation(source);
+    const twoWayOperation = deserializeTwoWayOperation(source);
     if (twoWayOperation == null) {
         throw new Error('This should not happen');
     }

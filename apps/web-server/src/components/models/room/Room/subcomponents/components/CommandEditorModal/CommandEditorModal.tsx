@@ -62,7 +62,7 @@ const Editor: React.FC<EditorProps> = ({ script, onChange, extraLib }: EditorPro
         switch (extraLib) {
             case 'characterCommand':
                 monaco.languages.typescript.typescriptDefaults.addExtraLib(
-                    characterCommandLibSource
+                    characterCommandLibSource,
                 );
                 break;
             default:
@@ -95,9 +95,9 @@ const Editor: React.FC<EditorProps> = ({ script, onChange, extraLib }: EditorPro
     return (
         <>
             <MonacoEditor
-                language='typescript'
+                language="typescript"
                 value={scriptState}
-                height='70vh'
+                height="70vh"
                 onChange={newValue => {
                     if (newValue == null) {
                         return;
@@ -106,7 +106,14 @@ const Editor: React.FC<EditorProps> = ({ script, onChange, extraLib }: EditorPro
                     onChange(newValue);
                 }}
                 onValidate={markers => {
-                    setErrorMarkers(markers.filter(m => m.severity >= 8));
+                    setErrorMarkers(
+                        markers.filter(
+                            m =>
+                                // もし lint に従って修正するならば 'monaco-editor' を import することになるが、そうすると tree shaking がうまく働かず JavaScript のサイズが肥大化することを確認したため、この問題が解決するまでは import はできない。そのため lint を無効化して数値を直書きしている。
+                                // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+                                m.severity >= 8,
+                        ),
+                    );
                 }}
             />
             {isSkipping ? <div>編集中…</div> : bottomElement}
@@ -131,10 +138,10 @@ export const CommandEditorModal: React.FC = () => {
     const character = useCharacter(commandEditorModalType?.characterId);
     const characterRef = useLatest(character);
     const [privateCommands, setPrivateCommands] = React.useState<Map<string, CommandState>>(
-        new Map()
+        new Map(),
     );
     const privateCommandsAsArray = [...privateCommands].sort(([, x], [, y]) =>
-        x.name.localeCompare(y.name)
+        x.name.localeCompare(y.name),
     );
     const [selectedKeyState, setSelectedKeyState] = React.useState<string | undefined>();
     React.useEffect(() => {
@@ -199,7 +206,7 @@ export const CommandEditorModal: React.FC = () => {
         editorElement = (
             <>
                 <Input
-                    placeholder='コマンド名'
+                    placeholder="コマンド名"
                     value={privateCommand.name}
                     onChange={e => {
                         setCommandName(selectedKey, e.target.value);
@@ -213,7 +220,7 @@ export const CommandEditorModal: React.FC = () => {
                         }
                         setCommandValue(selectedKey, newValue);
                     }}
-                    extraLib='characterCommand'
+                    extraLib="characterCommand"
                 />
             </>
         );
@@ -247,7 +254,7 @@ export const CommandEditorModal: React.FC = () => {
                         $v: 2,
                         $r: 1,
                         privateCommands: d == null ? undefined : privateCommandsUpOperation(d),
-                    })
+                    }),
                 );
                 setCommandEditorModalType(null);
             }}
