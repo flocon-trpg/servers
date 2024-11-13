@@ -68,6 +68,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
 export const PlaceHolder: Story = { args: { placeholder: 'placeholder' } };
 
 export const Medium: Story = { args: { size: 'medium' } };

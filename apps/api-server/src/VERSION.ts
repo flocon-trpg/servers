@@ -4,5 +4,5 @@ export const VERSION = new SemVer({
     major: 0,
     minor: 7,
     patch: 16,
-    prerelease: { type: 'beta', version: 2 },
+    prerelease: { type: 'rc', version: 1 },
 });

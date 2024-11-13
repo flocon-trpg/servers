@@ -9,12 +9,15 @@ import { SupportedApiServers, VERSION } from '@/VERSION';
 import { enableTanStackRouterDevtoolsAtom } from '@/atoms/enableTanStackRouterDevtoolsAtom/enableTanStackRouterDevtoolsAtom';
 import { EnvsMonitor } from '@/components/models/envs/EnvsMonitor/EnvsMonitor';
 import { FileSelectorModal } from '@/components/models/file/FileSelectorModal/FileSelectorModal';
+import { AlertCounter, AlertCounterContext } from '@/components/ui/AlertCounter/AlertCounter';
 import { AwaitableButton } from '@/components/ui/AwaitableButton/AwaitableButton';
 import { GraphQLAlert } from '@/components/ui/GraphQLAlert/GraphQLAlert';
 import { useGetApiSemVer } from '@/hooks/useGetApiSemVer';
 import { flex, flexColumn } from '@/styles/className';
 import { apiServerSatisfies } from '@/versioning/apiServerSatisfies';
 import { semVerRangeToString } from '@/versioning/semVerRange';
+
+const alertCounterSymbol = Symbol();
 
 const DeveloperOption: React.FC = () => {
     const [enableTanStackRouterDevtools, setEnableTanStackRouterDevtools] = useAtom(
@@ -135,40 +138,62 @@ export const IndexPage: React.FC = () => {
                         }
                     </li>
                 </ul>
-                <Typography.Title level={3}>バージョン情報</Typography.Title>
-                <ul>
-                    <li>{`Webサーバー: ${VERSION}`}</li>
-                    <li>
-                        {'APIサーバー: '}
-                        {apiServerSemVer == null ? (
-                            <span>
-                                <Icon.LoadingOutlined />
-                                取得中…
-                            </span>
-                        ) : apiServerSemVer.isError ? (
-                            '(エラーが発生しました。Flocon が正常に動作しないと思われます。API サーバーが正常に稼働しているかどうかを確認してください。)'
-                        ) : (
-                            apiServerSemVer.value.toString()
-                        )}
-                        <div style={{ maxWidth: 800 }}>
-                            <GraphQLAlert
-                                error={
-                                    apiServerSemVer?.error == null
-                                        ? undefined
-                                        : {
-                                              mainMessage: 'APIエラー',
-                                              error: apiServerSemVer.error,
-                                          }
-                                }
-                                loading={false}
-                            >
-                                {versionInfo}
-                            </GraphQLAlert>
-                        </div>
-                    </li>
-                </ul>
-                <Typography.Title level={3}>環境変数</Typography.Title>
-                <EnvsMonitor style={{ maxWidth: 600 }} />
+                <Typography.Title level={3}>サーバー情報</Typography.Title>
+                <AlertCounterContext.Provider value={alertCounterSymbol}>
+                    <AlertCounter.Counter showIcon />
+                    <Collapse
+                        items={[
+                            {
+                                key: '2',
+                                label: '詳細',
+                                // forceRender: true にしないと、Collapse コンポーネントを開いていないときに中身のコンポーネントが存在しないとみなされるため、AlertCounter.Counter が一切カウントしてくれない。
+                                forceRender: true,
+                                children: (
+                                    <div>
+                                        <Typography.Title level={4}>
+                                            バージョン情報
+                                        </Typography.Title>
+                                        <ul>
+                                            <li>{`Webサーバー: ${VERSION}`}</li>
+                                            <li>
+                                                {'APIサーバー: '}
+                                                {apiServerSemVer == null ? (
+                                                    <AlertCounter.CountAsLoading>
+                                                        <span>
+                                                            <Icon.LoadingOutlined />
+                                                            取得中…
+                                                        </span>
+                                                    </AlertCounter.CountAsLoading>
+                                                ) : apiServerSemVer.isError ? (
+                                                    '(エラーが発生しました。Flocon が正常に動作しないと思われます。インターネットに接続されているか、もしくは API サーバーが正常に稼働しているかどうかを確認してください。)'
+                                                ) : (
+                                                    apiServerSemVer.value.toString()
+                                                )}
+                                                <div>
+                                                    <GraphQLAlert
+                                                        error={
+                                                            apiServerSemVer?.error == null
+                                                                ? undefined
+                                                                : {
+                                                                      mainMessage: 'APIエラー',
+                                                                      error: apiServerSemVer.error,
+                                                                  }
+                                                        }
+                                                        loading={false}
+                                                    >
+                                                        {versionInfo}
+                                                    </GraphQLAlert>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                        <Typography.Title level={4}>環境変数</Typography.Title>
+                                        <EnvsMonitor style={{ maxWidth: 600 }} />
+                                    </div>
+                                ),
+                            },
+                        ]}
+                    />
+                </AlertCounterContext.Provider>
                 <Typography.Title level={3}>利用規約・プライバシーポリシー</Typography.Title>
                 <ul>
                     <li>
