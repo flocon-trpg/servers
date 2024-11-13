@@ -4,10 +4,10 @@ import { atomWithLazy, loadable } from 'jotai/utils';
 import { Subject, concatAll, debounceTime, map } from 'rxjs';
 
 /**
- * localForage を用いて自動保存する atom 。AsyncStorage を用いた atomWithStorage との違いは次のとおり。
+ * localForage を用いて自動保存する atom。AsyncStorage を用いた atomWithStorage との違いは次のとおり。
  * - 短時間で大量に set されても、ストレージへの保存処理は適度に debounce されて実行される。
  * - atom の get は async だが、set は async ではない。ただし、get がどこかで完了していない場合は set を実行しても無視される。
- * - atomSet の引数を利用することで、atom の set のカスタマイズが比較的容易に行える。
+ * - 引数の `atomSet` を利用することで、atom の set のカスタマイズが比較的容易に行える。例えば reducer にするなど。
  */
 export const atomWithDebounceStorage = <T, Args extends unknown[]>({
     getItemFromStorage,
@@ -18,12 +18,12 @@ export const atomWithDebounceStorage = <T, Args extends unknown[]>({
     setItemToStorage: (newValue: T) => Promise<void>;
     atomSet: (prev: T, ...args: Args) => T;
 }) => {
-    // `savesaveRequestSubject.next(async () => { /* ストレージに保存する処理 */});` と書くことでストレージに保存される。next メソッドが短時間で大量に実行された場合は適度に間引かれる。
+    // `saveRequestSubject.next(async () => { /* ストレージに保存する処理 */});` と書くことでストレージに保存される。next メソッドが短時間で大量に実行された場合は適度に間引かれる。
     const saveRequestSubject = new Subject<() => Promise<void>>();
-    // 現状では、この subscribe を unsubscribe 手段がない。そのため、ブラウザのタブを閉じずに複数の部屋を開いて回るとパフォーマンス上の問題が生じる可能性がある。ただし、よほど数が多くならない限りは問題にならないと考えられるため、現状はこのままにしている。
+    // 現状では、この subscribe を unsubscribe する手段がない。そのため、部屋を複数のブラウザのタブで開いて回ったときにそれらが開きっぱなしだとパフォーマンス上の問題が生じる可能性がある。ただし、よほど数が多くならない限りは問題にならないと考えられるため、現時点では対処していない。
     saveRequestSubject
         .pipe(
-            // 500msという値は適当。あまりに長すぎるとすぐブラウザのタブが閉じられたときに反映されなくなる可能性が高くなることに注意。
+            // 500msという値は適当。あまりに長すぎると操作後にすぐブラウザのタブが閉じられたときに反映されなくなる可能性が高くなることに注意。
             debounceTime(500),
             map(f => f()),
             concatAll(),
@@ -46,7 +46,7 @@ export const atomWithDebounceStorage = <T, Args extends unknown[]>({
             const awaitedEnsureAtom = loadable(anAtom);
             const prevState = get(awaitedEnsureAtom);
             if (prevState.state !== 'hasData') {
-                // もし get(anAtom) をそのまま await すると、この atom の set の戻り値が Promise<void> になる。その場合は Promise<void> を await する必要がありそう(深い論考や検証はしていないので、しなくてもいい可能性もある)だがそれは Flocon では不便なので、戻り値を Promise<void> ではなく void にするのが目的で何もせずに return している。当然ながらこの場合は set を実行しても何も起こらないという問題点があるが、Flocon のコンポーネントでは set が実行される前に get を useAtomValue などを用いてどこかで事前に実行しておりここには来ないと思われるのと、もしここに来ても致命的な事態にはならないと考えられるため問題ないと判断している。
+                // もし get(anAtom) をそのまま await すると、この atom の set の戻り値が Promise<void> になる。その場合は Promise<void> を await する必要がありそう(深い論考や検証はしていないので、しなくてもいい可能性もある)だがそれは Flocon では不便なので、戻り値を Promise<void> ではなく void にするのが目的で何もせずに return している。当然ながらこの場合は set を実行しても何も起こらないという問題点があるが、Flocon のコンポーネントでは set が実行される前に get を useAtomValue などを用いてどこかで事前に実行しているはずでありここには来ないと思われるのと、もしここに来ても致命的な事態にはならないと考えられるため問題ないと判断している。
                 loggerRef.warn('set action is ignored at atomWithDebounceStorage.');
                 return;
             }
