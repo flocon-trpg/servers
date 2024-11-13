@@ -48,10 +48,10 @@ jobs:
             - run: yarn build
 
             - name: mv dist directory
-              run: mv ./apps/web-server/dist ./dist
+              run: mv ./apps/web-server/dist ./flocon_web_server
 
             - name: Create flocon_web_server.zip
-              run: zip -r ${GITHUB_WORKSPACE}/flocon_web_server.zip ./dist
+              run: zip -r ${GITHUB_WORKSPACE}/flocon_web_server.zip ./flocon_web_server
 
             - name: Generate Dockerfile
               run: yarn run gen-flyio-dockerfile
