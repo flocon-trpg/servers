@@ -35,21 +35,31 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v4
+
+            - name: Use Node 22.x
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22.x
+                  cache: yarn
+
             - run: yarn
 
-            - name: Build web-server
-              run: yarn build
-              working-directory: ./apps/web-server
+            # 下のほうで `yarn run gen-flyio-dockerfile` を実行しているため API サーバーもビルドする必要がある
+            - run: yarn build
+
             - name: mv dist directory
               run: mv ./apps/web-server/dist ./dist
+
             - name: Create flocon_web_server.zip
               run: zip -r ${GITHUB_WORKSPACE}/flocon_web_server.zip ./dist
 
             - name: Generate Dockerfile
               run: yarn run gen-flyio-dockerfile
               working-directory: ./apps/api-server
+
             - name: mv Dockerfile
               run: mv ./apps/api-server/flyio.Dockerfile ./Dockerfile
+
             - name: Create flocon_api_server_flyio.zip
               run: zip ${GITHUB_WORKSPACE}/flocon_api_server_flyio.zip ./Dockerfile
 
