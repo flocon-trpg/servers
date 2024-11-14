@@ -13,9 +13,7 @@ Netlify は、静的な Web サイトを無料で作成できるサービスで�
 
 [リリース一覧](https://github.com/flocon-trpg/servers/releases)からダウンロードしたいバージョンを探します。どのバージョンを選ぶべきかよくわからない場合は、基本的には Pre-release が付いてないものの中から最新のバージョンを選べば大丈夫です。
 
-選んだバージョンの下の方に`flocon_web_server.zip`のリンクがあるので、それをダウンロードしてファイルを展開します。
-
-展開すると`out`という名前のフォルダが作成されます。その中に`env.txt`というテキストファイルがありますが、このファイルに Web サーバーの設定を記述する必要があります。[Web サーバー公式設定ツール](https://tools.flocon.app/web-server) を利用して、`env.txt`を編集してください。
+選んだバージョンの下の方に`flocon_web_server.zip`のリンクがあるので、それをダウンロードしてファイルを展開します。その中に`env.txt`というテキストファイルがありますが、このファイルに Web サーバーの設定を記述する必要があります。[Web サーバー公式設定ツール](https://tools.flocon.app/web-server) を利用して、`env.txt`を編集してください。
 
 :::info
 Firebase Storage 版アップローダーを有効化する場合は、あわせて[こちらの解説](/docs/server/details/uploader/firebase_storage)から Firebase Storage の設定を行う必要があります。
@@ -29,12 +27,12 @@ Firebase Storage 版アップローダーを有効化する場合は、あわせ
 
 まずは[Netlify のサイト](https://www.netlify.com/)からアカウントを作成します。
 
-アカウントの作成が完了したら、下のような画面になります。「Drag and drop your site output folder here」のところに out フォルダをドラッグ＆ドロップします。
+アカウントの作成が完了したら、下のような画面になります。「Drag and drop your site output folder here」のところにファイルの入ったフォルダをドラッグ＆ドロップします。
 
 ![netlify1.png](/img/docs/netlify/1.png)
 
 :::danger
-ドラッグ＆ドロップしたフォルダの中身はほぼ全て[^3]がそのままの形でウェブサイト上に公開されます。そのため、out フォルダ内に機密情報などに関わるデータを含めないように気をつけてください。
+ドラッグ＆ドロップしたフォルダの中身はほぼ全て[^3]がそのままの形でウェブサイト上に公開されます。そのため、フォルダ内に機密情報などに関わるデータを含めないように気をつけてください。
 :::
 
 :::info

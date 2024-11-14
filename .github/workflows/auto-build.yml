@@ -91,7 +91,9 @@ jobs:
                       <summary>差分の内容</summary>
 
                       ```
+
                       ${{ env.git_diff }}
+
                       ```
 
                       </details>
