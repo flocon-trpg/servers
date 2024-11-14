@@ -2,5 +2,6 @@
 /bcrypt-hash.txt
 /flyio.Dockerfile
 /git-tags.txt
+/github-release-name.txt
 # テストを実行すると./__uploader_for_tests__ディレクトリに画像ファイルが生成される。もしアップローダーのテストが失敗するとこれらが残ることがあるため、除外している。
 /__uploader_for_tests__

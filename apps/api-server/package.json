@@ -13,6 +13,7 @@
         "gen": "run-s gen:schema gen:codegen",
         "gen-flyio-dockerfile": "node dist/run-generateFlyioDockerfile.js",
         "gen-git-tags": "node dist/run-generateGitTagsTxt.js",
+        "gen-github-release-name": "node dist/run-generateGithubReleaseName.js",
         "gen:codegen": "graphql-codegen --config codegen.yml",
         "gen:schema": "node dist/run-buildSchemaSync.js",
         "lint": "eslint \"**/*.ts\" --cache",
