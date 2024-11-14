@@ -213,15 +213,11 @@ const moveCursorByUpOperation = (
             }
         }
 
-        if (selectionStart !== newSelectionStart || selectionEnd !== newSelectionEnd) {
-            input.setSelectionRange(newSelectionStart, newSelectionEnd);
-        }
+        input.setSelectionRange(newSelectionStart, newSelectionEnd);
         return;
     }
 
-    if (selectionStart !== newSelectionStart) {
-        input.setSelectionRange(newSelectionStart, newSelectionStart);
-    }
+    input.setSelectionRange(newSelectionStart, newSelectionStart);
 };
 
 /**
