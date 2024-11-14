@@ -83,7 +83,6 @@ const useParseBufferDuration = (value: Props['bufferDuration']): number => {
     return value;
 };
 
-// TODO: 文字列に変化がないときは処理を高速化できると思われる。文字列に変化がないときでもこの関数はよく呼ばれるため、高速化が望まれる。
 const ot = ({
     rootText,
     currentMyText,
@@ -93,27 +92,52 @@ const ot = ({
     currentMyText: string;
     currentTheirText: string;
 }) => {
-    const first = diff({ prevState: rootText, nextState: currentTheirText });
-    const second = diff({ prevState: rootText, nextState: currentMyText });
+    const first =
+        rootText === currentTheirText
+            ? undefined
+            : diff({ prevState: rootText, nextState: currentTheirText });
+    const second =
+        rootText === currentMyText
+            ? undefined
+            : diff({ prevState: rootText, nextState: currentMyText });
 
-    const firstUpOperation = toUpOperation(first);
-    const secondUpOperation = toUpOperation(second);
-    const xform = transformUpOperation({ first: firstUpOperation, second: secondUpOperation });
-    if (xform.isError) {
-        loggerRef.fatal(
-            {
-                rootText,
-                currentMyText,
-                currentTheirText,
+    const firstUpOperation = first == null ? undefined : toUpOperation(first);
+    const secondUpOperation = second == null ? undefined : toUpOperation(second);
+
+    let firstPrime: UpOperation | undefined;
+    if (firstUpOperation == null) {
+        firstPrime = undefined;
+    } else {
+        if (secondUpOperation == null) {
+            firstPrime = firstUpOperation;
+        } else {
+            const xform = transformUpOperation({
                 first: firstUpOperation,
                 second: secondUpOperation,
-                error: xform.error,
-            },
-            'OT failed at CollaborativeInput.tsx',
-        );
-        throw new Error('OT failed at CollaborativeInput.tsx. See the log for details.');
+            });
+            if (xform.isError) {
+                loggerRef.fatal(
+                    {
+                        rootText,
+                        currentMyText,
+                        currentTheirText,
+                        first: firstUpOperation,
+                        second: secondUpOperation,
+                        error: xform.error,
+                    },
+                    'OT failed at CollaborativeInput.tsx',
+                );
+                throw new Error('OT failed at CollaborativeInput.tsx. See the log for details.');
+            }
+            firstPrime = xform.value.firstPrime;
+        }
     }
-    const result = apply({ prevState: currentMyText, upOperation: xform.value.firstPrime });
+
+    if (firstPrime == null) {
+        return { state: currentMyText, upOperation: undefined };
+    }
+
+    const result = apply({ prevState: currentMyText, upOperation: firstPrime });
     if (result.isError) {
         loggerRef.fatal(
             {
@@ -130,7 +154,7 @@ const ot = ({
             'Applying operation is failed at CollaborativeInput.tsx. See the log for details.',
         );
     }
-    return { state: result.value, upOperation: xform.value.firstPrime };
+    return { state: result.value, upOperation: firstPrime };
 };
 
 function* toOperationUnitByChar(operation: readonly UpOperationUnit[]) {
@@ -269,10 +293,14 @@ export const CollaborativeInput: React.FC<Props> = ({
         setInputTextAtLastDataMatch(nextInputText);
         setValueAtLastDataMatch(nextInputText);
         if (inputRef.current != null) {
-            moveCursorByUpOperation(inputRef.current, upOperation, nextInputText);
+            if (upOperation != null) {
+                moveCursorByUpOperation(inputRef.current, upOperation, nextInputText);
+            }
         }
         if (textareaRef.current != null) {
-            moveCursorByUpOperation(textareaRef.current, upOperation, nextInputText);
+            if (upOperation != null) {
+                moveCursorByUpOperation(textareaRef.current, upOperation, nextInputText);
+            }
         }
     }, [inputTextRef, valueRef, onChangeRef, valueAtLastDataMatchRef]);
 
