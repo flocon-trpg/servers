@@ -1,8 +1,8 @@
 'use strict';
 
 require('reflect-metadata');
-var buildSchema = require('./buildSchema.js');
-var registerEnumTypes = require('./graphql/registerEnumTypes.js');
+var buildSchema = require('./api-server/src/buildSchema.js');
+var registerEnumTypes = require('./api-server/src/graphql/registerEnumTypes.js');
 
 console.log('building GraphQL schema...');
 registerEnumTypes.registerEnumTypes();

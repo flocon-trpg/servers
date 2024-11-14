@@ -1,8 +1,8 @@
 'use strict';
 
-var migrate = require('./migrate.js');
-var appConsole = require('./utils/appConsole.js');
-var commandLineArgs = require('./utils/commandLineArgs.js');
+var migrate = require('./api-server/src/migrate.js');
+var appConsole = require('./api-server/src/utils/appConsole.js');
+var commandLineArgs = require('./api-server/src/utils/commandLineArgs.js');
 
 const main = async () => {
     const commandLineArgs$1 = await commandLineArgs.loadMigrationCreate();

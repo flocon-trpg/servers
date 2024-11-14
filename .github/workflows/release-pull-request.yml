@@ -6,6 +6,7 @@ on:
             - 'release'
 
 jobs:
+    # TODO: かつてはビルドされた JavaScript ファイルがリポジトリに含まれておりそのチェックにこのジョブが使われていたが、現在はそれらのファイルはリポジトリに含まれていないため、このジョブは削除したほうがよいかもしれない
     check-artifacts:
         name: Check artifacts
 
@@ -25,12 +26,51 @@ jobs:
 
             - run: yarn
 
-            # 必要のない web-server のビルドも行われる。web-server のみを除外するとその除外処理でミスが生じる余地があるため、web-server も含めてまとめてビルドしている。
-            - name: Generate dist
-              run: yarn build
+            - run: yarn build
 
             - name: Clean CRLF
               run: git config --local core.autocrlf input && git add . && git reset
 
             - name: Fail if not all the artifacts are OK
               uses: numtide/clean-git-action@v2
+
+    comment-git-tags:
+        name: Comment git tags
+        runs-on: ubuntu-22.04
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Use Node 20.x
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20.x
+                  cache: yarn
+
+            - run: yarn
+
+            - run: yarn build
+
+            - run: yarn run gen-git-tags
+              working-directory: ./apps/api-server
+
+            - name: set git tags to GITHUB_ENV
+              run: |
+                  tags_txt=$(cat ./apps/api-server/git-tags.txt) 
+                  echo "tags_txt<<EOF" >> $GITHUB_ENV
+                  echo "$tags_txt" >> $GITHUB_ENV
+                  echo "EOF" >> $GITHUB_ENV
+
+            - name: Add comment
+              run: gh issue comment "$PR_NUMBER" --body "$BODY"
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  GH_REPO: ${{ github.repository }}
+                  PR_NUMBER: ${{ github.event.number }}
+                  BODY: >
+                      リポジトリの管理者へ: PR をマージした後に Release ブランチにセットするタグの名前の候補は下のとおりです。`*` の部分は自分で変更してください。
+
+                      ```
+
+                      ${{ env.tags_txt }}
+
+                      ```

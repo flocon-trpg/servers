@@ -2,7 +2,7 @@ import { authToken } from '@flocon-trpg/core';
 import { loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import admin from 'firebase-admin';
-import { Context } from 'graphql-ws/lib/server';
+import { Context } from 'graphql-ws';
 import { VERSION } from './VERSION';
 import { buildSchema } from './buildSchema';
 import { createORM } from './config/createORM';

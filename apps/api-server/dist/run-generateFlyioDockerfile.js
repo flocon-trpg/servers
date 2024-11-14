@@ -1,7 +1,7 @@
 'use strict';
 
 var fs = require('fs-extra');
-var VERSION = require('./VERSION.js');
+var VERSION = require('./api-server/src/VERSION.js');
 
 const main = () => {
     const version = VERSION.VERSION.toString();

@@ -1,7 +1,7 @@
 'use strict';
 
 var migrations = require('@mikro-orm/migrations');
-var migrations$1 = require('../../utils/migrations.js');
+var migrations$1 = require('../../api-server/src/utils/migrations.js');
 
 class Migration20220409152838 extends migrations.Migration {
     async up() {

@@ -1,4 +1,4 @@
-# "# dist/" is automatically commented out in the "main-build" branch by ./.github/workflows/build.yml
+# "dist/" is automatically commented out in the "main-build" branch by ./.github/workflows/auto-build.yml
 # dist/
 
 *.log

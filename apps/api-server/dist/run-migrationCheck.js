@@ -1,7 +1,7 @@
 'use strict';
 
-var migrate = require('./migrate.js');
-var appConsole = require('./utils/appConsole.js');
+var migrate = require('./api-server/src/migrate.js');
+var appConsole = require('./api-server/src/utils/appConsole.js');
 
 migrate.migrateByNpmScript('check').catch((err) => {
     appConsole.AppConsole.fatal({
