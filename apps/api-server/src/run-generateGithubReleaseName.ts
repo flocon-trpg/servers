@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
-import { getApiServerTag, getMainTag, getWebServerTag } from './gitTags';
+import { getApiServerVersion, getWebServerVersion } from './gitTags';
 
 const main = (): void => {
-    const txt = `Web サーバー ${getWebServerTag()} & API サーバー ${getApiServerTag()}`;
+    const txt = `Web サーバー v${getWebServerVersion()} & API サーバー v${getApiServerVersion()}`;
     fs.writeFileSync('./github-release-name.txt', txt);
 };
 

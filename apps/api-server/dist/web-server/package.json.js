@@ -3,7 +3,7 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var name = "@flocon-trpg/web-server";
-var version = "0.9.0-rc.4";
+var version = "0.9.0-rc.6";
 var type = "module";
 var scripts = {
 	dev: "vite",

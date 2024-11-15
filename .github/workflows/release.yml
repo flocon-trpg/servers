@@ -69,7 +69,7 @@ jobs:
             - name: set name to GITHUB_ENV
               run: |
                   release_name=$(cat ./apps/api-server/github-release-name.txt) 
-                  echo "$release_name" >> $GITHUB_ENV
+                  echo "release_name=$release_name" >> $GITHUB_ENV
 
             - name: Release
               uses: softprops/action-gh-release@v2
@@ -78,4 +78,4 @@ jobs:
                       flocon_web_server.zip
                       flocon_api_server_flyio.zip
                   draft: true
-                  name: ${{ env.release_name }} (${{ github.ref_name }}) ※ Web サーバーと API サーバーのバージョンは推定値です
+                  name: '${{ env.release_name }} - (全体: ${{ github.ref_name }}) ※ Web サーバーと API サーバーのバージョンは推定値です'
