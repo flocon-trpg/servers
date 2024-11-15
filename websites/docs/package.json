@@ -17,6 +17,8 @@
         "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,mdx,graphql}\"",
         "write-translations": "docusaurus write-translations",
         "write-heading-ids": "docusaurus write-heading-ids",
+        "test": "jest --passWithNoTests",
+        "test-ci": "jest --passWithNoTests --ci --coverage",
         "typecheck": "tsc"
     },
     "dependencies": {
@@ -40,7 +42,9 @@
         "@docusaurus/types": "3.6.0",
         "@flocon-trpg/prettier-config": "workspace:^",
         "@types/bcryptjs": "2.4.6",
+        "@types/jest": "29.5.14",
         "@types/react": "18.3.12",
+        "jest": "29.7.0",
         "npm-run-all2": "7.0.1",
         "prettier": "3.3.3",
         "typescript": "5.5.4"
