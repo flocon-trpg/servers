@@ -12,6 +12,7 @@ import { FileSelectorModal } from '@/components/models/file/FileSelectorModal/Fi
 import { AlertCounter, AlertCounterContext } from '@/components/ui/AlertCounter/AlertCounter';
 import { AwaitableButton } from '@/components/ui/AwaitableButton/AwaitableButton';
 import { GraphQLAlert } from '@/components/ui/GraphQLAlert/GraphQLAlert';
+import { HelpMessageTooltip } from '@/components/ui/HelpMessageTooltip/HelpMessageTooltip';
 import { useGetApiSemVer } from '@/hooks/useGetApiSemVer';
 import { flex, flexColumn } from '@/styles/className';
 import { apiServerSatisfies } from '@/versioning/apiServerSatisfies';
@@ -181,7 +182,16 @@ export const IndexPage: React.FC = () => {
                                                 </div>
                                             </li>
                                         </ul>
-                                        <Typography.Title level={4}>環境変数</Typography.Title>
+                                        <Typography.Title level={4}>
+                                            <HelpMessageTooltip
+                                                overlayWidth={600}
+                                                title={
+                                                    'この Web サーバーに適用されている環境変数の一覧です。これはこの Web サーバーの運用者向けの UI であり、そのほかの方々が利用する機会は少ないと思われます。これらの値はこのページにアクセスする人全員が見ることができますが、そのこと自体は問題ありません(Firebase の API キーも、公開が前提とされている仕組みのため問題ありません)。ただし、もし誤って公開すべきでない値が表示されている場合は修正することを推奨します。API サーバーの環境変数は Web サーバーから直接取得することはできないためこの一覧には含まれません。'
+                                                }
+                                            >
+                                                {'環境変数'}
+                                            </HelpMessageTooltip>
+                                        </Typography.Title>
                                         <EnvsMonitor style={{ maxWidth: 600 }} />
                                     </div>
                                 ),

@@ -16,7 +16,9 @@
         "lint": "eslint \"**/*.ts\" --cache",
         "prettier": "yarn prettier:base --write --cache",
         "prettier-check": "yarn prettier:base --check",
-        "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\""
+        "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\"",
+        "test": "jest --passWithNoTests",
+        "test-ci": "jest --passWithNoTests --ci --coverage"
     },
     "dependencies": {
         "pino-abstract-transport": "^1.0.0"
@@ -26,9 +28,11 @@
         "@flocon-trpg/prettier-config": "workspace:^",
         "@flocon-trpg/rollup-config": "workspace:^",
         "@flocon-trpg/tsconfig": "workspace:^",
+        "@types/jest": "29.5.14",
         "eslint": "9.14.0",
         "eslint-config-prettier": "9.1.0",
         "eslint-plugin-import": "2.31.0",
+        "jest": "29.7.0",
         "prettier": "3.3.3",
         "rimraf": "5.0.10",
         "rollup": "4.24.4",

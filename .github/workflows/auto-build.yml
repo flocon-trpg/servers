@@ -37,7 +37,7 @@ jobs:
             - run: cat ./.gitignore
 
             - name: Comment out dist/ from .gitignore
-              run: "sed -i 's/dist\\//# dist\\//g' ./.gitignore"
+              run: "sed -i 's/^dist\\//# dist\\//g' ./.gitignore"
 
             - run: cat ./.gitignore
 
