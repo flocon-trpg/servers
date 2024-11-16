@@ -72,6 +72,11 @@ const config: Config = {
                     position: 'left',
                 },
                 {
+                    href: '/tools',
+                    label: 'ツール',
+                    position: 'left',
+                },
+                {
                     href: 'https://github.com/flocon-trpg/servers/releases',
                     label: 'ダウンロード',
                     position: 'left',
