@@ -1013,13 +1013,16 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
         const menuItems: ItemType[] = [
             {
                 key: 'logo@menu',
+                // span タグで囲まないとアイコン画像が中央に表示されない。
                 label: (
-                    <img
-                        src="/assets/logo.png"
-                        width={24}
-                        height={24}
-                        style={{ verticalAlign: 'middle' }}
-                    />
+                    <span>
+                        <img
+                            src="/assets/logo.png"
+                            width={24}
+                            height={24}
+                            style={{ verticalAlign: 'middle' }}
+                        />
+                    </span>
                 ),
                 // routing であれば複数回実行されてもあまり問題ないため、Promise の結果を無視してコードを簡略化している。
                 onClick: () => void router({ to: '/' }),
