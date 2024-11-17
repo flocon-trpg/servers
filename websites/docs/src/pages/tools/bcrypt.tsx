@@ -39,7 +39,7 @@ const Bcrypt: React.FC = () => {
         return await hash(textRef.current, saltRef.current);
     }, [keyToGenerate]);
 
-    let resultElement;
+    let resultElement: JSX.Element;
     if (result.loading) {
         resultElement = <div>生成中です…</div>;
     } else if (result.value != null) {
