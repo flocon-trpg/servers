@@ -27,7 +27,7 @@ const config: Config = {
                     sidebarPath: './sidebars.ts',
                     // Please change this to your repo.
                     // Remove this to remove the "edit this page" links.
-                    editUrl: 'https://github.com/flocon-trpg/servers/edit/main/',
+                    editUrl: 'https://github.com/flocon-trpg/servers/edit/main/websites/docs',
                 },
                 blog: {
                     showReadingTime: true,
@@ -37,7 +37,7 @@ const config: Config = {
                     // },
                     // Please change this to your repo.
                     // Remove this to remove the "edit this page" links.
-                    editUrl: 'https://github.com/flocon-trpg/servers/edit/main/',
+                    editUrl: 'https://github.com/flocon-trpg/servers/edit/main/websites/docs',
                     // Useful options to enforce blogging best practices
                     onInlineTags: 'warn',
                     onInlineAuthors: 'warn',
@@ -69,6 +69,11 @@ const config: Config = {
                     type: 'doc',
                     docId: 'public_servers',
                     label: '公開サーバー一覧',
+                    position: 'left',
+                },
+                {
+                    href: '/tools',
+                    label: 'ツール',
                     position: 'left',
                 },
                 {

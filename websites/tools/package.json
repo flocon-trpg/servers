@@ -1,0 +1,42 @@
+{
+    "name": "@flocon-trpg/tools",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "run-s build:deps build:self",
+        "build:deps": "yarn workspaces foreach --recursive -pt --from '@flocon-trpg/tools' --exclude '@flocon-trpg/tools' run build",
+        "build:self": "tsc -b && vite build",
+        "lint": "eslint .",
+        "preview": "vite preview",
+        "prettier": "yarn prettier:base --write --cache",
+        "prettier-check": "yarn prettier:base --check",
+        "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\""
+    },
+    "dependencies": {
+        "@tanstack/react-router": "^1.69.1",
+        "antd": "^5.0.0",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "typescript": "5.6.2"
+    },
+    "devDependencies": {
+        "@eslint/js": "9.14.0",
+        "@flocon-trpg/eslint-config": "workspace:^",
+        "@flocon-trpg/prettier-config": "workspace:^",
+        "@tanstack/router-plugin": "1.78.3",
+        "@types/react": "18.3.12",
+        "@types/react-dom": "18.3.1",
+        "@vitejs/plugin-react-swc": "3.7.1",
+        "eslint": "9.14.0",
+        "eslint-plugin-react-hooks": "5.1.0-rc-fb9a90fa48-20240614",
+        "eslint-plugin-react-refresh": "0.4.14",
+        "npm-run-all2": "7.0.1",
+        "prettier": "3.3.3",
+        "typescript": "5.6.3",
+        "typescript-eslint": "8.12.2",
+        "vite": "5.4.10",
+        "vite-tsconfig-paths": "5.0.1"
+    }
+}

@@ -12,6 +12,8 @@ import React, { PropsWithChildren, StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { AllContextProvider } from './components/behaviors/AllContextProvider';
 import { AntdThemeConfigProvider } from './components/behaviors/AntdThemeConfigProvider';
+import { EnvsMonitor } from './components/models/envs/EnvsMonitor/EnvsMonitor';
+import { AlertCounter, AlertCounterContext } from './components/ui/AlertCounter/AlertCounter';
 import { LayoutWithNoHook } from './components/ui/Layout/Layout';
 import { SuspenseWithFallback } from './components/ui/SuspenseWithFallback/SuspenseWithFallback';
 import { useOnFirebaseAppChange, useSetupApp } from './hooks/useSetupApp';
@@ -47,6 +49,8 @@ declare module '@tanstack/react-router' {
     }
 }
 
+const alertCounterSymbol = Symbol();
+
 const App = ({ children }: PropsWithChildren) => {
     const { authNotFoundState, urqlClient, reactQueryClient, clientId, httpUri, wsUri } =
         useSetupApp();
@@ -72,10 +76,16 @@ const App = ({ children }: PropsWithChildren) => {
 
     if (authNotFoundState) {
         return (
-            <ThemedDiv style={{ padding: 5 }}>
+            <ThemedDiv style={{ padding: 12 }}>
                 {
-                    '予期しないエラーが発生しました: authNotFound / An unexpected error occured: authNotFound'
+                    'エラーが発生しました。環境変数をセットし忘れている可能性があります。 - authNotFound / An unexpected error occured: authNotFound'
                 }
+                <h3>環境変数</h3>
+                <p>{'この Web サーバーに設定されている環境変数は次のとおりです。'}</p>
+                <AlertCounterContext.Provider value={alertCounterSymbol}>
+                    <AlertCounter.Counter />
+                    <EnvsMonitor />
+                </AlertCounterContext.Provider>
             </ThemedDiv>
         );
     }
