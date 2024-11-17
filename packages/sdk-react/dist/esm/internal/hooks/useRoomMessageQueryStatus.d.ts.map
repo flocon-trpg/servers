@@ -1,0 +1,1 @@
+{"version":3,"file":"useRoomMessageQueryStatus.d.ts","sourceRoot":"","sources":["../../../../src/internal/hooks/useRoomMessageQueryStatus.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,UAAU,EAAE,MAAM,kBAAkB,CAAC;AAG9C,eAAO,MAAM,yBAAyB,GAAI,cAAc,EAAE,aAAa,cACvD,IAAI,CAAC,UAAU,CAAC,cAAc,EAAE,aAAa,CAAC,EAAE,UAAU,CAAC,qEAG1E,CAAC"}
