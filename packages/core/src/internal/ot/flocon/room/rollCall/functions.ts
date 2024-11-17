@@ -1,13 +1,13 @@
 import { Result } from '@kizahasi/result';
-import { State, TwoWayOperation, UpOperation } from '../../../generator';
+import { State, TwoWayOperation, UpOperation } from '../../../generator/types';
 import { isIdRecord } from '../../../record';
 import * as RecordOperation from '../../../recordOperation';
+import { RequestedBy, admin, isAuthorized } from '../../../requestedBy';
 import * as ReplaceOperation from '../../../util/replaceOperation';
 import { ServerTransform } from '../../../util/type';
 import { isOpenRollCall } from './isOpenRollCall';
 import * as Participant from './rollCallParticipant/functions';
 import { template } from './types';
-import { RequestedBy, admin, isAuthorized } from '@/ot/requestedBy';
 
 export const toClientState = (source: State<typeof template>): State<typeof template> => {
     return {

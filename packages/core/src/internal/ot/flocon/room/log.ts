@@ -1,5 +1,6 @@
 import { recordForEach } from '@flocon-trpg/utils';
-import { State, TwoWayOperation, diff } from '../../generator';
+import { diff } from '../../generator/functions';
+import { State, TwoWayOperation } from '../../generator/types';
 import * as RecordOperation from '../../recordOperation';
 import { replace } from '../../recordOperationElement';
 import { restrict } from '../../requestedBy';
@@ -117,7 +118,7 @@ export const createLogs = ({
                             type: deleteType,
                             value: DicePiece.toClientState(
                                 { type: restrict },
-                                prevState
+                                prevState,
                             )(operation.replace.oldValue),
                         },
                     });
@@ -132,7 +133,7 @@ export const createLogs = ({
                             type: createType,
                             value: DicePiece.toClientState(
                                 { type: restrict },
-                                prevState
+                                prevState,
                             )(operation.replace.newValue),
                         },
                     });
@@ -164,7 +165,7 @@ export const createLogs = ({
                             type: deleteType,
                             value: StringPiece.toClientState(
                                 { type: restrict },
-                                prevState
+                                prevState,
                             )(operation.replace.oldValue),
                         },
                     });
@@ -179,7 +180,7 @@ export const createLogs = ({
                             type: createType,
                             value: StringPiece.toClientState(
                                 { type: restrict },
-                                prevState
+                                prevState,
                             )(operation.replace.newValue),
                         },
                     });

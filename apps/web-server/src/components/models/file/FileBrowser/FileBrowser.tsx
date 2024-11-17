@@ -32,7 +32,7 @@ import {
     Select,
     Tooltip,
 } from 'antd';
-import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import { ItemType } from 'antd/lib/menu/interface';
 import classNames from 'classnames';
 import { produce } from 'immer';
 import {
@@ -183,14 +183,16 @@ export type Props = {
     /** ファイルのリネーム処理が完了したときにトリガーされます。複数のファイルがリネームされるときは、最後のファイルがリネームされたときにトリガーされます。 */
     onRename?: (renamedFiles: readonly RenameResult[]) => void;
 
+    onFileCreate?: (absolutePath: readonly string[]) => void;
+
     canMove: (
         /** 例えば`folder1`というフォルダに`a.png`と`b.png`と`c.png`というファイルがあってこれらのうち`a.png`と`b.png`のみを`folder2`フォルダに移動しようとした場合、`currentDirectoryPath`は`['folder1']`、newDirectoryPathは`['folder2']`となります。ファイル名が`a.png`と`b.png`であるという情報の取得は、現時点では必要とされていないためサポートしていません。 */ params: {
             currentDirectoryPath: readonly string[];
 
             /** cutの際はnullに、pasteの際はnon-nullになります。 */
             newDirectoryPath: readonly string[] | null;
-        }
-    ) => Result<undefined>;
+        },
+    ) => Result<void>;
 
     canRename: (params: {
         directoryPath: readonly string[];
@@ -201,18 +203,16 @@ export type Props = {
         newName: string | null;
 
         nodeType: Node['type'];
-    }) => Result<undefined>;
+    }) => Result<void>;
 
     canCreateFolder: (params: {
         directoryPath: readonly string[];
 
         foldername: string;
-    }) => Result<undefined>;
+    }) => Result<void>;
 
     /** trueが返されたファイルパスでは、ファイルおよびフォルダの作成とリネームと移動と削除などが無効化されます。 */
     isProtected: IsProtected;
-
-    onFileCreate: (absolutePath: readonly string[]) => void;
 
     fileCreateLabel: string;
 
@@ -449,7 +449,7 @@ class PathState {
 
     renameFolderIfEmpty(
         currentPath: readonly string[],
-        newPath: readonly string[]
+        newPath: readonly string[],
     ): PathState | null {
         const subtree = this.members.rootFolder.createSubTreeIfExists(currentPath)?.traverse();
         if (subtree == null) {
@@ -469,7 +469,7 @@ class PathState {
                     }
                     return oldValue.value;
                 },
-                () => ({ files: new DualKeyMap() })
+                () => ({ files: new DualKeyMap() }),
             );
         }
         return new PathState({ ...this.members, rootFolder: newValue });
@@ -499,7 +499,7 @@ class PathState {
                     }
                     return oldValue.value;
                 },
-                () => ({ files: new DualKeyMap() })
+                () => ({ files: new DualKeyMap() }),
             );
             folderNode.files.set(
                 { first: filename, second: filePath.id },
@@ -513,7 +513,7 @@ class PathState {
                     name: filename,
                     folderPath,
                     path: undefined,
-                }
+                },
             );
         }
 
@@ -529,7 +529,7 @@ class PathState {
                     }
                     return oldValue.value;
                 },
-                () => ({ files: new DualKeyMap() })
+                () => ({ files: new DualKeyMap() }),
             );
         }
 
@@ -542,7 +542,7 @@ class PathState {
             newValue.ensure(
                 joinPath(path.path).array,
                 () => null,
-                () => null
+                () => null,
             );
         }
         return new PathState({ ...this.members, ensuredFolders: newValue });
@@ -554,7 +554,7 @@ class PathState {
             newValue.ensure(
                 joinPath(elem.path).array,
                 () => elem.element,
-                () => null
+                () => null,
             );
         }
         return new PathState({ ...this.members, overridingElements: newValue });
@@ -583,7 +583,7 @@ class PathState {
             ?.getChildren() ?? []) {
             const key = $folder.absolutePath.reduce(
                 (seed, elem) => `${seed}/${elem}`,
-                'FileBrowser@EnsuredFolder/'
+                'FileBrowser@EnsuredFolder/',
             );
 
             const folderPath = [...$folder.absolutePath];
@@ -690,7 +690,7 @@ class PathState {
                 }
                 return oldValue.value;
             },
-            () => ({ files: new DualKeyMap() })
+            () => ({ files: new DualKeyMap() }),
         );
         return new PathState({ ...this.members, rootFolder });
     }
@@ -714,7 +714,7 @@ class PathState {
         }
 
         if (nodeSource.onSelect == null) {
-            nodeSource.onOpen && nodeSource.onOpen();
+            nodeSource.onOpen?.();
         } else {
             nodeSource.onSelect();
         }
@@ -858,7 +858,7 @@ class PathState {
         });
     }
 
-    canCut(props: Props): Result<undefined> {
+    canCut(props: Props): Result<void> {
         if (this.isCurrentDirectoryProtected(props)) {
             return Result.error(protectedErrorMessage);
         }
@@ -917,7 +917,7 @@ class PathState {
         });
     }
 
-    canCreateFile(props: Props): Result<undefined> {
+    canCreateFile(props: Props): Result<void> {
         if (this.isCurrentDirectoryProtected(props)) {
             return Result.error(protectedErrorMessage);
         }
@@ -928,12 +928,12 @@ class PathState {
         if (this.canCreateFile(props).isError) {
             return;
         }
-        props.onFileCreate && props.onFileCreate(this.members.currentDirectory);
+        props.onFileCreate?.(this.members.currentDirectory);
     }
 
     #requestDeleting(source: readonly FilePathNode[]): FileToDelete[] {
         return source
-            .map(file => ({ status: 'waiting', file } as const))
+            .map(file => ({ status: 'waiting', file }) as const)
             .sort((x, y) => {
                 for (const group of groupJoinArray(new Node(x.file).path, new Node(y.file).path)) {
                     switch (group.type) {
@@ -953,7 +953,7 @@ class PathState {
             });
     }
 
-    canRequestDeleting(props: Props, node: Node): Result<undefined> {
+    canRequestDeleting(props: Props, node: Node): Result<void> {
         if (props.isProtected(node.folderPath)) {
             return Result.error(protectedErrorMessage);
         }
@@ -972,7 +972,7 @@ class PathState {
         };
     }
 
-    canRequestDeletingSelectedNodes(props: Props): Result<undefined> {
+    canRequestDeletingSelectedNodes(props: Props): Result<void> {
         if (props.isProtected(this.currentDirectory)) {
             return Result.error(protectedErrorMessage);
         }
@@ -992,7 +992,7 @@ class PathState {
         };
     }
 
-    canRequestPasting(props: Props, destDirectoryPath: readonly string[]): Result<undefined> {
+    canRequestPasting(props: Props, destDirectoryPath: readonly string[]): Result<void> {
         return props.canMove({
             currentDirectoryPath: this.members.cutAt,
             newDirectoryPath: destDirectoryPath,
@@ -1039,7 +1039,7 @@ class PathState {
         };
     }
 
-    canRequestRenaming(props: Props, node: Node, newName: string | null): Result<undefined> {
+    canRequestRenaming(props: Props, node: Node, newName: string | null): Result<void> {
         return props.canRename({
             directoryPath: node.folderPath,
             oldName: node.name,
@@ -1089,7 +1089,7 @@ const useAtom = <T,>(atom: PrimitiveAtom<T>) => {
 };
 
 const useAtomSelector = <T1, T2>(atom: Atom<T1>, mapping: (value: T1) => T2) => {
-    return useAtomSelectorCore(atom, mapping, undefined, { store: useJotaiStore() });
+    return useAtomSelectorCore(atom, mapping, { store: useJotaiStore() });
 };
 
 const pathStateAtom = atom(PathState.init());
@@ -1128,7 +1128,7 @@ const useCreateFolderAction = () => {
             canExecute: isProtected ? Result.error(protectedErrorMessage) : Result.ok(undefined),
             showModal: () => setVisible(true),
         }),
-        [isProtected, setVisible]
+        [isProtected, setVisible],
     );
 };
 
@@ -1151,7 +1151,7 @@ const useTrySetDeleteStatusAsAsking = () => {
             setDeleteStatus(() => askingDeleteStatus);
             setIsModalVisible(true);
         },
-        [deleteStatus.type, notification, setDeleteStatus, setIsModalVisible]
+        [deleteStatus.type, notification, setDeleteStatus, setIsModalVisible],
     );
 };
 
@@ -1187,7 +1187,7 @@ const useRequestDeletingNodeAction = () => {
         (node: Node) => {
             return pathState.canRequestDeleting(props, node);
         },
-        [pathState, props]
+        [pathState, props],
     );
 
     const execute = React.useCallback(
@@ -1198,7 +1198,7 @@ const useRequestDeletingNodeAction = () => {
             }
             setAsAsking(newStatus);
         },
-        [pathState, props, setAsAsking]
+        [pathState, props, setAsAsking],
     );
 
     return React.useMemo(
@@ -1206,7 +1206,7 @@ const useRequestDeletingNodeAction = () => {
             execute,
             canExecute,
         }),
-        [execute, canExecute]
+        [execute, canExecute],
     );
 };
 
@@ -1229,7 +1229,7 @@ const useTrySetRenameStatusAsAsking = () => {
             setRenameStatus(() => askingRenameStatus);
             setIsModalVisible(true);
         },
-        [renameStatus.type, setRenameStatus, setIsModalVisible, notification]
+        [renameStatus.type, setRenameStatus, setIsModalVisible, notification],
     );
 };
 
@@ -1241,7 +1241,7 @@ const useRequestPastingAction = () => {
     const canExecute = React.useCallback(
         (
             /** 貼り付け先のフォルダを指定できます。指定せず、current directoryに貼り付ける場合はnullを渡します。 */
-            targetFolder: string | null
+            targetFolder: string | null,
         ) => {
             const destPath =
                 targetFolder == null
@@ -1249,13 +1249,13 @@ const useRequestPastingAction = () => {
                     : [...pathState.currentDirectory, targetFolder];
             return pathState.canRequestPasting(props, destPath);
         },
-        [pathState, props]
+        [pathState, props],
     );
 
     const execute = React.useCallback(
         (
             /** 貼り付け先のフォルダを指定できます。指定せず、current directoryに貼り付ける場合はnullを渡します。 */
-            targetFolder: string | null
+            targetFolder: string | null,
         ) => {
             const destPath =
                 targetFolder == null
@@ -1268,7 +1268,7 @@ const useRequestPastingAction = () => {
             }
             setAsAsking(newStatus);
         },
-        [pathState, props, setAsAsking, setPathState]
+        [pathState, props, setAsAsking, setPathState],
     );
 
     return React.useMemo(
@@ -1276,7 +1276,7 @@ const useRequestPastingAction = () => {
             execute,
             canExecute,
         }),
-        [execute, canExecute]
+        [execute, canExecute],
     );
 };
 
@@ -1289,7 +1289,7 @@ const useRequestRenamingAction = () => {
         (node: Node, newName: string | null) => {
             return pathState.canRequestRenaming(props, node, newName);
         },
-        [pathState, props]
+        [pathState, props],
     );
 
     const execute = React.useCallback(
@@ -1301,7 +1301,7 @@ const useRequestRenamingAction = () => {
             }
             setAsAsking(newStatus);
         },
-        [pathState, props, setAsAsking, setPathState]
+        [pathState, props, setAsAsking, setPathState],
     );
 
     return React.useMemo(
@@ -1309,7 +1309,7 @@ const useRequestRenamingAction = () => {
             execute,
             canExecute,
         }),
-        [execute, canExecute]
+        [execute, canExecute],
     );
 };
 
@@ -1356,7 +1356,7 @@ const ActionBar: React.FC = () => {
                 disabled={!pathState.canChangeMultipleSelectMode(props)}
                 onChange={e =>
                     setPathState(pathState =>
-                        pathState.changeIsMultipleSelectMode(e.target.checked)
+                        pathState.changeIsMultipleSelectMode(e.target.checked),
                     )
                 }
                 checked={pathState.isMultipleSelectMode}
@@ -1380,7 +1380,7 @@ const AddressBar: React.FC = () => {
     const searchPlaceholder = useAtomSelector(propsAtom, props => props.searchPlaceholder);
     const currentDirectory = React.useMemo(
         () => pathState.currentDirectory,
-        [pathState.currentDirectory]
+        [pathState.currentDirectory],
     );
     const [fileNameFilter, setFileNameFilter] = useAtom(fileNameFilterAtom);
 
@@ -1393,7 +1393,7 @@ const AddressBar: React.FC = () => {
     return (
         <div className={classNames(flex, flexRow, itemsCenter)}>
             <Button
-                size='small'
+                size="small"
                 disabled={currentDirectory.length === 0}
                 onClick={() =>
                     setPathState(pathState => {
@@ -1482,7 +1482,7 @@ const DeleteConfirmModal: React.FC = () => {
         case 'none':
         case 'finished':
             button = (
-                <Button style={buttonStyle} type='primary' danger disabled>
+                <Button style={buttonStyle} type="primary" danger disabled>
                     削除
                 </Button>
             );
@@ -1492,7 +1492,7 @@ const DeleteConfirmModal: React.FC = () => {
             button = (
                 <Button
                     style={buttonStyle}
-                    type='primary'
+                    type="primary"
                     danger
                     onClick={() => {
                         if (deleteStatus.type === 'asking') {
@@ -1547,7 +1547,7 @@ const DeleteConfirmModal: React.FC = () => {
     return (
         <Modal
             open={isModalVisible}
-            title='削除の確認'
+            title="削除の確認"
             footer={
                 <DialogFooter
                     close={{ textType: 'close', onClick: onClose, disabled: !canClose }}
@@ -1630,7 +1630,7 @@ const RenameConfirmModal: React.FC = () => {
         case 'none':
         case 'finished':
             button = (
-                <Button style={buttonStyle} type='primary' danger disabled>
+                <Button style={buttonStyle} type="primary" danger disabled>
                     移動/リネーム
                 </Button>
             );
@@ -1640,7 +1640,7 @@ const RenameConfirmModal: React.FC = () => {
             button = (
                 <Button
                     style={buttonStyle}
-                    type='primary'
+                    type="primary"
                     onClick={() => {
                         if (renameStatus.type === 'asking') {
                             setPathState(pathState => {
@@ -1695,7 +1695,7 @@ const RenameConfirmModal: React.FC = () => {
     return (
         <Modal
             open={isModalVisible}
-            title='移動、リネームの確認'
+            title="移動、リネームの確認"
             footer={
                 <DialogFooter
                     close={{ textType: 'close', onClick: onClose, disabled: !canClose }}
@@ -1732,7 +1732,7 @@ const RenameInputModal: React.FC = () => {
     return (
         <Modal
             open={state != null}
-            title='リネーム'
+            title="リネーム"
             onCancel={onClose}
             footer={
                 <DialogFooter
@@ -1771,7 +1771,7 @@ const CreateFolderModal: React.FC = () => {
                 directoryPath: pathState.currentDirectory,
                 foldername,
             }).error,
-        [foldername, pathState.currentDirectory, props]
+        [foldername, pathState.currentDirectory, props],
     );
 
     const [visible, setVisible] = useAtom(isModalToCreateFolderVisibleAtom);
@@ -1787,7 +1787,7 @@ const CreateFolderModal: React.FC = () => {
             return;
         }
         setPathState(pathState =>
-            pathState.createFolder([...pathState.currentDirectory, foldername])
+            pathState.createFolder([...pathState.currentDirectory, foldername]),
         );
         setFoldername('');
         setVisible(false);
@@ -1796,7 +1796,7 @@ const CreateFolderModal: React.FC = () => {
     return (
         <Modal
             open={visible}
-            title='新しいフォルダの作成'
+            title="新しいフォルダの作成"
             onCancel={() => setVisible(false)}
             footer={
                 <DialogFooter
@@ -1814,13 +1814,13 @@ const CreateFolderModal: React.FC = () => {
             <div className={classNames(flex, flexColumn)} style={{ gap: 4 }}>
                 <div>新しく作るフォルダの名前を入力してください。</div>
                 <Alert
-                    type='info'
+                    type="info"
                     showIcon
-                    message='ファイルが1つもない空のフォルダは、サーバーに保存されません。空のフォルダは、ファイル操作を行いやすくするためにブラウザの画面上でのみ存在する一時的なフォルダであり、ブラウザを閉じた際などに自動的に消去されます。'
+                    message="ファイルが1つもない空のフォルダは、サーバーに保存されません。空のフォルダは、ファイル操作を行いやすくするためにブラウザの画面上でのみ存在する一時的なフォルダであり、ブラウザを閉じた際などに自動的に消去されます。"
                 />
                 <Input
                     ref={inputRef}
-                    placeholder='フォルダ名'
+                    placeholder="フォルダ名"
                     value={foldername}
                     onChange={e => setFoldername(e.target.value)}
                     onKeyDown={e => {
@@ -1830,7 +1830,7 @@ const CreateFolderModal: React.FC = () => {
                     }}
                 />
                 {foldernameError != null && (
-                    <Alert type='error' showIcon message={foldernameError} />
+                    <Alert type="error" showIcon message={foldernameError} />
                 )}
             </div>
         </Modal>
@@ -1855,7 +1855,7 @@ const CellFile: React.FC<{ children: React.ReactNode; opacity: number | undefine
                 justifySelfCenter,
                 flex,
                 itemsCenter,
-                justifyItemsCenter
+                justifyItemsCenter,
             )}
             style={{ ...cellFileStyle, opacity }}
         >
@@ -1883,7 +1883,7 @@ const ContextMenu: React.FC<{
         result,
     }: {
         label: string;
-        result: Result<undefined>;
+        result: Result<void>;
     }) => {
         return {
             label: <Tooltip overlay={result.isError ? result.error : undefined}>{label}</Tooltip>,
@@ -1928,7 +1928,7 @@ const ContextMenu: React.FC<{
                 }),
                 key: createMenuKey('fileCreateLabel'),
                 onClick: () => {
-                    props.onFileCreate(pathState.currentDirectory);
+                    props.onFileCreate?.(pathState.currentDirectory);
                 },
             },
             {
@@ -2159,7 +2159,7 @@ const NodeView: React.FC<{
                         textOverflow: 'ellipsis',
                     }}
                 >
-                    <Tooltip title={node.name} placement='bottom'>
+                    <Tooltip title={node.name} placement="bottom">
                         {node.name}
                     </Tooltip>
                 </div>
@@ -2226,7 +2226,7 @@ const NodesGrid: React.FC = () => {
                 style={{ backgroundColor }}
                 totalCount={filteredNodes.length}
                 components={{
-                    List: ListContainer as any,
+                    List: ListContainer,
                 }}
                 itemContent={index => <NodeView node={filteredNodes[index]!} />}
                 computeItemKey={index => filteredNodes[index]!.key}
@@ -2252,7 +2252,7 @@ const useStartAutoDeleteFiles = () => {
     const deleteStatusValueRef = useLatest(deleteStatusValue);
     const setPathState = useSetAtom(pathStateAtom);
     const foldersDeletingOnNextRootFolderUpdate = useSetAtom(
-        foldersDeletingOnNextRootFolderUpdateAtom
+        foldersDeletingOnNextRootFolderUpdateAtom,
     );
     const { notification } = App.useApp();
 
@@ -2279,13 +2279,12 @@ const useStartAutoDeleteFiles = () => {
                 placement: 'bottomRight',
                 message: 'ファイルの削除が完了しました。',
             });
-            onDeleteRef.current &&
-                onDeleteRef.current(
-                    deleteStatusValueRef.current?.map(file => ({
-                        path: new Node(file.file).path,
-                        id: file.file.id,
-                    })) ?? []
-                );
+            onDeleteRef.current?.(
+                deleteStatusValueRef.current?.map(file => ({
+                    path: new Node(file.file).path,
+                    id: file.file.id,
+                })) ?? [],
+            );
             foldersDeletingOnNextRootFolderUpdate(oldState => {
                 if (deleteStatusRef.current.type === 'none') {
                     return oldState;
@@ -2301,7 +2300,7 @@ const useStartAutoDeleteFiles = () => {
                     return oldValue;
                 }
                 const index = oldValue.files.findIndex(
-                    oldFile => oldFile.file.key === file.file.key
+                    oldFile => oldFile.file.key === file.file.key,
                 );
                 if (index < 0) {
                     return oldValue;
@@ -2326,13 +2325,13 @@ const useStartAutoDeleteFiles = () => {
                 setHasDeleted(true);
                 setIsDeleting(false);
             })
-            .catch(e => {
+            .catch((e: unknown) => {
                 notification.error({
                     placement: 'bottomRight',
                     message: 'ファイルの削除に失敗しました。',
                     description: joinPath(new Node(fileToDelete.file).path).string,
                 });
-                loggerRef.error(e, 'ファイルの削除に失敗しました。');
+                loggerRef.autoDetectObj.error(e, 'ファイルの削除に失敗しました。');
                 setFileStatus(fileToDelete, 'error');
                 setIsDeleting(false);
             });
@@ -2361,7 +2360,7 @@ const useStartAutoRenameFiles = () => {
     const renameStatusValueRef = useLatest(renameStatusValue);
     const setPathState = useSetAtom(pathStateAtom);
     const setDeletingFoldersOnNextRootFolderUpdate = useSetAtom(
-        foldersDeletingOnNextRootFolderUpdateAtom
+        foldersDeletingOnNextRootFolderUpdateAtom,
     );
     const { notification } = App.useApp();
 
@@ -2389,14 +2388,13 @@ const useStartAutoRenameFiles = () => {
                 message: 'ファイルの移動もしくはリネームが完了しました。',
             });
 
-            onRenameRef.current &&
-                onRenameRef.current(
-                    renameStatusValueRef.current?.map(file => ({
-                        id: file.file.id,
-                        oldPath: new Node(file.file).path,
-                        currentPath: file.newPath,
-                    })) ?? []
-                );
+            onRenameRef.current?.(
+                renameStatusValueRef.current?.map(file => ({
+                    id: file.file.id,
+                    oldPath: new Node(file.file).path,
+                    currentPath: file.newPath,
+                })) ?? [],
+            );
             setPathState(pathState => {
                 return pathState.resetCutState();
             });
@@ -2418,7 +2416,7 @@ const useStartAutoRenameFiles = () => {
                     return oldValue;
                 }
                 const index = oldValue.files.findIndex(
-                    oldFile => oldFile.file.key === file.file.key
+                    oldFile => oldFile.file.key === file.file.key,
                 );
                 if (index < 0) {
                     return oldValue;
@@ -2446,13 +2444,13 @@ const useStartAutoRenameFiles = () => {
                 setHasRenamed(true);
                 setIsRenaming(false);
             })
-            .catch(e => {
+            .catch((e: unknown) => {
                 notification.error({
                     placement: 'bottomRight',
                     message: 'ファイルのリネームに失敗しました。',
                     description: joinPath(new Node(fileToRename.file).path).string,
                 });
-                loggerRef.error(e, 'ファイルのリネームに失敗しました。');
+                loggerRef.autoDetectObj.error(e, 'ファイルのリネームに失敗しました。');
                 setFileStatus(fileToRename, 'error');
                 setIsRenaming(false);
             });
@@ -2475,7 +2473,7 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
     useStartAutoRenameFiles();
 
     const foldersDeletingOnNextRootFolderUpdate = useAtomValue(
-        foldersDeletingOnNextRootFolderUpdateAtom
+        foldersDeletingOnNextRootFolderUpdateAtom,
     );
 
     const setProps = useSetAtom(propsAtom);
@@ -2514,7 +2512,7 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
             className={classNames(flex, flexColumn)}
             style={mergeStyles(
                 { gap: columnGap, height: props.height ?? defaultHeight },
-                props.style
+                props.style,
             )}
         >
             <ActionBar />

@@ -5,7 +5,7 @@
         // Node 14 で推奨される設定を使用している
         // https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping#node-14
 
-        "resolveJsonModule": false,
+        "resolveJsonModule": true,
         "target": "ES2020",
         "module": "ES2015",
         "sourceMap": true,

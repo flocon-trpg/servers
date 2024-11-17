@@ -1,1 +1,0 @@
-{"version":3,"file":"Migration20220502053022.js","sources":["../../../src/__migrations__/sqlite/Migration20220502053022.ts"],"sourcesContent":[null],"names":["Migration"],"mappings":";;;;AAEM,MAAO,uBAAwB,SAAQA,oBAAS,CAAA;AAClD,IAAA,MAAM,EAAE,GAAA;AACJ,QAAA,IAAI,CAAC,MAAM,CAAC,oEAAoE,CAAC,CAAC;AAClF,QAAA,IAAI,CAAC,MAAM,CACP,kFAAkF,CACrF,CAAC;KACL;AACJ;;;;"}

@@ -1,5 +1,6 @@
 const typescript = require('@rollup/plugin-typescript');
 const multiInput = require('rollup-plugin-multi-input');
+const json = require('@rollup/plugin-json');
 
 const external = [
     // https://rollupjs.org/guide/en/#importing-packagejson
@@ -29,6 +30,7 @@ module.exports = [
                 declarationMap: false,
                 sourceMap: true,
             }),
+            json(),
         ],
         external,
     },

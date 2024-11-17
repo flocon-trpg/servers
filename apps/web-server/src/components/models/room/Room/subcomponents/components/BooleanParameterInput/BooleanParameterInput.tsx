@@ -83,7 +83,7 @@ export const BooleanParameterInput: React.FC<Props> = ({
             return (
                 <Tooltip title={addParameter}>
                     <Button
-                        size='small'
+                        size="small"
                         disabled={disabled}
                         onClick={() => {
                             const operation: CharacterUpOperation = {
@@ -108,7 +108,7 @@ export const BooleanParameterInput: React.FC<Props> = ({
         return (
             <Tooltip title={deleteParameter}>
                 <Button
-                    size='small'
+                    size="small"
                     disabled={disabled}
                     onClick={() => {
                         const operation: CharacterUpOperation = {
@@ -156,14 +156,14 @@ export const BooleanParameterInput: React.FC<Props> = ({
             hideWhenDisabled={compact}
             showAsTextWhenDisabled={!compact}
             tooltip={
-                parameter?.isValuePrivate ?? false
+                (parameter?.isValuePrivate ?? false)
                     ? parameterIsPrivate({ isCharacterPrivate, isCreate })
                     : parameterIsNotPrivate({ isCharacterPrivate, isCreate })
             }
             checkedChildren={<EyeOutlined />}
             unCheckedChildren={<EyeInvisibleOutlined />}
-            size='small'
-            onChange={e => {
+            size="small"
+            onChange={async e => {
                 const operation: CharacterUpOperation = {
                     $v: 2,
                     $r: 1,
@@ -177,8 +177,8 @@ export const BooleanParameterInput: React.FC<Props> = ({
                 };
                 onOperate(apply(operation));
             }}
-            shape='circle'
-            defaultType='dashed'
+            shape="circle"
+            defaultType="dashed"
         />
     );
     if (parameter?.value == null) {

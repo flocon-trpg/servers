@@ -4,11 +4,12 @@ import { NumberSize, ResizeDirection } from 're-resizable';
 import React, { PropsWithChildren } from 'react';
 import { ControlPosition } from 'react-draggable';
 import { Rnd, Props as RndProps } from 'react-rnd';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import {
     defaultPanelOpacity,
     minPanelOpacity,
 } from '@/atoms/roomConfigAtom/types/roomConfig/resources';
+import { useRoomId } from '@/components/models/room/Room/subcomponents/hooks/useRoomId';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { Styles } from '@/styles';
 import { cancelRnd } from '@/styles/className';
@@ -53,16 +54,16 @@ type Props = {
     hideElementsOnResize?: boolean;
     /** この値が変更されるたびに、ウィンドウの色が変わり強調表示されます。ただし `undefined` に変更されたときは除きます。 */
     highlightKey?: string | undefined;
-};
+} & PropsWithChildren;
 
-export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
+export const DraggableCard: React.FC<Props> = (props: Props) => {
     const [styles, api] = useSpring(() => ({ headerBackgroundColor, borderColor }), []);
 
     React.useEffect(() => {
         if (props.highlightKey == null) {
             return;
         }
-        api.start({
+        void api.start({
             to: [
                 {
                     headerBackgroundColor: headerBackgroundActiveColor,
@@ -76,14 +77,15 @@ export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) 
     const bottomElementContainerHeight =
         props.bottomElement == null
             ? 0
-            : props.bottomElementContainerHeight ?? defaultBottomElementContainerHeight;
+            : (props.bottomElementContainerHeight ?? defaultBottomElementContainerHeight);
     const topElementContainerHeight =
         props.topElement == null
             ? 0
-            : props.topElementContainerHeight ?? defaultTopElementContainerHeight;
+            : (props.topElementContainerHeight ?? defaultTopElementContainerHeight);
 
-    const rawPanelOpacity =
-        useAtomSelector(roomConfigAtom, state => state?.panelOpacity) ?? defaultPanelOpacity;
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const rawPanelOpacity = useAtomSelector(roomConfigAtom, state => state.panelOpacity);
     let panelOpacity = rawPanelOpacity;
     panelOpacity = Math.max(minPanelOpacity, panelOpacity);
     panelOpacity = Math.min(1, panelOpacity);

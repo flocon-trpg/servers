@@ -1,12 +1,11 @@
 import { recordToArray } from '@flocon-trpg/utils';
 import { Layout as AntdLayout, App, Result } from 'antd';
 import classNames from 'classnames';
-import { useAtomValue } from 'jotai/react';
-import dynamic from 'next/dynamic';
+import { useAtomValue, useSetAtom } from 'jotai/react';
 import { NumberSize, ResizeDirection } from 're-resizable';
 import React from 'react';
 import { ControlPosition } from 'react-draggable';
-import { Props as BoardProps } from './subcomponents/components/Board/Board';
+import { Board } from './subcomponents/components/Board/Board';
 import { BoardEditorModal } from './subcomponents/components/BoardEditorModal/BoardEditorModal';
 import {
     BoardContextMenu,
@@ -35,49 +34,42 @@ import { SoundPlayerPanelContent } from './subcomponents/components/SoundPlayerP
 import { StringPieceEditorModal } from './subcomponents/components/StringPieceEditorModal/StringPieceEditorModal';
 import { usePlayBgm } from './subcomponents/hooks/usePlayBgm';
 import { usePlaySoundEffect } from './subcomponents/hooks/usePlaySoundEffect';
-import { usePushNotifications } from './subcomponents/hooks/usePushNotifications';
+import { usePushNotificationsAndAutoOpenPanel } from './subcomponents/hooks/usePushNotifications';
 import { useRoomId } from './subcomponents/hooks/useRoomId';
 import { panelHighlightKeysAtom } from '@/atoms/panelHighlightKeysAtom/panelHighlightKeysAtom';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import {
+    activeBoardPanel,
+    boardEditorPanel,
+    bringPanelToFront,
+    characterPanel,
+    chatPalettePanel,
+    custom,
+    gameEffectPanel,
+    memoPanel,
+    messagePanel,
+    minimize,
+    movePanel,
+    participantPanel,
+    pieceValuePanel,
+    resizePanel,
+    rollCallPanel,
+    roomConfigAtomFamily,
+} from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { BoardEditorPanelConfig } from '@/atoms/roomConfigAtom/types/boardEditorPanelConfig';
 import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
 import { MemoPanelConfig } from '@/atoms/roomConfigAtom/types/memoPanelConfig';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
-import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
 import { RoomGlobalStyle } from '@/components/globalStyles/RoomGlobalStyle';
 import {
     debouncedWindowInnerHeightAtom,
     debouncedWindowInnerWidthAtom,
 } from '@/components/pages/room/RoomIdPage/RoomIdPage';
 import { DraggableCard, horizontalPadding } from '@/components/ui/DraggableCard/DraggableCard';
-import { LoadingResult } from '@/components/ui/LoadingResult/LoadingResult';
+import { SuspenseWithFallback } from '@/components/ui/SuspenseWithFallback/SuspenseWithFallback';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { relative } from '@/styles/className';
-
-/*
-Boardをdynamicを使わず直接importすると、next exportのときに次のエラーが出る（next export以外は問題なしの模様）。
-
-Error occurred prerendering page "/rooms/[id]". Read more: https://nextjs.org/docs/messages/prerender-error
-Error: Cannot find module 'canvas'
-Require stack:
-- /home/runner/work/servers/servers/node_modules/konva/cmj/index-node.js
-- /home/runner/work/servers/servers/node_modules/react-konva/lib/ReactKonva.js
-- /home/runner/work/servers/servers/apps/web-server/.next/server/pages/rooms/[id].js
-
-index-node.jsを見てみると、次のコードがある(konva@v8.3.9で確認)。ここでエラーが出ていると思われる。
-
-const Canvas = require("canvas");
-
-もしかするとyarn add canvasで直るかもしれないが、このパッケージのReadmeによると「node-canvas is a Cairo-backed Canvas implementation for Node.js.」とのことであり、詳しくは調査していないが、next exportを使うか否かで挙動が変わってしまう可能性がある。そのため、代わりにdynamicを使うことで対処している。
-今のところreact-konvaはBoardでしか使っていないが、他のコンポーネントでも使うのであればそちらもdynamicを使ったほうがよさそう。
-*/
-const Board: React.ComponentType<BoardProps> = dynamic(
-    () => import('./subcomponents/components/Board/Board').then(mod => mod.Board as any),
-    { ssr: false }
-);
 
 type ConfigProps<T> = {
     config: T;
@@ -101,57 +93,54 @@ namespace ChildrenContainerStyle {
 }
 
 const ActiveBoardPanel: React.FC = React.memo(function ActiveBoardPanel() {
-    const config = useAtomSelector(roomConfigAtom, state => state?.panels.activeBoardPanel);
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const config = useAtomSelector(roomConfigAtom, state => state.panels.activeBoardPanel);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
         (e: ControlPosition) => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                RoomConfigUtils.movePanel(roomConfig.panels.activeBoardPanel, e);
+            reduceRoomConfig({
+                type: movePanel,
+                panelType: { type: activeBoardPanel },
+                action: e,
             });
         },
-        [setRoomConfig]
+        [reduceRoomConfig],
     );
     const onResizeStop = React.useCallback(
         (dir: ResizeDirection, delta: NumberSize) => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                RoomConfigUtils.resizePanel(roomConfig.panels.activeBoardPanel, dir, delta);
+            reduceRoomConfig({
+                type: resizePanel,
+                panelType: { type: activeBoardPanel },
+                action: { dir, delta },
             });
         },
-        [setRoomConfig]
+        [reduceRoomConfig],
     );
     const onMoveToFront = React.useCallback(() => {
-        setRoomConfig(roomConfig => {
-            if (roomConfig == null) {
-                return;
-            }
-            RoomConfigUtils.bringPanelToFront(roomConfig, {
-                type: 'activeBoardPanel',
-            });
+        reduceRoomConfig({
+            type: bringPanelToFront,
+            panelType: { type: activeBoardPanel },
+            action: {
+                unminimizePanel: true,
+            },
         });
-    }, [setRoomConfig]);
+    }, [reduceRoomConfig]);
     const onClose = React.useCallback(() => {
-        setRoomConfig(roomConfig => {
-            if (roomConfig == null) {
-                return;
-            }
-            roomConfig.panels.activeBoardPanel.isMinimized = true;
+        reduceRoomConfig({
+            type: minimize,
+            panelType: { type: activeBoardPanel },
         });
-    }, [setRoomConfig]);
+    }, [reduceRoomConfig]);
 
-    if (config == null || config.isMinimized) {
+    if (config.isMinimized) {
         return null;
     }
 
     return (
         <DraggableCard
-            header='ボードビュアー'
+            header="ボードビュアー"
             onDragStop={onDragStop}
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
@@ -163,74 +152,60 @@ const ActiveBoardPanel: React.FC = React.memo(function ActiveBoardPanel() {
             minWidth={150}
             zIndex={config.zIndex}
         >
-            <Board
-                canvasWidth={config.width}
-                canvasHeight={config.height}
-                type='activeBoard'
-                isBackground={false}
-                config={config}
-            />
+            <SuspenseWithFallback>
+                <Board
+                    canvasWidth={config.width}
+                    canvasHeight={config.height}
+                    type="activeBoard"
+                    isBackground={false}
+                    config={config}
+                />
+            </SuspenseWithFallback>
         </DraggableCard>
     );
 });
 
 const BoardEditorPanel: React.FC<ConfigAndKeyProps<BoardEditorPanelConfig>> = React.memo(
     function BoardEditorPanel({ config, keyName }) {
-        const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+        const roomId = useRoomId();
+        const roomConfigAtom = roomConfigAtomFamily(roomId);
+        const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
         const onDragStop = React.useCallback(
             (e: ControlPosition) => {
-                setRoomConfig(roomConfig => {
-                    if (roomConfig == null) {
-                        return;
-                    }
-                    const boardEditorPanel = roomConfig.panels.boardEditorPanels[keyName];
-                    if (boardEditorPanel == null) {
-                        return;
-                    }
-                    RoomConfigUtils.movePanel(boardEditorPanel, e);
+                reduceRoomConfig({
+                    type: movePanel,
+                    panelType: { type: boardEditorPanel, panelId: keyName },
+                    action: e,
                 });
             },
-            [keyName, setRoomConfig]
+            [keyName, reduceRoomConfig],
         );
         const onResizeStop = React.useCallback(
             (dir: ResizeDirection, delta: NumberSize) => {
-                setRoomConfig(roomConfig => {
-                    if (roomConfig == null) {
-                        return;
-                    }
-                    const boardEditorPanel = roomConfig.panels.boardEditorPanels[keyName];
-                    if (boardEditorPanel == null) {
-                        return;
-                    }
-                    RoomConfigUtils.resizePanel(boardEditorPanel, dir, delta);
+                reduceRoomConfig({
+                    type: resizePanel,
+                    panelType: { type: boardEditorPanel, panelId: keyName },
+                    action: { dir, delta },
                 });
             },
-            [keyName, setRoomConfig]
+            [keyName, reduceRoomConfig],
         );
         const onMoveToFront = React.useCallback(() => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                const boardEditorPanel = roomConfig.panels.boardEditorPanels[keyName];
-                if (boardEditorPanel == null) {
-                    return;
-                }
-                RoomConfigUtils.bringPanelToFront(roomConfig, {
-                    type: 'boardEditorPanel',
-                    panelId: keyName,
-                });
+            reduceRoomConfig({
+                type: bringPanelToFront,
+                panelType: { type: boardEditorPanel, panelId: keyName },
+                action: {
+                    unminimizePanel: true,
+                },
             });
-        }, [keyName, setRoomConfig]);
+        }, [keyName, reduceRoomConfig]);
         const onClose = React.useCallback(() => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                roomConfig.panels.boardEditorPanels[keyName] = undefined;
+            reduceRoomConfig({
+                type: minimize,
+                panelType: { type: boardEditorPanel, panelId: keyName },
             });
-        }, [keyName, setRoomConfig]);
+        }, [keyName, reduceRoomConfig]);
 
         if (config.isMinimized) {
             return null;
@@ -240,7 +215,7 @@ const BoardEditorPanel: React.FC<ConfigAndKeyProps<BoardEditorPanelConfig>> = Re
         return (
             <DraggableCard
                 key={keyName}
-                header='ボードエディター'
+                header="ボードエディター"
                 onDragStop={onDragStop}
                 onResizeStop={onResizeStop}
                 onMoveToFront={onMoveToFront}
@@ -252,24 +227,24 @@ const BoardEditorPanel: React.FC<ConfigAndKeyProps<BoardEditorPanelConfig>> = Re
                 minWidth={150}
                 zIndex={config.zIndex}
             >
-                <Board
-                    canvasWidth={config.width}
-                    canvasHeight={config.height}
-                    type='boardEditor'
-                    boardEditorPanelId={keyName}
-                    config={config}
-                />
+                <SuspenseWithFallback>
+                    <Board
+                        canvasWidth={config.width}
+                        canvasHeight={config.height}
+                        type="boardEditor"
+                        boardEditorPanelId={keyName}
+                        config={config}
+                    />
+                </SuspenseWithFallback>
             </DraggableCard>
         );
-    }
+    },
 );
 
 const BoardEditorPanels: React.FC = () => {
-    const config = useAtomSelector(roomConfigAtom, state => state?.panels.boardEditorPanels);
-
-    if (config == null) {
-        return null;
-    }
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const config = useAtomSelector(roomConfigAtom, state => state.panels.boardEditorPanels);
 
     return (
         <>
@@ -282,62 +257,45 @@ const BoardEditorPanels: React.FC = () => {
 
 const ChatPalettePanel: React.FC<ConfigAndKeyProps<ChatPalettePanelConfig>> = React.memo(
     function ChatPalettePanel({ keyName, config }) {
-        const setRoomConfig = useImmerSetAtom(roomConfigAtom);
         const roomId = useRoomId();
+        const roomConfigAtom = roomConfigAtomFamily(roomId);
+        const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
         const onDragStop = React.useCallback(
             (e: ControlPosition) => {
-                setRoomConfig(roomConfig => {
-                    if (roomConfig == null) {
-                        return;
-                    }
-                    const chatPalettePanel = roomConfig.panels.chatPalettePanels[keyName];
-                    if (chatPalettePanel == null) {
-                        return;
-                    }
-                    RoomConfigUtils.movePanel(chatPalettePanel, e);
+                reduceRoomConfig({
+                    type: movePanel,
+                    panelType: { type: chatPalettePanel, panelId: keyName },
+                    action: e,
                 });
             },
-            [keyName, setRoomConfig]
+            [keyName, reduceRoomConfig],
         );
         const onResizeStop = React.useCallback(
             (dir: ResizeDirection, delta: NumberSize) => {
-                setRoomConfig(roomConfig => {
-                    if (roomConfig == null) {
-                        return;
-                    }
-                    const chatPalettePanel = roomConfig.panels.chatPalettePanels[keyName];
-                    if (chatPalettePanel == null) {
-                        return;
-                    }
-                    RoomConfigUtils.resizePanel(chatPalettePanel, dir, delta);
+                reduceRoomConfig({
+                    type: resizePanel,
+                    panelType: { type: chatPalettePanel, panelId: keyName },
+                    action: { dir, delta },
                 });
             },
-            [keyName, setRoomConfig]
+            [keyName, reduceRoomConfig],
         );
         const onMoveToFront = React.useCallback(() => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                const chatPalettePanel = roomConfig.panels.chatPalettePanels[keyName];
-                if (chatPalettePanel == null) {
-                    return;
-                }
-                RoomConfigUtils.bringPanelToFront(roomConfig, {
-                    type: 'chatPalettePanel',
-                    panelId: keyName,
-                });
+            reduceRoomConfig({
+                type: bringPanelToFront,
+                panelType: { type: chatPalettePanel, panelId: keyName },
+                action: {
+                    unminimizePanel: true,
+                },
             });
-        }, [keyName, setRoomConfig]);
+        }, [keyName, reduceRoomConfig]);
         const onClose = React.useCallback(() => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                roomConfig.panels.chatPalettePanels[keyName] = undefined;
+            reduceRoomConfig({
+                type: minimize,
+                panelType: { type: chatPalettePanel, panelId: keyName },
             });
-        }, [keyName, setRoomConfig]);
+        }, [keyName, reduceRoomConfig]);
 
         if (config.isMinimized) {
             return null;
@@ -346,7 +304,7 @@ const ChatPalettePanel: React.FC<ConfigAndKeyProps<ChatPalettePanelConfig>> = Re
         return (
             <DraggableCard
                 key={keyName}
-                header='チャットパレット'
+                header="チャットパレット"
                 onDragStop={onDragStop}
                 onResizeStop={onResizeStop}
                 onMoveToFront={onMoveToFront}
@@ -358,18 +316,18 @@ const ChatPalettePanel: React.FC<ConfigAndKeyProps<ChatPalettePanelConfig>> = Re
                 minWidth={150}
                 zIndex={config.zIndex}
             >
-                <ChatPalettePanelContent roomId={roomId} panelId={keyName} />
+                <SuspenseWithFallback>
+                    <ChatPalettePanelContent roomId={roomId} panelId={keyName} />
+                </SuspenseWithFallback>
             </DraggableCard>
         );
-    }
+    },
 );
 
 const ChatPalettePanels: React.FC = () => {
-    const config = useAtomSelector(roomConfigAtom, state => state?.panels.chatPalettePanels);
-
-    if (config == null) {
-        return null;
-    }
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const config = useAtomSelector(roomConfigAtom, state => state.panels.chatPalettePanels);
 
     return (
         <>
@@ -381,57 +339,54 @@ const ChatPalettePanels: React.FC = () => {
 };
 
 const CharacterPanel: React.FC = React.memo(function CharacterPanel() {
-    const config = useAtomSelector(roomConfigAtom, state => state?.panels.characterPanel);
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const config = useAtomSelector(roomConfigAtom, state => state.panels.characterPanel);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
         (e: ControlPosition) => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                RoomConfigUtils.movePanel(roomConfig.panels.characterPanel, e);
+            reduceRoomConfig({
+                type: movePanel,
+                panelType: { type: characterPanel },
+                action: e,
             });
         },
-        [setRoomConfig]
+        [reduceRoomConfig],
     );
     const onResizeStop = React.useCallback(
         (dir: ResizeDirection, delta: NumberSize) => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                RoomConfigUtils.resizePanel(roomConfig.panels.characterPanel, dir, delta);
+            reduceRoomConfig({
+                type: resizePanel,
+                panelType: { type: characterPanel },
+                action: { dir, delta },
             });
         },
-        [setRoomConfig]
+        [reduceRoomConfig],
     );
     const onMoveToFront = React.useCallback(() => {
-        setRoomConfig(roomConfig => {
-            if (roomConfig == null) {
-                return;
-            }
-            RoomConfigUtils.bringPanelToFront(roomConfig, {
-                type: 'characterPanel',
-            });
+        reduceRoomConfig({
+            type: bringPanelToFront,
+            panelType: { type: characterPanel },
+            action: {
+                unminimizePanel: true,
+            },
         });
-    }, [setRoomConfig]);
+    }, [reduceRoomConfig]);
     const onClose = React.useCallback(() => {
-        setRoomConfig(roomConfig => {
-            if (roomConfig == null) {
-                return;
-            }
-            roomConfig.panels.characterPanel.isMinimized = true;
+        reduceRoomConfig({
+            type: minimize,
+            panelType: { type: characterPanel },
         });
-    }, [setRoomConfig]);
+    }, [reduceRoomConfig]);
 
-    if (config == null || config.isMinimized) {
+    if (config.isMinimized) {
         return null;
     }
 
     return (
         <DraggableCard
-            header='キャラクター'
+            header="キャラクター"
             onDragStop={onDragStop}
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
@@ -443,63 +398,62 @@ const CharacterPanel: React.FC = React.memo(function CharacterPanel() {
             minWidth={150}
             zIndex={config.zIndex}
         >
-            <CharacterListPanelContent height={config.height} />
+            <SuspenseWithFallback>
+                <CharacterListPanelContent height={config.height} />
+            </SuspenseWithFallback>
         </DraggableCard>
     );
 });
 
 const GameEffectPanel: React.FC = React.memo(function GameEffectPanel() {
-    const config = useAtomSelector(roomConfigAtom, state => state?.panels.gameEffectPanel);
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const config = useAtomSelector(roomConfigAtom, state => state.panels.gameEffectPanel);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
         (e: ControlPosition) => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                RoomConfigUtils.movePanel(roomConfig.panels.gameEffectPanel, e);
+            reduceRoomConfig({
+                type: movePanel,
+                panelType: { type: gameEffectPanel },
+                action: e,
             });
         },
-        [setRoomConfig]
+        [reduceRoomConfig],
     );
     const onResizeStop = React.useCallback(
         (dir: ResizeDirection, delta: NumberSize) => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                RoomConfigUtils.resizePanel(roomConfig.panels.gameEffectPanel, dir, delta);
+            reduceRoomConfig({
+                type: resizePanel,
+                panelType: { type: gameEffectPanel },
+                action: { dir, delta },
             });
         },
-        [setRoomConfig]
+        [reduceRoomConfig],
     );
     const onMoveToFront = React.useCallback(() => {
-        setRoomConfig(roomConfig => {
-            if (roomConfig == null) {
-                return;
-            }
-            RoomConfigUtils.bringPanelToFront(roomConfig, {
-                type: 'gameEffectPanel',
-            });
+        reduceRoomConfig({
+            type: bringPanelToFront,
+            panelType: { type: gameEffectPanel },
+            action: {
+                unminimizePanel: true,
+            },
         });
-    }, [setRoomConfig]);
+    }, [reduceRoomConfig]);
     const onClose = React.useCallback(() => {
-        setRoomConfig(roomConfig => {
-            if (roomConfig == null) {
-                return;
-            }
-            roomConfig.panels.gameEffectPanel.isMinimized = true;
+        reduceRoomConfig({
+            type: minimize,
+            panelType: { type: gameEffectPanel },
         });
-    }, [setRoomConfig]);
+    }, [reduceRoomConfig]);
 
-    if (config == null || config.isMinimized) {
+    if (config.isMinimized) {
         return null;
     }
 
     return (
         <DraggableCard
-            header='SE, BGM'
+            header="SE, BGM"
             onDragStop={onDragStop}
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
@@ -511,7 +465,9 @@ const GameEffectPanel: React.FC = React.memo(function GameEffectPanel() {
             minWidth={150}
             zIndex={config.zIndex}
         >
-            <SoundPlayerPanelContent />
+            <SuspenseWithFallback>
+                <SoundPlayerPanelContent />
+            </SuspenseWithFallback>
         </DraggableCard>
     );
 });
@@ -520,75 +476,62 @@ const MemoPanel: React.FC<ConfigAndKeyProps<MemoPanelConfig>> = React.memo(funct
     config,
     keyName,
 }) {
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
         (e: ControlPosition) => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                const memoPanel = roomConfig.panels.memoPanels[keyName];
-                if (memoPanel == null) {
-                    return;
-                }
-                RoomConfigUtils.movePanel(memoPanel, e);
+            reduceRoomConfig({
+                type: movePanel,
+                panelType: { type: memoPanel, panelId: keyName },
+                action: e,
             });
         },
-        [keyName, setRoomConfig]
+        [keyName, reduceRoomConfig],
     );
     const onResizeStop = React.useCallback(
         (dir: ResizeDirection, delta: NumberSize) => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                const memoPanel = roomConfig.panels.memoPanels[keyName];
-                if (memoPanel == null) {
-                    return;
-                }
-                RoomConfigUtils.resizePanel(memoPanel, dir, delta);
+            reduceRoomConfig({
+                type: resizePanel,
+                panelType: { type: memoPanel, panelId: keyName },
+                action: { dir, delta },
             });
         },
-        [keyName, setRoomConfig]
+        [keyName, reduceRoomConfig],
     );
     const onMoveToFront = React.useCallback(() => {
-        setRoomConfig(roomConfig => {
-            if (roomConfig == null) {
-                return;
-            }
-            const memoPanel = roomConfig.panels.memoPanels[keyName];
-            if (memoPanel == null) {
-                return;
-            }
-            RoomConfigUtils.bringPanelToFront(roomConfig, {
-                type: 'memoPanel',
-                panelId: keyName,
-            });
+        reduceRoomConfig({
+            type: bringPanelToFront,
+            panelType: { type: memoPanel, panelId: keyName },
+            action: {
+                unminimizePanel: true,
+            },
         });
-    }, [keyName, setRoomConfig]);
+    }, [keyName, reduceRoomConfig]);
     const onClose = React.useCallback(() => {
-        setRoomConfig(roomConfig => {
-            if (roomConfig == null) {
-                return;
-            }
-            roomConfig.panels.memoPanels[keyName] = undefined;
+        reduceRoomConfig({
+            type: minimize,
+            panelType: { type: memoPanel, panelId: keyName },
         });
-    }, [keyName, setRoomConfig]);
+    }, [keyName, reduceRoomConfig]);
     const onSelectedMemoIdChange = React.useCallback(
         (newId: string) => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                const memoPanel = roomConfig.panels.memoPanels[keyName];
-                if (memoPanel == null) {
-                    return;
-                }
-                memoPanel.selectedMemoId = newId;
+            reduceRoomConfig({
+                type: custom,
+                action: roomConfig => {
+                    if (roomConfig == null) {
+                        return;
+                    }
+                    const memoPanel = roomConfig.panels.memoPanels[keyName];
+                    if (memoPanel == null) {
+                        return;
+                    }
+                    memoPanel.selectedMemoId = newId;
+                },
             });
         },
-        [keyName, setRoomConfig]
+        [keyName, reduceRoomConfig],
     );
 
     if (config.isMinimized) {
@@ -598,7 +541,7 @@ const MemoPanel: React.FC<ConfigAndKeyProps<MemoPanelConfig>> = React.memo(funct
     return (
         <DraggableCard
             key={keyName}
-            header='共有メモ（部屋）'
+            header="共有メモ（部屋）"
             onDragStop={onDragStop}
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
@@ -610,20 +553,20 @@ const MemoPanel: React.FC<ConfigAndKeyProps<MemoPanelConfig>> = React.memo(funct
             minWidth={150}
             zIndex={config.zIndex}
         >
-            <MemosPanelContent
-                selectedMemoId={config.selectedMemoId}
-                onSelectedMemoIdChange={onSelectedMemoIdChange}
-            />
+            <SuspenseWithFallback>
+                <MemosPanelContent
+                    selectedMemoId={config.selectedMemoId}
+                    onSelectedMemoIdChange={onSelectedMemoIdChange}
+                />
+            </SuspenseWithFallback>
         </DraggableCard>
     );
 });
 
 const MemoPanels: React.FC = () => {
-    const config = useAtomSelector(roomConfigAtom, state => state?.panels.memoPanels);
-
-    if (config == null) {
-        return null;
-    }
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const config = useAtomSelector(roomConfigAtom, state => state.panels.memoPanels);
 
     return (
         <>
@@ -635,129 +578,122 @@ const MemoPanels: React.FC = () => {
 };
 
 const ParticipantPanel: React.FC = () => {
-    const participantPanel = useAtomSelector(
-        roomConfigAtom,
-        state => state?.panels.participantPanel
-    );
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const config = useAtomSelector(roomConfigAtom, state => state.panels.participantPanel);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
         (e: ControlPosition) => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                RoomConfigUtils.movePanel(roomConfig.panels.participantPanel, e);
+            reduceRoomConfig({
+                type: movePanel,
+                panelType: { type: participantPanel },
+                action: e,
             });
         },
-        [setRoomConfig]
+        [reduceRoomConfig],
     );
     const onResizeStop = React.useCallback(
         (dir: ResizeDirection, delta: NumberSize) => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                RoomConfigUtils.resizePanel(roomConfig.panels.participantPanel, dir, delta);
+            reduceRoomConfig({
+                type: resizePanel,
+                panelType: { type: participantPanel },
+                action: { dir, delta },
             });
         },
-        [setRoomConfig]
+        [reduceRoomConfig],
     );
     const onMoveToFront = React.useCallback(() => {
-        setRoomConfig(roomConfig => {
-            if (roomConfig == null) {
-                return;
-            }
-            RoomConfigUtils.bringPanelToFront(roomConfig, {
-                type: 'participantPanel',
-            });
+        reduceRoomConfig({
+            type: bringPanelToFront,
+            panelType: { type: participantPanel },
+            action: {
+                unminimizePanel: true,
+            },
         });
-    }, [setRoomConfig]);
+    }, [reduceRoomConfig]);
     const onClose = React.useCallback(() => {
-        setRoomConfig(roomConfig => {
-            if (roomConfig == null) {
-                return;
-            }
-            roomConfig.panels.participantPanel.isMinimized = true;
+        reduceRoomConfig({
+            type: minimize,
+            panelType: { type: participantPanel },
         });
-    }, [setRoomConfig]);
+    }, [reduceRoomConfig]);
 
-    if (participantPanel == null || participantPanel.isMinimized) {
+    if (config.isMinimized) {
         return null;
     }
 
     return (
         <DraggableCard
-            header='入室者'
+            header="入室者"
             onDragStop={onDragStop}
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
             onClose={onClose}
             childrenContainerStyle={ChildrenContainerStyle.defaultStyle}
-            position={participantPanel}
-            size={participantPanel}
+            position={config}
+            size={config}
             minHeight={150}
             minWidth={150}
-            zIndex={participantPanel.zIndex}
+            zIndex={config.zIndex}
         >
-            <ParticipantListPanelContent />
+            <SuspenseWithFallback>
+                <ParticipantListPanelContent />
+            </SuspenseWithFallback>
         </DraggableCard>
     );
 };
 
 const PieceValuePanel: React.FC = () => {
-    const config = useAtomSelector(roomConfigAtom, state => state?.panels.pieceValuePanel);
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const config = useAtomSelector(roomConfigAtom, state => state.panels.pieceValuePanel);
     const activeBoardId = useRoomStateValueSelector(state => state.activeBoardId);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
         (e: ControlPosition) => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                RoomConfigUtils.movePanel(roomConfig.panels.pieceValuePanel, e);
+            reduceRoomConfig({
+                type: movePanel,
+                panelType: { type: pieceValuePanel },
+                action: e,
             });
         },
-        [setRoomConfig]
+        [reduceRoomConfig],
     );
     const onResizeStop = React.useCallback(
         (dir: ResizeDirection, delta: NumberSize) => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                RoomConfigUtils.resizePanel(roomConfig.panels.pieceValuePanel, dir, delta);
+            reduceRoomConfig({
+                type: resizePanel,
+                panelType: { type: pieceValuePanel },
+                action: { dir, delta },
             });
         },
-        [setRoomConfig]
+        [reduceRoomConfig],
     );
     const onMoveToFront = React.useCallback(() => {
-        setRoomConfig(roomConfig => {
-            if (roomConfig == null) {
-                return;
-            }
-            RoomConfigUtils.bringPanelToFront(roomConfig, {
-                type: 'pieceValuePanel',
-            });
+        reduceRoomConfig({
+            type: bringPanelToFront,
+            panelType: { type: pieceValuePanel },
+            action: {
+                unminimizePanel: true,
+            },
         });
-    }, [setRoomConfig]);
+    }, [reduceRoomConfig]);
     const onClose = React.useCallback(() => {
-        setRoomConfig(roomConfig => {
-            if (roomConfig == null) {
-                return;
-            }
-            roomConfig.panels.pieceValuePanel.isMinimized = true;
+        reduceRoomConfig({
+            type: minimize,
+            panelType: { type: pieceValuePanel },
         });
-    }, [setRoomConfig]);
+    }, [reduceRoomConfig]);
 
-    if (config == null || config.isMinimized) {
+    if (config.isMinimized) {
         return null;
     }
 
     return (
         <DraggableCard
-            header='コマ(仮)'
+            header="コマ(仮)"
             onDragStop={onDragStop}
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
@@ -772,66 +708,65 @@ const PieceValuePanel: React.FC = () => {
             {activeBoardId == null ? (
                 'ボードビュアーにボードが表示されていないため、無効化されています'
             ) : (
-                <PieceListPanelContent boardId={activeBoardId} />
+                <SuspenseWithFallback>
+                    <PieceListPanelContent boardId={activeBoardId} />
+                </SuspenseWithFallback>
             )}
         </DraggableCard>
     );
 };
 
 const RollCallPanel: React.FC = () => {
-    const config = useAtomSelector(roomConfigAtom, state => state?.panels.rollCallPanel);
-    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const config = useAtomSelector(roomConfigAtom, state => state.panels.rollCallPanel);
     const highlightKey = useAtomValue(panelHighlightKeysAtom);
+    const rollCalls = useRoomStateValueSelector(state => state.rollCalls);
+    const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
         (e: ControlPosition) => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                RoomConfigUtils.movePanel(roomConfig.panels.rollCallPanel, e);
+            reduceRoomConfig({
+                type: movePanel,
+                panelType: { type: rollCallPanel },
+                action: e,
             });
         },
-        [setRoomConfig]
+        [reduceRoomConfig],
     );
     const onResizeStop = React.useCallback(
         (dir: ResizeDirection, delta: NumberSize) => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                RoomConfigUtils.resizePanel(roomConfig.panels.rollCallPanel, dir, delta);
+            reduceRoomConfig({
+                type: resizePanel,
+                panelType: { type: rollCallPanel },
+                action: { dir, delta },
             });
         },
-        [setRoomConfig]
+        [reduceRoomConfig],
     );
     const onMoveToFront = React.useCallback(() => {
-        setRoomConfig(roomConfig => {
-            if (roomConfig == null) {
-                return;
-            }
-            RoomConfigUtils.bringPanelToFront(roomConfig, {
-                type: 'rollCallPanel',
-            });
+        reduceRoomConfig({
+            type: bringPanelToFront,
+            panelType: { type: rollCallPanel },
+            action: {
+                unminimizePanel: true,
+            },
         });
-    }, [setRoomConfig]);
+    }, [reduceRoomConfig]);
     const onClose = React.useCallback(() => {
-        setRoomConfig(roomConfig => {
-            if (roomConfig == null) {
-                return;
-            }
-            roomConfig.panels.rollCallPanel.isMinimized = true;
+        reduceRoomConfig({
+            type: minimize,
+            panelType: { type: rollCallPanel },
         });
-    }, [setRoomConfig]);
-    const rollCalls = useRoomStateValueSelector(state => state.rollCalls);
+    }, [reduceRoomConfig]);
 
-    if (config == null || config.isMinimized) {
+    if (config.isMinimized) {
         return null;
     }
 
     return (
         <DraggableCard
-            header='点呼'
+            header="点呼"
             onDragStop={onDragStop}
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
@@ -844,71 +779,57 @@ const RollCallPanel: React.FC = () => {
             zIndex={config.zIndex}
             highlightKey={highlightKey.rollCallPanel}
         >
-            <RollCall rollCalls={rollCalls ?? {}} />
+            <SuspenseWithFallback>
+                <RollCall rollCalls={rollCalls ?? {}} />
+            </SuspenseWithFallback>
         </DraggableCard>
     );
 };
 
 const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.memo(
     function RoomMessagePanel({ config, keyName }) {
-        const setRoomConfig = useImmerSetAtom(roomConfigAtom);
         const { modal } = App.useApp();
+        const roomId = useRoomId();
+        const roomConfigAtom = roomConfigAtomFamily(roomId);
+        const reduceRoomConfig = useSetAtom(roomConfigAtom);
 
         const onDragStop = React.useCallback(
             (e: ControlPosition) => {
-                setRoomConfig(roomConfig => {
-                    if (roomConfig == null) {
-                        return;
-                    }
-                    const messagePanel = roomConfig.panels.messagePanels[keyName];
-                    if (messagePanel == null) {
-                        return;
-                    }
-                    RoomConfigUtils.movePanel(messagePanel, e);
+                reduceRoomConfig({
+                    type: movePanel,
+                    panelType: { type: messagePanel, panelId: keyName },
+                    action: e,
                 });
             },
-            [keyName, setRoomConfig]
+            [keyName, reduceRoomConfig],
         );
         const onResizeStop = React.useCallback(
             (dir: ResizeDirection, delta: NumberSize) => {
-                setRoomConfig(roomConfig => {
-                    if (roomConfig == null) {
-                        return;
-                    }
-                    const messagePanel = roomConfig.panels.messagePanels[keyName];
-                    if (messagePanel == null) {
-                        return;
-                    }
-                    RoomConfigUtils.resizePanel(messagePanel, dir, delta);
+                reduceRoomConfig({
+                    type: resizePanel,
+                    panelType: { type: messagePanel, panelId: keyName },
+                    action: { dir, delta },
                 });
             },
-            [keyName, setRoomConfig]
+            [keyName, reduceRoomConfig],
         );
         const onMoveToFront = React.useCallback(() => {
-            setRoomConfig(roomConfig => {
-                if (roomConfig == null) {
-                    return;
-                }
-                const messagePanel = roomConfig.panels.messagePanels[keyName];
-                if (messagePanel == null) {
-                    return;
-                }
-                RoomConfigUtils.bringPanelToFront(roomConfig, {
-                    type: 'messagePanel',
-                    panelId: keyName,
-                });
+            reduceRoomConfig({
+                type: bringPanelToFront,
+                panelType: { type: messagePanel, panelId: keyName },
+                action: {
+                    unminimizePanel: true,
+                },
             });
-        }, [keyName, setRoomConfig]);
+        }, [keyName, reduceRoomConfig]);
         const onClose = React.useCallback(() => {
             modal.confirm({
                 title: '削除の確認',
                 content: '選択されたメッセージウィンドウを削除します。よろしいですか？',
                 onOk: () => {
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        roomConfig.panels.messagePanels[keyName] = undefined;
+                    reduceRoomConfig({
+                        type: minimize,
+                        panelType: { type: messagePanel, panelId: keyName },
                     });
                 },
                 okText: '削除',
@@ -916,7 +837,7 @@ const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.
                 closable: true,
                 maskClosable: true,
             });
-        }, [keyName, modal, setRoomConfig]);
+        }, [keyName, modal, reduceRoomConfig]);
 
         if (config == null || config.isMinimized) {
             return null;
@@ -925,7 +846,7 @@ const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.
         return (
             <DraggableCard
                 key={keyName}
-                header='メッセージ'
+                header="メッセージ"
                 onDragStop={onDragStop}
                 onResizeStop={onResizeStop}
                 onMoveToFront={onMoveToFront}
@@ -937,18 +858,18 @@ const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.
                 minWidth={150}
                 zIndex={config.zIndex}
             >
-                <RoomMessagesPanelContent panelId={keyName} height={config.height} />
+                <SuspenseWithFallback>
+                    <RoomMessagesPanelContent panelId={keyName} height={config.height} />
+                </SuspenseWithFallback>
             </DraggableCard>
         );
-    }
+    },
 );
 
 const RoomMessagePanels: React.FC = () => {
-    const config = useAtomSelector(roomConfigAtom, state => state?.panels.messagePanels);
-
-    if (config == null) {
-        return null;
-    }
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
+    const config = useAtomSelector(roomConfigAtom, state => state.panels.messagePanels);
 
     return (
         <>
@@ -972,37 +893,28 @@ export const Room: React.FC<Props> = ({ debug }) => {
     const myUserUid = useMyUserUid();
     const innerWidth = useAtomValue(debouncedWindowInnerWidthAtom);
     const innerHeight = useAtomValue(debouncedWindowInnerHeightAtom);
-    const roomIdOfRoomConfig = useAtomSelector(roomConfigAtom, state => state?.roomId);
+    const roomId = useRoomId();
+    const roomConfigAtom = roomConfigAtomFamily(roomId);
     const showBackgroundBoardViewer = useAtomSelector(
         roomConfigAtom,
-        state => state?.showBackgroundBoardViewer
+        state => state.showBackgroundBoardViewer,
     );
     const activeBoardBackgroundConfig = useAtomSelector(
         roomConfigAtom,
-        state => state?.panels.activeBoardBackground
+        state => state?.panels.activeBoardBackground,
     );
 
     usePlayBgm();
     usePlaySoundEffect();
-    usePushNotifications();
-
-    const roomId = useRoomId();
-
-    if (
-        roomIdOfRoomConfig == null ||
-        roomIdOfRoomConfig !== roomId ||
-        activeBoardBackgroundConfig == null
-    ) {
-        return <LoadingResult title='個人設定のデータをブラウザから読み込んでいます…' />;
-    }
+    usePushNotificationsAndAutoOpenPanel();
 
     if (myUserUid == null) {
         return (
             <AntdLayout>
                 <AntdLayout.Content>
                     <Result
-                        status='warning'
-                        title='ログインしていないか、Participantの取得に失敗しました。'
+                        status="warning"
+                        title="ログインしていないか、Participantの取得に失敗しました。"
                     />
                 </AntdLayout.Content>
             </AntdLayout>
@@ -1013,19 +925,23 @@ export const Room: React.FC<Props> = ({ debug }) => {
         <AntdLayout>
             <RoomGlobalStyle />
             <AntdLayout.Content>
-                <RoomMenu />
+                <SuspenseWithFallback>
+                    <RoomMenu />
+                </SuspenseWithFallback>
                 <div className={classNames(relative)}>
-                    {showBackgroundBoardViewer == true && (
-                        <Board
-                            canvasWidth={debug?.window?.innerWidth ?? innerWidth}
-                            canvasHeight={
-                                (debug?.window?.innerHeight ?? innerHeight) -
-                                40 /* TODO: 40という値は適当 */
-                            }
-                            type='activeBoard'
-                            isBackground={true}
-                            config={activeBoardBackgroundConfig}
-                        />
+                    {showBackgroundBoardViewer && (
+                        <SuspenseWithFallback>
+                            <Board
+                                canvasWidth={debug?.window?.innerWidth ?? innerWidth}
+                                canvasHeight={
+                                    (debug?.window?.innerHeight ?? innerHeight) -
+                                    40 /* TODO: 40という値は適当 */
+                                }
+                                type="activeBoard"
+                                isBackground={true}
+                                config={activeBoardBackgroundConfig}
+                            />
+                        </SuspenseWithFallback>
                     )}
                     <BoardEditorPanels />
                     <ActiveBoardPanel />

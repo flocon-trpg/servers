@@ -1,4 +1,4 @@
-import { createObjectValueTemplate, createTextValueTemplate } from '../../../../generator';
+import { createObjectValueTemplate, createTextValueTemplate } from '../../../../generator/types';
 
 export const template = createObjectValueTemplate(
     {
@@ -6,5 +6,5 @@ export const template = createObjectValueTemplate(
         value: createTextValueTemplate(false),
     },
     1,
-    1
+    1,
 );

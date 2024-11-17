@@ -1,13 +1,13 @@
 import { chooseRecord } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
-import { State, TwoWayOperation, UpOperation } from '../../../../generator';
+import { State, TwoWayOperation, UpOperation } from '../../../../generator/types';
 import { isIdRecord } from '../../../../record';
 import * as RecordOperation from '../../../../recordOperation';
 import {
     RequestedBy,
     anyValue,
+    canChangeCharacterValue,
     canChangeOwnerCharacterId,
-    isCharacterOwner,
 } from '../../../../requestedBy';
 import * as ReplaceOperation from '../../../../util/replaceOperation';
 import { ServerTransform, TwoWayError } from '../../../../util/type';
@@ -20,7 +20,7 @@ import { dicePieceStrIndexes, template } from './types';
 export const toClientState =
     (requestedBy: RequestedBy, currentRoomState: State<typeof Room.template>) =>
     (source: State<typeof template>): State<typeof template> => {
-        const isAuthorized = isCharacterOwner({
+        const isAuthorized = canChangeCharacterValue({
             requestedBy,
             characterId: source.ownerCharacterId ?? anyValue,
             currentRoomState,
@@ -28,7 +28,7 @@ export const toClientState =
         return {
             ...source,
             dice: chooseRecord(source.dice ?? {}, state =>
-                DieValue.toClientState(isAuthorized)(state)
+                DieValue.toClientState(isAuthorized)(state),
             ),
         };
     };
@@ -36,7 +36,7 @@ export const toClientState =
 export const serverTransform =
     (
         requestedBy: RequestedBy,
-        currentRoomState: State<typeof Room.template>
+        currentRoomState: State<typeof Room.template>,
     ): ServerTransform<
         State<typeof template>,
         TwoWayOperation<typeof template>,
@@ -48,7 +48,7 @@ export const serverTransform =
         clientOperation,
         serverOperation,
     }) => {
-        const isAuthorized = isCharacterOwner({
+        const isAuthorized = canChangeCharacterValue({
             requestedBy,
             characterId: stateAfterServerOperation.ownerCharacterId ?? anyValue,
             currentRoomState,

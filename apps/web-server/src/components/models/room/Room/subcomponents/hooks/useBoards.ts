@@ -9,6 +9,6 @@ export const useBoards = (): ReadonlyMap<string, BoardState> => {
     const record = useRoomStateValueSelector(state => state.boards);
     return React.useMemo(
         () => (record == null ? new Map<string, BoardState>() : recordToMap(record)),
-        [record]
+        [record],
     );
 };

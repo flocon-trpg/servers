@@ -6,8 +6,9 @@ on:
             - 'release'
 
 jobs:
-    check-disclaimer:
-        name: Check licenses-npm-package.txt
+    # TODO: かつてはビルドされた JavaScript ファイルがリポジトリに含まれておりそのチェックにこのジョブが使われていたが、現在はそれらのファイルはリポジトリに含まれていないため、このジョブは削除したほうがよいかもしれない
+    check-artifacts:
+        name: Check artifacts
 
         runs-on: ubuntu-22.04
 
@@ -15,22 +16,61 @@ jobs:
             - name: List git config
               run: git config -l
 
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
-            - name: Use Node 18.x
-              uses: actions/setup-node@v3
+            - name: Use Node 20.x
+              uses: actions/setup-node@v4
               with:
-                  node-version: 18.x
+                  node-version: 20.x
                   cache: yarn
 
             - run: yarn
 
-            - name: Generate licenses disclaimer
-              run: yarn generate-disclaimer
+            - run: yarn build
 
-            # yarn generate-disclaimer で生成されるファイルはLFとCRLFが混在するため、改行コードを統一する処理を行っている。
             - name: Clean CRLF
               run: git config --local core.autocrlf input && git add . && git reset
 
             - name: Fail if not all the artifacts are OK
-              uses: numtide/clean-git-action@v1
+              uses: numtide/clean-git-action@v2
+
+    comment-git-tags:
+        name: Comment git tags
+        runs-on: ubuntu-22.04
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Use Node 20.x
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20.x
+                  cache: yarn
+
+            - run: yarn
+
+            - run: yarn build
+
+            - run: yarn run gen-git-tags
+              working-directory: ./apps/api-server
+
+            - name: set git tags to GITHUB_ENV
+              run: |
+                  tags_txt=$(cat ./apps/api-server/git-tags.txt) 
+                  echo "tags_txt<<EOF" >> $GITHUB_ENV
+                  echo "$tags_txt" >> $GITHUB_ENV
+                  echo "EOF" >> $GITHUB_ENV
+
+            - name: Add comment
+              run: gh issue comment "$PR_NUMBER" --body "$BODY"
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  GH_REPO: ${{ github.repository }}
+                  PR_NUMBER: ${{ github.event.number }}
+                  BODY: >
+                      リポジトリの管理者へ: PR をマージした後に Release ブランチにセットするタグの名前の候補は下のとおりです。`*` の部分は自分で変更してください。
+
+                      ```
+
+                      ${{ env.tags_txt }}
+
+                      ```

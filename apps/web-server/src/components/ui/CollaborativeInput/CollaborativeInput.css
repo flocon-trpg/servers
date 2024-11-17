@@ -1,0 +1,34 @@
+
+        .collaborative-input {
+            /* Ant Design の Input の色と等しい */
+            background-color: #141414;
+            /* Ant Design の Input の色と等しい */
+            color: rgba(255, 255, 255, 0.85);
+            border: 1px solid #333;
+            border-radius: 6px;
+        }
+
+        .collaborative-input:focus {
+outline: none;
+            border: 1px solid #0078d4;
+        }
+
+        .collaborative-input.very-small {
+            font-size: 0.7rem;
+            padding: 2px 4px;
+        }
+
+        .collaborative-input.small {
+            font-size: 0.75rem;
+            padding: 2px 4px;
+        }
+
+        .collaborative-input.medium {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+        }
+
+        .collaborative-input.disabled {
+            color: gray;
+            cursor: not-allowed;
+        }

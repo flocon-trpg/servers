@@ -1,7 +1,7 @@
 import { ConfigProvider, theme } from 'antd';
 import { ThemeConfig } from 'antd/es/config-provider/context';
 import jaJP from 'antd/locale/ja_JP';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { AntdThemeContext, Value } from '@/contexts/AntdThemeContext';
 
 const defaultTheme: ThemeConfig = { algorithm: [theme.darkAlgorithm] };
@@ -12,7 +12,10 @@ type Props = {
     compact?: boolean | undefined;
 };
 
-export const AntdThemeConfigProvider: React.FC<Props> = ({ compact, children }) => {
+export const AntdThemeConfigProvider: React.FC<Props & PropsWithChildren> = ({
+    compact,
+    children,
+}) => {
     const parentCompact = React.useContext(AntdThemeContext).compact;
     const childCompact = compact ?? parentCompact;
     const childContextValue: Value = React.useMemo(() => {

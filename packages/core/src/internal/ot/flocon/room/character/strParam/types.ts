@@ -3,7 +3,7 @@ import {
     createObjectValueTemplate,
     createReplaceValueTemplate,
     createTextValueTemplate,
-} from '../../../../generator';
+} from '../../../../generator/types';
 
 export const template = createObjectValueTemplate(
     {
@@ -12,5 +12,5 @@ export const template = createObjectValueTemplate(
         overriddenParameterName: createTextValueTemplate(true),
     },
     2,
-    1
+    1,
 );

@@ -43,7 +43,7 @@ export const serializedMessagePanelConfig = z
 export type SerializedMessagePanelConfig = z.TypeOf<typeof serializedMessagePanelConfig>;
 
 export const deserializeMessagePanelConfig = (
-    source: SerializedMessagePanelConfig
+    source: SerializedMessagePanelConfig,
 ): MessagePanelConfig => {
     return {
         ...deserializeDraggablePanelConfigBase(source),

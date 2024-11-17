@@ -1,8 +1,8 @@
 import { z } from 'zod';
+import { maybe } from '../../../../../maybe';
+import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../../generator/types';
 import { filePathValue } from '../../../filePath/types';
 import * as Piece from '../../../piece/types';
-import { maybe } from '@/maybe';
-import { createObjectValueTemplate, createReplaceValueTemplate } from '@/ot/generator';
 
 export const template = createObjectValueTemplate(
     {
@@ -12,5 +12,5 @@ export const template = createObjectValueTemplate(
         isPrivate: createReplaceValueTemplate(z.boolean()),
     },
     2,
-    1
+    1,
 );

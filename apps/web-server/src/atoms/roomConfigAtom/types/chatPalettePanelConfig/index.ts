@@ -33,7 +33,7 @@ export const serializedChatPalettePanelConfig = z
 export type SerializedChatPalettePanelConfig = z.TypeOf<typeof serializedChatPalettePanelConfig>;
 
 export const deserializeChatPalettePanelConfig = (
-    source: SerializedChatPalettePanelConfig
+    source: SerializedChatPalettePanelConfig,
 ): ChatPalettePanelConfig => {
     return {
         ...deserializeDraggablePanelConfigBase(source),

@@ -21,6 +21,21 @@ import {
 } from './recordOperationElement';
 import { isValidKey } from './util/isValidKey';
 
+type RecordOperationElement<TReplace, TUpdate> =
+    | {
+          type: typeof update;
+          update: TUpdate;
+      }
+    | {
+          type: typeof replace;
+          replace: TReplace;
+      };
+
+type RecordOperation<TReplace, TUpdate> = Record<
+    string,
+    RecordOperationElement<TReplace, TUpdate> | undefined
+>;
+
 export type RecordDownOperation<TState, TOperation> = Record<
     string,
     RecordDownOperationElement<TState, TOperation> | undefined
@@ -173,7 +188,7 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
                 const nextStateElement = nextState[key];
                 if (nextStateElement === undefined) {
                     return Result.error(
-                        `tried to update "${key}", but nextState does not have such a key`
+                        `tried to update "${key}", but nextState does not have such a key`,
                     );
                 }
                 const restored = innerRestore({
@@ -236,7 +251,7 @@ export const apply = <TState, TOperation, TCustomError = string>({
                 const prevStateElement = prevState[key];
                 if (prevStateElement === undefined) {
                     return Result.error(
-                        `tried to update "${key}", but prevState does not have such a key`
+                        `tried to update "${key}", but prevState does not have such a key`,
                     );
                 }
                 const newValue = innerApply({
@@ -290,7 +305,7 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({
                 const nextStateElement = nextState[key];
                 if (nextStateElement === undefined) {
                     return Result.error(
-                        `tried to update "${key}", but nextState does not have such a key`
+                        `tried to update "${key}", but nextState does not have such a key`,
                     );
                 }
                 const oldValue = innerApplyBack({
@@ -311,25 +326,37 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({
 };
 
 // stateが必要ないため処理を高速化&簡略化できるが、その代わり戻り値のreplaceにおいて oldValue === undefined && newValue === undefined もしくは oldValue !== undefined && newValue !== undefinedになるケースがある。
-export const composeDownOperation = <TState, TDownOperation, TCustomError = string>({
+export const compose = <TReplace, TUpdate, TError>({
     first,
     second,
-    innerApplyBack,
-    innerCompose,
+    composeReplaceReplace,
+    composeReplaceUpdate,
+    composeUpdateReplace,
+    composeUpdateUpdate,
 }: {
-    first?: RecordDownOperation<TState, TDownOperation>;
-    second?: RecordDownOperation<TState, TDownOperation>;
-    innerApplyBack: (params: {
+    first?: RecordOperation<TReplace, TUpdate>;
+    second?: RecordOperation<TReplace, TUpdate>;
+    composeReplaceReplace: (params: {
+        first: TReplace;
+        second: TReplace;
         key: string;
-        operation: TDownOperation;
-        state: TState;
-    }) => Result<TState, string | TCustomError>;
-    innerCompose: (params: {
+    }) => Result<TReplace | undefined, TError>;
+    composeReplaceUpdate: (params: {
+        first: TReplace;
+        second: TUpdate;
         key: string;
-        first: TDownOperation;
-        second: TDownOperation;
-    }) => Result<TDownOperation | undefined, string | TCustomError>;
-}): Result<RecordDownOperation<TState, TDownOperation> | undefined, string | TCustomError> => {
+    }) => Result<TReplace | undefined, TError>;
+    composeUpdateReplace: (params: {
+        first: TUpdate;
+        second: TReplace;
+        key: string;
+    }) => Result<TReplace | undefined, TError>;
+    composeUpdateUpdate: (params: {
+        first: TUpdate;
+        second: TUpdate;
+        key: string;
+    }) => Result<TUpdate | undefined, TError>;
+}): Result<RecordOperation<TReplace, TUpdate> | undefined, TError> => {
     if (first == null) {
         return Result.ok(second == null || isEmptyRecord(second) ? undefined : second);
     }
@@ -337,7 +364,7 @@ export const composeDownOperation = <TState, TDownOperation, TCustomError = stri
         return Result.ok(first == null || isEmptyRecord(first) ? undefined : first);
     }
 
-    const result = new Map<string, RecordDownOperationElement<TState, TDownOperation>>();
+    const result = new Map<string, RecordOperationElement<TReplace, TUpdate>>();
 
     for (const [key, groupJoined] of groupJoinMap(recordToMap(first), recordToMap(second))) {
         switch (groupJoined.type) {
@@ -378,58 +405,78 @@ export const composeDownOperation = <TState, TDownOperation, TCustomError = stri
                     case 'replace':
                         switch (groupJoined.right.type) {
                             case 'replace': {
-                                const left = groupJoined.left.replace.oldValue;
-                                result.set(key, {
-                                    type: 'replace',
-                                    replace: { oldValue: left },
-                                });
-                                continue;
-                            }
-                            case 'update':
-                                break;
-                        }
-                        result.set(key, {
-                            type: 'replace',
-                            replace: groupJoined.left.replace,
-                        });
-                        continue;
-                    case 'update':
-                        switch (groupJoined.right.type) {
-                            case 'replace': {
-                                if (groupJoined.right.replace.oldValue === undefined) {
-                                    return Result.error(
-                                        `first is update, but second.oldValue is null. the key is "${key}".`
-                                    );
-                                }
-                                const firstOldValue = innerApplyBack({
+                                const composed = composeReplaceReplace({
+                                    first: groupJoined.left.replace,
+                                    second: groupJoined.right.replace,
                                     key,
-                                    operation: groupJoined.left.update,
-                                    state: groupJoined.right.replace.oldValue,
                                 });
-                                if (firstOldValue.isError) {
-                                    return firstOldValue;
+                                if (composed.isError) {
+                                    return composed;
+                                }
+                                if (composed.value === undefined) {
+                                    continue;
                                 }
                                 result.set(key, {
                                     type: 'replace',
-                                    replace: { oldValue: firstOldValue.value },
+                                    replace: composed.value,
                                 });
                                 continue;
                             }
                             case 'update': {
-                                const update = innerCompose({
+                                const composed = composeReplaceUpdate({
+                                    first: groupJoined.left.replace,
+                                    second: groupJoined.right.update,
                                     key,
+                                });
+                                if (composed.isError) {
+                                    return composed;
+                                }
+                                if (composed.value === undefined) {
+                                    continue;
+                                }
+                                result.set(key, {
+                                    type: 'replace',
+                                    replace: composed.value,
+                                });
+                                continue;
+                            }
+                        }
+                        continue;
+                    case 'update':
+                        switch (groupJoined.right.type) {
+                            case 'replace': {
+                                const composed = composeUpdateReplace({
+                                    first: groupJoined.left.update,
+                                    second: groupJoined.right.replace,
+                                    key,
+                                });
+                                if (composed.isError) {
+                                    return composed;
+                                }
+                                if (composed.value === undefined) {
+                                    continue;
+                                }
+                                result.set(key, {
+                                    type: 'replace',
+                                    replace: composed.value,
+                                });
+                                continue;
+                            }
+                            case 'update': {
+                                const composed = composeUpdateUpdate({
                                     first: groupJoined.left.update,
                                     second: groupJoined.right.update,
+                                    key,
                                 });
-                                if (update.isError) {
-                                    return update;
+                                if (composed.isError) {
+                                    return composed;
                                 }
-                                if (update.value === undefined) {
+                                if (composed.value === undefined) {
                                     continue;
                                 }
                                 result.set(key, {
                                     type: 'update',
-                                    update: update.value,
+                                    update: composed.value,
                                 });
                                 continue;
                             }
@@ -441,12 +488,66 @@ export const composeDownOperation = <TState, TDownOperation, TCustomError = stri
     return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
 };
 
+export const composeDownOperation = <TState, TDownOperation, TCustomError = string>({
+    first,
+    second,
+    innerApplyBack,
+    innerCompose,
+}: {
+    first?: RecordDownOperation<TState, TDownOperation>;
+    second?: RecordDownOperation<TState, TDownOperation>;
+    innerApplyBack: (params: {
+        key: string;
+        operation: TDownOperation;
+        state: TState;
+    }) => Result<TState, string | TCustomError>;
+    innerCompose: (params: {
+        key: string;
+        first: TDownOperation;
+        second: TDownOperation;
+    }) => Result<TDownOperation | undefined, string | TCustomError>;
+}): Result<RecordDownOperation<TState, TDownOperation> | undefined, string | TCustomError> => {
+    return compose<{ oldValue?: TState }, TDownOperation, string | TCustomError>({
+        first,
+        second,
+        composeReplaceReplace: params => {
+            return Result.ok(params.first);
+        },
+        composeReplaceUpdate: params => {
+            return Result.ok(params.first);
+        },
+        composeUpdateReplace: params => {
+            if (params.second.oldValue === undefined) {
+                return Result.error(
+                    `first is update, but second.oldValue is null. the key is "${params.key}".`,
+                );
+            }
+            const firstOldValue = innerApplyBack({
+                key: params.key,
+                operation: params.first,
+                state: params.second.oldValue,
+            });
+            if (firstOldValue.isError) {
+                return firstOldValue;
+            }
+            return Result.ok({ oldValue: firstOldValue.value });
+        },
+        composeUpdateUpdate: params => {
+            return innerCompose({
+                key: params.key,
+                first: params.first,
+                second: params.second,
+            });
+        },
+    });
+};
+
 type ServerTransformCoreParams<
     TServerState,
     TClientState,
     TFirstOperation,
     TSecondOperation,
-    TCustomError
+    TCustomError,
 > = {
     stateBeforeFirst: StringKeyRecord<TServerState>;
     stateAfterFirst: StringKeyRecord<TServerState>;
@@ -457,7 +558,7 @@ type ServerTransformCoreParams<
     innerTransform: (
         params: ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> & {
             key: string;
-        }
+        },
     ) => Result<TFirstOperation | undefined, string | TCustomError>;
     cancellationPolicy: CancellationPolicy<string, TServerState>;
 };
@@ -468,7 +569,7 @@ const serverTransformWithoutValidation = <
     TClientState,
     TFirstOperation,
     TSecondOperation,
-    TCustomError = string
+    TCustomError = string,
 >({
     first,
     second,
@@ -510,7 +611,7 @@ const serverTransformWithoutValidation = <
                 if (operation.replace.newValue === undefined) {
                     if (innerPrevState === undefined) {
                         return Result.error(
-                            `"${key}" was not found at requested revision. It is not allowed to try to remove non-existing element.`
+                            `"${key}" was not found at requested revision. It is not allowed to try to remove non-existing element.`,
                         );
                     }
                     if (innerNextState === undefined) {
@@ -543,7 +644,7 @@ const serverTransformWithoutValidation = <
 
                 if (innerPrevState !== undefined) {
                     return Result.error(
-                        `"${key}" was found at requested revision. When adding a state, old value must be empty.`
+                        `"${key}" was found at requested revision. When adding a state, old value must be empty.`,
                     );
                 }
 
@@ -617,12 +718,12 @@ const serverTransformWithoutValidation = <
     return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
 };
 
-type ServerTransformParams<
+export type ServerTransformParams<
     TServerState,
     TClientState,
     TFirstOperation,
     TSecondOperation,
-    TCustomError
+    TCustomError,
 > = ServerTransformCoreParams<
     TServerState,
     TClientState,
@@ -646,7 +747,7 @@ export const serverTransform = <
     TClientState,
     TFirstOperation,
     TSecondOperation,
-    TCustomError = string
+    TCustomError = string,
 >(
     params: ServerTransformParams<
         TServerState,
@@ -654,7 +755,7 @@ export const serverTransform = <
         TFirstOperation,
         TSecondOperation,
         TCustomError
-    >
+    >,
 ): Result<
     RecordTwoWayOperation<TServerState, TFirstOperation> | undefined,
     string | TCustomError
@@ -685,14 +786,15 @@ export const serverTransform = <
             prevStateLength < nextStateLength
         ) {
             return Result.error(
-                `${params.validation.recordName} の要素の数が多すぎるため、これ以上追加することはできません。追加するには、不要な要素を削除してください。`
+                `${params.validation.recordName} の要素の数が多すぎるため、これ以上追加することはできません。追加するには、不要な要素を削除してください。`,
             );
         }
     }
     return result;
 };
 
-type InnerClientTransform<TFirstOperation, TSecondOperation, TError = string> = (params: {
+type InnerClientTransform<TState, TFirstOperation, TSecondOperation, TError = string> = (params: {
+    state: TState;
     first: TFirstOperation;
     second: TSecondOperation;
 }) => Result<
@@ -709,21 +811,25 @@ type Diff<TState, TOperation> = (params: {
 }) => TOperation | undefined;
 
 const transformElement = <TState, TFirstOperation, TSecondOperation, TError = string>({
+    state,
     first,
     second,
     innerTransform,
     innerDiff,
+    errorMessageOnStateNotFound,
 }: {
+    state: TState | undefined;
     first: RecordUpOperationElement<TState, TFirstOperation>;
     second: RecordUpOperationElement<TState, TSecondOperation>;
-    innerTransform: InnerClientTransform<TFirstOperation, TSecondOperation, TError>;
+    innerTransform: InnerClientTransform<TState, TFirstOperation, TSecondOperation, TError>;
     innerDiff: Diff<TState, TFirstOperation>;
+    errorMessageOnStateNotFound: string;
 }): Result<
     {
         firstPrime: RecordUpOperationElement<TState, TFirstOperation> | undefined;
         secondPrime: RecordUpOperationElement<TState, TSecondOperation> | undefined;
     },
-    TError
+    string | TError
 > => {
     switch (first.type) {
         case replace:
@@ -766,7 +872,7 @@ const transformElement = <TState, TFirstOperation, TSecondOperation, TError = st
                 case replace: {
                     if (second.replace.newValue !== undefined) {
                         throw new Error(
-                            'Tried to add an element, but already exists another value.'
+                            'Tried to add an element, but already exists another value.',
                         );
                     }
 
@@ -781,7 +887,11 @@ const transformElement = <TState, TFirstOperation, TSecondOperation, TError = st
                     });
                 }
                 case update: {
+                    if (state === undefined) {
+                        return Result.error(errorMessageOnStateNotFound);
+                    }
                     const xform = innerTransform({
+                        state,
                         first: first.update,
                         second: second.update,
                     });
@@ -810,22 +920,24 @@ const transformElement = <TState, TFirstOperation, TSecondOperation, TError = st
     }
 };
 
-export const clientTransform = <TState, TOperation, TError = string>({
+export const clientTransform = <TState, TOperation, TCustomError = string>({
+    state,
     first,
     second,
     innerTransform,
     innerDiff,
 }: {
+    state: StringKeyRecord<TState>;
     first?: RecordUpOperation<TState, TOperation>;
     second?: RecordUpOperation<TState, TOperation>;
-    innerTransform: InnerClientTransform<TOperation, TOperation, TError>;
+    innerTransform: InnerClientTransform<TState, TOperation, TOperation, TCustomError>;
     innerDiff: Diff<TState, TOperation>;
 }): Result<
     {
         firstPrime: RecordUpOperation<TState, TOperation> | undefined;
         secondPrime: RecordUpOperation<TState, TOperation> | undefined;
     },
-    TError
+    string | TCustomError
 > => {
     if (first == null || second == null) {
         return Result.ok({
@@ -836,7 +948,7 @@ export const clientTransform = <TState, TOperation, TError = string>({
 
     const firstPrime = new Map<string, RecordUpOperationElement<TState, TOperation>>();
     const secondPrime = new Map<string, RecordUpOperationElement<TState, TOperation>>();
-    let error = undefined as { error: TError } | undefined;
+    let error = undefined as { error: string | TCustomError } | undefined;
 
     groupJoinMap(recordToMap(first), recordToMap(second)).forEach((group, key) => {
         if (error != null) {
@@ -853,10 +965,12 @@ export const clientTransform = <TState, TOperation, TError = string>({
             }
             case both: {
                 const xform = transformElement({
+                    state: state[key],
                     first: group.left,
                     second: group.right,
                     innerTransform,
                     innerDiff,
+                    errorMessageOnStateNotFound: `"${key}" is not found at RecordOperation.clientTransform.`,
                 });
                 if (xform.isError) {
                     error = { error: xform.error };
@@ -937,7 +1051,7 @@ export const mapRecordUpOperation = <TState1, TState2, TOperation1, TOperation2>
 }: {
     source: Record<string, RecordUpOperationElement<TState1, TOperation1> | undefined>;
     mapState: (state: TState1) => TState2;
-    mapOperation: (state: TOperation1) => TOperation2;
+    mapOperation: (operation: TOperation1) => TOperation2;
 }): Record<string, RecordUpOperationElement<TState2, TOperation2>> => {
     return chooseRecord(source, element => {
         if (element.type === replace) {
@@ -965,7 +1079,7 @@ export const mapRecordDownOperation = <TState1, TState2, TOperation1, TOperation
 }: {
     source: Record<string, RecordDownOperationElement<TState1, TOperation1> | undefined>;
     mapState: (state: TState1) => TState2;
-    mapOperation: (state: TOperation1) => TOperation2;
+    mapOperation: (operation: TOperation1) => TOperation2;
 }): Record<string, RecordDownOperationElement<TState2, TOperation2>> => {
     return chooseRecord(source, element => {
         if (element.type === replace) {

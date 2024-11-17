@@ -1,5 +1,5 @@
 import { State, characterTemplate, client, isCharacterOwner } from '@flocon-trpg/core';
-import { Reference } from '@mikro-orm/core';
+import { Reference, ref } from '@mikro-orm/core';
 import { MaxLength } from 'class-validator';
 import {
     Args,
@@ -74,7 +74,7 @@ export class WritePrivateMessageResolver {
     public async writePrivateMessage(
         @Args() args: WritePrivateMessageArgs,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<typeof WriteRoomPrivateMessageResult> {
         // **** args guard ****
 
@@ -117,9 +117,10 @@ export class WritePrivateMessageResolver {
                     requestedBy: { type: client, userUid: authorizedUser.userUid },
                     characterId: args.characterId,
                     currentRoomState: roomState,
-                })
-            )
+                }) === true
+            ) {
                 chara = roomState.characters?.[args.characterId];
+            }
         }
         const entityResult = await analyzeTextAndSetToEntity({
             type: 'RoomPrvMsg',
@@ -136,7 +137,9 @@ export class WritePrivateMessageResolver {
             };
         }
         const entity = entityResult.value as RoomPrvMsg;
-        args.textColor == null ? undefined : fixTextColor(args.textColor);
+        if (args.textColor != null) {
+            fixTextColor(args.textColor);
+        }
 
         for (const visibleToElement of visibleTo) {
             const user = await em.findOne(User, { userUid: visibleToElement });
@@ -157,20 +160,20 @@ export class WritePrivateMessageResolver {
             entity.charaIsPrivate = chara.isPrivate;
             entity.charaImagePath = chara.image?.path;
             entity.charaImageSourceType = FileSourceTypeModule.ofNullishString(
-                chara.portraitImage?.sourceType
+                chara.portraitImage?.sourceType,
             );
             entity.charaPortraitImagePath = chara.portraitImage?.path;
             entity.charaPortraitImageSourceType = FileSourceTypeModule.ofNullishString(
-                chara.portraitImage?.sourceType
+                chara.portraitImage?.sourceType,
             );
         }
 
-        entity.room = Reference.create(room);
+        entity.room = ref(room);
         room.completeUpdatedAt = new Date();
         await em.persistAndFlush(entity);
 
         const visibleToArray = [...visibleTo].sort();
-        const result = createRoomPrivateMessage({
+        const result = await createRoomPrivateMessage({
             msg: entity,
             visibleTo: visibleToArray,
         });

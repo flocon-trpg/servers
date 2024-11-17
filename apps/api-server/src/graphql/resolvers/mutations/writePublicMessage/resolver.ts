@@ -7,7 +7,7 @@ import {
     client,
     isCharacterOwner,
 } from '@flocon-trpg/core';
-import { Reference } from '@mikro-orm/core';
+import { Reference, ref } from '@mikro-orm/core';
 import { MaxLength } from 'class-validator';
 import {
     Args,
@@ -107,7 +107,7 @@ export class WritePublicMessageResolver {
     public async writePublicMessage(
         @Args() args: WritePublicMessageArgs,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<typeof WriteRoomPublicMessageResult> {
         const channelKey = args.channelKey;
         const em = context.em;
@@ -145,7 +145,7 @@ export class WritePublicMessageResolver {
                     requestedBy: { type: client, userUid: authorizedUser.userUid },
                     characterId: args.characterId,
                     currentRoomState: roomState,
-                })
+                }) === true
             )
                 chara = roomState.characters?.[args.characterId];
         }
@@ -168,7 +168,7 @@ export class WritePublicMessageResolver {
         let ch = await em.findOne(RoomPubCh, { key: channelKey, room: room.id });
         if (ch == null) {
             ch = new RoomPubCh({ key: channelKey });
-            ch.room = Reference.create(room);
+            ch.room = ref(room);
             em.persist(ch);
         }
         entity.customName = args.customName;
@@ -179,19 +179,22 @@ export class WritePublicMessageResolver {
             entity.charaIsPrivate = chara.isPrivate;
             entity.charaImagePath = chara.image?.path;
             entity.charaImageSourceType = FileSourceTypeModule.ofNullishString(
-                chara.image?.sourceType
+                chara.image?.sourceType,
             );
             entity.charaPortraitImagePath = chara.portraitImage?.path;
             entity.charaPortraitImageSourceType = FileSourceTypeModule.ofNullishString(
-                chara.portraitImage?.sourceType
+                chara.portraitImage?.sourceType,
             );
         }
 
-        entity.roomPubCh = Reference.create(ch);
+        entity.roomPubCh = ref(ch);
         room.completeUpdatedAt = new Date();
         await em.persistAndFlush(entity);
 
-        const result: RoomPublicMessage = createRoomPublicMessage({ msg: entity, channelKey });
+        const result: RoomPublicMessage = await createRoomPublicMessage({
+            msg: entity,
+            channelKey,
+        });
 
         const payload: MessageUpdatePayload & SendTo = {
             type: 'messageUpdatePayload',

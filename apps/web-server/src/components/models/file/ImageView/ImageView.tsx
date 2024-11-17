@@ -24,7 +24,7 @@ export const ImageView: React.FC<Props> = ({
 
     switch (queryResult.type) {
         case loaded: {
-            if (queryResult.value.status === 'loading' || queryResult.value.status === 'idle') {
+            if (queryResult.value.status === 'pending') {
                 return loadingIcon;
             }
             if (queryResult.value.data?.src == null) {
@@ -34,7 +34,7 @@ export const ImageView: React.FC<Props> = ({
             // CONSIDER: 画像のURLを取得中のときだけでなく、画像を読込中のときもLoadingとして表示しないと少し混乱しそう
             // TODO: Uploaderのときは新しいタブで開くのではなくダウンロードする
             if (link) {
-                <a href={src} target='_blank' rel='noopener noreferrer'>
+                <a href={src} target="_blank" rel="noopener noreferrer">
                     <LazyAndPreloadImage
                         src={src}
                         width={size}

@@ -5,7 +5,7 @@ import React from 'react';
 import { Center } from '../../ui/Center/Center';
 import { Layout, login } from '../../ui/Layout/Layout';
 import { HelpMessageTooltip } from '@/components/ui/HelpMessageTooltip/HelpMessageTooltip';
-import { firebaseUserValueAtom } from '@/pages/_app';
+import { firebaseUserValueAtom } from '@/hooks/useSetupApp';
 
 const labelCol = 10;
 const wrapperCol = 24 - labelCol;
@@ -29,7 +29,7 @@ export const ProfilePage: React.FC = () => {
 
     const form = (
         <Form
-            name='createRoom'
+            name="createRoom"
             labelCol={{ span: labelCol }}
             wrapperCol={{ span: wrapperCol }}
             style={{ width: 600 }}
@@ -77,12 +77,12 @@ export const ProfilePage: React.FC = () => {
                 />
             </Form.Item>
             <Form.Item wrapperCol={{ offset: labelCol, span: wrapperCol }}>
-                <Button disabled={isSubmitting} type='primary' htmlType='submit'>
+                <Button disabled={isSubmitting} type="primary" htmlType="submit">
                     更新
                 </Button>
                 {isSubmitting ? <Spin /> : null}
                 {submitErrorMessage == null ? null : (
-                    <Alert message={submitErrorMessage} type='error' showIcon />
+                    <Alert message={submitErrorMessage} type="error" showIcon />
                 )}
             </Form.Item>
         </Form>
@@ -91,7 +91,7 @@ export const ProfilePage: React.FC = () => {
     return (
         <Layout requires={login}>
             <Center setPaddingY>
-                <Card title='ユーザー情報の変更'>{form}</Card>
+                <Card title="ユーザー情報の変更">{form}</Card>
             </Center>
         </Layout>
     );

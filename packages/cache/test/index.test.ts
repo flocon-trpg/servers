@@ -21,7 +21,7 @@ const createEach = (redis: Redis): Cache[] => {
             createRedisCache({
                 keyPrefix: Math.random().toString(),
                 redis,
-            })
+            }),
         );
     }
     return result;

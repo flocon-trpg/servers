@@ -27,7 +27,7 @@ class FConsoleClass extends FFunction {
                         // eslint-disable-next-line no-console
                         console.log(...[this.header, ...args.map(arg => toJObject(arg))]);
                         return undefined;
-                    })
+                    }),
                 );
             }
             case 'info': {
@@ -37,7 +37,7 @@ class FConsoleClass extends FFunction {
                         // eslint-disable-next-line no-console
                         console.info(...[this.header, ...args.map(arg => toJObject(arg))]);
                         return undefined;
-                    })
+                    }),
                 );
             }
             case 'warn': {
@@ -47,7 +47,7 @@ class FConsoleClass extends FFunction {
                         // eslint-disable-next-line no-console
                         console.warn(...[this.header, ...args.map(arg => toJObject(arg))]);
                         return undefined;
-                    })
+                    }),
                 );
             }
             case 'error': {
@@ -57,7 +57,7 @@ class FConsoleClass extends FFunction {
                         // eslint-disable-next-line no-console
                         console.error(...[this.header, ...args.map(arg => toJObject(arg))]);
                         return undefined;
-                    })
+                    }),
                 );
             }
             default:

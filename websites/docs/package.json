@@ -1,0 +1,67 @@
+{
+    "name": "@flocon-trpg/docs",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "docusaurus": "docusaurus",
+        "start": "docusaurus start",
+        "build": "run-s build:deps build:self",
+        "build:deps": "yarn workspaces foreach --recursive -pt --from '@flocon-trpg/docs' --exclude '@flocon-trpg/docs' run build",
+        "build:self": "docusaurus build",
+        "swizzle": "docusaurus swizzle",
+        "deploy": "docusaurus deploy",
+        "clear": "docusaurus clear",
+        "serve": "docusaurus serve",
+        "prettier": "yarn prettier:base --write --cache",
+        "prettier-check": "yarn prettier:base --check",
+        "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,mdx,graphql}\"",
+        "write-translations": "docusaurus write-translations",
+        "write-heading-ids": "docusaurus write-heading-ids",
+        "test": "jest --passWithNoTests",
+        "test-ci": "jest --passWithNoTests --ci --coverage",
+        "typecheck": "tsc"
+    },
+    "dependencies": {
+        "@docusaurus/core": "3.6.0",
+        "@docusaurus/preset-classic": "3.6.0",
+        "@docusaurus/theme-classic": "3.6.0",
+        "@flocon-trpg/core": "workspace:^",
+        "@mdx-js/react": "^3.0.0",
+        "antd": "^5.21.6",
+        "bcryptjs": "^2.4.3",
+        "clsx": "^2.0.0",
+        "docusaurus-plugin-image-zoom": "^2.0.0",
+        "jotai": "^2.10.1",
+        "prism-react-renderer": "^2.3.0",
+        "react": "^18.0.0",
+        "react-dom": "^18.0.0"
+    },
+    "devDependencies": {
+        "@docusaurus/module-type-aliases": "3.6.0",
+        "@docusaurus/tsconfig": "3.6.0",
+        "@docusaurus/types": "3.6.0",
+        "@flocon-trpg/prettier-config": "workspace:^",
+        "@types/bcryptjs": "2.4.6",
+        "@types/jest": "29.5.14",
+        "@types/react": "18.3.12",
+        "jest": "29.7.0",
+        "npm-run-all2": "7.0.1",
+        "prettier": "3.3.3",
+        "typescript": "5.5.4"
+    },
+    "browserslist": {
+        "production": [
+            ">0.5%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 3 chrome version",
+            "last 3 firefox version",
+            "last 5 safari version"
+        ]
+    },
+    "engines": {
+        "node": ">=18"
+    }
+}

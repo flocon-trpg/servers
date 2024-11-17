@@ -1,25 +1,25 @@
 import { ParticipantRole } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { Room } from './Room';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { WebConfig } from '@/configType';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { mockWebConfig } from '@/mocks';
-import { createMockUrqlClientForRoomMessage } from '@/mocks/mockAvailableGameSystemsQuery';
+import { createMockUrqlClientForRoomMessage } from '@/mocks/createMockUrqlClientForRoomMessage';
 
-export const Player: React.FC<WebConfig & { myParticipantRole: ParticipantRole }> = ({
-    isUnlistedFirebaseStorageEnabled,
-    isPublicFirebaseStorageEnabled,
-    myParticipantRole,
-}) => {
+export const Player: React.FC<
+    Pick<WebConfig, 'isUnlistedFirebaseStorageEnabled' | 'isPublicFirebaseStorageEnabled'> & {
+        myParticipantRole: ParticipantRole;
+    }
+> = ({ isUnlistedFirebaseStorageEnabled, isPublicFirebaseStorageEnabled, myParticipantRole }) => {
     const webConfig = React.useMemo(() => {
-        return Result.ok({
+        return {
             ...mockWebConfig,
             isUnlistedFirebaseStorageEnabled,
             isPublicFirebaseStorageEnabled,
-        });
+        };
     }, [isPublicFirebaseStorageEnabled, isUnlistedFirebaseStorageEnabled]);
     const { roomClientContextValue } = useSetupStorybook({
         basicMock: {
@@ -42,23 +42,35 @@ export const Player: React.FC<WebConfig & { myParticipantRole: ParticipantRole }
     );
 };
 
-export default {
+const meta = {
     title: 'models/room/Room',
     component: Player,
-    args: { myParticipantRole: 'Player' },
+    args: {
+        myParticipantRole: 'Player',
+        isPublicFirebaseStorageEnabled: false,
+        isUnlistedFirebaseStorageEnabled: false,
+    },
     parameters: {
         chromatic: { delay: 1000 },
     },
-} as ComponentMeta<typeof Player>;
+} satisfies Meta<typeof Player>;
 
-const Template: ComponentStory<typeof Player> = args => <Player {...args} />;
+export default meta;
 
-export const Master = Template.bind({});
-Master.args = {
-    myParticipantRole: 'Master',
+type Story = StoryObj<typeof meta>;
+
+export const Master: Story = {
+    args: {
+        myParticipantRole: 'Master',
+        isPublicFirebaseStorageEnabled: false,
+        isUnlistedFirebaseStorageEnabled: false,
+    },
 };
 
-export const Spectator = Template.bind({});
-Spectator.args = {
-    myParticipantRole: 'Spectator',
+export const Spectator: Story = {
+    args: {
+        myParticipantRole: 'Spectator',
+        isPublicFirebaseStorageEnabled: false,
+        isUnlistedFirebaseStorageEnabled: false,
+    },
 };

@@ -1,10 +1,10 @@
 import { Player, Spectator, State, forceMaxLength100String, roomTemplate } from '@flocon-trpg/core';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { RollCall } from './RollCall';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
-import { mockUser } from '@/mocks';
+import { createMockUrqlClient, mockUser } from '@/mocks';
 
 const currentDateTime = 1_000_000_000_000;
 
@@ -181,8 +181,13 @@ export const Default: React.FC<{ roomState: RoomState }> = ({ roomState }) => {
             custom: roomState,
         },
     });
+    const mockUrqlClient = React.useRef(createMockUrqlClient());
     return (
-        <StorybookProvider compact roomClientContextValue={roomClientContextValue}>
+        <StorybookProvider
+            compact
+            roomClientContextValue={roomClientContextValue}
+            urqlClient={mockUrqlClient.current}
+        >
             <RollCall
                 rollCalls={roomState.rollCalls ?? {}}
                 mockDate={() => new Date(currentDateTime)}
@@ -191,19 +196,30 @@ export const Default: React.FC<{ roomState: RoomState }> = ({ roomState }) => {
     );
 };
 
-export default {
+const meta = {
     title: 'models/room/Room/RollCall',
     component: Default,
     args: { roomState: baseRoomState },
-} as ComponentMeta<typeof Default>;
+} satisfies Meta<typeof Default>;
 
-const Template: ComponentStory<typeof Default> = args => <Default {...args} />;
+export default meta;
 
-export const Closed = Template.bind({});
-Closed.args = { roomState: stateForClosedRollCall };
+type Story = StoryObj<typeof meta>;
 
-export const OpenAndAnswered = Template.bind({});
-OpenAndAnswered.args = { roomState: stateForOpenAndAnswered };
+export const Closed: Story = {
+    args: {
+        roomState: stateForClosedRollCall,
+    },
+};
 
-export const OpenAndNotAnswered = Template.bind({});
-OpenAndNotAnswered.args = { roomState: stateForOpenAndNotAnswered };
+export const OpenAndAnswered: Story = {
+    args: {
+        roomState: stateForOpenAndAnswered,
+    },
+};
+
+export const OpenAndNotAnswered: Story = {
+    args: {
+        roomState: stateForOpenAndNotAnswered,
+    },
+};

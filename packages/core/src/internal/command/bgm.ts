@@ -10,7 +10,7 @@ import {
     beginCast,
 } from '@flocon-trpg/flocon-script';
 import * as BgmTypes from '../ot/flocon/room/bgm/types';
-import { State } from '../ot/generator';
+import { State } from '../ot/generator/types';
 import { toFFilePath, toFilePath } from './filePath';
 
 const isPlaying = 'isPlaying';
@@ -31,7 +31,7 @@ export class FBgm extends FObject {
                 return new FTypedArray(
                     this.bgm.files,
                     value => toFFilePath(value, undefined),
-                    (value, astInfo) => toFilePath(value, astInfo)
+                    (value, astInfo) => toFilePath(value, astInfo),
                 );
             case volume:
                 return new FNumber(this.bgm.volume * 100);

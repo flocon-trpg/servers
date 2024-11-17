@@ -2,7 +2,7 @@
 
 JavaScript をサンドボックス環境で実行します。ただし全ての機能には対応していません。
 
-将来、このパッケージは削除して、代わりに[quickjs-emscripten](https://github.com/justjake/quickjs-emscripten)などに置き換えるかもしれません。
+将来、このパッケージは削除して、代わりに ShadowRealm や [quickjs-emscripten](https://github.com/justjake/quickjs-emscripten)などに置き換える予定です。
 
 ## Usage
 
@@ -28,7 +28,7 @@ const array = [i];
 console.log(Array.isArray(array));
 array
 `,
-    globalThis
+    globalThis,
 );
 // console.log(Array.isArray(array)); が実行され、"[MY HEADER!] true"が出力される
 

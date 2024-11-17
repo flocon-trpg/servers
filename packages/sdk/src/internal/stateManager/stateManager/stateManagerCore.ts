@@ -75,21 +75,9 @@ export class StateManagerCore<TState, TOperation> {
         this._pendingGetOperations.delete(this._revision + 1);
 
         if (toApply.isByMyClient) {
-            /*                                      prev syncedState
-             *                                          /        \
-             *                                         /          \
-             *                this._postingState.diff /            \ toApply.operation
-             *                                       /              \
-             *                                      /      diff      \
-             *              this._postingState.state  ------------- next syncedState
-             *                        /                                  /
-             *                       /                                  /
-             *       localOperation /                                  / (xform)
-             *                     /                                  /
-             *                    /                                  /
-             *              this._uiState                      next uiState
-             */
+            // see "by my client" page in ./transformation.drawio
 
+            const prevSyncedState = this._stateGetter.syncedState;
             this._stateGetter.syncedState = this.params.apply({
                 state: this._stateGetter.syncedState,
                 operation: toApply.operation,
@@ -108,12 +96,16 @@ export class StateManagerCore<TState, TOperation> {
                     });
                 }
                 if (diff !== undefined) {
-                    const xform = this.params.transform({ first: localOperation, second: diff });
+                    const xform = this.params.transform({
+                        state: this._stateGetter.postingState?.state ?? prevSyncedState,
+                        first: localOperation,
+                        second: diff,
+                    });
                     this._stateGetter.setUiState(
                         this.params.apply({
                             state: this._stateGetter.syncedState,
                             operation: xform.firstPrime,
-                        })
+                        }),
                     );
                 }
             }
@@ -124,21 +116,9 @@ export class StateManagerCore<TState, TOperation> {
             return;
         }
 
-        /*                    prev this._syncedState
-         *                            /        \
-         *   this._postingState.diff /          \ toApply.operation
-         *                          /            \
-         *        this._postingState.state    next this._syncedState
-         *                       / \            /
-         * this._localOperation /  (xform)     / next this._postingOperation.diff
-         *                     /        \     /
-         *        prev this._uiState     --- (expected posted state')
-         *                     \            /
-         *              (xform) \          / next this._localOperation
-         *                       \        /
-         *                  next this._uiState
-         */
+        // see "not by my client" page in ./transformation.drawio
 
+        const prevSyncedState = this._stateGetter.syncedState;
         const prevLocalOperation = this._stateGetter.getLocalOperation();
         this._stateGetter.syncedState = this.params.apply({
             state: this._stateGetter.syncedState,
@@ -152,6 +132,7 @@ export class StateManagerCore<TState, TOperation> {
                 };
             }
             const xform = this.params.transform({
+                state: prevSyncedState,
                 first: toApply.operation,
                 second: this._stateGetter.postingState.operation,
             });
@@ -168,13 +149,14 @@ export class StateManagerCore<TState, TOperation> {
                           state: this._stateGetter.syncedState,
                           operation: nextPostingOperation,
                       }),
-                this._stateGetter.postingState.metadata
+                this._stateGetter.postingState.metadata,
             );
         }
         const nextLocalOperation =
             prevLocalOperation === undefined
                 ? undefined
                 : this.params.transform({
+                      state: this._stateGetter.postingState?.state ?? prevSyncedState,
                       first: toApplyOperationPrime,
                       second: prevLocalOperation,
                   }).firstPrime;
@@ -183,7 +165,7 @@ export class StateManagerCore<TState, TOperation> {
                 this.params.apply({
                     state: this._stateGetter.uiState,
                     operation: nextLocalOperation,
-                })
+                }),
             );
         } else {
             this._stateGetter.clearUiState();
@@ -201,13 +183,13 @@ export class StateManagerCore<TState, TOperation> {
         }
         if (revisionTo <= this._revision) {
             loggerRef.info(
-                `revisionTo of GetOperation is ${revisionTo}, but state revision is already ${this._revision}`
+                `revisionTo of GetOperation is ${revisionTo}, but state revision is already ${this._revision}`,
             );
             return;
         }
         if (this._pendingGetOperations.has(revisionTo)) {
             loggerRef.warn(
-                `stateManagerCore.__pendingGetOperations already contains ${revisionTo}`
+                `stateManagerCore.__pendingGetOperations already contains ${revisionTo}`,
             );
         }
         this._pendingGetOperations.set(revisionTo, {
@@ -264,7 +246,7 @@ export class StateManagerCore<TState, TOperation> {
             return false;
         }
         this._stateGetter.setUiState(
-            this._stateGetter.uiState ?? this._stateGetter.postingState.state
+            this._stateGetter.uiState ?? this._stateGetter.postingState.state,
         );
         this._stateGetter.clearPostingState();
         return true;

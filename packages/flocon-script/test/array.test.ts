@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { arrayClass, exec } from '../src';
 
 describe('Array', () => {
@@ -6,7 +7,7 @@ describe('Array', () => {
             `
 Array.isArray(${source});
         `,
-            { Array: arrayClass }
+            { Array: arrayClass },
         );
         expect(actual.result).toBe(true);
     });
@@ -16,7 +17,7 @@ Array.isArray(${source});
             `
 Array.isArray(${source});
         `,
-            { Array: arrayClass }
+            { Array: arrayClass },
         );
         expect(actual.result).toBe(false);
     });
@@ -26,7 +27,7 @@ Array.isArray(${source});
             `
 [1,2,3,4].filter(i => i >= 3);
         `,
-            {}
+            {},
         );
         expect(actual.result).toEqual([3, 4]);
     });
@@ -45,7 +46,7 @@ const found = [1,2,3,4].find((x, i) => {
 });
 ({ found, indexes });
         `,
-            {}
+            {},
         );
         expect(actual.result).toEqual({ found: expectedValue, indexes: expectedIndexes });
     });
@@ -61,7 +62,7 @@ let indexes = [];
 });
 ({ sum, indexes });
         `,
-            {}
+            {},
         );
         expect(actual.result).toEqual({ sum: 10, indexes: [0, 1, 2, 3] });
     });
@@ -71,7 +72,7 @@ let indexes = [];
             `
 [1,2].map(i => i * 2);
         `,
-            {}
+            {},
         );
         expect(actual.result).toEqual([2, 4]);
     });
@@ -87,7 +88,7 @@ let array = ${JSON.stringify(source)};
 let popped = array.pop();
 ({ popped, array });
         `,
-            {}
+            {},
         );
         expect(actual.result).toEqual({ popped: expectedPopped, array: expectedArray });
     });
@@ -104,7 +105,7 @@ let array = [1,2];
 let result = array.push(${args});
 ({ array, result });
         `,
-            {}
+            {},
         );
         expect(actual.result).toEqual({ array: expectedArray, result: expectedResult });
     });
@@ -120,7 +121,7 @@ let array = ${JSON.stringify(source)};
 let shifted = array.shift();
 ({ shifted, array });
         `,
-            {}
+            {},
         );
         expect(actual.result).toEqual({ shifted: expectedShifted, array: expectedArray });
     });
@@ -137,7 +138,7 @@ let array = [1,2];
 let result = array.unshift(${args});
 ({ array, result });
         `,
-            {}
+            {},
         );
         expect(actual.result).toEqual({ array: expectedArray, result: expectedResult });
     });

@@ -250,20 +250,20 @@ export namespace RoomMessage {
         switch (message.type) {
             case 'custom':
             case pieceLog:
-                return <IconView image='Message' size={size} />;
+                return <IconView image="Message" size={size} />;
             case privateMessage:
             case publicMessage:
                 break;
         }
         if (message.value.createdBy == null) {
-            return <IconView image='Message' size={size} />;
+            return <IconView image="Message" size={size} />;
         }
         return <IconView image={message.value.character?.image ?? 'Person'} size={size} />;
     };
 
     export const userName = (
         message: MessageState,
-        participants: ReadonlyMap<string, ParticipantState>
+        participants: ReadonlyMap<string, ParticipantState>,
     ) => {
         if (message.type === pieceLog || message.value.createdBy == null) {
             return null;
@@ -294,7 +294,7 @@ export namespace RoomMessage {
         );
 
         return (
-            <Popover trigger='hover' content={popoverContent}>
+            <Popover trigger="hover" content={popoverContent}>
                 <div>
                     {message.value.customName ??
                         message.value.character?.name ??
@@ -308,7 +308,7 @@ export namespace RoomMessage {
     export const toChannelName = (
         message: MessageState,
         publicChannelNames: PublicChannelNames,
-        participants: ReadonlyMap<string, ParticipantState>
+        participants: ReadonlyMap<string, ParticipantState>,
     ) => {
         if (message.type === pieceLog || message.value.createdBy == null) {
             return 'システムメッセージ';
@@ -344,14 +344,14 @@ export namespace RoomMessage {
             }
             case privateMessage: {
                 const userNames = new PrivateChannelSet(message.value.visibleTo).toChannelNameBase(
-                    participants ?? new Map()
+                    participants ?? new Map(),
                 );
                 if (userNames.length === 0) {
                     return '秘話:(自分のみ)';
                 }
                 return userNames.reduce(
                     (seed, userName, i) => (i === 0 ? `${seed}${userName}` : `${seed},${userName}`),
-                    '秘話:'
+                    '秘話:',
                 );
             }
         }

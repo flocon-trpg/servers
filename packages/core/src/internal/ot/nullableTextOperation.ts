@@ -1,4 +1,5 @@
-import * as TextOperationCore from '@kizahasi/ot-string';
+import * as TextOperationCore from '@kizahasi/ot-core';
+import { NonEmptyString } from '@kizahasi/ot-string';
 import { Result } from '@kizahasi/result';
 import { z } from 'zod';
 import { replace, update } from './recordOperationElement';
@@ -11,18 +12,18 @@ const firstTypeShouldBeSameAsSecondType = 'first type and second type should be 
 
 const stringOrUndefined = z.union([z.string(), z.undefined()]);
 
-type ApplyError = TextOperationCore.ApplyError<TextOperationCore.PositiveInt>;
+type ApplyError = TextOperationCore.ApplyError<NonEmptyString, TextOperationCore.PositiveInt>;
 type ComposeAndTransformUpError = TextOperationCore.ComposeAndTransformError<
     TextOperationCore.PositiveInt,
-    TextOperationCore.NonEmptyString
+    NonEmptyString
 >;
 type ComposeAndTransformDownError = TextOperationCore.ComposeAndTransformError<
-    TextOperationCore.NonEmptyString,
+    NonEmptyString,
     TextOperationCore.PositiveInt
 >;
 type ComposeAndTransformTwoWayError = TextOperationCore.ComposeAndTransformError<
-    TextOperationCore.NonEmptyString,
-    TextOperationCore.NonEmptyString
+    NonEmptyString,
+    NonEmptyString
 >;
 
 export const downOperation = z.union([
@@ -125,7 +126,7 @@ export const applyBack = (state: string | undefined, action: DownOperation) => {
 // stateが必要ないため処理を高速化&簡略化できるが、その代わり戻り値のreplaceにおいて oldValue === undefined && newValue === undefined もしくは oldValue !== undefined && newValue !== undefinedになるケースがある。
 export const composeDownOperation = (
     first: DownOperation | undefined,
-    second: DownOperation | undefined
+    second: DownOperation | undefined,
 ): Result<DownOperation | undefined, string | ApplyError | ComposeAndTransformUpError> => {
     if (first == null) {
         return Result.ok(second);
@@ -141,7 +142,7 @@ export const composeDownOperation = (
                 case replace: {
                     if (second.replace.oldValue == null) {
                         return Result.error(
-                            'Because first is update, second.oldValue should not be undefined'
+                            'Because first is update, second.oldValue should not be undefined',
                         );
                     }
                     const oldValue = TextOperation.applyBack(second.replace.oldValue, first.update);
@@ -158,7 +159,7 @@ export const composeDownOperation = (
                 case 'update': {
                     const composed = TextOperation.composeDownOperation(
                         first.update,
-                        second.update
+                        second.update,
                     );
                     if (composed.isError) {
                         return composed;
@@ -359,7 +360,7 @@ export const clientTransform = ({
         if (second.type === update) {
             if (first.replace.newValue != null) {
                 throw new Error(
-                    'because second is update, first replace.newValue must not be undefined'
+                    'because second is update, first replace.newValue must not be undefined',
                 );
             }
             return Result.ok({

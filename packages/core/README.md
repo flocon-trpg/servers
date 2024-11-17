@@ -12,11 +12,11 @@
 次のコードのように書くことで、部屋のモデルの TypeScript の型を生成できます。
 
 ```typescript
-import { State as S, roomTemplate } from '@flocon-trpg/core';
+import { State, roomTemplate } from '@flocon-trpg/core';
 
-type State = S<typeof roomTemplate>;
+type RoomState = State<typeof roomTemplate>;
 /*
-type State = {
+type RoomState = {
     $v: 2;
     $r: 1;
 } & {
@@ -41,26 +41,19 @@ type State = {
 
 API サーバーでは、この State のオブジェクトが JSON としてデータベースに保存され、必要に応じて各ブラウザに送信されます。この際、送信される State オブジェクトに非公開のキャラクターやパラメーターなどが含まれる場合は、事前に取り除いてから各ユーザーごとに送信されます。ブラウザ側では、受け取った State オブジェクトを解釈して画面上に現在の部屋の状態を表示します。
 
-2 つの State オブジェクト間の差分を Operation と呼びます。Operation には、UpOperation、DownOperation、TwoWayOperation の 3 種類があります。TwoWayOperation には差分の全ての情報が含まれていますが、UpOperation は時系列が前の State から後の State に変換する情報のみを、DownOperation は時系列が後の State から前の State に変換する情報のみを保持します。
-
-例えば、a と b という 2 つの State があるとして、時系列順で古いほうを a、新しいほうを b とします。これらの差分を、UpOperation、DownOperation、TwoWayOperation の 3 種類で生成する場合を考えます。UpOperation は、a を b に変換することはできますが b を a に変換することはできません。DownOperation ではその逆で、b を a に変換することはできますが a を b に変換することはできません。TwoWayOperation は、a←→b の両方向の変換が可能です。
+2 つの State オブジェクト間の差分を Operation と呼びます。Operation には、UpOperation、DownOperation、TwoWayOperation の 3 種類があります。TwoWayOperation には差分の全ての情報が含まれていますが、UpOperation は時系列が前の State から後の State に変換する情報のみを、DownOperation は時系列が後の State から前の State に変換する情報のみを保持します。例えば、a と b という 2 つの State があるとして、時系列順で古いほうを a、新しいほうを b とします。これらの差分を、UpOperation、DownOperation、TwoWayOperation の 3 種類で生成する場合を考えます。UpOperation は、a を b に変換することはできますが b を a に変換することはできません。DownOperation ではその逆で、b を a に変換することはできますが a を b に変換することはできません。TwoWayOperation は、a←→b の両方向の変換が可能です。
 
 Room モデルに対応する UpOperation、DownOperation、TwoWayOperation の TypeScript の型は、次のように書くことで生成できます。
 
 ```typescript
-import {
-    DownOperation as D,
-    TwoWayOperation as T,
-    UpOperation as U,
-    roomTemplate,
-} from '@flocon-trpg/core';
+import { DownOperation, TwoWayOperation, UpOperation, roomTemplate } from '@flocon-trpg/core';
 
-type UpOperation = U<typeof roomTemplate>;
-type DownOperation = D<typeof roomTemplate>;
-type TwoWayOperation = T<typeof roomTemplate>;
+type RoomUpOperation = UpOperation<typeof roomTemplate>;
+type RoomDownOperation = DownOperation<typeof roomTemplate>;
+type RoomTwoWayOperation = TwoWayOperation<typeof roomTemplate>;
 ```
 
-State オブジェクトの更新に関する ブラウザ ←→ API サーバー 間の通信には、送受信量を削減するため、State オブジェクトではなく UpOperation オブジェクトが用いられます。
+State オブジェクトの更新内容を ブラウザ ←→ API サーバー 間で伝える際、送受信量を削減するため、新しい State オブジェクトを丸ごと渡すのではなく、差分のみを表す UpOperation オブジェクトが用いられます。
 
 State や Operation に関する関数は次の 10 個があります。
 
@@ -75,7 +68,7 @@ State や Operation に関する関数は次の 10 個があります。
 -   serverTransform
 -   toClientState
 
-serverTransform と toClientState は、import したものを直接使うことができます。これら以外の関数は、次のコードのように書くことで生成できます。これら 10 個の関数の解説は、該当する JSDoc/TSDoc をお読みください。
+serverTransform と toClientState は、import したものを直接使うことができます。これら以外の関数は、次のコードのように roomTemplate というテンプレートから自動生成できます。これら 10 個の関数の解説は、該当する JSDoc/TSDoc をお読みください。
 
 ```typescript
 import { roomTemplate } from '@flocon-trpg/core';
@@ -104,7 +97,7 @@ const toClientState = Core.toClientState;
 
 ## Q&A
 
-### なぜ CRDT でなく OT を採用したの？
+### なぜ CRDT でなく OT を採用したのか
 
 ※ あくまで私の理解の範囲内での話であり、誤りが含まれるかもしれません。
 

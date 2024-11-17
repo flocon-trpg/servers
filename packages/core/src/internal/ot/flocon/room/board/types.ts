@@ -1,16 +1,16 @@
 import { z } from 'zod';
-import { filePathValue } from '../../filePath/types';
-import * as DicePiece from './dicePiece/types';
-import * as ImagePiece from './imagePiece/types';
-import * as ShapePiece from './shapePiece/types';
-import * as StringPiece from './stringPiece/types';
-import { maybe } from '@/maybe';
+import { maybe } from '../../../../maybe';
 import {
     createObjectValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
     createTextValueTemplate,
-} from '@/ot/generator';
+} from '../../../generator/types';
+import { filePathValue } from '../../filePath/types';
+import * as DicePiece from './dicePiece/types';
+import * as ImagePiece from './imagePiece/types';
+import * as ShapePiece from './shapePiece/types';
+import * as StringPiece from './stringPiece/types';
 
 export const template = createObjectValueTemplate(
     {
@@ -31,5 +31,5 @@ export const template = createObjectValueTemplate(
         stringPieces: createRecordValueTemplate(StringPiece.template),
     },
     2,
-    1
+    1,
 );

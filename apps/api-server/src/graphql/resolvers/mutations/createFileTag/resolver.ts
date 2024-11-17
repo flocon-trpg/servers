@@ -10,7 +10,6 @@ import {
     UseMiddleware,
 } from 'type-graphql';
 import { FileTag as FileTagEntity } from '../../../../entities/fileTag/entity';
-import { User } from '../../../../entities/user/entity';
 import { ResolverContext } from '../../../../types';
 import { ENTRY } from '../../../../utils/roles';
 import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
@@ -36,7 +35,7 @@ export class CreateFileTagResolver {
     @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async createFileTag(
         @Ctx() context: ResolverContext,
-        @Arg('tagName') tagName: string
+        @Arg('tagName') tagName: string,
     ): Promise<FileTag | null> {
         const maxTagsCount = 10;
 
@@ -45,9 +44,7 @@ export class CreateFileTagResolver {
         if (maxTagsCount <= tagsCount) {
             return null;
         }
-        const newFileTag = new FileTagEntity({ name: tagName });
-        newFileTag.name = tagName;
-        newFileTag.user = Reference.create<User, 'userUid'>(user);
+        const newFileTag = context.em.create(FileTagEntity, { name: tagName, user: user });
         await context.em.persistAndFlush(newFileTag);
         return {
             id: newFileTag.id,

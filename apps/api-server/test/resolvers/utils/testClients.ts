@@ -44,7 +44,7 @@ export class TestClients<TUserUids extends ReadonlyArray<string>> {
         }
 
         const allSubscriptions = new CompositeTestRoomEventSubscription(
-            subscriptionsRecord as { [_ in TUserUids[number]]: TestRoomEventSubscription }
+            subscriptionsRecord as { [_ in TUserUids[number]]: TestRoomEventSubscription },
         );
         return { all: allSubscriptions, value: subscriptionsRecord as Subscriptions<TUserUids> };
     }

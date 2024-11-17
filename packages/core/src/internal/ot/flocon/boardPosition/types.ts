@@ -1,10 +1,10 @@
 import { z } from 'zod';
+import { maybe } from '../../../maybe';
 import {
     createObjectValueTemplate,
     createReplaceValueTemplate,
     createTextValueTemplate,
-} from '../../generator';
-import { maybe } from '@/maybe';
+} from '../../generator/types';
 
 export const templateValue = {
     h: createReplaceValueTemplate(z.number()),

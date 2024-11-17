@@ -418,7 +418,7 @@ describe('RoomMessagesClient', () => {
             const expected = [Fixtures.Message.updatedPublicMessage3b];
             expect(client.getCurrent()).toEqual(expected);
             tester.expectToBeOneQuery(expected);
-        }
+        },
     );
 
     it.each([null, true])(
@@ -443,7 +443,7 @@ describe('RoomMessagesClient', () => {
             const expected = [Fixtures.Message.updatedPrivateMessage4b];
             expect(client.getCurrent()).toEqual(expected);
             tester.expectToBeOneEvent(expected);
-        }
+        },
     );
 
     it('should show a message by an update event', () => {

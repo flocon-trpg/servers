@@ -16,7 +16,7 @@ jobs:
             - name: List git config
               run: git config -l
 
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
               with:
                   fetch-depth: 0
 
@@ -31,32 +31,51 @@ jobs:
                   fi
 
     release:
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-22.04
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
+
+            - name: Use Node 22.x
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22.x
+                  cache: yarn
+
             - run: yarn
 
-            - name: Build web-server
-              run: yarn run export
-              working-directory: ./apps/web-server
-            - name: mv out directory
-              run: mv ./apps/web-server/out ./out
+            # 下のほうで `yarn run gen-flyio-dockerfile` や `yarn run gen-git-tags` を実行しているため API サーバーもビルドする必要がある
+            - run: yarn build
+
+            - name: mv dist directory
+              run: mv ./apps/web-server/dist ./flocon_web_server
+
             - name: Create flocon_web_server.zip
-              run: zip -r ${GITHUB_WORKSPACE}/flocon_web_server.zip ./out
+              run: zip -r ${GITHUB_WORKSPACE}/flocon_web_server.zip ./flocon_web_server
 
             - name: Generate Dockerfile
               run: yarn run gen-flyio-dockerfile
               working-directory: ./apps/api-server
+
             - name: mv Dockerfile
               run: mv ./apps/api-server/flyio.Dockerfile ./Dockerfile
+
             - name: Create flocon_api_server_flyio.zip
               run: zip ${GITHUB_WORKSPACE}/flocon_api_server_flyio.zip ./Dockerfile
 
+            - run: yarn run gen-github-release-name
+              working-directory: ./apps/api-server
+
+            - name: set name to GITHUB_ENV
+              run: |
+                  release_name=$(cat ./apps/api-server/github-release-name.txt) 
+                  echo "release_name=$release_name" >> $GITHUB_ENV
+
             - name: Release
-              uses: softprops/action-gh-release@v1
+              uses: softprops/action-gh-release@v2
               with:
                   files: |
                       flocon_web_server.zip
                       flocon_api_server_flyio.zip
                   draft: true
+                  name: '${{ env.release_name }} - (全体: ${{ github.ref_name }}) ※ Web サーバーと API サーバーのバージョンは推定値です'

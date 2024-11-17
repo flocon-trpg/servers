@@ -22,6 +22,7 @@ const WrapTabNode: React.FC<WrapTabNodeProps> = ({
             type: dndType,
             end: (_, monitor) => {
                 const dropResult = monitor.getDropResult();
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 const draggedItemKey = (dropResult as any)?.[dndItemKey] as string | undefined;
                 if (draggedItemKey == null) {
                     return;
@@ -32,7 +33,7 @@ const WrapTabNode: React.FC<WrapTabNodeProps> = ({
                 onDnd({ from: index, to: draggedItemKey });
             },
         },
-        [dndType, index]
+        [dndType, index],
     );
     const [, drop] = useDrop({
         accept: dndType,
@@ -57,15 +58,16 @@ export const DraggableTabs: React.FC<Props> = (props: Props) => {
 
     const tabBarChildren = React.useCallback(
         (node: any) => (
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
             <WrapTabNode key={node.key} index={node.key} dndType={dndType} onDnd={onDnd}>
                 {node}
             </WrapTabNode>
         ),
-        [dndType, onDnd]
+        [dndType, onDnd],
     );
-    const renderTabBar: TabsProps['renderTabBar'] = React.useCallback(
+    const renderTabBar = React.useCallback<NonNullable<TabsProps['renderTabBar']>>(
         (props, DefaultTabBar) => <DefaultTabBar {...props}>{tabBarChildren}</DefaultTabBar>,
-        [tabBarChildren]
+        [tabBarChildren],
     );
 
     return <Tabs {...tabsProps} renderTabBar={renderTabBar} />;

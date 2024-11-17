@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createReplaceValueTemplate } from '../../generator';
+import { createReplaceValueTemplate } from '../../generator/types';
 
 export const Default = 'Default';
 export const Uploader = 'Uploader';

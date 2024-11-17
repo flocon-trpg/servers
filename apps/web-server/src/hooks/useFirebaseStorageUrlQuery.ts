@@ -1,5 +1,5 @@
 import { FirebaseStorage, StorageReference, getDownloadURL, ref } from '@firebase/storage';
-import { QueryClient, useQuery } from 'react-query';
+import { QueryClient, useQuery } from '@tanstack/react-query';
 
 export const reference = 'reference';
 export const string = 'string';
@@ -45,16 +45,21 @@ const queryFn = async (storage: StorageReference | null) => {
 };
 
 export const useFirebaseStorageUrlQuery = (storage: StorageReference | null) => {
-    return useQuery(queryKey(storage), () => queryFn(storage), {
-        // FirebaseのURLは自動的にexpireされるのでcacheTimeを指定している。
+    return useQuery({
+        queryKey: queryKey(storage),
+        queryFn: () => queryFn(storage),
+        // FirebaseのURLは自動的にexpireされるのでstaleTimeを指定している。
         // TODO: 1時間にしているがこの値は適当。
-        cacheTime: 1000 * 60 * 60 * 1,
+        staleTime: 1000 * 60 * 60 * 1,
     });
 };
 
 export const fetchFirebaseStorageUrlQuery = (
     queryClient: QueryClient,
-    storage: StorageReference | null
+    storage: StorageReference | null,
 ) => {
-    return queryClient.fetchQuery(queryKey(storage), () => queryFn(storage));
+    return queryClient.fetchQuery({
+        queryKey: queryKey(storage),
+        queryFn: () => queryFn(storage),
+    });
 };

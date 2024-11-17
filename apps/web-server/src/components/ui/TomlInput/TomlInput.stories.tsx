@@ -1,20 +1,20 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import classNames from 'classnames';
 import React from 'react';
 import { interval } from 'rxjs';
-import { OnChangeParams } from '../CollaborativeInput/CollaborativeInput';
 import { TomlInput } from './Tomllnput';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { flex, flex1, flexColumn, flexInitial } from '@/styles/className';
 
 const Main: React.FC<{
-    bufferDuration: number | 'default' | 'short' | null;
+    bufferDuration: number | 'default' | 'short';
     placeholder?: string;
     disabled: boolean;
     testUpdate: boolean;
     initText: string;
-}> = ({ bufferDuration, placeholder, disabled, testUpdate, initText }) => {
-    const [changelog, setChangelog] = React.useState<OnChangeParams[]>([]);
+    multiline: boolean;
+}> = ({ bufferDuration, placeholder, disabled, testUpdate, initText, multiline }) => {
+    const [changelog, setChangelog] = React.useState<string[]>([]);
     const [value, setValue] = React.useState<string>(initText);
     React.useEffect(() => {
         if (!testUpdate) {
@@ -38,12 +38,11 @@ const Main: React.FC<{
                     bufferDuration={bufferDuration}
                     placeholder={placeholder}
                     disabled={disabled}
+                    multiline={multiline}
                 />
                 <div className={classNames(flexInitial)}>
                     {changelog.slice(-3).map((log, i) => (
-                        <div
-                            key={i}
-                        >{`previousValue: ${log.previousValue}, currentValue: ${log.currentValue}`}</div>
+                        <div key={i}>{log}</div>
                     ))}
                 </div>
             </div>
@@ -51,7 +50,7 @@ const Main: React.FC<{
     );
 };
 
-export default {
+const meta = {
     title: 'UI/TomlInput',
     component: Main,
     args: {
@@ -62,28 +61,32 @@ export default {
         disabled: false,
         testUpdate: false,
     },
-} as ComponentMeta<typeof Main>;
+} satisfies Meta<typeof Main>;
 
-const Template: ComponentStory<typeof Main> = args => <Main {...args} />;
+export default meta;
 
-export const Default = Template.bind({});
+type Story = StoryObj<typeof meta>;
 
-export const ValidToml = Template.bind({});
-ValidToml.args = {
-    initText: 'n = 1',
+export const Multiline: Story = {
+    args: {
+        multiline: true,
+    },
 };
 
-export const InvalidToml = Template.bind({});
-InvalidToml.args = {
-    initText: 'this is invalid text!',
+export const ValidToml: Story = {
+    args: {
+        initText: 'n = 1',
+    },
 };
 
-export const Short = Template.bind({});
-Short.args = {
-    bufferDuration: 'short',
+export const InvalidToml: Story = {
+    args: {
+        initText: 'this is invalid text!',
+    },
 };
 
-export const NoBuffer = Template.bind({});
-NoBuffer.args = {
-    bufferDuration: null,
+export const Short: Story = {
+    args: {
+        bufferDuration: 'short',
+    },
 };

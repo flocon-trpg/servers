@@ -28,7 +28,7 @@ export type SerializedUserConfig = z.TypeOf<typeof serializedUserConfig>;
 // versionが未対応のものの場合はundefinedを返す。
 export const deserializeUserConfig = (
     source: SerializedUserConfig,
-    userUid: string
+    userUid: string,
 ): UserConfig => {
     return {
         userUid,

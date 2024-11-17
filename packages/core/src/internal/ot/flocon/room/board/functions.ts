@@ -1,12 +1,12 @@
 import { Result } from '@kizahasi/result';
-import { State, TwoWayOperation, UpOperation } from '../../../generator';
+import { State, TwoWayOperation, UpOperation } from '../../../generator/types';
 import { isIdRecord } from '../../../record';
 import * as RecordOperation from '../../../recordOperation';
 import {
     RequestedBy,
     anyValue,
+    canChangeCharacterValue,
     canChangeOwnerParticipantId,
-    isCharacterOwner,
     isOwner,
     none,
 } from '../../../requestedBy';
@@ -79,7 +79,7 @@ export const toClientState =
 export const serverTransform =
     (
         requestedBy: RequestedBy,
-        currentRoomState: State<typeof Room.template>
+        currentRoomState: State<typeof Room.template>,
     ): ServerTransform<
         State<typeof template>,
         TwoWayOperation<typeof template>,
@@ -96,13 +96,13 @@ export const serverTransform =
             { ownerCharacterId: string | undefined }
         > = {
             cancelCreate: ({ newState }) =>
-                !isCharacterOwner({
+                !canChangeCharacterValue({
                     requestedBy,
                     characterId: newState.ownerCharacterId ?? none,
                     currentRoomState,
                 }),
             cancelRemove: ({ state }) =>
-                !isCharacterOwner({
+                !canChangeCharacterValue({
                     requestedBy,
                     characterId: state.ownerCharacterId ?? anyValue,
                     currentRoomState,
@@ -138,7 +138,7 @@ export const serverTransform =
             innerTransform: ({ first, second, prevState, nextState }) =>
                 DicePiece.serverTransform(
                     requestedBy,
-                    currentRoomState
+                    currentRoomState,
                 )({
                     stateBeforeServerOperation: prevState,
                     stateAfterServerOperation: nextState,
@@ -216,7 +216,7 @@ export const serverTransform =
             innerTransform: ({ first, second, prevState, nextState }) =>
                 StringPiece.serverTransform(
                     requestedBy,
-                    currentRoomState
+                    currentRoomState,
                 )({
                     stateBeforeServerOperation: prevState,
                     stateAfterServerOperation: nextState,

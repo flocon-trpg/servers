@@ -38,7 +38,7 @@ export class UpdateWritingMessageStatusResolver {
     public async updateWritingMessageStatus(
         @Args() args: UpdateWritingMessageStateArgs,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<boolean> {
         const authorizedUserUid = ensureAuthorizedUser(context).userUid;
         let status: WritingMessageStatusType;

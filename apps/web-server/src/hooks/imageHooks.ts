@@ -24,7 +24,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
 */
 
 // https://github.com/konvajs/use-image からsizeが欲しかったので改変。
@@ -72,7 +71,7 @@ type State = LoadingState | SuccessState | FailedState | ArgNullState;
 
 export function useImage(
     src: string | null,
-    options?: { skipAnalyzeUrl?: boolean; size?: Size; crossOrigin?: string }
+    options?: { skipAnalyzeUrl?: boolean; size?: Size; crossOrigin?: string },
 ): State {
     const [state, setState] = React.useState(null as State | null);
     const skipAnalyzeUrl = options?.skipAnalyzeUrl ?? false;
@@ -104,7 +103,9 @@ export function useImage(
             setState({ type: loading });
             img.addEventListener('load', onload);
             img.addEventListener('error', onerror);
-            crossOrigin && (img.crossOrigin = crossOrigin);
+            if (crossOrigin) {
+                img.crossOrigin = crossOrigin;
+            }
             if (skipAnalyzeUrl) {
                 img.src = src;
             } else {
@@ -120,7 +121,7 @@ export function useImage(
                 setState(null);
             };
         },
-        [src, crossOrigin, size?.w, size?.h, skipAnalyzeUrl]
+        [src, crossOrigin, size?.w, size?.h, skipAnalyzeUrl],
     );
 
     return state ?? { type: loading };
@@ -130,7 +131,7 @@ export function useImageFromFilePath(
     filePath: FilePathLikeOrThumb | null | undefined,
     options?: {
         crossOrigin?: string;
-    }
+    },
 ): State {
     const { src, queryResult } = useSrcFromFilePath(filePath);
 

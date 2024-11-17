@@ -11,7 +11,7 @@ import { recordToArray } from '@flocon-trpg/utils';
 import * as NumParam from '../ot/flocon/room/character/numParam/types';
 import * as Character from '../ot/flocon/room/character/types';
 import * as Room from '../ot/flocon/room/types';
-import { State } from '../ot/generator';
+import { State } from '../ot/generator/types';
 import { FNumParam } from './numParam';
 
 const createDefaultState = (): State<typeof NumParam.template> => ({
@@ -25,7 +25,7 @@ const createDefaultState = (): State<typeof NumParam.template> => ({
 export class FNumParams extends FObject {
     public constructor(
         private readonly numParams: NonNullable<State<typeof Character.template>['numParams']>,
-        private readonly room: State<typeof Room.template>
+        private readonly room: State<typeof Room.template>,
     ) {
         super();
     }
@@ -58,7 +58,7 @@ export class FNumParams extends FObject {
         nameOrKeyValue: FValue,
         diffValue: FValue,
         isIncr: boolean,
-        astInfo: AstInfo | undefined
+        astInfo: AstInfo | undefined,
     ) {
         const diff = beginCast(diffValue, astInfo).addNumber().cast();
         const found = this.findByName(nameOrKeyValue, astInfo);
@@ -78,7 +78,7 @@ export class FNumParams extends FObject {
     private setIsValuePrivate(
         nameOrKeyValue: FValue,
         newValue: FValue,
-        astInfo: AstInfo | undefined
+        astInfo: AstInfo | undefined,
     ) {
         const $newValue = beginCast(newValue, astInfo).addBoolean().cast();
         const found = this.findByName(nameOrKeyValue, astInfo);

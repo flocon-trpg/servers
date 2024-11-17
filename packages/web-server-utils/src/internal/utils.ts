@@ -1,5 +1,5 @@
 export const visibleToToString = (
-    visibleTo: ReadonlyArray<string> | ReadonlySet<string>
+    visibleTo: ReadonlyArray<string> | ReadonlySet<string>,
 ): string => {
     return [...visibleTo]
         .sort()

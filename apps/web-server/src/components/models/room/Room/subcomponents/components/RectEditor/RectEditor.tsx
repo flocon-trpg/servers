@@ -20,15 +20,15 @@ type PropsBase<T> = {
 
 const NameRow = <T extends BoardPositionState>({ value, onChange }: PropsBase<T>) => {
     return (
-        <TableRow label='コマの名前'>
+        <TableRow label="コマの名前">
             <CollaborativeInput
                 style={{ width: 150 }}
-                bufferDuration='default'
+                bufferDuration="default"
                 value={value.name ?? ''}
                 onChange={e => {
                     const newValue = produce(value, state => {
                         // nameがない状態をあらわす値として '' と undefined の2種類が混在するのは後々仕様変更があった際に困るかもしれないため、undefinedで統一させるようにしている
-                        state.name = e.currentValue === '' ? undefined : e.currentValue;
+                        state.name = e === '' ? undefined : e;
                     });
                     onChange(newValue);
                 }}
@@ -44,11 +44,11 @@ const CellPositionEditorRow = <T extends PieceState>({
 }: PropsBase<T> & { disabled: boolean }) => {
     return (
         <>
-            <TableRow label='セルの座標'>
+            <TableRow label="セルの座標">
                 <Space>
                     <InputNumber
                         disabled={disabled}
-                        size='small'
+                        size="small"
                         value={value.cellX}
                         onChange={newValue => {
                             if (typeof newValue !== 'number') {
@@ -63,7 +63,7 @@ const CellPositionEditorRow = <T extends PieceState>({
                     <span>*</span>
                     <InputNumber
                         disabled={disabled}
-                        size='small'
+                        size="small"
                         value={value.cellY}
                         onChange={newValue => {
                             if (typeof newValue !== 'number') {
@@ -77,11 +77,11 @@ const CellPositionEditorRow = <T extends PieceState>({
                     />
                 </Space>
             </TableRow>
-            <TableRow label='セルの大きさ'>
+            <TableRow label="セルの大きさ">
                 <Space>
                     <InputNumber
                         disabled={disabled}
-                        size='small'
+                        size="small"
                         value={value.cellW}
                         onChange={newValue => {
                             if (typeof newValue !== 'number') {
@@ -96,7 +96,7 @@ const CellPositionEditorRow = <T extends PieceState>({
                     <span>*</span>
                     <InputNumber
                         disabled={disabled}
-                        size='small'
+                        size="small"
                         value={value.cellH}
                         onChange={newValue => {
                             if (typeof newValue !== 'number') {
@@ -121,11 +121,11 @@ const PixelPositionEditorRow = <T extends BoardPositionState>({
 }: PropsBase<T> & { disabled: boolean }) => {
     return (
         <>
-            <TableRow label='座標'>
+            <TableRow label="座標">
                 <Space>
                     <InputNumber
                         disabled={disabled}
-                        size='small'
+                        size="small"
                         value={value.x}
                         onChange={newValue => {
                             if (typeof newValue !== 'number') {
@@ -140,7 +140,7 @@ const PixelPositionEditorRow = <T extends BoardPositionState>({
                     <span>*</span>
                     <InputNumber
                         disabled={disabled}
-                        size='small'
+                        size="small"
                         value={value.y}
                         onChange={newValue => {
                             if (typeof newValue !== 'number') {
@@ -154,11 +154,11 @@ const PixelPositionEditorRow = <T extends BoardPositionState>({
                     />
                 </Space>
             </TableRow>
-            <TableRow label='大きさ'>
+            <TableRow label="大きさ">
                 <Space>
                     <InputNumber
                         disabled={disabled}
-                        size='small'
+                        size="small"
                         value={value.w}
                         onChange={newValue => {
                             if (typeof newValue !== 'number') {
@@ -173,7 +173,7 @@ const PixelPositionEditorRow = <T extends BoardPositionState>({
                     <span>*</span>
                     <InputNumber
                         disabled={disabled}
-                        size='small'
+                        size="small"
                         value={value.h}
                         onChange={newValue => {
                             if (typeof newValue !== 'number') {

@@ -5,10 +5,10 @@ export const replace = 'replace';
 
 export const recordDownOperationElementFactory = <
     TState extends z.ZodTypeAny,
-    TOperation extends z.ZodTypeAny
+    TOperation extends z.ZodTypeAny,
 >(
     state: TState,
-    operation: TOperation
+    operation: TOperation,
 ) =>
     z.union([
         z.object({
@@ -39,10 +39,10 @@ export type RecordDownOperationElement<TState, TOperation> =
 
 export const recordUpOperationElementFactory = <
     TState extends z.ZodTypeAny,
-    TOperation extends z.ZodTypeAny
+    TOperation extends z.ZodTypeAny,
 >(
     state: TState,
-    operation: TOperation
+    operation: TOperation,
 ) =>
     z.union([
         z.object({
@@ -85,7 +85,7 @@ export type RecordTwoWayOperationElement<TState, TOperation> =
       };
 
 /**
- * @deprecated Consider using map(Dual)?KeyRecord(Up|Down)?Operation
+ * @deprecated Consider using map(DualKey)?Record(Up|Down)?Operation
  */
 export const mapRecordOperationElement = <TReplace1, TReplace2, TUpdate1, TUpdate2>({
     source,

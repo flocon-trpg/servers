@@ -38,12 +38,12 @@ export class SemVer {
     private static requireToBePositiveInteger(source: number, propName: string) {
         if (!Number.isInteger(source)) {
             throw new Error(
-                `Semver error: ${propName} must be integer. Actual value is "${source}"`
+                `Semver error: ${propName} must be integer. Actual value is "${source}"`,
             );
         }
         if (source <= 0) {
             throw new Error(
-                `Semver error: ${propName} must be positive. Actual value is "${source}"`
+                `Semver error: ${propName} must be positive. Actual value is "${source}"`,
             );
         }
     }
@@ -51,12 +51,12 @@ export class SemVer {
     private static requireToBeNonNegativeInteger(source: number, propName: string) {
         if (!Number.isInteger(source)) {
             throw new Error(
-                `Semver error: ${propName} must be integer. Actual value is "${source}"`
+                `Semver error: ${propName} must be integer. Actual value is "${source}"`,
             );
         }
         if (source < 0) {
             throw new Error(
-                `Semver error: ${propName} must not be negative. Actual value is "${source}"`
+                `Semver error: ${propName} must not be negative. Actual value is "${source}"`,
             );
         }
     }
@@ -82,7 +82,7 @@ export class SemVer {
     }
 
     private static prereleaseTypeToNumber(
-        type: typeof alpha | typeof beta | typeof rc | null | undefined
+        type: typeof alpha | typeof beta | typeof rc | null | undefined,
     ): number {
         if (type == null) {
             return 0;

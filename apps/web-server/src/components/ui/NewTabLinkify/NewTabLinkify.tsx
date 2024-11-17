@@ -1,7 +1,7 @@
 import Linkify from 'linkify-react';
 import React from 'react';
 
-// eslint-disable-next-line @typescript-eslint/ban-types
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type Props = {};
 
 export const NewTabLinkify: React.FC<React.PropsWithChildren<Props>> = ({

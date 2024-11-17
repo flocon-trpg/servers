@@ -82,7 +82,7 @@ export const migrateByNpmScript = async (
         | typeof createInitial
         | typeof up
         | typeof down
-        | typeof autoMigrationAlways
+        | typeof autoMigrationAlways,
 ) => {
     const logConfigResult = new LogConfigParser(process.env).logConfig;
     initializeLogger(logConfigResult);
@@ -202,7 +202,7 @@ export const migrateByNpmScript = async (
         }
     } finally {
         // これがないとターミナルなどで実行したときに自動で終わらない。
-        orm?.value?.close();
+        void orm?.value?.close();
     }
 };
 

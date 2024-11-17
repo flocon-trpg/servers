@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import '../beforeAllGlobal';
 import { readFileSync } from 'fs';
 import { $free, UpOperation as U, parseState, roomTemplate } from '@flocon-trpg/core';
@@ -290,7 +293,7 @@ namespace Assert {
 
     export namespace JoinRoomMutation {
         export const toBeSuccess = (
-            source: OperationResult<JoinRoomAsPlayerMutation | JoinRoomAsSpectatorMutation>
+            source: OperationResult<JoinRoomAsPlayerMutation | JoinRoomAsSpectatorMutation>,
         ) => {
             if (source.data?.result.__typename !== 'JoinRoomSuccessResult') {
                 expect(source.data?.result.__typename).toBe('JoinRoomSuccessResult');
@@ -300,7 +303,7 @@ namespace Assert {
         };
 
         export const toBeFailure = (
-            source: OperationResult<JoinRoomAsPlayerMutation | JoinRoomAsSpectatorMutation>
+            source: OperationResult<JoinRoomAsPlayerMutation | JoinRoomAsSpectatorMutation>,
         ) => {
             if (source.data?.result.__typename !== 'JoinRoomFailureResult') {
                 expect(source.data?.result.__typename).toBe('JoinRoomFailureResult');
@@ -342,7 +345,7 @@ namespace Assert {
 
         export const toBeFailure = async (
             source: Promise<OperationResult<OperateMutation>>,
-            errorType: 'GraphQL'
+            errorType: 'GraphQL',
         ) => {
             const sourceResult = await source;
             if (errorType === 'GraphQL') {
@@ -556,7 +559,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
         main: (params: {
             server: Awaited<ReturnType<typeof createTestServer>>;
             onFinally: Omit<CompositeDisposable, 'dispose'>;
-        }) => PromiseLike<void>
+        }) => PromiseLike<void>,
     ) => {
         const onFinally = new CompositeDisposable();
         const server = await createTestServer({
@@ -590,7 +593,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
         }
 
         for (const { value: client } of recordToArray(
-            clients.clients as Record<string, TestClient>
+            clients.clients as Record<string, TestClient>,
         )) {
             const result = await client.entryToServerMutation({ password: entryPassword });
             if (test) {
@@ -603,7 +606,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
 
     const setupUsersAndRoom = async <
         TUserUids extends ReadonlyArray<string>,
-        TRoomMaster extends TUserUids[number]
+        TRoomMaster extends TUserUids[number],
     >({
         userUids,
         roomMasterUserUid,
@@ -710,7 +713,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                         readFileSync('./test/resolvers/pexels-public-domain-pictures-68147.jpg'),
                         {
                             filename: 'test-image.jpg',
-                        }
+                        },
                     );
                     const postResult = await fetch(
                         urljoin(httpUri, 'uploader', 'upload', publicOrUnlisted),
@@ -720,7 +723,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                 [Resources.testAuthorizationHeader]: userUid1,
                             },
                             body: formData,
-                        }
+                        },
                     )
                         .then(r => r.ok)
                         .catch(err => err);
@@ -731,7 +734,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                 let thumbFilename: string | null | undefined;
                 {
                     const filesResult = Assert.GetFilesQuery.toBeSuccess(
-                        await clientToUploadFiles.getFilesQuery({ input: { fileTagIds: [] } })
+                        await clientToUploadFiles.getFilesQuery({ input: { fileTagIds: [] } }),
                     );
                     expect(filesResult).toHaveLength(1);
                     filename = filesResult[0]!.filename;
@@ -743,7 +746,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
 
                 {
                     const filesResult = Assert.GetFilesQuery.toBeSuccess(
-                        await anotherClient.getFilesQuery({ input: { fileTagIds: [] } })
+                        await anotherClient.getFilesQuery({ input: { fileTagIds: [] } }),
                     );
                     expect(filesResult).toHaveLength(publicOrUnlisted === 'public' ? 1 : 0);
                 }
@@ -760,13 +763,13 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                             httpUri,
                             'uploader',
                             fileType,
-                            fileType === 'files' ? filename : thumbFilename
+                            fileType === 'files' ? filename : thumbFilename,
                         ),
                         {
                             headers: {
                                 [Resources.testAuthorizationHeader]: id,
                             },
-                        }
+                        },
                     )
                         .then(r => r.ok)
                         .catch(err => err);
@@ -779,7 +782,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                     const fileTagResult = Assert.CreateFileTagMutation.toBeSuccess(
                         await clientToUploadFiles.createFileTagMutation({
                             tagName: fileTagName,
-                        })
+                        }),
                     );
                     expect(fileTagResult.name).toBe(fileTagName);
                     fileTagId = fileTagResult.id;
@@ -791,7 +794,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                             input: {
                                 actions: [{ filename, add: [fileTagId], remove: [] }],
                             },
-                        })
+                        }),
                     );
                 }
 
@@ -799,7 +802,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                     const filesResult = Assert.GetFilesQuery.toBeSuccess(
                         await clientToUploadFiles.getFilesQuery({
                             input: { fileTagIds: [fileTagId] },
-                        })
+                        }),
                     );
                     expect(filesResult).toHaveLength(1);
                 }
@@ -810,7 +813,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                         const filesResult = Assert.GetFilesQuery.toBeSuccess(
                             await client.getFilesQuery({
                                 input: { fileTagIds: [nonExistFileTagId] },
-                            })
+                            }),
                         );
                         expect(filesResult).toHaveLength(0);
                     }
@@ -831,7 +834,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
 
                 {
                     const filesResult = Assert.GetFilesQuery.toBeSuccess(
-                        await clientToUploadFiles.getFilesQuery({ input: { fileTagIds: [] } })
+                        await clientToUploadFiles.getFilesQuery({ input: { fileTagIds: [] } }),
                     );
                     expect(filesResult).toHaveLength(1);
                     expect(filesResult[0]?.filename).toBe(filename);
@@ -840,7 +843,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
 
                 {
                     const filesResult = Assert.GetFilesQuery.toBeSuccess(
-                        await anotherClient.getFilesQuery({ input: { fileTagIds: [] } })
+                        await anotherClient.getFilesQuery({ input: { fileTagIds: [] } }),
                     );
                     expect(filesResult).toHaveLength(publicOrUnlisted === 'public' ? 1 : 0);
                 }
@@ -857,12 +860,12 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                     const filesResult = Assert.GetFilesQuery.toBeSuccess(
                         await client.getFilesQuery({
                             input: { fileTagIds: [] },
-                        })
+                        }),
                     );
                     expect(filesResult).toHaveLength(0);
                 }
             });
-        }
+        },
     );
 
     it.each([
@@ -879,7 +882,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
 
                 const result = await client.getMyRolesQuery({});
                 expect(result.data?.result.admin).toBe(isAdmin);
-            }
+            },
         );
     });
 
@@ -898,7 +901,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
 
             // - master can get the room
             const roomMasterResult = Assert.GetRoomsListQuery.toBeSuccess(
-                await clients[Resources.UserUid.master].getRoomsListQuery()
+                await clients[Resources.UserUid.master].getRoomsListQuery(),
             );
             loggerRef.trace({ roomMasterResult }, 'getRoomsList query result');
             expect(roomMasterResult.rooms).toHaveLength(1);
@@ -916,11 +919,11 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
 
             // - another user can get the room
             const anotherUserResult = Assert.GetRoomsListQuery.toBeSuccess(
-                await clients[Resources.UserUid.player1].getRoomsListQuery()
+                await clients[Resources.UserUid.player1].getRoomsListQuery(),
             );
             expect(anotherUserResult.rooms[0]!.role).toBeFalsy();
             expect(maskKeys(anotherUserResult.rooms, ['role'])).toEqual(
-                maskKeys(roomMasterResult.rooms, ['role'])
+                maskKeys(roomMasterResult.rooms, ['role']),
             );
         });
     });
@@ -944,12 +947,12 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                         id: roomId,
                         name: Resources.Participant.Name.player1,
                         password: incorrectPassword,
-                    })
+                    }),
                 );
                 subscriptions.all.toBeEmpty();
                 subscriptions.all.clear();
             });
-        }
+        },
     );
 
     it.each([undefined, Resources.Room.playerPassword])(
@@ -971,12 +974,12 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                         id: roomId,
                         name: Resources.Participant.Name.player1,
                         password: incorrectPassword,
-                    })
+                    }),
                 );
                 subscriptions.all.toBeEmpty();
                 subscriptions.all.clear();
             });
-        }
+        },
     );
 
     describe.each([
@@ -1030,35 +1033,35 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                     room2ValueAsPlayer: boolean;
                 }) => {
                     const room1AsMaster = Assert.GetRoomQuery.toBeSuccess(
-                        await clients[Resources.UserUid.master].getRoomQuery({ id: room1Id })
+                        await clients[Resources.UserUid.master].getRoomQuery({ id: room1Id }),
                     );
                     const room2AsMaster = Assert.GetRoomQuery.toBeSuccess(
-                        await clients[Resources.UserUid.master].getRoomQuery({ id: room2Id })
+                        await clients[Resources.UserUid.master].getRoomQuery({ id: room2Id }),
                     );
                     const room1AsPlayer = Assert.GetRoomQuery.toBeSuccess(
-                        await clients[Resources.UserUid.player1].getRoomQuery({ id: room1Id })
+                        await clients[Resources.UserUid.player1].getRoomQuery({ id: room1Id }),
                     );
                     expect(room1AsMaster.room.isBookmarked).toBe(room1ValueAsMaster);
                     expect(room2AsMaster.room.isBookmarked).toBe(room2ValueAsMaster);
                     expect(room1AsPlayer.room.isBookmarked).toBe(room1ValueAsPlayer);
 
                     const roomsListAsMaster = Assert.GetRoomsListQuery.toBeSuccess(
-                        await clients[Resources.UserUid.master].getRoomsListQuery()
+                        await clients[Resources.UserUid.master].getRoomsListQuery(),
                     );
                     const roomsListAsPlayer = Assert.GetRoomsListQuery.toBeSuccess(
-                        await clients[Resources.UserUid.player1].getRoomsListQuery()
+                        await clients[Resources.UserUid.player1].getRoomsListQuery(),
                     );
                     expect(roomsListAsMaster.rooms.find(r => r.id === room1Id)?.isBookmarked).toBe(
-                        room1ValueAsMaster
+                        room1ValueAsMaster,
                     );
                     expect(roomsListAsMaster.rooms.find(r => r.id === room2Id)?.isBookmarked).toBe(
-                        room2ValueAsMaster
+                        room2ValueAsMaster,
                     );
                     expect(roomsListAsPlayer.rooms.find(r => r.id === room1Id)?.isBookmarked).toBe(
-                        room1ValueAsPlayer
+                        room1ValueAsPlayer,
                     );
                     expect(roomsListAsPlayer.rooms.find(r => r.id === room2Id)?.isBookmarked).toBe(
-                        room2ValueAsPlayer
+                        room2ValueAsPlayer,
                     );
                 };
 
@@ -1068,7 +1071,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                         await clients[Resources.UserUid.master].updateBookmarkMutation({
                             roomId: room1Id,
                             newValue: true,
-                        })
+                        }),
                     );
                     expect(bookmarked.prevValue).toBe(false);
                     expect(bookmarked.currentValue).toBe(true);
@@ -1087,7 +1090,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                         await clients[Resources.UserUid.master].updateBookmarkMutation({
                             roomId: room1Id,
                             newValue: true,
-                        })
+                        }),
                     );
                     expect(bookmarked.prevValue).toBe(true);
                     expect(bookmarked.currentValue).toBe(true);
@@ -1106,7 +1109,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                         await clients[Resources.UserUid.master].updateBookmarkMutation({
                             roomId: 'invalidroomid',
                             newValue: true,
-                        })
+                        }),
                     );
 
                     await testRooms({
@@ -1123,7 +1126,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                         await clients[Resources.UserUid.master].updateBookmarkMutation({
                             roomId: room1Id,
                             newValue: false,
-                        })
+                        }),
                     );
                     expect(bookmarked.prevValue).toBe(true);
                     expect(bookmarked.currentValue).toBe(false);
@@ -1142,7 +1145,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                         await clients[Resources.UserUid.master].updateBookmarkMutation({
                             roomId: room1Id,
                             newValue: false,
-                        })
+                        }),
                     );
                     expect(bookmarked.prevValue).toBe(false);
                     expect(bookmarked.currentValue).toBe(false);
@@ -1174,7 +1177,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                             id: roomId,
                             name: Resources.Participant.Name.player1,
                             password: playerPassword,
-                        })
+                        }),
                     );
                     subscriptions.value[
                         Resources.UserUid.master
@@ -1187,7 +1190,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                             id: roomId,
                             name: Resources.Participant.Name.player1,
                             password: playerPassword,
-                        })
+                        }),
                     );
                     subscriptions.all.toBeEmpty();
                     subscriptions.all.clear();
@@ -1214,7 +1217,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                             id: roomId,
                             name: Resources.Participant.Name.player1,
                             password: spectatorPassword,
-                        })
+                        }),
                     );
                     subscriptions.value[
                         Resources.UserUid.master
@@ -1227,7 +1230,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                             id: roomId,
                             name: Resources.Participant.Name.player1,
                             password: spectatorPassword,
-                        })
+                        }),
                     );
                     subscriptions.all.toBeEmpty();
                     subscriptions.all.clear();
@@ -1237,7 +1240,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                             id: roomId,
                             name: Resources.Participant.Name.player1,
                             password: playerPassword,
-                        })
+                        }),
                     );
                     subscriptions.all.toBeEmpty();
                     subscriptions.all.clear();
@@ -1270,7 +1273,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                 const masterResult = Assert.GetRoomQuery.toBeSuccess(
                     await clients[Resources.UserUid.master].getRoomQuery({
                         id: roomId,
-                    })
+                    }),
                 );
                 expect(masterResult.role).toBe(ParticipantRole.Master);
                 expect(masterResult.room.createdAt).toBeTruthy();
@@ -1280,27 +1283,27 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                 const player1Result = Assert.GetRoomQuery.toBeSuccess(
                     await clients[Resources.UserUid.player1].getRoomQuery({
                         id: roomId,
-                    })
+                    }),
                 );
                 expect(player1Result.role).toBe(ParticipantRole.Player);
                 expect(maskKeys(player1Result, ['stateJson', 'role', 'isBookmarked'])).toEqual(
-                    maskKeys(masterResult, ['stateJson', 'role', 'isBookmarked'])
+                    maskKeys(masterResult, ['stateJson', 'role', 'isBookmarked']),
                 );
 
                 const spectatorResult = Assert.GetRoomQuery.toBeSuccess(
                     await clients[Resources.UserUid.spectator1].getRoomQuery({
                         id: roomId,
-                    })
+                    }),
                 );
                 expect(spectatorResult.role).toBe(ParticipantRole.Spectator);
                 expect(maskKeys(spectatorResult, ['stateJson', 'role', 'isBookmarked'])).toEqual(
-                    maskKeys(masterResult, ['stateJson', 'role', 'isBookmarked'])
+                    maskKeys(masterResult, ['stateJson', 'role', 'isBookmarked']),
                 );
 
                 const nonJoinedResult = Assert.GetRoomQuery.toBeNonJoined(
                     await clients[Resources.UserUid.notJoin].getRoomQuery({
                         id: roomId,
-                    })
+                    }),
                 );
                 expect(nonJoinedResult.roomAsListItem.id).toBe(roomId);
                 systemTimeManager
@@ -1357,7 +1360,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                 clientId: Resources.ClientId.player1,
                                 valueJson: JSON.stringify(operation),
                             },
-                        })
+                        }),
                     );
 
                     expect(operationResult.operation.revisionTo).toBe(roomRevision + 1);
@@ -1366,28 +1369,28 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                             Resources.UserUid.master
                         ].toBeExactlyOneRoomOperationEvent();
                     expect(maskTypeNames(masterSubscriptionResult)).toEqual(
-                        maskTypeNames(operationResult.operation)
+                        maskTypeNames(operationResult.operation),
                     );
                     const player2SubscriptionResult =
                         subscriptions.value[
                             Resources.UserUid.player2
                         ].toBeExactlyOneRoomOperationEvent();
                     expect(maskTypeNames(player2SubscriptionResult)).toEqual(
-                        maskTypeNames(operationResult.operation)
+                        maskTypeNames(operationResult.operation),
                     );
                     const spectatorSubscriptionResult =
                         subscriptions.value[
                             Resources.UserUid.spectator1
                         ].toBeExactlyOneRoomOperationEvent();
                     expect(maskTypeNames(spectatorSubscriptionResult)).toEqual(
-                        maskTypeNames(operationResult.operation)
+                        maskTypeNames(operationResult.operation),
                     );
                     subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
 
                     const room = Assert.GetRoomQuery.toBeSuccess(
                         await clients[Resources.UserUid.player1].getRoomQuery({
                             id: roomId,
-                        })
+                        }),
                     );
                     expect(parseState(room.room.stateJson).name).toBe(newRoomName);
                     systemTimeManager.expect(room.room.updatedAt).toBeCloseToSystemTimeType(2);
@@ -1430,7 +1433,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                 valueJson: invalidJSON,
                             },
                         }),
-                        'GraphQL'
+                        'GraphQL',
                     );
 
                     subscriptions.all.toBeEmpty();
@@ -1438,7 +1441,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                     const room = Assert.GetRoomQuery.toBeSuccess(
                         await clients[Resources.UserUid.player1].getRoomQuery({
                             id: roomId,
-                        })
+                        }),
                     );
                     systemTimeManager.expect(room.room.updatedAt).toBeCloseToSystemTimeType(1);
                 });
@@ -1514,13 +1517,13 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                     roomId,
                                     text,
                                     channelKey,
-                                })
+                                }),
                             );
                             expect(authorMessage.initText).toBe(text);
                             expect(
                                 subscriptions.all
                                     .except(Resources.UserUid.notJoin)
-                                    .distinct(x => x.toBeExactlyOneRoomPublicMessage())
+                                    .distinct(x => x.toBeExactlyOneRoomPublicMessage()),
                             ).toEqual(authorMessage);
                             subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
 
@@ -1532,15 +1535,15 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                 const messages = Assert.GetMessagesQuery.toBeSuccess(
                                     await clients[userUid].getMessagesQuery({
                                         roomId,
-                                    })
+                                    }),
                                 );
                                 expect(roundMilliSecondsInObject(messages.publicMessages)).toEqual(
-                                    roundMilliSecondsInObject([authorMessage])
+                                    roundMilliSecondsInObject([authorMessage]),
                                 );
                                 const room = Assert.GetRoomQuery.toBeSuccess(
                                     await clients[userUid].getRoomQuery({
                                         id: roomId,
-                                    })
+                                    }),
                                 );
                                 systemTimeManager
                                     .expect(room.room.updatedAt)
@@ -1558,7 +1561,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                     roomId,
                                     text: editedText,
                                     messageId: authorMessage.messageId,
-                                })
+                                }),
                             );
                             expect(editResult.failureType).toBeFalsy();
                             const updatedMessage = subscriptions.all
@@ -1584,7 +1587,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                 const room = Assert.GetRoomQuery.toBeSuccess(
                                     await clients[userUid].getRoomQuery({
                                         id: roomId,
-                                    })
+                                    }),
                                 );
                                 systemTimeManager
                                     .expect(room.room.updatedAt)
@@ -1599,7 +1602,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                 await clients[author].deleteMessageMutation({
                                     roomId,
                                     messageId: authorMessage.messageId,
-                                })
+                                }),
                             );
                             expect(deleteResult.failureType).toBeFalsy();
                             const deletedMessage = subscriptions.all
@@ -1625,7 +1628,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                 const room = Assert.GetRoomQuery.toBeSuccess(
                                     await clients[userUid].getRoomQuery({
                                         id: roomId,
-                                    })
+                                    }),
                                 );
                                 systemTimeManager
                                     .expect(room.room.updatedAt)
@@ -1675,7 +1678,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                         text,
                                         channelKey,
                                         gameType,
-                                    })
+                                    }),
                                 );
                                 expect(authorMessage.initText).toBe(text);
                                 expect(authorMessage.initTextSource).toBe(text);
@@ -1685,8 +1688,8 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                     maskTypeNames(
                                         subscriptions.all
                                             .except(Resources.UserUid.notJoin)
-                                            .distinct(x => x.toBeExactlyOneRoomPublicMessage())
-                                    )
+                                            .distinct(x => x.toBeExactlyOneRoomPublicMessage()),
+                                    ),
                                 ).toEqual(maskTypeNames(authorMessage));
                                 subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
 
@@ -1698,10 +1701,10 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                     const messages = Assert.GetMessagesQuery.toBeSuccess(
                                         await clients[userUid].getMessagesQuery({
                                             roomId,
-                                        })
+                                        }),
                                     );
                                     expect(
-                                        roundMilliSecondsInObject(messages.publicMessages)
+                                        roundMilliSecondsInObject(messages.publicMessages),
                                     ).toEqual(roundMilliSecondsInObject([authorMessage]));
                                 }
                             }
@@ -1714,7 +1717,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                         roomId,
                                         text: editedText,
                                         messageId: authorMessage.messageId,
-                                    })
+                                    }),
                                 );
                                 expect(editResult.failureType).toBeFalsy();
                                 const updatedMessage = subscriptions.all
@@ -1726,13 +1729,13 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                         '__typename',
                                         'updatedAt',
                                         'updatedText',
-                                    ])
+                                    ]),
                                 ).toEqual(
                                     maskKeys(authorMessage, [
                                         '__typename',
                                         'updatedAt',
                                         'updatedText',
-                                    ])
+                                    ]),
                                 );
                                 subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
                             }
@@ -1742,7 +1745,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                     await clients[author].deleteMessageMutation({
                                         roomId,
                                         messageId: authorMessage.messageId,
-                                    })
+                                    }),
                                 );
                                 expect(deleteResult.failureType).toBeFalsy();
                                 const deletedMessage = subscriptions.all
@@ -1754,13 +1757,13 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                         '__typename',
                                         'updatedAt',
                                         'updatedText',
-                                    ])
+                                    ]),
                                 ).toEqual(
                                     maskKeys(authorMessage, [
                                         '__typename',
                                         'updatedAt',
                                         'updatedText',
-                                    ])
+                                    ]),
                                 );
                                 subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
                             }
@@ -1805,7 +1808,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                         text,
                                         channelKey,
                                         gameType,
-                                    })
+                                    }),
                                 );
                                 expect(authorMessage.initText).toBe(text);
                                 expect(authorMessage.initTextSource).toBe(text);
@@ -1817,8 +1820,8 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                     maskTypeNames(
                                         subscriptions.value[
                                             author
-                                        ].toBeExactlyOneRoomPublicMessage()
-                                    )
+                                        ].toBeExactlyOneRoomPublicMessage(),
+                                    ),
                                 ).toEqual(maskTypeNames(authorMessage));
                                 const nonAuthorMessage = subscriptions.all
                                     .except(author, Resources.UserUid.notJoin)
@@ -1837,7 +1840,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                     'commandResult',
                                 ];
                                 expect(maskKeys(nonAuthorMessage, maskingKeys)).toEqual(
-                                    maskKeys(authorMessage, maskingKeys)
+                                    maskKeys(authorMessage, maskingKeys),
                                 );
                                 subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
 
@@ -1849,18 +1852,18 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                     const messages = Assert.GetMessagesQuery.toBeSuccess(
                                         await clients[userUid].getMessagesQuery({
                                             roomId,
-                                        })
+                                        }),
                                     );
 
                                     expect(messages.publicMessages).toHaveLength(1);
 
                                     if (userUid === author) {
                                         expect(
-                                            messages.publicMessages[0]?.commandResult
+                                            messages.publicMessages[0]?.commandResult,
                                         ).toBeTruthy();
                                     } else {
                                         expect(
-                                            messages.publicMessages[0]?.commandResult
+                                            messages.publicMessages[0]?.commandResult,
                                         ).toBeFalsy();
                                     }
 
@@ -1874,13 +1877,13 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                     expect(
                                         maskKeys(
                                             roundMilliSecondsInObject(messages.publicMessages),
-                                            maskingKeys
-                                        )
+                                            maskingKeys,
+                                        ),
                                     ).toEqual(
                                         maskKeys(
                                             roundMilliSecondsInObject([authorMessage]),
-                                            maskingKeys
-                                        )
+                                            maskingKeys,
+                                        ),
                                     );
                                 }
                             }
@@ -1895,20 +1898,20 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                         roomId,
                                         text: editedText,
                                         messageId: authorMessage.messageId,
-                                    })
+                                    }),
                                 );
                                 expect(editResult.failureType).toBeFalsy();
                                 updatedAuthorMessage =
                                     subscriptions.value[author].toBeExactlyOneRoomPublicMessage();
                                 expect(updatedAuthorMessage.updatedText?.currentText).toBe(
-                                    editedText
+                                    editedText,
                                 );
                                 expect(updatedAuthorMessage.commandResult).toBeTruthy();
                                 const updatedNonAuthorMessage = subscriptions.all
                                     .except(author, Resources.UserUid.notJoin)
                                     .distinct(x => x.toBeExactlyOneRoomPublicMessage());
                                 expect(updatedNonAuthorMessage.updatedText?.currentText).toBe(
-                                    editedText
+                                    editedText,
                                 );
                                 expect(updatedNonAuthorMessage.commandResult).toBeFalsy();
                                 const maskingKeysForAuthor = [
@@ -1923,10 +1926,10 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                     'commandResult',
                                 ];
                                 expect(
-                                    maskKeys(updatedAuthorMessage, maskingKeysForAuthor)
+                                    maskKeys(updatedAuthorMessage, maskingKeysForAuthor),
                                 ).toEqual(maskKeys(authorMessage, maskingKeysForAuthor));
                                 expect(
-                                    maskKeys(updatedNonAuthorMessage, maskingKeysForNonAuthor)
+                                    maskKeys(updatedNonAuthorMessage, maskingKeysForNonAuthor),
                                 ).toEqual(maskKeys(authorMessage, maskingKeysForNonAuthor));
                                 subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
                             }
@@ -1935,13 +1938,13 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                 await clients[Resources.UserUid.player1].makeMessageNotSecret({
                                     roomId,
                                     messageId: authorMessage.messageId,
-                                })
+                                }),
                             );
                             Assert.MakeMessageNotSecretMutation.toBeFailure(
                                 await clients[Resources.UserUid.notJoin].makeMessageNotSecret({
                                     roomId,
                                     messageId: authorMessage.messageId,
-                                })
+                                }),
                             );
 
                             {
@@ -1949,7 +1952,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                     await clients[author].makeMessageNotSecret({
                                         roomId,
                                         messageId: authorMessage.messageId,
-                                    })
+                                    }),
                                 );
                                 const updatedMessage = subscriptions.all
                                     .except(Resources.UserUid.notJoin)
@@ -1963,14 +1966,17 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                 expect(updatedMessage.commandResult).toBeTruthy();
                                 const maskingKeys = ['__typename', 'updatedAt', 'isSecret'];
                                 expect(
-                                    maskKeys(roundMilliSecondsInObject(updatedMessage), maskingKeys)
+                                    maskKeys(
+                                        roundMilliSecondsInObject(updatedMessage),
+                                        maskingKeys,
+                                    ),
                                 ).toEqual(
                                     maskKeys(
                                         roundMilliSecondsInObject(
-                                            updatedAuthorMessage ?? authorMessage
+                                            updatedAuthorMessage ?? authorMessage,
                                         ),
-                                        maskingKeys
-                                    )
+                                        maskingKeys,
+                                    ),
                                 );
                             }
 
@@ -1979,7 +1985,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                     await clients[author].deleteMessageMutation({
                                         roomId,
                                         messageId: authorMessage.messageId,
-                                    })
+                                    }),
                                 );
                                 expect(deleteResult.failureType).toBeFalsy();
                                 const deletedMessage = subscriptions.all
@@ -1993,7 +1999,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                                     'isSecret',
                                 ];
                                 expect(maskKeys(deletedMessage, maskingKeys)).toEqual(
-                                    maskKeys(authorMessage, maskingKeys)
+                                    maskKeys(authorMessage, maskingKeys),
                                 );
                                 subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
                             }
@@ -2056,7 +2062,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                         roomId,
                         text,
                         channelKey,
-                    })
+                    }),
                 );
                 subscriptions.all.toBeEmpty();
 
@@ -2069,14 +2075,14 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                     const messages = Assert.GetMessagesQuery.toBeSuccess(
                         await clients[userUid].getMessagesQuery({
                             roomId,
-                        })
+                        }),
                     );
                     expect(messages.publicMessages).toHaveLength(0);
 
                     const room = Assert.GetRoomQuery.toBeSuccess(
                         await clients[userUid].getRoomQuery({
                             id: roomId,
-                        })
+                        }),
                     );
                     systemTimeManager.expect(room.room.updatedAt).toBeCloseToSystemTimeType(1);
                 }
@@ -2117,7 +2123,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                             roomId,
                             text,
                             visibleTo,
-                        })
+                        }),
                     );
                     subscriptions.value[Resources.UserUid.master].toBeEmpty();
                     const player2SubscriptionResult =
@@ -2135,7 +2141,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                         const messages = Assert.GetMessagesQuery.toBeSuccess(
                             await clients[userUid].getMessagesQuery({
                                 roomId,
-                            })
+                            }),
                         );
                         expect(messages.privateMessages).toHaveLength(0);
                     }
@@ -2147,10 +2153,10 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                         const messages = Assert.GetMessagesQuery.toBeSuccess(
                             await clients[userUid].getMessagesQuery({
                                 roomId,
-                            })
+                            }),
                         );
                         expect(roundMilliSecondsInObject(messages.privateMessages)).toEqual(
-                            roundMilliSecondsInObject([player2SubscriptionResult])
+                            roundMilliSecondsInObject([player2SubscriptionResult]),
                         );
                     }
 
@@ -2163,7 +2169,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                         const room = Assert.GetRoomQuery.toBeSuccess(
                             await clients[userUid].getRoomQuery({
                                 id: roomId,
-                            })
+                            }),
                         );
                         systemTimeManager.expect(room.room.updatedAt).toBeCloseToSystemTimeType(2);
                     }
@@ -2197,7 +2203,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                     Assert.LeaveRoomMutation.toBeSuccess(
                         await clients[Resources.UserUid.player1].leaveRoomMutation({
                             id: roomId,
-                        })
+                        }),
                     );
 
                     subscriptions.all
@@ -2208,23 +2214,23 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                     const room = Assert.GetRoomQuery.toBeSuccess(
                         await clients[Resources.UserUid.master].getRoomQuery({
                             id: roomId,
-                        })
+                        }),
                     );
                     expect(
                         parseState(room.room.stateJson).participants?.[Resources.UserUid.master]
-                            ?.role
+                            ?.role,
                     ).not.toBeUndefined();
                     expect(
                         parseState(room.room.stateJson).participants?.[Resources.UserUid.player1]
-                            ?.role
+                            ?.role,
                     ).toBeUndefined();
                     expect(
                         parseState(room.room.stateJson).participants?.[Resources.UserUid.player2]
-                            ?.role
+                            ?.role,
                     ).not.toBeUndefined();
                     expect(
                         parseState(room.room.stateJson).participants?.[Resources.UserUid.spectator1]
-                            ?.role
+                            ?.role,
                     ).not.toBeUndefined();
                 });
             });
@@ -2253,7 +2259,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                     Assert.DeleteRoomMutation.toBeSuccess(
                         await clients[Resources.UserUid.master].deleteRoomMutation({
                             id: roomId,
-                        })
+                        }),
                     );
 
                     subscriptions.value[Resources.UserUid.player1].toBeExactlyOneDeleteRoomEvent({
@@ -2262,23 +2268,23 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                     subscriptions.value[Resources.UserUid.spectator1].toBeExactlyOneDeleteRoomEvent(
                         {
                             deletedBy: Resources.UserUid.master,
-                        }
+                        },
                     );
 
                     Assert.GetRoomQuery.toBeNotFound(
                         await clients[Resources.UserUid.master].getRoomQuery({
                             id: roomId,
-                        })
+                        }),
                     );
                     Assert.GetRoomQuery.toBeNotFound(
                         await clients[Resources.UserUid.player1].getRoomQuery({
                             id: roomId,
-                        })
+                        }),
                     );
                     Assert.GetRoomQuery.toBeNotFound(
                         await clients[Resources.UserUid.spectator1].getRoomQuery({
                             id: roomId,
-                        })
+                        }),
                     );
                 });
             });
@@ -2313,7 +2319,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                     Assert.DeleteRoomMutation.toBeNotCreatedByYou(
                         await clients[mutatedBy].deleteRoomMutation({
                             id: roomId,
-                        })
+                        }),
                     );
 
                     subscriptions.all.toBeEmpty();
@@ -2321,22 +2327,22 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                     const room = Assert.GetRoomQuery.toBeSuccess(
                         await clients[Resources.UserUid.master].getRoomQuery({
                             id: roomId,
-                        })
+                        }),
                     );
                     Assert.GetRoomQuery.toBeSuccess(
                         await clients[Resources.UserUid.player1].getRoomQuery({
                             id: roomId,
-                        })
+                        }),
                     );
                     Assert.GetRoomQuery.toBeSuccess(
                         await clients[Resources.UserUid.spectator1].getRoomQuery({
                             id: roomId,
-                        })
+                        }),
                     );
                     Assert.GetRoomQuery.toBeNonJoined(
                         await clients[Resources.UserUid.notJoin].getRoomQuery({
                             id: roomId,
-                        })
+                        }),
                     );
 
                     systemTimeManager
@@ -2373,13 +2379,13 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                         Assert.DeleteRoomAsAdminMutation.toBeSuccess(
                             await clients[Resources.UserUid.admin].deleteRoomAsAdminMutation({
                                 id: roomId,
-                            })
+                            }),
                         );
 
                         subscriptions.value[Resources.UserUid.master].toBeExactlyOneDeleteRoomEvent(
                             {
                                 deletedBy: Resources.UserUid.admin,
-                            }
+                            },
                         );
                         subscriptions.value[
                             Resources.UserUid.player1
@@ -2396,10 +2402,10 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                             Assert.GetRoomQuery.toBeNotFound(
                                 await clients[userUid].getRoomQuery({
                                     id: roomId,
-                                })
+                                }),
                             );
                         }
-                    }
+                    },
                 );
             });
 
@@ -2434,7 +2440,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                     Assert.DeleteRoomAsAdminMutation.toBeError(
                         await clients[mutatedBy].deleteRoomAsAdminMutation({
                             id: roomId,
-                        })
+                        }),
                     );
 
                     subscriptions.all.toBeEmpty();
@@ -2447,7 +2453,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                         const room = Assert.GetRoomQuery.toBeSuccess(
                             await clients[userUid].getRoomQuery({
                                 id: roomId,
-                            })
+                            }),
                         );
                         systemTimeManager
                             .expect(room.room.updatedAt, 'acceptNullish')

@@ -5,7 +5,7 @@ import {
     downOperation,
     state,
     upOperation,
-} from '../../generator';
+} from '../../generator/types';
 import * as Room from './types';
 
 type RoomState = State<typeof Room.template>;

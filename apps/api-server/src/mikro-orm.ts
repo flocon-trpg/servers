@@ -5,9 +5,11 @@ import {
     Dictionary,
     IDatabaseDriver,
     LogContext,
-    LoggerNamespace,
 } from '@mikro-orm/core';
-import { pickBy } from 'lodash';
+import { MySqlDriver } from '@mikro-orm/mysql';
+import { PostgreSqlDriver } from '@mikro-orm/postgresql';
+import { SqliteDriver } from '@mikro-orm/sqlite';
+import { pickBy } from 'es-toolkit';
 import { z } from 'zod';
 import { sqliteDatabase } from './config/types';
 import { File } from './entities/file/entity';
@@ -65,9 +67,9 @@ mikro-ormのログには実行されたSQLが含まれる。これらは、複�
 const loggerFactory: Options['loggerFactory'] = () => {
     const logBase = (
         methodName: 'debug' | 'info' | 'warn' | 'error',
-        namespace: LoggerNamespace,
+        namespace: string,
         message: string,
-        context?: LogContext
+        context?: LogContext,
     ): void => {
         const text = message;
         if (context == null) {
@@ -82,7 +84,7 @@ const loggerFactory: Options['loggerFactory'] = () => {
                     },
                     namespace,
                 },
-                text
+                text,
             );
         }
     };
@@ -116,7 +118,7 @@ const loggerFactory: Options['loggerFactory'] = () => {
                     // pinoのlevelと重複して出力されるのを防ぐため、mikro-ormのログのlevelは取り除いている。
                     level: undefined,
                 },
-                'MikroORM logQuery'
+                'MikroORM logQuery',
             );
         },
         setDebugMode() {
@@ -148,7 +150,7 @@ export const createSQLiteOptions = ({
         dbName: sqliteConfig.dbName,
         clientUrl: sqliteConfig.clientUrl,
         migrations: migrations({ dbType: 'sqlite', dirName }),
-        type: 'sqlite',
+        driver: SqliteDriver,
         forceUndefined: true,
     };
     return pickBy(opts, x => x !== undefined);
@@ -175,7 +177,7 @@ export const createPostgreSQLOptions = ({
             // https://github.com/mikro-orm/mikro-orm/issues/190#issuecomment-655763246
             disableForeignKeys: false,
         },
-        type: 'postgresql',
+        driver: PostgreSqlDriver,
         forceUndefined: true,
         clientUrl,
         driverOptions,
@@ -199,7 +201,7 @@ export const createMySQLOptions = ({
         entities,
         dbName,
         migrations: migrations({ dbType: 'mysql', dirName }),
-        type: 'mysql',
+        driver: MySqlDriver,
         forceUndefined: true,
         clientUrl,
         driverOptions,

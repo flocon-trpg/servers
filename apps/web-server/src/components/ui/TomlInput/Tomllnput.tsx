@@ -33,7 +33,7 @@ type Props = Exclude<PropsCore, 'className' | 'onSkipping'>;
 export const TomlInput: React.FC<Props> = (props: Props) => {
     const { ...inputProps } = props;
     const [bottomElement, setBottomElement] = React.useState<JSX.Element | null>(
-        createBottomElement({ isSkipping: false, currentValue: props.value })
+        createBottomElement({ isSkipping: false, currentValue: props.value }),
     );
     const onSkipping = (params: CreateBottomElementParams): void => {
         setBottomElement(createBottomElement(params));

@@ -62,7 +62,7 @@ export class GetRoomConnectionsResolver {
     @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async getRoomConnections(
         @Arg('roomId') roomId: string,
-        @Ctx() context: ResolverContext
+        @Ctx() context: ResolverContext,
     ): Promise<typeof GetRoomConnectionsResult> {
         const em = context.em;
         const authorizedUserUid = ensureAuthorizedUser(context).userUid;

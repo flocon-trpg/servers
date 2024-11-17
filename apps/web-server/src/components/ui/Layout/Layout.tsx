@@ -6,6 +6,7 @@ import {
     IsEntryQuery,
     IsEntryQueryVariables,
 } from '@flocon-trpg/typed-document-node';
+import { Link, useNavigate } from '@tanstack/react-router';
 import {
     Alert,
     Layout as AntdLayout,
@@ -20,17 +21,15 @@ import {
     Spin,
 } from 'antd';
 import { useAtomValue } from 'jotai';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import React, { PropsWithChildren } from 'react';
+import React, { Children, PropsWithChildren } from 'react';
 import { useClient, useMutation } from 'urql';
+import { AwaitableButton } from '../AwaitableButton/AwaitableButton';
 import { Center } from '../Center/Center';
 import { LoadingResult } from '../LoadingResult/LoadingResult';
 import { NotSignInResult } from '../NotSignInResult/NotSignInResult';
-import { useGetIdToken } from '@/hooks/useGetIdToken';
 import { useGetMyRoles } from '@/hooks/useGetMyRoles';
+import { firebaseUserAtom, getIdTokenResultAtom } from '@/hooks/useSetupApp';
 import { useSignOut } from '@/hooks/useSignOut';
-import { firebaseUserAtom } from '@/pages/_app';
 import { authNotFound, loading, notSignIn } from '@/utils/firebase/firebaseUserState';
 
 const { Header, Content } = AntdLayout;
@@ -49,14 +48,15 @@ const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormC
 
     return (
         <Form
-            name='entryPassword'
+            name="entryPassword"
             onFinish={e => {
                 if (isSubmitting || isFinishedSuccessfully) {
                     return;
                 }
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
                 const password: string = e[passwordName];
                 setIsSubmitting(true);
-                entryToServer({ password }).then(r => {
+                void entryToServer({ password }).then(r => {
                     const resultType = r.data?.result.type;
                     if (resultType == null) {
                         return;
@@ -75,28 +75,28 @@ const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormC
                 });
             }}
         >
-            <Form.Item label='password' name={passwordName}>
+            <Form.Item label="password" name={passwordName}>
                 <Input.Password />
             </Form.Item>
 
             <Form.Item>
                 <Button
                     disabled={isSubmitting || isFinishedSuccessfully}
-                    type='primary'
-                    htmlType='submit'
+                    type="primary"
+                    htmlType="submit"
                 >
                     Submit
                 </Button>
                 {isSubmitting ? <Spin /> : null}
                 {entryToServerResult?.data?.result.type ===
                 EntryToServerResultType.WrongPassword ? (
-                    <Alert message='wrong password' type='error' showIcon />
+                    <Alert message="wrong password" type="error" showIcon />
                 ) : null}
                 {entryToServerResult?.error == null ? null : (
-                    <Alert message={entryToServerResult.error.message} type='error' showIcon />
+                    <Alert message={entryToServerResult.error.message} type="error" showIcon />
                 )}
                 {isFinishedSuccessfully ? (
-                    <Alert message='success' type='success' showIcon />
+                    <Alert message="success" type="success" showIcon />
                 ) : null}
             </Form.Item>
         </Form>
@@ -117,13 +117,15 @@ type Props = {
     hideHeader?: typeof always | typeof success;
 };
 
+const antdLayoutStyle: React.CSSProperties = { minHeight: '100vh' };
+
 export const Layout: React.FC<PropsWithChildren<Props>> = ({
     children,
     onEntry,
     requires,
     hideHeader: hideHeaderProp,
 }) => {
-    const router = useRouter();
+    const router = useNavigate();
     const getMyRolesQueryResult = useGetMyRoles();
     const firebaseUser = useAtomValue(firebaseUserAtom);
     const myUserUid = typeof firebaseUser === 'string' ? null : firebaseUser.uid;
@@ -133,7 +135,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
     const [isEntry, setIsEntry] = React.useState<
         'notRequired' | 'loading' | { type: 'error'; error: Error } | boolean
     >('loading');
-    const { canGetIdToken } = useGetIdToken();
+    const { canGetIdToken } = useAtomValue(getIdTokenResultAtom);
     const requiresEntry = requires === loginAndEntry;
     React.useEffect(() => {
         if (requiresEntry && myUserUid != null) {
@@ -148,7 +150,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                     {},
                     {
                         requestPolicy: 'network-only',
-                    }
+                    },
                 )
                 .toPromise()
                 .then(queryResult => {
@@ -173,7 +175,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
 
     if (firebaseUser === authNotFound) {
         return (
-            <Result status='info' title='Firebase Authentication インスタンスが見つかりません。' />
+            <Result status="info" title="Firebase Authentication インスタンスが見つかりません。" />
         );
     }
 
@@ -184,7 +186,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
             return children;
         }
         if (firebaseUser === loading) {
-            return <LoadingResult title='Firebase Authentication による認証を行っています…' />;
+            return <LoadingResult title="Firebase Authentication による認証を行っています…" />;
         }
         if (firebaseUser === notSignIn) {
             return <NotSignInResult />;
@@ -193,15 +195,15 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
             case 'loading':
                 return (
                     <LoadingResult
-                        title='エントリーの有無を確認しています…'
+                        title="エントリーの有無を確認しています…"
                         // APIサーバーをHeroku Freeプランで運用している場合はスリープが解除されるまで待たされることがあるため、それに対応した文章としている。特に公式サーバーの利用者を念頭に置いている。
-                        subTitle='完了までに十数秒程度かかることがあります。しばらくお待ちください…'
+                        subTitle="完了までに十数秒程度かかることがあります。しばらくお待ちください…"
                     />
                 );
             case false:
                 return (
                     <Center setPaddingY>
-                        <Card title='エントリーパスワードの入力'>
+                        <Card title="エントリーパスワードの入力">
                             <EntryFormComponent
                                 onEntry={() => {
                                     setIsEntry(true);
@@ -217,7 +219,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
             case 'notRequired':
                 break;
             default:
-                return <Result status='error' title='APIエラー' subTitle={isEntry.error.message} />;
+                return <Result status="error" title="APIエラー" subTitle={isEntry.error.message} />;
         }
         showChildren = true;
         return children;
@@ -236,15 +238,15 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
     }
 
     return (
-        <AntdLayout style={{ minHeight: '100vh' }}>
+        <AntdLayout style={antdLayoutStyle}>
             {!hideHeader && (
                 <Header>
                     <Row>
                         <Col flex={0}>
-                            <Link href='/'>
+                            <Link to="/">
                                 <img
                                     style={{ cursor: 'pointer', verticalAlign: 'middle' }}
-                                    src='/assets/logo.png'
+                                    src="/assets/logo.png"
                                     width={32}
                                     height={32}
                                 />
@@ -264,27 +266,36 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                                     </div>
                                 )}
                                 {typeof firebaseUser === 'string' ? (
-                                    <Button key='2' onClick={() => router.push('/signin')}>
+                                    <AwaitableButton
+                                        key="2"
+                                        onClick={() => router({ to: '/signin' })}
+                                    >
                                         ログイン/ユーザー登録
-                                    </Button>
+                                    </AwaitableButton>
                                 ) : (
                                     <>
                                         <Button
-                                            key='1'
-                                            href='/profile'
-                                            target='_blank'
-                                            rel='noopener noreferrer'
+                                            key="1"
+                                            href="/profile"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
                                         >
                                             ユーザー名を変更する
                                         </Button>
                                         {isAnonymous && (
-                                            <Button key='2' onClick={() => router.push('/signin')}>
+                                            <AwaitableButton
+                                                key="2"
+                                                onClick={() => router({ to: '/signin' })}
+                                            >
                                                 非匿名アカウントに変換する
-                                            </Button>
+                                            </AwaitableButton>
                                         )}
-                                        <Button key='3' onClick={() => signOut()}>
+                                        <AwaitableButton
+                                            key="3"
+                                            onClick={() => signOut().then(() => undefined)}
+                                        >
                                             ログアウト
-                                        </Button>
+                                        </AwaitableButton>
                                     </>
                                 )}
                             </Space>
@@ -293,6 +304,14 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                 </Header>
             )}
             <Content>{content}</Content>
+        </AntdLayout>
+    );
+};
+
+export const LayoutWithNoHook: React.FC<PropsWithChildren> = ({ children }) => {
+    return (
+        <AntdLayout style={antdLayoutStyle}>
+            <Content>{children}</Content>
         </AntdLayout>
     );
 };

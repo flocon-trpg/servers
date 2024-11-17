@@ -1,5 +1,5 @@
 export const parseEnvListValue = (
-    source: string | null | undefined
+    source: string | null | undefined,
 ): string[] | null | undefined => {
     if (source == null) {
         return source;

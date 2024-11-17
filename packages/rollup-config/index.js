@@ -3,14 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.config = void 0;
+exports.config = config;
 const plugin_typescript_1 = __importDefault(require("@rollup/plugin-typescript"));
 /**
  * @example
  * ```javascript
 const { config } = require('@flocon-trpg/rollup-config');
 // https://rollupjs.org/guide/en/#importing-packagejson
-const external = Object.keys(require('./package.json').dependencies);
+const external = Object.keys(require('./package.json').dependencies ?? { });
 module.exports = config({ external });
  * ```
  */
@@ -47,5 +47,4 @@ function config({ external }) {
         }),
     ];
 }
-exports.config = config;
 //# sourceMappingURL=index.js.map

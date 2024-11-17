@@ -8,13 +8,16 @@ import {
 import { keyNames } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import * as Room from '../ot/flocon/room/types';
-import { State } from '../ot/generator';
+import { State } from '../ot/generator/types';
 import { FRoom } from './room';
 
 type RoomState = State<typeof Room.template>;
 
 class CommandError extends Error {
-    constructor(message: string, public readonly range?: readonly [number, number]) {
+    constructor(
+        message: string,
+        public readonly range?: readonly [number, number],
+    ) {
         super(message);
         this.name = 'CommandError';
     }

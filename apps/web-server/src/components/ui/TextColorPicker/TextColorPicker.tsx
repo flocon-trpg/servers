@@ -12,7 +12,7 @@ import { rgb } from '@/utils/rgb';
 type Props = {
     config: ChatPalettePanelConfig | MessagePanelConfig;
     onConfigUpdate: (
-        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void
+        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void,
     ) => void;
     descriptionStyle?: React.CSSProperties;
 };
@@ -26,7 +26,7 @@ export const TextColorPicker: React.FC<Props> = ({
         <div className={classNames(flexNone, flex, flexRow, itemsCenter)}>
             <InputDescription style={descriptionStyle}>文字色</InputDescription>
             <ColorPickerButton
-                trigger='click'
+                trigger="click"
                 disableAlpha
                 color={config.selectedTextColor == null ? '#FFFFFF' : config.selectedTextColor}
                 onChange={e =>
@@ -49,12 +49,12 @@ export const TextColorPicker: React.FC<Props> = ({
                     '#F262A9',
                     '#9D9D9D',
                 ]}
-                buttonSize='small'
+                buttonSize="small"
                 buttonStyle={{ margin: '4px 4px 4px 0' }}
                 buttonContent={config.selectedTextColor ?? 'デフォルト'}
             />
             <Button
-                size='small'
+                size="small"
                 onClick={() =>
                     onConfigUpdate(draft => {
                         draft.selectedTextColor = undefined;

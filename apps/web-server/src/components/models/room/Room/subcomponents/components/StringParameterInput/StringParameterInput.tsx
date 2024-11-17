@@ -63,18 +63,18 @@ export const StringParameterInput: React.FC<Props> = ({
         <CollaborativeInput
             style={{ width: inputWidth }}
             className={classNames(flex1)}
-            size='small'
-            bufferDuration='default'
+            size="small"
+            bufferDuration="default"
             disabled={disabled}
             value={parameter?.value ?? ''}
-            onChange={e => {
+            onChange={currentValue => {
                 // valueで??演算子を使用しているため、e.previousValueは使えない。そのため代わりにparameter?.valueを使用している
                 const previousValue = parameter?.value;
 
-                if (previousValue === e.currentValue) {
+                if (previousValue === currentValue) {
                     return;
                 }
-                const diff2 = nullableTextDiff({ prev: previousValue, next: e.currentValue });
+                const diff2 = nullableTextDiff({ prev: previousValue, next: currentValue });
                 const operation: CharacterUpOperation = {
                     $v: 2,
                     $r: 1,
@@ -116,13 +116,13 @@ export const StringParameterInput: React.FC<Props> = ({
             hideWhenDisabled={compact}
             showAsTextWhenDisabled={!compact}
             tooltip={
-                parameter?.isValuePrivate ?? false
+                (parameter?.isValuePrivate ?? false)
                     ? parameterIsPrivate({ isCharacterPrivate, isCreate })
                     : parameterIsNotPrivate({ isCharacterPrivate, isCreate })
             }
             checkedChildren={<EyeOutlined />}
             unCheckedChildren={<EyeInvisibleOutlined />}
-            size='small'
+            size="small"
             onChange={e => {
                 const operation: CharacterUpOperation = {
                     $v: 2,
@@ -136,9 +136,10 @@ export const StringParameterInput: React.FC<Props> = ({
                     },
                 };
                 onOperate(apply(operation));
+                return Promise.resolve();
             }}
-            shape='circle'
-            defaultType='dashed'
+            shape="circle"
+            defaultType="dashed"
         />
     );
     return (

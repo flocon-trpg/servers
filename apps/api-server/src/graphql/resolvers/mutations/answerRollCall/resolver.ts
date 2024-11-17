@@ -45,7 +45,7 @@ export class AnswerRollCallResolver {
         @Arg('rollCallId') rollCallId: string,
         @Arg('answer') answer: boolean,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<AnswerRollCallResult> {
         const myUserUid = ensureUserUid(context);
         const result = await operateAsAdminAndFlush({

@@ -13,7 +13,7 @@ import { AstInfo, GetCoreParams, SetCoreParams } from './types';
 export class FIterator extends FObject {
     protected constructor(
         private readonly source: IterableIterator<unknown>,
-        private readonly convertValue: (value: unknown) => FValue
+        private readonly convertValue: (value: unknown) => FValue,
     ) {
         super();
     }

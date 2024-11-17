@@ -9,7 +9,7 @@ import {
 } from '@flocon-trpg/flocon-script';
 import { maxLength100String } from '../maxLengthString';
 import * as Participant from '../ot/flocon/room/participant/types';
-import { State } from '../ot/generator';
+import { State } from '../ot/generator/types';
 
 const name = 'name';
 
@@ -50,7 +50,7 @@ export class FParticipant extends FObject {
             default:
                 throw new ScriptError(
                     `'${typeof key === 'symbol' ? 'symbol' : key}' is not supported.`,
-                    astInfo?.range
+                    astInfo?.range,
                 );
         }
     }

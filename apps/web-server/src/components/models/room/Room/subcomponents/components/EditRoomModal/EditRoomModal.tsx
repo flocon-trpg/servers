@@ -13,7 +13,7 @@ const modalProps: Partial<ModalProps> = {
 
 export const EditRoomModal: React.FC = () => {
     const [editRoomModalVisibility, setEditRoomModalVisibility] = useAtom(
-        editRoomModalVisibilityAtom
+        editRoomModalVisibilityAtom,
     );
     const operateAsStateWithImmer = useSetRoomStateWithImmer();
     const name = useRoomStateValueSelector(state => state.name);
@@ -21,7 +21,7 @@ export const EditRoomModal: React.FC = () => {
     return (
         <Modal
             {...modalProps}
-            title='部屋の設定'
+            title="部屋の設定"
             open={editRoomModalVisibility}
             closable
             onCancel={() => setEditRoomModalVisibility(false)}
@@ -35,9 +35,9 @@ export const EditRoomModal: React.FC = () => {
             }
         >
             <Table>
-                <TableRow label='名前'>
+                <TableRow label="名前">
                     <Input
-                        size='small'
+                        size="small"
                         value={name ?? undefined}
                         onChange={e => {
                             operateAsStateWithImmer(state => {

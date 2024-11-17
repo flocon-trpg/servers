@@ -6,9 +6,10 @@ describe('isReadonlyNonEmptyArray', () => {
         const actual = isReadonlyNonEmptyArray(source);
         expect(actual).toBe(true);
         if (actual) {
+            // sourceの型がReadonlyNonEmptyArrayになっていることを確認するためのテスト
             const _: ReadonlyNonEmptyArray<number> = source;
-            // TypeScriptなどによる未使用の変数の警告を抑制している
-            _ == null ? undefined : undefined;
+            // 適当な関数を実行するコードを書くことで、TypeScriptなどによる未使用の変数の警告を抑制している
+            _.toString();
         }
     });
 

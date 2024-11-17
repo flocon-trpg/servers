@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { exec, mapClass } from '../src';
 
 describe('Map', () => {
@@ -11,7 +12,7 @@ let map = new Map();
 map.set(1, '1');
 map.get(${param});
         `,
-            { Map: mapClass }
+            { Map: mapClass },
         );
         expect(actual.result).toBe(expected);
     });
@@ -27,7 +28,7 @@ let map = new Map();
 ${script}
 map.size;
         `,
-            { Map: mapClass }
+            { Map: mapClass },
         );
         expect(actual.result).toBe(expected);
     });
@@ -63,7 +64,7 @@ let result = map.delete(${key});
 let size = map.size;
 ({ result, size });
         `,
-            { Map: mapClass }
+            { Map: mapClass },
         );
         expect(actual.result).toEqual({
             result: expectedResult,
@@ -85,7 +86,7 @@ map.forEach((value, key) => {
 });
 ({ valueSum, keySum });
         `,
-            { Map: mapClass }
+            { Map: mapClass },
         );
         expect(actual.result).toEqual({ valueSum: 30, keySum: 3 });
     });
@@ -100,7 +101,7 @@ let map = new Map();
 map.set(1, '1');
 map.has(${param});
         `,
-            { Map: mapClass }
+            { Map: mapClass },
         );
         expect(actual.result).toBe(expected);
     });

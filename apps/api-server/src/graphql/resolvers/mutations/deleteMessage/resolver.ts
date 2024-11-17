@@ -46,7 +46,7 @@ export class DeleteMessageResolver {
     public async deleteMessage(
         @Args() args: MessageIdArgs,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<DeleteMessageResult> {
         const em = context.em;
         const authorizedUserUid = ensureAuthorizedUser(context).userUid;
@@ -68,7 +68,8 @@ export class DeleteMessageResolver {
         }
         const publicMsg = await em.findOne(RoomPubMsg, { id: args.messageId });
         if (publicMsg != null) {
-            if (publicMsg.createdBy?.userUid !== authorizedUserUid) {
+            const createdBy = await publicMsg.createdBy?.loadProperty('userUid');
+            if (createdBy !== authorizedUserUid) {
                 return {
                     failureType: DeleteMessageFailureType.NotYourMessage,
                 };
@@ -89,14 +90,15 @@ export class DeleteMessageResolver {
                 sendTo: findResult.participantIds(),
                 roomId: room.id,
                 visibleTo: undefined,
-                createdBy: publicMsg.createdBy?.userUid,
+                createdBy,
                 value: payloadValue,
             });
             return {};
         }
         const privateMsg = await em.findOne(RoomPrvMsg, { id: args.messageId });
         if (privateMsg != null) {
-            if (privateMsg.createdBy?.userUid !== authorizedUserUid) {
+            const createdBy = await privateMsg.createdBy?.loadProperty('userUid');
+            if (createdBy !== authorizedUserUid) {
                 return {
                     failureType: DeleteMessageFailureType.NotYourMessage,
                 };
@@ -118,7 +120,7 @@ export class DeleteMessageResolver {
                 sendTo: findResult.participantIds(),
                 roomId: room.id,
                 visibleTo: (await privateMsg.visibleTo.loadItems()).map(user => user.userUid),
-                createdBy: privateMsg.createdBy?.userUid,
+                createdBy,
                 value: payloadValue,
             });
             return {};

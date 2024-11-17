@@ -10,6 +10,6 @@ export const useIsMyCharacter = () => {
             }
             return myCharacters?.has(characterId) ?? false;
         },
-        [myCharacters]
+        [myCharacters],
     );
 };

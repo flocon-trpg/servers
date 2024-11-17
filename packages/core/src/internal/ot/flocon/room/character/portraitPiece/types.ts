@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../../generator';
+import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../../generator/types';
 import * as BoardPositionBase from '../../../boardPosition/types';
 
 export const template = createObjectValueTemplate(
@@ -9,5 +9,5 @@ export const template = createObjectValueTemplate(
         isPrivate: createReplaceValueTemplate(z.boolean()),
     },
     2,
-    1
+    1,
 );

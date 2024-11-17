@@ -9,9 +9,9 @@ import {
 import { Button, Input } from 'antd';
 import { TextAreaRef } from 'antd/lib/input/TextArea';
 import classNames from 'classnames';
+import { compact } from 'es-toolkit';
 import { Draft } from 'immer';
 import { useAtom } from 'jotai';
-import _ from 'lodash';
 import React from 'react';
 import { useLatest } from 'react-use';
 import { Observable } from 'rxjs';
@@ -25,11 +25,12 @@ import { PrivateMessageChannelSelector } from './subcomponents/components/Privat
 import { PublicMessageChannelSelector } from './subcomponents/components/PublicMessageChannelSelector/PublicMessageChannelSelector';
 import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
-import { userConfigAtom } from '@/atoms/userConfigAtom/userConfigAtom';
+import { userConfigAtomFamily } from '@/atoms/userConfigAtom/userConfigAtom';
 import { UserConfigUtils } from '@/atoms/userConfigAtom/utils';
 import { UISelector } from '@/components/ui/UISelector/UISelector';
 import { useAddNotification } from '@/hooks/useAddNotification';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { flex, flexColumn, flexNone } from '@/styles/className';
 
 /* react-virtuosoはおそらくheightを指定しなければ正常に動作しないため、もしこれが可変だとheightの指定が無理とは言わないまでも面倒になる。そのため、70pxという適当な値で固定している */
@@ -92,30 +93,29 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
             textAreaRef.current?.focus();
         }
     }, [isPostingState.focus]);
+    const userUid = useMyUserUid();
+    const userConfigAtom = userConfigAtomFamily(userUid);
     const roomMessagesFontSizeDelta = useAtomSelector(
         userConfigAtom,
-        state => state?.roomMessagesFontSizeDelta
+        state => state?.roomMessagesFontSizeDelta,
     );
     const fontSize = UserConfigUtils.getRoomMessagesFontSize(roomMessagesFontSizeDelta ?? 0);
     const participants = useParticipants();
-    const selectedParticipantsBase = React.useMemo(
-        () =>
-            _([...participantIdsOfSendTo])
-                .map(id => {
-                    const found = participants?.get(id);
-                    if (found == null) {
-                        return null;
-                    }
-                    return [id, found] as const;
-                })
-                .compact()
-                .sort(([, x], [, y]) => (x.name ?? '').localeCompare(y.name ?? ''))
-                .value(),
-        [participantIdsOfSendTo, participants]
-    );
+    const selectedParticipantsBase = React.useMemo(() => {
+        const notCompacted = [...participantIdsOfSendTo].map(id => {
+            const found = participants?.get(id);
+            if (found == null) {
+                return null;
+            }
+            return [id, found] as const;
+        });
+        return compact(notCompacted).sort(([, x], [, y]) =>
+            (x.name ?? '').localeCompare(y.name ?? ''),
+        );
+    }, [participantIdsOfSendTo, participants]);
     const selectedParticipants = React.useMemo(
         () => selectedParticipantsBase.map(([, participant]) => participant.name ?? ''),
-        [selectedParticipantsBase]
+        [selectedParticipantsBase],
     );
     const placeholder = `秘話 (${
         selectedParticipants.length === 0
@@ -145,7 +145,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
             customNameVariable = undefined;
         }
         setIsPostingState({ isPosting: true, focus: false });
-        writePrivateMessage({
+        void writePrivateMessage({
             roomId,
             text,
             textColor: config.selectedTextColor,
@@ -259,9 +259,11 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
             textAreaRef.current?.focus();
         }
     }, [isPostingState.focus]);
+    const userUid = useMyUserUid();
+    const userConfigAtom = userConfigAtomFamily(userUid);
     const roomMessagesFontSizeDelta = useAtomSelector(
         userConfigAtom,
-        state => state?.roomMessagesFontSizeDelta
+        state => state?.roomMessagesFontSizeDelta,
     );
     const fontSize = UserConfigUtils.getRoomMessagesFontSize(roomMessagesFontSizeDelta ?? 0);
     const publicChannelNames = usePublicChannelNames();
@@ -302,7 +304,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
         }
 
         setIsPostingState({ isPosting: true, focus: false });
-        writePublicMessage({
+        void writePublicMessage({
             roomId,
             text,
             textColor: config.selectedTextColor,
@@ -409,7 +411,7 @@ type Props = {
     onSelectedChannelTypeChange: (newValue: SelectedChannelType) => void;
     config: ChatPalettePanelConfig | MessagePanelConfig;
     onConfigUpdate: (
-        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void
+        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void,
     ) => void;
     descriptionStyle?: React.CSSProperties;
 
@@ -432,7 +434,7 @@ export const SubmitMessage: React.FC<Props> = ({
     autoSubmitter,
 }: Props) => {
     const [participantIdsOfSendTo, setParticipantIdsOfSendTo] = React.useState<ReadonlySet<string>>(
-        new Set()
+        new Set(),
     );
 
     const privateMessageElement = (

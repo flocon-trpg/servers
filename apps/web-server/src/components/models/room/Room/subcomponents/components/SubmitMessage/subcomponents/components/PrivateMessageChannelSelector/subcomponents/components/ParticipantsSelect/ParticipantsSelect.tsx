@@ -45,14 +45,14 @@ export const ParticipantsSelect: React.FC<Props> = ({
                     />
                     <div style={{ paddingLeft: 4 }}>{participant.name}</div>
                 </div>
-            </Select.Option>
+            </Select.Option>,
         );
     });
 
     return (
         <Select
             placeholder={placeholder}
-            mode='multiple'
+            mode="multiple"
             style={{ width: '100%' }}
             value={[...selectedParticipantIds].filter(participantId => participantId !== myUserUid)}
             onChange={value => onChange(value)}
