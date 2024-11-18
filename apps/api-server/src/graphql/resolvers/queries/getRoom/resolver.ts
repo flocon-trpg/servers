@@ -2,17 +2,14 @@ import { client } from '@flocon-trpg/core';
 import {
     Args,
     ArgsType,
-    Authorized,
-    Ctx,
     Field,
     ObjectType,
     Query,
     Resolver,
-    UseMiddleware,
     createUnionType,
-} from 'type-graphql';
-import { isBookmarked } from '../../../../entities/room/isBookmarked';
-import { role } from '../../../../entities/room/role';
+} from '@nestjs/graphql';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { GlobalRoom } from '../../../../entities-graphql/room';
 import { stateToGraphQL } from '../../../../entities-graphql/roomAsListItem';
 import { GetRoomFailureType } from '../../../../enums/GetRoomFailureType';
@@ -20,12 +17,11 @@ import {
     ParticipantRoleType,
     stringToParticipantRoleType,
 } from '../../../../enums/ParticipantRoleType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import { isBookmarked } from '../../../../mikro-orm/entities/room/isBookmarked';
+import { role } from '../../../../mikro-orm/entities/room/role';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { RoomAsListItem, RoomGetState } from '../../../objects/room';
-import { ensureAuthorizedUser, findRoomAndMyParticipant } from '../../utils/utils';
+import { findRoomAndMyParticipant } from '../../utils/utils';
 
 @ArgsType()
 class GetRoomArgs {
@@ -75,18 +71,19 @@ const GetRoomResult = createUnionType({
 
 @Resolver()
 export class GetRoomResolver {
+    public constructor(private readonly mikroOrmService: MikroOrmService) {}
+
     @Query(() => GetRoomResult, {
         description:
             '通常はこの Query を直接実行する必要はありません。@flocon-trpg/sdk を用いることで、リアルタイムに Room を取得および自動更新できます。',
     })
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
+    @Auth(ENTRY)
     public async getRoom(
         @Args() args: GetRoomArgs,
-        @Ctx() context: ResolverContext,
+        @AuthData() auth: AuthDataType,
     ): Promise<typeof GetRoomResult> {
-        const em = context.em;
-        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+        const em = await this.mikroOrmService.forkEmForMain();
+        const authorizedUserUid = auth.user.userUid;
         const findResult = await findRoomAndMyParticipant({
             em,
             userUid: authorizedUserUid,

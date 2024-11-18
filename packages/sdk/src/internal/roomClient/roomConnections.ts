@@ -1,8 +1,11 @@
-import { RoomEventSubscription } from '@flocon-trpg/typed-document-node';
+import { RoomEventDoc } from '@flocon-trpg/graphql-documents';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import { Observable } from 'rxjs';
 import { BehaviorEvent } from '../rxjs/behaviorEvent';
 import { ReadonlyBehaviorEvent } from '../rxjs/readonlyBehaviorEvent';
 import { GraphQLClientWithStatus } from './graphqlClient';
+
+type RoomEventSubscriptionResult = ResultOf<typeof RoomEventDoc>['result'];
 
 export type RoomConnectionStatus = {
     isConnected: boolean;
@@ -67,9 +70,7 @@ export const subscribeRoomConnections = ({
     subscription,
 }: {
     client: Pick<GraphQLClientWithStatus<any>, 'getRoomConnectionsQuery'>;
-    subscription: Observable<
-        Pick<NonNullable<RoomEventSubscription['roomEvent']>, 'roomConnectionEvent'>
-    >;
+    subscription: Observable<Pick<NonNullable<RoomEventSubscriptionResult>, 'roomConnectionEvent'>>;
 }) => {
     const manager = new RoomConnectionsManager();
     const subscriptionSubscription = subscription.subscribe({

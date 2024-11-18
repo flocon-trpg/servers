@@ -8,34 +8,21 @@ import {
     toOtError,
 } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
+import { Args, ArgsType, Field, Mutation, ObjectType, Resolver } from '@nestjs/graphql';
 import { produce } from 'immer';
-import {
-    Args,
-    ArgsType,
-    Authorized,
-    Ctx,
-    Field,
-    Mutation,
-    ObjectType,
-    PubSub,
-    PubSubEngine,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
-import * as Room$MikroORM from '../../../../entities/room/entity';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { PromoteFailureType } from '../../../../enums/PromoteFailureType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import * as Room$MikroORM from '../../../../mikro-orm/entities/room/entity';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { EM } from '../../../../types';
 import { RoomEventPayload } from '../../subsciptions/roomEvent/payload';
 import {
     IdOperation,
     RoomNotFound,
     bcryptCompareNullable,
-    ensureAuthorizedUser,
     operateAsAdminAndFlush,
-    publishRoomEvent,
 } from '../../utils/utils';
 
 type ParticipantState = State<typeof participantTemplate>;
@@ -57,11 +44,13 @@ class PromoteResult {
 
 const promoteMeCore = async ({
     roomId,
-    context,
+    userUid,
+    em,
     strategy,
 }: {
     roomId: string;
-    context: ResolverContext;
+    userUid: string;
+    em: EM;
     strategy: (params: {
         room: Room$MikroORM.Room;
         me: ParticipantState;
@@ -72,15 +61,13 @@ const promoteMeCore = async ({
         | PromoteFailureType.NotParticipant
     >;
 }): Promise<{ result: PromoteResult; payload: RoomEventPayload | undefined }> => {
-    const em = context.em;
-    const authorizedUser = ensureAuthorizedUser(context);
     const flushResult = await operateAsAdminAndFlush({
         operationType: 'state',
         em,
         roomId,
         roomHistCount: undefined,
         operation: async (roomState, { room }) => {
-            const me = roomState.participants?.[authorizedUser.userUid];
+            const me = roomState.participants?.[userUid];
             if (me == null) {
                 return Result.error(PromoteFailureType.NotParticipant);
             }
@@ -90,7 +77,7 @@ const promoteMeCore = async ({
                 case 'Player':
                 case 'Spectator': {
                     const result = produce(roomState, roomState => {
-                        const me = roomState.participants?.[authorizedUser.userUid];
+                        const me = roomState.participants?.[userUid];
                         if (me == null) {
                             return;
                         }
@@ -122,19 +109,23 @@ const promoteMeCore = async ({
     }
 };
 
-@Resolver()
+@Resolver(() => PromoteResult)
 export class PromoteToPlayerResolver {
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly pubSubService: PubSubService,
+    ) {}
+
     @Mutation(() => PromoteResult)
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
+    @Auth(ENTRY)
     public async promoteToPlayer(
         @Args() args: PromoteArgs,
-        @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine,
+        @AuthData() auth: AuthDataType,
     ): Promise<PromoteResult> {
         const { result, payload } = await promoteMeCore({
             ...args,
-            context,
+            em: await this.mikroOrmService.forkEmForMain(),
+            userUid: auth.user.userUid,
             strategy: async ({ me, room }) => {
                 switch (me.role) {
                     case Master:
@@ -155,7 +146,7 @@ export class PromoteToPlayerResolver {
             },
         });
         if (payload != null) {
-            await publishRoomEvent(pubSub, payload);
+            this.pubSubService.roomEvent.next(payload);
         }
         return result;
     }

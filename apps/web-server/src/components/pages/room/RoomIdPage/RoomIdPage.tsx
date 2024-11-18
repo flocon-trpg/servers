@@ -1,14 +1,13 @@
-import { useCreateRoomClient } from '@flocon-trpg/sdk-react';
-import { createGraphQLClientForRoomClient } from '@flocon-trpg/sdk-urql';
 import {
     GetRoomFailureType,
-    JoinRoomAsPlayerDocument,
-    JoinRoomAsSpectatorDocument,
     JoinRoomFailureType,
     OperateRoomFailureType,
-    RoomAsListItemFragment,
+    RoomAsListItemFragmentDoc,
     WritingMessageStatusInputType,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/graphql-documents';
+import { useCreateRoomClient } from '@flocon-trpg/sdk-react';
+import { createGraphQLClientForRoomClient } from '@flocon-trpg/sdk-urql';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import { Link } from '@tanstack/react-router';
 import { Alert, Card, Input, Result, Spin } from 'antd';
 import classNames from 'classnames';
@@ -19,6 +18,7 @@ import React, { PropsWithChildren } from 'react';
 import { useDebounce, usePrevious } from 'react-use';
 import { CombinedError, useClient, useMutation } from 'urql';
 import { useMemoOne } from 'use-memo-one';
+import { JoinRoomAsPlayerDoc, JoinRoomAsSpectatorDoc } from '../../../../graphql/JoinRoomDocs';
 import { hideAllOverlayActionAtom } from '@/atoms/hideAllOverlayActionAtom/hideAllOverlayActionAtom';
 import { AntdThemeConfigProvider } from '@/components/behaviors/AntdThemeConfigProvider';
 import { Room } from '@/components/models/room/Room/Room';
@@ -39,6 +39,8 @@ import { useRoomGraphQLStatus } from '@/hooks/useRoomGraphQLStatus';
 import { useRoomState } from '@/hooks/useRoomState';
 import { firebaseUserValueAtom, getIdTokenResultAtom } from '@/hooks/useSetupApp';
 import { flex, flexColumn, itemsCenter } from '@/styles/className';
+
+type RoomAsListItemFragment = ResultOf<typeof RoomAsListItemFragmentDoc>;
 
 const debouncedWindowInnerWidthAtomCore = atom(0);
 const debouncedWindowInnerHeightAtomCore = atom(0);
@@ -119,10 +121,8 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
     const [name, setName] = React.useState<string>(firebaseUser?.displayName ?? '');
     const [playerPassword, setPlayerPassword] = React.useState<string>('');
     const [spectatorPassword, setSpectatorPassword] = React.useState<string>('');
-    const [joinRoomAsPlayerResult, joinRoomAsPlayer] = useMutation(JoinRoomAsPlayerDocument);
-    const [joinRoomAsSpectatorResult, joinRoomAsSpectator] = useMutation(
-        JoinRoomAsSpectatorDocument,
-    );
+    const [joinRoomAsPlayerResult, joinRoomAsPlayer] = useMutation(JoinRoomAsPlayerDoc);
+    const [joinRoomAsSpectatorResult, joinRoomAsSpectator] = useMutation(JoinRoomAsSpectatorDoc);
     const [errorMessage, setErrorMessage] = React.useState<string | undefined>(undefined);
 
     const disableJoinActions =

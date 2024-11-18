@@ -1,5 +1,5 @@
 import { State, participantTemplate } from '@flocon-trpg/core';
-import { ParticipantRole } from '@flocon-trpg/typed-document-node';
+import { ParticipantRole } from '@flocon-trpg/graphql-documents';
 import { Table } from 'antd';
 import React from 'react';
 import { useParticipants } from '../../hooks/useParticipants';

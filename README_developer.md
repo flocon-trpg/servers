@@ -147,17 +147,11 @@ yarn run test
 
 パッケージのディレクトリ内で`yarn run test`を実行することで、パッケージ単体をテストすることもできます。
 
-#### 環境変数
+#### データベースを用いるテストの設定
 
-`REDIS_TEST`に falsy な値をセットすることで Redis を使用したテストをスキップできます。Redis を使用したテストを実行する場合は Redis サーバーを起動しておく必要があります。
+Flocon のテストには、リレーショナルデータベースを使用したテストが含まれます。デフォルトでは SQLite のみが用いられますが、環境変数の `MYSQL_TEST`、`POSTGRESQL_TEST` に truthy な値をセットすることで MySQL や PostgreSQL を用いたテストを実行することもできます。逆に、`SQLITE_TEST` に falsy な値をセットすることで SQLite のテストをスキップすることもできます。リレーショナルデータベースを使用したテストは [api-server](./apps/api-server) パッケージにのみ存在します。このパッケージをテストしない場合は`MYSQL_TEST`、`POSTGRESQL_TEST`、`SQLITE_TEST`の値は利用されません。テストに使われるデータベースの URL は [./apps/api-server/test/utils/databaseConfig.ts](./apps/api-server/test/utils/databaseConfig.ts) に記述されています。databaseConfig.ts を編集してテストしても構いません。
 
-Redis を使用したテストは`./packages/cache`パッケージにのみ存在します。このパッケージをテストしない場合は`REDIS_TEST`の値は利用されません。現時点では Flocon の Web サーバーと API サーバーでは Redis を使っていないため、Redis を使用したテストは基本的にスキップして構いません。
-
-`MYSQL_TEST`、`POSTGRESQL_TEST`、`SQLITE_TEST`に falsy な値をセットすることで、それぞれのリレーショナルデータベースを使用したテストをスキップできます。MySQL や PostgreSQL を使用したテストを実行する場合は、それぞれのデータベースを準備しておく必要があります。SQLite は事前の準備は必要ありません。
-
-テストに使われるデータベースの URL は [./apps/api-server/test/utils/databaseConfig.ts](./apps/api-server/test/utils/databaseConfig.ts) に記述されています。databaseConfig.ts を編集してテストしても構いません。
-
-リレーショナルデータベースを使用したテストは [api-server](./apps/api-server) パッケージにのみ存在します。このパッケージをテストしない場合は`MYSQL_TEST`、`POSTGRESQL_TEST`、`SQLITE_TEST`の値は利用されません。
+Flocon のテストには、Redis を使用したテストも含まれます。デフォルトでは Redis を用いたテストはスキップされます。`REDIS_TEST`に truthy な値をセットすることで Redis を使用したテストを実行できます。Redis を使用したテストを実行する場合は Redis サーバーを起動しておく必要があります。Redis を使用したテストは`./packages/cache`パッケージにのみ存在します。このパッケージをテストしない場合は`REDIS_TEST`の値は利用されません。現時点では Flocon の Web サーバーと API サーバーでは Redis を使っていないため、Redis を使用したテストは基本的にスキップして構いません。
 
 ## ブランチ名について
 

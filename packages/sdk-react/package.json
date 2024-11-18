@@ -22,6 +22,7 @@
     },
     "dependencies": {
         "@flocon-trpg/sdk": "workspace:^",
+        "@graphql-typed-document-node/core": "^3.2.0",
         "react": "^18.0.0",
         "react-use": "^17.3.1",
         "use-memo-one": "^1.1.2"

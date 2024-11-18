@@ -1,26 +1,15 @@
 import { State, characterTemplate, client, isCharacterOwner } from '@flocon-trpg/core';
-import { Reference, ref } from '@mikro-orm/core';
-import { MaxLength } from 'class-validator';
-import {
-    Args,
-    ArgsType,
-    Authorized,
-    Ctx,
-    Field,
-    Mutation,
-    PubSub,
-    PubSubEngine,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
-import { RoomPrvMsg } from '../../../../entities/roomMessage/entity';
-import { User } from '../../../../entities/user/entity';
+import { ref } from '@mikro-orm/core';
+import { Args, ArgsType, Field, Mutation, Resolver } from '@nestjs/graphql';
+import { MaxLength, ValidateIf } from 'class-validator';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { FileSourceTypeModule } from '../../../../enums/FileSourceType';
 import { WriteRoomPrivateMessageFailureType } from '../../../../enums/WriteRoomPrivateMessageFailureType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import { RoomPrvMsg } from '../../../../mikro-orm/entities/roomMessage/entity';
+import { User } from '../../../../mikro-orm/entities/user/entity';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { PubSubService } from '../../../../pub-sub/pub-sub.service';
 import {
     RoomMessageSyntaxErrorType,
     WriteRoomPrivateMessageFailureResultType,
@@ -31,10 +20,8 @@ import { SendTo } from '../../types';
 import {
     analyzeTextAndSetToEntity,
     createRoomPrivateMessage,
-    ensureAuthorizedUser,
     findRoomAndMyParticipant,
     fixTextColor,
-    publishRoomEvent,
 } from '../../utils/utils';
 
 type CharacterState = State<typeof characterTemplate>;
@@ -53,6 +40,7 @@ class WritePrivateMessageArgs {
 
     @Field({ nullable: true })
     @MaxLength(50)
+    @ValidateIf((_, value) => value != null)
     public textColor?: string;
 
     @Field({ nullable: true })
@@ -60,6 +48,7 @@ class WritePrivateMessageArgs {
 
     @Field({ nullable: true })
     @MaxLength(1_000)
+    @ValidateIf((_, value) => value != null)
     public customName?: string;
 
     @Field({ nullable: true, description: 'BCDiceのgameType。' })
@@ -68,13 +57,16 @@ class WritePrivateMessageArgs {
 
 @Resolver()
 export class WritePrivateMessageResolver {
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly pubSubService: PubSubService,
+    ) {}
+
     @Mutation(() => WriteRoomPrivateMessageResult)
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(3))
+    @Auth(ENTRY)
     public async writePrivateMessage(
         @Args() args: WritePrivateMessageArgs,
-        @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine,
+        @AuthData() auth: AuthDataType,
     ): Promise<typeof WriteRoomPrivateMessageResult> {
         // **** args guard ****
 
@@ -84,8 +76,8 @@ export class WritePrivateMessageResolver {
 
         // **** main ****
 
-        const em = context.em;
-        const authorizedUser = ensureAuthorizedUser(context);
+        const em = await this.mikroOrmService.forkEmForMain();
+        const authorizedUser = await em.findOneOrFail(User, { userUid: auth.user.userUid });
         const findResult = await findRoomAndMyParticipant({
             em,
             userUid: authorizedUser.userUid,
@@ -187,7 +179,7 @@ export class WritePrivateMessageResolver {
             value: result,
         };
 
-        await publishRoomEvent(pubSub, payload);
+        this.pubSubService.roomEvent.next(payload);
         return result;
     }
 }

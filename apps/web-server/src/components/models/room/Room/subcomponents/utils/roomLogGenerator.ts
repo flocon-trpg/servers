@@ -9,10 +9,11 @@ import {
 } from '@flocon-trpg/core';
 import {
     FileSourceType,
-    RoomMessages,
-    RoomPublicChannelFragment,
-} from '@flocon-trpg/typed-document-node';
+    GetMessagesDoc,
+    RoomPublicChannelFragmentDoc,
+} from '@flocon-trpg/graphql-documents';
 import { PrivateChannelSet } from '@flocon-trpg/web-server-utils';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import { escape } from 'html-escaper';
 import JSZip from 'jszip';
 import moment from 'moment';
@@ -29,6 +30,12 @@ import { analyzeUrl } from '@/utils/analyzeUrl';
 import { FilePath, FilePathModule } from '@/utils/file/filePath';
 import { idTokenIsNull } from '@/utils/file/getFloconUploaderFile';
 import { PublicChannelNames } from '@/utils/types';
+
+type RoomPublicChannelFragment = ResultOf<typeof RoomPublicChannelFragmentDoc>;
+type RoomMessages = Omit<
+    Extract<ResultOf<typeof GetMessagesDoc>['result'], { __typename?: 'RoomMessages' }>,
+    '__typename'
+>;
 
 const logHtml = (messageDivs: string[]) => `
 <!DOCTYPE html>

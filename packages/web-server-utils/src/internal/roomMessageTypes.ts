@@ -1,10 +1,17 @@
 import {
-    PieceLogFragment,
-    RoomPrivateMessageFragment,
-    RoomPublicChannelFragment,
-    RoomPublicMessageFragment,
-    RoomSoundEffectFragment,
-} from '@flocon-trpg/typed-document-node';
+    PieceLogFragmentDoc,
+    RoomPrivateMessageFragmentDoc,
+    RoomPublicChannelFragmentDoc,
+    RoomPublicMessageFragmentDoc,
+    RoomSoundEffectFragmentDoc,
+} from '@flocon-trpg/graphql-documents';
+import { ResultOf } from '@graphql-typed-document-node/core';
+
+type PieceLogFragment = ResultOf<typeof PieceLogFragmentDoc>;
+type RoomPublicMessageFragment = ResultOf<typeof RoomPublicMessageFragmentDoc>;
+type RoomPrivateMessageFragment = ResultOf<typeof RoomPrivateMessageFragmentDoc>;
+type RoomPublicChannelFragment = ResultOf<typeof RoomPublicChannelFragmentDoc>;
+type RoomSoundEffectFragment = ResultOf<typeof RoomSoundEffectFragmentDoc>;
 
 export const privateMessage = 'privateMessage';
 export const publicMessage = 'publicMessage';

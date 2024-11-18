@@ -1,30 +1,13 @@
 import { Master, Player, toOtError } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
+import { Args, Field, Mutation, ObjectType, Resolver } from '@nestjs/graphql';
 import { produce } from 'immer';
-import {
-    Arg,
-    Authorized,
-    Ctx,
-    Field,
-    Mutation,
-    ObjectType,
-    PubSub,
-    PubSubEngine,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import {
-    IdOperation,
-    RoomNotFound,
-    ensureUserUid,
-    operateAsAdminAndFlush,
-    publishRoomEvent,
-} from '../../utils/utils';
-import { AnswerRollCallFailureType } from '@/enums/AnswerRollCallFailureType';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
+import { AnswerRollCallFailureType } from '../../../../enums/AnswerRollCallFailureType';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { IdOperation, RoomNotFound, operateAsAdminAndFlush } from '../../utils/utils';
 
 @ObjectType()
 class AnswerRollCallResult {
@@ -34,22 +17,25 @@ class AnswerRollCallResult {
 
 // StateManager 等を経由せずなるべく速やかに変更させたいと思われるため、Operate mutation ではなくこの mutation で点呼状況を変更させるようにしている。
 // また、もし Operate mutation を用いるとすると、クライアント側から渡された answeredAt は現在時刻と大きく異なる可能性があるので、serverTransform ではクライアントから渡された時刻を無視して API サーバー側の現在時刻に置き換える必要があるが、これはあまり綺麗な処理方法ではない、といった理由もある。
-@Resolver()
+@Resolver(() => AnswerRollCallResult)
 export class AnswerRollCallResolver {
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly pubSubService: PubSubService,
+    ) {}
+
     // TODO: テストを書く
     @Mutation(() => AnswerRollCallResult, { description: 'since v0.7.13' })
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
+    @Auth(ENTRY)
     public async answerRollCall(
-        @Arg('roomId') roomId: string,
-        @Arg('rollCallId') rollCallId: string,
-        @Arg('answer') answer: boolean,
-        @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine,
+        @Args('roomId') roomId: string,
+        @Args('rollCallId') rollCallId: string,
+        @Args('answer') answer: boolean,
+        @AuthData() auth: AuthDataType,
     ): Promise<AnswerRollCallResult> {
-        const myUserUid = ensureUserUid(context);
+        const myUserUid = auth.user.userUid;
         const result = await operateAsAdminAndFlush({
-            em: context.em,
+            em: await this.mikroOrmService.forkEmForMain(),
             roomId,
             roomHistCount: undefined,
             operationType: 'state',
@@ -111,7 +97,7 @@ export class AnswerRollCallResolver {
             default:
                 break;
         }
-        await publishRoomEvent(pubSub, result.value);
+        this.pubSubService.roomEvent.next(result.value);
         return {};
     }
 }

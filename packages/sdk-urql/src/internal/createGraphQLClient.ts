@@ -1,13 +1,13 @@
-import { GraphQLClient } from '@flocon-trpg/sdk';
 import {
-    GetMessagesDocument,
-    GetRoomConnectionsDocument,
-    GetRoomDocument,
-    OperateDocument,
-    RoomEventDocument,
-    RoomEventSubscription,
-    UpdateWritingMessageStatusDocument,
-} from '@flocon-trpg/typed-document-node';
+    GetMessagesDoc,
+    GetRoomConnectionsDoc,
+    GetRoomDoc,
+    OperateDoc,
+    RoomEventDoc,
+    UpdateWritingMessageStatusDoc,
+} from '@flocon-trpg/graphql-documents';
+import { GraphQLClient } from '@flocon-trpg/sdk';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import { Result } from '@kizahasi/result';
 import { Observable, share } from 'rxjs';
 import { Client, CombinedError } from 'urql';
@@ -17,7 +17,7 @@ export const createGraphQLClientForRoomClient = (client: Client): GraphQLClient<
     return {
         getMessagesQuery: variables =>
             client
-                .query(GetMessagesDocument, variables, { requestPolicy: 'network-only' })
+                .query(GetMessagesDoc, variables, { requestPolicy: 'network-only' })
                 .toPromise()
                 .then(result => {
                     if (result.data != null) {
@@ -27,7 +27,7 @@ export const createGraphQLClientForRoomClient = (client: Client): GraphQLClient<
                 }),
         getRoomConnectionsQuery: variables =>
             client
-                .query(GetRoomConnectionsDocument, variables, {
+                .query(GetRoomConnectionsDoc, variables, {
                     requestPolicy: 'network-only',
                 })
                 .toPromise()
@@ -39,7 +39,7 @@ export const createGraphQLClientForRoomClient = (client: Client): GraphQLClient<
                 }),
         getRoomQuery: variables =>
             client
-                .query(GetRoomDocument, variables, { requestPolicy: 'network-only' })
+                .query(GetRoomDoc, variables, { requestPolicy: 'network-only' })
                 .toPromise()
                 .then(result => {
                     if (result.data != null) {
@@ -49,7 +49,7 @@ export const createGraphQLClientForRoomClient = (client: Client): GraphQLClient<
                 }),
         operateMutation: variables =>
             client
-                .mutation(OperateDocument, variables)
+                .mutation(OperateDoc, variables)
                 .toPromise()
                 .then(result => {
                     if (result.data != null) {
@@ -59,7 +59,7 @@ export const createGraphQLClientForRoomClient = (client: Client): GraphQLClient<
                 }),
         updateWritingMessagesStatusMutation: variables =>
             client
-                .mutation(UpdateWritingMessageStatusDocument, variables)
+                .mutation(UpdateWritingMessageStatusDoc, variables)
                 .toPromise()
                 .then(result => {
                     if (result.data != null) {
@@ -71,10 +71,10 @@ export const createGraphQLClientForRoomClient = (client: Client): GraphQLClient<
             // 当初は、client.subscription() の戻り値を wonka の toObservable で wonka の Observable に変換して、それを RxJS の Observable に変換していた。
             // だがこの方法だと unsubscribe が効かないという問題が発生したため、toObservable を使わずに実装している。
 
-            const observable = new Observable<Result<RoomEventSubscription, CombinedError>>(
+            const observable = new Observable<Result<ResultOf<typeof RoomEventDoc>, CombinedError>>(
                 observer => {
                     const subscription = pipe(
-                        client.subscription(RoomEventDocument, variables),
+                        client.subscription(RoomEventDoc, variables),
                         subscribe(value => {
                             if (value.data != null) {
                                 observer.next(Result.ok(value.data));

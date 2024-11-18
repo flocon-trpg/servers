@@ -9,27 +9,20 @@ import {
     serverTransform,
     toOtError,
 } from '@flocon-trpg/core';
-import { MaxLength } from 'class-validator';
 import {
     Args,
     ArgsType,
-    Authorized,
-    Ctx,
     Field,
     InputType,
     Int,
     Mutation,
     ObjectType,
-    PubSub,
-    PubSubEngine,
     Resolver,
-    UseMiddleware,
     createUnionType,
-} from 'type-graphql';
-import {
-    DicePieceLog as DicePieceLog$MikroORM,
-    StringPieceLog as StringPieceLog$MikroORM,
-} from '../../../../entities/roomMessage/entity';
+} from '@nestjs/graphql';
+import { MaxLength } from 'class-validator';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { GlobalRoom } from '../../../../entities-graphql/room';
 import * as RoomAsListItemGlobal from '../../../../entities-graphql/roomAsListItem';
 import {
@@ -37,18 +30,18 @@ import {
     StringPieceLog as StringPieceLogNameSpace,
 } from '../../../../entities-graphql/roomMessage';
 import { OperateRoomFailureType } from '../../../../enums/OperateRoomFailureType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import {
+    DicePieceLog as DicePieceLog$MikroORM,
+    StringPieceLog as StringPieceLog$MikroORM,
+} from '../../../../mikro-orm/entities/roomMessage/entity';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { ServerConfig, ServerConfigService } from '../../../../server-config/server-config.service';
+import { EM } from '../../../../types';
 import { RoomAsListItem, RoomOperation } from '../../../objects/room';
 import { MessageUpdatePayload, RoomOperationPayload } from '../../subsciptions/roomEvent/payload';
 import { SendTo } from '../../types';
-import {
-    ensureAuthorizedUser,
-    findRoomAndMyParticipant,
-    publishRoomEvent,
-} from '../../utils/utils';
+import { findRoomAndMyParticipant } from '../../utils/utils';
 
 type RoomState = State<typeof roomTemplate>;
 type RoomTwoWayOperation = TwoWayOperation<typeof roomTemplate>;
@@ -154,18 +147,20 @@ type OperateCoreResult =
 
 async function operateCore({
     args,
-    context,
+    userUid,
+    em,
+    serverConfig,
 }: {
     args: OperateArgs;
-    context: ResolverContext;
+    userUid: string;
+    em: EM;
+    serverConfig: ServerConfig;
 }): Promise<OperateCoreResult> {
     // Spectatorであっても自分の名前などはoperateで変更する必要があるため、Spectatorならば無条件で弾くという手法は使えない
 
-    const em = context.em;
-    const authorizedUserUid = ensureAuthorizedUser(context).userUid;
     const findResult = await findRoomAndMyParticipant({
         em,
-        userUid: authorizedUserUid,
+        userUid,
         roomId: args.id,
     });
     if (findResult == null) {
@@ -181,7 +176,7 @@ async function operateCore({
             result: {
                 roomAsListItem: await RoomAsListItemGlobal.stateToGraphQL({
                     roomEntity: room,
-                    myUserUid: authorizedUserUid,
+                    myUserUid: userUid,
                 }),
             },
         };
@@ -212,7 +207,7 @@ async function operateCore({
         twoWayOperation = restoredRoom.value.twoWayOperation;
     }
 
-    const transformed = serverTransform({ type: client, userUid: authorizedUserUid })({
+    const transformed = serverTransform({ type: client, userUid })({
         stateBeforeServerOperation: prevState,
         stateAfterServerOperation: roomState,
         clientOperation: clientOperation,
@@ -263,7 +258,7 @@ async function operateCore({
     await GlobalRoom.Global.cleanOldRoomOp({
         em: em.fork(),
         room,
-        roomHistCount: context.serverConfig.roomHistCount,
+        roomHistCount: serverConfig.roomHistCount,
     });
     await em.flush();
 
@@ -272,7 +267,7 @@ async function operateCore({
             __tstype: 'RoomOperation',
             revisionTo: prevRevision + 1,
             operatedBy: {
-                userUid: authorizedUserUid,
+                userUid,
                 clientId: args.operation.clientId,
             },
             valueJson: GlobalRoom.Global.ToGraphQL.operation({
@@ -314,35 +309,44 @@ async function operateCore({
             ),
         ],
         result: {
-            operation: generateOperation(authorizedUserUid),
+            operation: generateOperation(userUid),
         },
     };
 }
 
-@Resolver()
+@Resolver(() => OperateRoomResult)
 export class OperateResolver {
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly pubSubService: PubSubService,
+        private readonly serverConfigService: ServerConfigService,
+    ) {}
+
     @Mutation(() => OperateRoomResult, {
         description:
             'この Mutation を直接実行することは非推奨です。代わりに @flocon-trpg/sdk を用いてください。',
     })
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(3))
+    @Auth(ENTRY)
     public async operate(
         @Args() args: OperateArgs,
-        @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine,
+        @AuthData() auth: AuthDataType,
     ): Promise<typeof OperateRoomResult> {
         const operateResult = await operateCore({
             args,
-            context,
+            userUid: auth.user.userUid,
+            em: await this.mikroOrmService.forkEmForMain(),
+            serverConfig: this.serverConfigService.getValueForce(),
         });
         if (operateResult.type === 'success') {
-            await publishRoomEvent(pubSub, {
+            this.pubSubService.roomEvent.next({
                 ...operateResult.roomOperationPayload,
                 sendTo: operateResult.sendTo,
             });
             for (const messageUpdate of operateResult.messageUpdatePayload) {
-                await publishRoomEvent(pubSub, { ...messageUpdate, sendTo: operateResult.sendTo });
+                this.pubSubService.roomEvent.next({
+                    ...messageUpdate,
+                    sendTo: operateResult.sendTo,
+                });
             }
         }
         return operateResult.result;

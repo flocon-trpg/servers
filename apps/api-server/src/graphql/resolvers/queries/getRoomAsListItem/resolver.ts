@@ -1,23 +1,11 @@
-import {
-    Arg,
-    Authorized,
-    Ctx,
-    Field,
-    ObjectType,
-    Query,
-    Resolver,
-    UseMiddleware,
-    createUnionType,
-} from 'type-graphql';
-import * as Room$MikroORM from '../../../../entities/room/entity';
+import { Args, Field, ObjectType, Query, Resolver, createUnionType } from '@nestjs/graphql';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType, AuthGuard } from '../../../../auth/auth.guard';
 import * as RoomAsListItemGlobal from '../../../../entities-graphql/roomAsListItem';
 import { GetRoomFailureType } from '../../../../enums/GetRoomFailureType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import * as Room$MikroORM from '../../../../mikro-orm/entities/room/entity';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { RoomAsListItem } from '../../../objects/room';
-import { ensureAuthorizedUser } from '../../utils/utils';
 
 @ObjectType()
 class GetRoomAsListItemSuccessResult {
@@ -47,15 +35,16 @@ const GetRoomAsListItemResult = createUnionType({
 
 @Resolver()
 export class GetRoomAsListItemResolver {
+    public constructor(private readonly mikroOrmService: MikroOrmService) {}
+
     @Query(() => GetRoomAsListItemResult)
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(1))
+    @Auth(ENTRY)
     public async getRoomAsListItem(
-        @Arg('roomId') roomId: string,
-        @Ctx() context: ResolverContext,
+        @Args('roomId') roomId: string,
+        @AuthData() auth: AuthDataType,
     ): Promise<typeof GetRoomAsListItemResult> {
-        const em = context.em;
-        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+        const em = await this.mikroOrmService.forkEmForMain();
+        const authorizedUserUid = auth.user.userUid;
         const roomEntity = await em.findOne(Room$MikroORM.Room, { id: roomId });
         if (roomEntity == null) {
             return {

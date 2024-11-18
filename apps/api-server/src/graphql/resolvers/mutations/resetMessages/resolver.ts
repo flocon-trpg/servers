@@ -1,42 +1,31 @@
 import { Spectator } from '@flocon-trpg/core';
-import {
-    Arg,
-    Authorized,
-    Ctx,
-    Mutation,
-    PubSub,
-    PubSubEngine,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
+import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { ResetRoomMessagesFailureType } from '../../../../enums/ResetRoomMessagesFailureType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { PubSubService } from '../../../../pub-sub/pub-sub.service';
 import { ResetRoomMessagesResult, ResetRoomMessagesResultType } from '../../../objects/roomMessage';
-import {
-    ensureAuthorizedUser,
-    findRoomAndMyParticipant,
-    publishRoomEvent,
-} from '../../utils/utils';
+import { findRoomAndMyParticipant } from '../../utils/utils';
 
-@Resolver()
+@Resolver(() => ResetRoomMessagesResult)
 export class ResetMessagesResolver {
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly pubSubService: PubSubService,
+    ) {}
+
     // TODO: テストを書く
     @Mutation(() => ResetRoomMessagesResult)
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(5))
+    @Auth(ENTRY)
     public async resetMessages(
-        @Arg('roomId') roomId: string,
-        @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine,
+        @Args('roomId') roomId: string,
+        @AuthData() auth: AuthDataType,
     ): Promise<ResetRoomMessagesResult> {
-        const em = context.em;
-        const authorizedUser = ensureAuthorizedUser(context);
+        const em = await this.mikroOrmService.forkEmForMain();
         const findResult = await findRoomAndMyParticipant({
             em,
-            userUid: authorizedUser.userUid,
+            userUid: auth.user.userUid,
             roomId,
         });
         if (findResult == null) {
@@ -83,7 +72,7 @@ export class ResetMessagesResolver {
         em.persist(room);
         await em.flush();
 
-        await publishRoomEvent(pubSub, {
+        this.pubSubService.roomEvent.next({
             type: 'roomMessagesResetPayload',
             sendTo: findResult.participantIds(),
             roomId,

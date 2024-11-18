@@ -1,15 +1,18 @@
 import { alpha, beta, rc } from '@flocon-trpg/utils';
-import { Ctx, Query, Resolver } from 'type-graphql';
+import { Query, Resolver } from '@nestjs/graphql';
 import { VERSION } from '../../../../VERSION';
 import { PrereleaseType } from '../../../../enums/PrereleaseType';
-import { ResolverContext } from '../../../../types';
+import { ServerConfigService } from '../../../../server-config/server-config.service';
 import { ServerInfo } from '../../../objects/serverInfo';
 
 @Resolver()
 export class GetServerInfoResolver {
-    // CONSIDER: 内部情報に簡単にアクセスできるのはセキュリティリスクになりうる。@Authorized(ENTRY) を付けたほうがいいか？
+    public constructor(private readonly serverConfigService: ServerConfigService) {}
+
+    // CONSIDER: 内部情報に簡単にアクセスできるのはセキュリティリスクになりうる。@Auth(ENTRY) を付けたほうがいいか？
     @Query(() => ServerInfo)
-    public async getServerInfo(@Ctx() context: ResolverContext): Promise<ServerInfo> {
+    public async getServerInfo(): Promise<ServerInfo> {
+        const serverConfig = this.serverConfigService.getValueForce();
         const prerelease = (() => {
             if (VERSION.prerelease == null) {
                 return undefined;
@@ -37,7 +40,7 @@ export class GetServerInfoResolver {
                 ...VERSION,
                 prerelease,
             },
-            uploaderEnabled: context.serverConfig.uploader != null,
+            uploaderEnabled: serverConfig.uploader != null,
         };
     }
 }

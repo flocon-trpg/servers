@@ -1,4 +1,4 @@
-import { Field, ObjectType, Query, Resolver } from 'type-graphql';
+import { Field, ObjectType, Query, Resolver } from '@nestjs/graphql';
 import { listAvailableGameSystems } from '../../utils/messageAnalyzer';
 
 @ObjectType()

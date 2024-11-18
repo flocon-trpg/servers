@@ -9,6 +9,7 @@
     "scripts": {
         "build": "yarn workspaces foreach --all -p --topological-dev run build:self",
         "format": "yarn lint --fix && yarn prettier && yarn sort-package-json",
+        "gen": "yarn workspaces foreach --all -p run gen",
         "install-husky": "husky install",
         "lint": "yarn workspaces foreach --all -p run lint",
         "prettier": "yarn prettier:base --write --cache && yarn workspaces foreach --all -p run prettier",

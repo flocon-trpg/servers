@@ -1,10 +1,10 @@
 import { getOpenRollCall } from '@flocon-trpg/core';
-import { FilePathFragment } from '@flocon-trpg/typed-document-node';
 import { loggerRef } from '@flocon-trpg/utils';
 import { soundEffect } from '@flocon-trpg/web-server-utils';
 import { Howl } from 'howler';
 import React from 'react';
 import { useLatest, usePrevious } from 'react-use';
+import { FilePathFragment } from '../../../../../../graphql-codegen/graphql';
 import { useRoomId } from './useRoomId';
 import { useRoomMessages } from './useRoomMessages';
 import { roomConfigAtomFamily } from '@/atoms/roomConfigAtom/roomConfigAtom';

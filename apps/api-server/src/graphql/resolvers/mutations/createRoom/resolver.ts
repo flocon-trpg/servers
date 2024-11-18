@@ -1,28 +1,24 @@
 import { client } from '@flocon-trpg/core';
-import { hash } from 'bcrypt';
 import {
-    Arg,
-    Authorized,
-    Ctx,
+    Args,
     Field,
     InputType,
     Mutation,
     ObjectType,
     Resolver,
-    UseMiddleware,
     createUnionType,
-} from 'type-graphql';
-import * as Participant$MikroORM from '../../../../entities/participant/entity';
-import * as Room$MikroORM from '../../../../entities/room/entity';
+} from '@nestjs/graphql';
+import { hash } from 'bcrypt';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { GlobalRoom } from '../../../../entities-graphql/room';
 import { CreateRoomFailureType } from '../../../../enums/CreateRoomFailureType';
 import { ParticipantRoleType } from '../../../../enums/ParticipantRoleType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import * as Participant$MikroORM from '../../../../mikro-orm/entities/participant/entity';
+import * as Room$MikroORM from '../../../../mikro-orm/entities/room/entity';
+import { User } from '../../../../mikro-orm/entities/user/entity';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { RoomGetState } from '../../../objects/room';
-import { ensureAuthorizedUser } from '../../utils/utils';
 
 const bcryptSaltRounds = 10;
 
@@ -70,17 +66,18 @@ class CreateRoomInput {
     public spectatorPassword?: string;
 }
 
-@Resolver()
+@Resolver(() => CreateRoomResult)
 export class CreateRoomResolver {
+    public constructor(private readonly mikroOrmService: MikroOrmService) {}
+
     @Mutation(() => CreateRoomResult)
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
+    @Auth(ENTRY)
     public async createRoom(
-        @Arg('input') input: CreateRoomInput,
-        @Ctx() context: ResolverContext,
+        @Args('input') input: CreateRoomInput,
+        @AuthData() auth: AuthDataType,
     ): Promise<typeof CreateRoomResult> {
-        const em = context.em;
-        const authorizedUser = ensureAuthorizedUser(context);
+        const em = await this.mikroOrmService.forkEmForMain();
+        const authorizedUser = await em.findOneOrFail(User, { userUid: auth.user.userUid });
 
         const newRoom = new Room$MikroORM.Room({
             name: input.roomName,
