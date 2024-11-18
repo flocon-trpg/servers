@@ -1,5 +1,6 @@
 import { $free, $system } from '@flocon-trpg/core';
-import { Field, ObjectType, createUnionType } from 'type-graphql';
+import { Field, ObjectType, createUnionType } from '@nestjs/graphql';
+import { z } from 'zod';
 import { DeleteMessageFailureType } from '../../enums/DeleteMessageFailureType';
 import { EditMessageFailureType } from '../../enums/EditMessageFailureType';
 import { GetRoomLogFailureType } from '../../enums/GetRoomLogFailureType';
@@ -10,6 +11,7 @@ import { ResetRoomMessagesFailureType } from '../../enums/ResetRoomMessagesFailu
 import { WriteRoomPrivateMessageFailureType } from '../../enums/WriteRoomPrivateMessageFailureType';
 import { WriteRoomPublicMessageFailureType } from '../../enums/WriteRoomPublicMessageFailureType';
 import { WriteRoomSoundEffectFailureType } from '../../enums/WriteRoomSoundEffectFailureType';
+import { tsTypeObject } from '../tsTypeObject';
 import { FilePath } from './filePath';
 
 // messageIdは、Reactのkeyとして使われる
@@ -262,7 +264,7 @@ export const RoomMessage = createUnionType({
             RoomSoundEffect,
         ] as const,
     resolveType: value => {
-        switch (value.__tstype) {
+        switch (tsTypeObject.parse(value).__tstype) {
             case RoomPrivateMessageType:
                 return RoomPrivateMessage;
             case RoomPublicChannelType:
@@ -313,7 +315,7 @@ export const GetRoomMessagesResult = createUnionType({
     name: 'GetRoomMessagesResult',
     types: () => [RoomMessages, GetRoomMessagesFailureResult] as const,
     resolveType: value => {
-        switch (value.__tstype) {
+        switch (tsTypeObject.parse(value).__tstype) {
             case RoomMessagesType:
                 return RoomMessages;
             case GetRoomMessagesFailureResultType:
@@ -336,7 +338,7 @@ export const GetRoomLogResult = createUnionType({
     name: 'GetRoomLogResult',
     types: () => [RoomMessages, GetRoomLogFailureResult] as const,
     resolveType: value => {
-        switch (value.__tstype) {
+        switch (tsTypeObject.parse(value).__tstype) {
             case RoomMessagesType:
                 return RoomMessages;
             case GetRoomLogFailureResultType:
@@ -370,7 +372,7 @@ export const WriteRoomPrivateMessageResult = createUnionType({
     types: () =>
         [RoomPrivateMessage, WriteRoomPrivateMessageFailureResult, RoomMessageSyntaxError] as const,
     resolveType: value => {
-        switch (value.__tstype) {
+        switch (tsTypeObject.parse(value).__tstype) {
             case RoomPrivateMessageType:
                 return RoomPrivateMessage;
             case WriteRoomPrivateMessageFailureResultType:
@@ -396,7 +398,7 @@ export const WriteRoomPublicMessageResult = createUnionType({
     types: () =>
         [RoomPublicMessage, WriteRoomPublicMessageFailureResult, RoomMessageSyntaxError] as const,
     resolveType: value => {
-        switch (value.__tstype) {
+        switch (tsTypeObject.parse(value).__tstype) {
             case RoomPublicMessageType:
                 return RoomPublicMessage;
             case WriteRoomPublicMessageFailureResultType:
@@ -421,7 +423,7 @@ export const WriteRoomSoundEffectResult = createUnionType({
     name: 'WriteRoomSoundEffectResult',
     types: () => [RoomSoundEffect, WriteRoomSoundEffectFailureResult] as const,
     resolveType: value => {
-        switch (value.__tstype) {
+        switch (tsTypeObject.parse(value).__tstype) {
             case RoomSoundEffectType:
                 return RoomSoundEffect;
             case WriteRoomSoundEffectFailureResultType:
@@ -568,7 +570,7 @@ export const RoomMessageEvent = createUnionType({
             RoomMessagesReset,
         ] as const,
     resolveType: value => {
-        switch (value.__tstype) {
+        switch (tsTypeObject.parse(value).__tstype) {
             case RoomPublicMessageType:
                 return RoomPublicMessage;
             case RoomPrivateMessageType:

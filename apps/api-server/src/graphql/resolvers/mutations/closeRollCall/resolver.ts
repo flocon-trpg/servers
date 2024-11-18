@@ -1,30 +1,13 @@
 import { Master, Player, toOtError } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
+import { Args, Field, Mutation, ObjectType, Resolver } from '@nestjs/graphql';
 import { produce } from 'immer';
-import {
-    Arg,
-    Authorized,
-    Ctx,
-    Field,
-    Mutation,
-    ObjectType,
-    PubSub,
-    PubSubEngine,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import {
-    IdOperation,
-    RoomNotFound,
-    ensureUserUid,
-    operateAsAdminAndFlush,
-    publishRoomEvent,
-} from '../../utils/utils';
-import { CloseRollCallFailureType } from '@/enums/CloseRollCallFailureType';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
+import { CloseRollCallFailureType } from '../../../../enums/CloseRollCallFailureType';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { IdOperation, RoomNotFound, operateAsAdminAndFlush } from '../../utils/utils';
 
 @ObjectType()
 class CloseRollCallResult {
@@ -32,21 +15,25 @@ class CloseRollCallResult {
     public failureType?: CloseRollCallFailureType;
 }
 
-@Resolver()
+@Resolver(() => CloseRollCallResult)
 export class CloseRollCallResolver {
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly pubSubService: PubSubService,
+    ) {}
+
     // TODO: テストを書く
     @Mutation(() => CloseRollCallResult, { description: 'since v0.7.13' })
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
+    @Auth(ENTRY)
     public async closeRollCall(
-        @Arg('roomId') roomId: string,
-        @Arg('rollCallId') rollCallId: string,
-        @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine,
+        @Args('roomId') roomId: string,
+        @Args('rollCallId') rollCallId: string,
+        @AuthData() auth: AuthDataType,
     ): Promise<CloseRollCallResult> {
-        const myUserUid = ensureUserUid(context);
+        const myUserUid = auth.user.userUid;
+        const em = await this.mikroOrmService.forkEmForMain();
         const result = await operateAsAdminAndFlush({
-            em: context.em,
+            em,
             roomId,
             roomHistCount: undefined,
             operationType: 'state',
@@ -90,7 +77,7 @@ export class CloseRollCallResolver {
             default:
                 break;
         }
-        await publishRoomEvent(pubSub, result.value);
+        this.pubSubService.roomEvent.next(result.value);
         return {};
     }
 }

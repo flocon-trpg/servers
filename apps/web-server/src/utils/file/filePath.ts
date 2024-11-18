@@ -1,7 +1,9 @@
 import * as Core from '@flocon-trpg/core';
-import { FilePathFragment, FilePathInput, FileSourceType } from '@flocon-trpg/typed-document-node';
+import { FilePathInput, FileSourceType } from '@flocon-trpg/graphql-documents';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import { FirebaseStorage, getDownloadURL, ref } from 'firebase/storage';
 import { MockableWebConfig } from '../../configType';
+import { FilePathFragmentDoc } from '../../graphql/FilePathFragmentDoc';
 import {
     files,
     getFloconUploaderFile as getFloconUploaderFileCore,
@@ -10,6 +12,7 @@ import {
 } from './getFloconUploaderFile';
 
 type FilePathState = Core.State<typeof Core.filePathTemplate>;
+type FilePathFragment = ResultOf<typeof FilePathFragmentDoc>;
 
 export const filePath = 'filePath';
 
@@ -25,7 +28,7 @@ export type FilePathLike =
     | FilePath;
 
 export type FilePathLikeOrThumb =
-    | FilePathLike
+    | (FilePathLike & { type?: undefined })
     | {
           // 内蔵アップローダーのサムネイル
 
@@ -56,7 +59,7 @@ export namespace FilePathModule {
 
         return {
             type: filePath,
-            value: source as FilePathLike,
+            value: source satisfies FilePathLike,
         } as const;
     };
 
@@ -71,9 +74,6 @@ export namespace FilePathModule {
                 break;
             case Core.Uploader:
                 sourceType = FileSourceType.Uploader;
-                break;
-            default:
-                sourceType = source.sourceType;
                 break;
         }
         return {
@@ -93,9 +93,6 @@ export namespace FilePathModule {
                 break;
             case FileSourceType.Uploader:
                 sourceType = Core.Uploader;
-                break;
-            default:
-                sourceType = source.sourceType;
                 break;
         }
         return {

@@ -10,13 +10,15 @@ import { DeleteRoomResolver } from './mutations/deleteRoom/resolver';
 import { DeleteRoomAsAdminResolver } from './mutations/deleteRoomAsAdmin/resolver';
 import { EditFileTagsResolver } from './mutations/editFileTags/resolver';
 import { EditMessageResolver } from './mutations/editMessage/resolver';
-import { EntryToServerResolver } from './mutations/entryToServer/resolver';
-import { JoinRoomResolver } from './mutations/joinRoom/resolver';
+import { EntryWithPasswordResolver } from './mutations/entryToServer/resolver';
+import {
+    JoinRoomAsPlayerResolver,
+    JoinRoomAsSpectatorResolver,
+} from './mutations/joinRoom/resolver';
 import { LeaveRoomResolver } from './mutations/leaveRoom/resolver';
 import { MakeMessageNotSecretResolver } from './mutations/makeMessageNotSecret/resolver';
 import { OperateResolver } from './mutations/operate/resolver';
 import { PerformRollCallResolver } from './mutations/performRollCall/resolver';
-import { PingResolver } from './mutations/ping/resolver';
 import { PromoteToPlayerResolver } from './mutations/promoteToPlayer/resolver';
 import { RenameFilesResolver } from './mutations/renameFiles/resolver';
 import { ResetMessagesResolver } from './mutations/resetMessages/resolver';
@@ -36,8 +38,6 @@ import { GetRoomAsListItemResolver } from './queries/getRoomAsListItem/resolver'
 import { GetRoomConnectionsResolver } from './queries/getRoomConnections/resolver';
 import { GetRoomsListResolver } from './queries/getRoomsList/resolver';
 import { GetServerInfoResolver } from './queries/getServerInfo/resolver';
-import { IsEntryResolver } from './queries/isEntry/resolver';
-import { PongResolver } from './subsciptions/pong/resolver';
 import { RoomEventResolver } from './subsciptions/roomEvent/resolver';
 
 export const allResolvers = [
@@ -53,13 +53,13 @@ export const allResolvers = [
     DeleteRoomAsAdminResolver,
     EditFileTagsResolver,
     EditMessageResolver,
-    EntryToServerResolver,
-    JoinRoomResolver,
+    EntryWithPasswordResolver,
+    JoinRoomAsPlayerResolver,
+    JoinRoomAsSpectatorResolver,
     LeaveRoomResolver,
     MakeMessageNotSecretResolver,
     OperateResolver,
     PerformRollCallResolver,
-    PingResolver,
     PromoteToPlayerResolver,
     RenameFilesResolver,
     ResetMessagesResolver,
@@ -80,8 +80,6 @@ export const allResolvers = [
     GetRoomConnectionsResolver,
     GetRoomsListResolver,
     GetServerInfoResolver,
-    IsEntryResolver,
 
-    PongResolver,
     RoomEventResolver,
 ] as const;

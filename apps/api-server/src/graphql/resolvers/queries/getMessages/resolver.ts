@@ -1,27 +1,15 @@
-import {
-    Args,
-    ArgsType,
-    Authorized,
-    Ctx,
-    Field,
-    Query,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
+import { Args, ArgsType, Field, Query, Resolver } from '@nestjs/graphql';
+import { Throttle } from '@nestjs/throttler';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { GetRoomMessagesFailureType } from '../../../../enums/GetRoomMessagesFailureType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { PubSubService } from '../../../../pub-sub/pub-sub.service';
 import {
     GetRoomMessagesFailureResultType,
     GetRoomMessagesResult,
 } from '../../../objects/roomMessage';
-import {
-    ensureAuthorizedUser,
-    findRoomAndMyParticipant,
-    getRoomMessagesFromDb,
-} from '../../utils/utils';
+import { findRoomAndMyParticipant, getRoomMessagesFromDb } from '../../utils/utils';
 
 @ArgsType()
 class GetMessagesArgs {
@@ -31,15 +19,20 @@ class GetMessagesArgs {
 
 @Resolver()
 export class GetRoomMessagesResolver {
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly pubSubService: PubSubService,
+    ) {}
+
     @Query(() => GetRoomMessagesResult)
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(10))
+    @Auth(ENTRY)
+    @Throttle({ default: { limit: 10, ttl: 60000 } })
     public async getMessages(
         @Args() args: GetMessagesArgs,
-        @Ctx() context: ResolverContext,
+        @AuthData() auth: AuthDataType,
     ): Promise<typeof GetRoomMessagesResult> {
-        const em = context.em;
-        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+        const em = await this.mikroOrmService.forkEmForMain();
+        const authorizedUserUid = auth.user.userUid;
         const findResult = await findRoomAndMyParticipant({
             em,
             userUid: authorizedUserUid,

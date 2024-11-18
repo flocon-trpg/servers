@@ -2,9 +2,10 @@ import { State as S, UpOperation as U, roomTemplate } from '@flocon-trpg/core';
 import {
     GetRoomFailureType,
     OperateRoomFailureType,
-    RoomEventSubscription,
-    RoomOperationFragment,
-} from '@flocon-trpg/typed-document-node';
+    RoomEventDoc,
+    RoomOperationFragmentDoc,
+} from '@flocon-trpg/graphql-documents';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import { EMPTY, Observable, Subject, Subscription, map, mergeAll, sampleTime } from 'rxjs';
 import { BehaviorEvent } from '../rxjs/behaviorEvent';
 import { ReadonlyBehaviorEvent } from '../rxjs/readonlyBehaviorEvent';
@@ -12,6 +13,8 @@ import { create as createStateManager } from '../stateManager/create';
 import { StateManager } from '../stateManager/stateManager/stateManager';
 import { Room } from '../stateManager/states/room';
 import { GraphQLClientWithStatus, PromiseError } from './graphqlClient';
+
+type RoomEventSubscriptionResult = ResultOf<typeof RoomEventDoc>['result'];
 
 const fetching = 'fetching';
 const joined = 'joined';
@@ -103,7 +106,7 @@ export class RoomStateManager<TGraphQLError> {
     #unsubscribe: () => void;
     /** GetRoom query が完了する前に、Subscription で受け取った RoomOperation を保持する Map です。 */
     // キーはrevisionTo
-    #roomOperationCache = new Map<number, RoomOperationFragment>();
+    #roomOperationCache = new Map<number, ResultOf<typeof RoomOperationFragmentDoc>>();
     /** `setState` もしくは `setStateByApply` が実行されたときにトリガーされます。 */
     #onStateChangedLocally = new Subject<void>();
 
@@ -115,10 +118,7 @@ export class RoomStateManager<TGraphQLError> {
     }: {
         client: Pick<GraphQLClientWithStatus<TGraphQLError>, 'getRoomQuery' | 'operateMutation'>;
         subscription: Observable<
-            Pick<
-                NonNullable<RoomEventSubscription['roomEvent']>,
-                'deleteRoomOperation' | 'roomOperation'
-            >
+            Pick<NonNullable<RoomEventSubscriptionResult>, 'deleteRoomOperation' | 'roomOperation'>
         >;
         userUid: string;
         /** 同一ユーザーが複数のブラウザでアクセスしたなどの際に、それらを区別するための文字列です。 */

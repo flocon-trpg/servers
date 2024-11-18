@@ -1,9 +1,10 @@
-import { CreateRoomDocument, CreateRoomInput } from '@flocon-trpg/typed-document-node';
 import { useNavigate } from '@tanstack/react-router';
 import { Alert, Button, Card, Form, Input, Spin, Switch } from 'antd';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import { useMutation } from 'urql';
+import { CreateRoomDoc } from '../../../../graphql/CreateRoomDoc';
+import { CreateRoomInput } from '../../../../graphql-codegen/graphql';
 import { Center } from '@/components/ui/Center/Center';
 import { HelpMessageTooltip } from '@/components/ui/HelpMessageTooltip/HelpMessageTooltip';
 import { Layout, loginAndEntry } from '@/components/ui/Layout/Layout';
@@ -19,7 +20,7 @@ const spectatorPassword = 'spectatorPassword';
 
 export const RoomCreatePage: React.FC = () => {
     const router = useNavigate();
-    const [createRoomResult, createRoom] = useMutation(CreateRoomDocument);
+    const [createRoomResult, createRoom] = useMutation(CreateRoomDoc);
     const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
     const [isPlayerPasswordEnabled, setIsPlayerPasswordEnabled] = React.useState<boolean>(false);
     const [isSpectatorPasswordEnabled, setIsSpectatorPasswordEnabled] =

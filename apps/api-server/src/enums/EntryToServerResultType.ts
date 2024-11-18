@@ -1,7 +1,7 @@
 export enum EntryToServerResultType {
     Success = 'Success',
-    NotSignIn = 'NotSignIn',
     AlreadyEntried = 'AlreadyEntried',
-    NoPasswordRequired = 'NoPasswordRequired',
+    NotSignIn = 'NotSignIn',
+    PasswordRequired = 'PasswordRequired',
     WrongPassword = 'WrongPassword',
 }

@@ -1,5 +1,6 @@
 import { State, filePathTemplate } from '@flocon-trpg/core';
-import { RoomPublicMessageFragment } from '@flocon-trpg/typed-document-node';
+import { RoomPublicMessageFragmentDoc } from '@flocon-trpg/graphql-documents';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import { useSpring, useTransition } from '@react-spring/konva';
 import React from 'react';
 import * as ReactKonva from 'react-konva';
@@ -12,6 +13,8 @@ import {
 } from '@/components/ui/AnimatedKonvaAsAnyProps/AnimatedKonvaAsAnyProps';
 import { success, useImageFromFilePath } from '@/hooks/imageHooks';
 import { FilePath } from '@/utils/file/filePath';
+
+type RoomPublicMessageFragment = ResultOf<typeof RoomPublicMessageFragmentDoc>;
 
 type CoreFilePath = State<typeof filePathTemplate>;
 

@@ -1,5 +1,5 @@
+import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { MaxLength } from 'class-validator';
-import { Field, InputType, ObjectType } from 'type-graphql';
 import { FileSourceType } from '../../enums/FileSourceType';
 
 @ObjectType()

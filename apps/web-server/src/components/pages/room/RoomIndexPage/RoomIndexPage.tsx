@@ -1,5 +1,6 @@
 import * as Icons from '@ant-design/icons';
-import * as Doc from '@flocon-trpg/typed-document-node';
+import { ParticipantRole, RoomAsListItemFragmentDoc } from '@flocon-trpg/graphql-documents';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import { useNavigate } from '@tanstack/react-router';
 import { App, Button, Dropdown, Menu, Table, Tooltip } from 'antd';
 import classNames from 'classnames';
@@ -7,6 +8,10 @@ import moment from 'moment';
 import React from 'react';
 import { Subscription } from 'rxjs';
 import { useMutation, useQuery } from 'urql';
+import { DeleteRoomAsAdminDoc } from '../../../../graphql/DeleteRoomAsAdminDoc';
+import { GetRoomAsListItemDoc } from '../../../../graphql/GetRoomAsListItemDoc';
+import { GetRoomsListDoc } from '../../../../graphql/GetRoomsListDoc';
+import { UpdateBookmarkDoc } from '../../../../graphql/UpdateBookmarkDoc';
 import { AwaitableButton } from '@/components/ui/AwaitableButton/AwaitableButton';
 import { GraphQLResult } from '@/components/ui/GraphQLResult/GraphQLResult';
 import { Layout, loginAndEntry } from '@/components/ui/Layout/Layout';
@@ -16,10 +21,10 @@ import { Styles } from '@/styles';
 import { flex, flexNone, flexRow } from '@/styles/className';
 import { defaultTriggerSubMenuAction } from '@/utils/variables';
 
-type Data = Doc.RoomAsListItemFragment;
+type Data = ResultOf<typeof RoomAsListItemFragmentDoc>;
 
 const BookmarkButton: React.FC<{ data: Data }> = ({ data }) => {
-    const [, updateBookmark] = useMutation(Doc.UpdateBookmarkDocument);
+    const [, updateBookmark] = useMutation(UpdateBookmarkDoc);
     const [loading, setLoading] = React.useState(false);
     const [checked, setChecked] = React.useState(data.isBookmarked);
     const { notification } = App.useApp();
@@ -65,9 +70,9 @@ const BookmarkButton: React.FC<{ data: Data }> = ({ data }) => {
 const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
     const { modal } = App.useApp();
     const router = useNavigate();
-    const [, deleteRoomAsAdmin] = useMutation(Doc.DeleteRoomAsAdminDocument);
+    const [, deleteRoomAsAdmin] = useMutation(DeleteRoomAsAdminDoc);
     const [, getRooms] = useQuery({
-        query: Doc.GetRoomsListDocument,
+        query: GetRoomsListDoc,
         pause: true,
         requestPolicy: 'network-only',
     });
@@ -180,10 +185,10 @@ const roleColumn = {
                 case null:
                 case undefined:
                     return 0;
-                case Doc.ParticipantRole.Master:
-                case Doc.ParticipantRole.Player:
+                case ParticipantRole.Master:
+                case ParticipantRole.Player:
                     return 2;
-                case Doc.ParticipantRole.Spectator:
+                case ParticipantRole.Spectator:
                     return 1;
             }
         };
@@ -194,10 +199,10 @@ const roleColumn = {
             case null:
             case undefined:
                 return '-';
-            case Doc.ParticipantRole.Master:
-            case Doc.ParticipantRole.Player:
+            case ParticipantRole.Master:
+            case ParticipantRole.Player:
                 return '参加者';
-            case Doc.ParticipantRole.Spectator:
+            case ParticipantRole.Spectator:
                 return '観戦者';
         }
     },
@@ -269,7 +274,7 @@ const RoomsListComponent: React.FC<RoomsListComponentProps> = ({
 
 const Room: React.FC = () => {
     const [rooms, getRooms] = useQuery({
-        query: Doc.GetRoomsListDocument,
+        query: GetRoomsListDoc,
         requestPolicy: 'network-only',
     });
     const fetching = rooms.fetching;

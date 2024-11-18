@@ -1,7 +1,11 @@
-import * as Doc from '@flocon-trpg/typed-document-node';
 import { loggerRef } from '@flocon-trpg/utils';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import { AnyVariables, GraphQLRequest } from 'urql';
 import { fromValue } from 'wonka';
+import { GetAvailableGameSystemsDoc } from '../graphql/GetAvailableGameSystemsDoc';
+import { GetDiceHelpMessagesDoc } from '../graphql/GetDiceHelpMessagesDoc';
+import { GetRoomAsListItemDoc } from '../graphql/GetRoomAsListItemDoc';
+import { ParticipantRole } from '../graphql-codegen/graphql';
 import { withPromise } from './withPromise';
 import { createDummyUrqlOperation, createMockUrqlClient } from '.';
 
@@ -9,8 +13,8 @@ export const createMockUrqlClientForRoomMessage = () => {
     return createMockUrqlClient({
         mockQuery: (query: GraphQLRequest<any, AnyVariables>) => {
             switch (query.query) {
-                case Doc.GetAvailableGameSystemsDocument: {
-                    const res: Doc.GetAvailableGameSystemsQuery = {
+                case GetAvailableGameSystemsDoc: {
+                    const res: ResultOf<typeof GetAvailableGameSystemsDoc> = {
                         __typename: 'Query',
                         result: {
                             __typename: 'GetAvailableGameSystemsResult',
@@ -40,8 +44,8 @@ export const createMockUrqlClientForRoomMessage = () => {
                         }),
                     );
                 }
-                case Doc.GetDiceHelpMessagesDocument: {
-                    const res: Doc.GetDiceHelpMessagesQuery = {
+                case GetDiceHelpMessagesDoc: {
+                    const res: ResultOf<typeof GetDiceHelpMessagesDoc> = {
                         __typename: 'Query',
                         result: 'Test DiceHelpMessage',
                     };
@@ -54,8 +58,8 @@ export const createMockUrqlClientForRoomMessage = () => {
                         }),
                     );
                 }
-                case Doc.GetRoomAsListItemDocument: {
-                    const res: Doc.GetRoomAsListItemQuery = {
+                case GetRoomAsListItemDoc: {
+                    const res: ResultOf<typeof GetRoomAsListItemDoc> = {
                         __typename: 'Query',
                         result: {
                             __typename: 'GetRoomAsListItemSuccessResult',
@@ -66,7 +70,7 @@ export const createMockUrqlClientForRoomMessage = () => {
                                 createdBy: 'test-createdBy',
                                 createdAt: 1704034800,
                                 updatedAt: 1704038400,
-                                role: Doc.ParticipantRole.Player,
+                                role: ParticipantRole.Player,
                                 isBookmarked: false,
                                 requiresPlayerPassword: false,
                                 requiresSpectatorPassword: false,

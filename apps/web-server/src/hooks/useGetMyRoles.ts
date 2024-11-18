@@ -1,10 +1,10 @@
-import { GetMyRolesDocument } from '@flocon-trpg/typed-document-node';
 import React from 'react';
 import { useQuery } from 'urql';
+import { GetMyRolesDoc } from '../graphql/GetMyRolesDoc';
 
 export const useGetMyRoles = () => {
     const [getMyRolesQueryResult, getMyRolesQuery] = useQuery({
-        query: GetMyRolesDocument,
+        query: GetMyRolesDoc,
         pause: true,
     });
 

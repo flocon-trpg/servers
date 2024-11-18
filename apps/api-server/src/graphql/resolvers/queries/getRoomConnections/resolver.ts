@@ -1,20 +1,11 @@
-import {
-    Arg,
-    Authorized,
-    Ctx,
-    Field,
-    ObjectType,
-    Query,
-    Resolver,
-    UseMiddleware,
-    createUnionType,
-} from 'type-graphql';
+import { Args, Field, ObjectType, Query, Resolver, createUnionType } from '@nestjs/graphql';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
+import { ConnectionManagerService } from '../../../../connection-manager/connection-manager.service';
 import { GetRoomConnectionFailureType } from '../../../../enums/GetRoomConnectionFailureType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import { ensureAuthorizedUser, findRoomAndMyParticipant } from '../../utils/utils';
+import { tsTypeObject } from '../../../../graphql/tsTypeObject';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { findRoomAndMyParticipant } from '../../utils/utils';
 
 const GetRoomConnectionSuccessResultType = 'GetRoomConnectionSuccessResultType';
 
@@ -43,7 +34,7 @@ const GetRoomConnectionsResult = createUnionType({
     name: 'GetRoomConnectionsResult',
     types: () => [GetRoomConnectionsSuccessResult, GetRoomConnectionsFailureResult] as const,
     resolveType: value => {
-        switch (value.__tstype) {
+        switch (tsTypeObject.parse(value).__tstype) {
             case GetRoomConnectionSuccessResultType:
                 return GetRoomConnectionsSuccessResult;
             case GetRoomConnectionFailureResultType:
@@ -54,18 +45,22 @@ const GetRoomConnectionsResult = createUnionType({
 
 @Resolver()
 export class GetRoomConnectionsResolver {
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly connectionManagerService: ConnectionManagerService,
+    ) {}
+
     @Query(() => GetRoomConnectionsResult, {
         description:
             '通常はこの Query を直接実行する必要はありません。@flocon-trpg/sdk を用いることで、リアルタイムに値を取得および自動更新できます。',
     })
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
+    @Auth(ENTRY)
     public async getRoomConnections(
-        @Arg('roomId') roomId: string,
-        @Ctx() context: ResolverContext,
+        @Args('roomId') roomId: string,
+        @AuthData() auth: AuthDataType,
     ): Promise<typeof GetRoomConnectionsResult> {
-        const em = context.em;
-        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+        const em = await this.mikroOrmService.forkEmForMain();
+        const authorizedUserUid = auth.user.userUid;
         const findResult = await findRoomAndMyParticipant({
             em,
             userUid: authorizedUserUid,
@@ -88,7 +83,7 @@ export class GetRoomConnectionsResolver {
         return {
             __tstype: GetRoomConnectionSuccessResultType,
             connectedUserUids: [
-                ...(await context.connectionManager.listRoomConnections({ roomId })),
+                ...(await this.connectionManagerService.value.listRoomConnections({ roomId })),
             ]
                 .filter(([, value]) => value > 0)
                 .map(([key]) => key),

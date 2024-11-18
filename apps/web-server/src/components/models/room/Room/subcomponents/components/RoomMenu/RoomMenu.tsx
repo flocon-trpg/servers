@@ -1,17 +1,6 @@
 import * as Icon from '@ant-design/icons';
 import { simpleId } from '@flocon-trpg/core';
-import {
-    ChangeParticipantNameDocument,
-    DeleteRoomDocument,
-    DeleteRoomFailureType,
-    GetRoomAsListItemDocument,
-    LeaveRoomDocument,
-    ParticipantRole,
-    PromoteFailureType,
-    PromoteToPlayerDocument,
-    ResetMessagesDocument,
-    ResetRoomMessagesFailureType,
-} from '@flocon-trpg/typed-document-node';
+import { ParticipantRole } from '@flocon-trpg/graphql-documents';
 import { recordToArray } from '@flocon-trpg/utils';
 import { useNavigate } from '@tanstack/react-router';
 import { Input, Menu, Modal, Popover, Tooltip } from 'antd';
@@ -21,6 +10,17 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai/react';
 import { atom } from 'jotai/vanilla';
 import React from 'react';
 import { useMutation, useQuery } from 'urql';
+import { ChangeParticipantNameDoc } from '../../../../../../../graphql/ChangeParticipantNameDoc';
+import { DeleteRoomDoc } from '../../../../../../../graphql/DeleteRoomDoc';
+import { GetRoomAsListItemDoc } from '../../../../../../../graphql/GetRoomAsListItemDoc';
+import { LeaveRoomDoc } from '../../../../../../../graphql/LeaveRoomDoc';
+import { PromoteToPlayerDoc } from '../../../../../../../graphql/PromoteToPlayerDoc';
+import { ResetMessagesDoc } from '../../../../../../../graphql/ResetMessagesDoc';
+import {
+    DeleteRoomFailureType,
+    PromoteFailureType,
+    ResetRoomMessagesFailureType,
+} from '../../../../../../../graphql-codegen/graphql';
 import { editRoomModalVisibilityAtom } from '../../atoms/editRoomModalVisibilityAtom/editRoomModalVisibilityAtom';
 import { useMe } from '../../hooks/useMe';
 import { useRoomId } from '../../hooks/useRoomId';
@@ -99,9 +99,9 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
 }: BecomePlayerModalProps) => {
     const addRoomNotification = useAddNotification();
     const [inputValue, setInputValue] = React.useState('');
-    const [, promoteToPlayer] = useMutation(PromoteToPlayerDocument);
+    const [, promoteToPlayer] = useMutation(PromoteToPlayerDoc);
     const [getRoomAsListItemResult, getRoomAsListItem] = useQuery({
-        query: GetRoomAsListItemDocument,
+        query: GetRoomAsListItemDoc,
         pause: true,
         variables: { roomId },
     });
@@ -217,7 +217,7 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
     roomCreatedByMe,
 }: DeleteRoomModalProps) => {
     const addRoomNotification = useAddNotification();
-    const [, deleteRoom] = useMutation(DeleteRoomDocument);
+    const [, deleteRoom] = useMutation(DeleteRoomDoc);
     const { execute, isExecuting } = useSingleExecuteAsync0(async () => {
         const e = await deleteRoom({ id: roomId });
         if (e.error != null) {
@@ -300,7 +300,7 @@ const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
     roomCreatedByMe,
 }: DeleteRoomModalProps) => {
     const addRoomNotification = useAddNotification();
-    const [, resetMessages] = useMutation(ResetMessagesDocument);
+    const [, resetMessages] = useMutation(ResetMessagesDoc);
     const { execute, isExecuting } = useSingleExecuteAsync0(async () => {
         const e = await resetMessages({ roomId });
         if (e.error != null) {
@@ -416,7 +416,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
 }: ChangeMyParticipantNameModalProps) => {
     const addRoomNotification = useAddNotification();
     const [inputValue, setInputValue] = React.useState('');
-    const [, changeParticipantName] = useMutation(ChangeParticipantNameDocument);
+    const [, changeParticipantName] = useMutation(ChangeParticipantNameDoc);
     React.useEffect(() => {
         setInputValue('');
     }, [visible, roomId]);
@@ -977,7 +977,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
     const [showBackgroundBoardViewer, setShowBackgroundBoardViewerAtom] =
         useShowBackgroundBoardViewer(roomId);
 
-    const [, leaveRoomMutation] = useMutation(LeaveRoomDocument);
+    const [, leaveRoomMutation] = useMutation(LeaveRoomDoc);
     const [isBecomePlayerModalVisible, setIsBecomePlayerModalVisible] = React.useState(false);
     const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] =
         React.useState(false);
