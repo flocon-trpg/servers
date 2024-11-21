@@ -4639,7 +4639,7 @@ __metadata:
     "@commitlint/cli": "npm:19.5.0"
     "@commitlint/config-conventional": "npm:19.5.0"
     "@flocon-trpg/prettier-config": "workspace:^"
-    husky: "npm:8.0.3"
+    husky: "npm:9.1.7"
     prettier: "npm:3.3.3"
     sort-package-json: "npm:2.10.1"
   languageName: unknown
@@ -7919,7 +7919,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/router-generator@npm:^1.78.3":
+"@tanstack/router-generator@npm:^1.78.3, @tanstack/router-generator@npm:^1.79.0":
   version: 1.81.9
   resolution: "@tanstack/router-generator@npm:1.81.9"
   dependencies:
@@ -7928,18 +7928,6 @@ __metadata:
     tsx: "npm:^4.19.2"
     zod: "npm:^3.23.8"
   checksum: 10/61a44fdc3714c764f8153e8772a12cb136c9319c1d7bea4071c517cd9003bf35598c66996f22f1f0de1fc3244cebb4e3a86aa74deea9611363e079116bdbb910
-  languageName: node
-  linkType: hard
-
-"@tanstack/router-generator@npm:^1.79.0":
-  version: 1.79.0
-  resolution: "@tanstack/router-generator@npm:1.79.0"
-  dependencies:
-    "@tanstack/virtual-file-routes": "npm:^1.64.0"
-    prettier: "npm:^3.3.3"
-    tsx: "npm:^4.19.2"
-    zod: "npm:^3.23.8"
-  checksum: 10/2909f82fba00995bea2a3e16761847de2433a106bbdcdb234202674259abc40380996d9eb09f67a20b6c423b87f63428ad53c886aef0705d25a1aad9acd5a26e
   languageName: node
   linkType: hard
 
@@ -8024,14 +8012,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/virtual-file-routes@npm:^1.64.0":
-  version: 1.64.0
-  resolution: "@tanstack/virtual-file-routes@npm:1.64.0"
-  checksum: 10/f9e19b4216b178c56a58cc413761afb3aebb09dd158ae5a0bc0063b280bc05e5797b0c0c8a5c7e9af2fe2abd8fc07f1abd4c7479ba26ce28f7b58bdb24da070f
-  languageName: node
-  linkType: hard
-
-"@tanstack/virtual-file-routes@npm:^1.81.9":
+"@tanstack/virtual-file-routes@npm:^1.64.0, @tanstack/virtual-file-routes@npm:^1.81.9":
   version: 1.81.9
   resolution: "@tanstack/virtual-file-routes@npm:1.81.9"
   checksum: 10/dd17d7bff244ed8639381008d930c294f12d347f3d485f2c9ff340b46277751f8c3ba81ab07ddb768cc14bbb2efd2b5b716bf459c5bba20074d1feef26a4da75
@@ -16211,12 +16192,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"husky@npm:8.0.3":
-  version: 8.0.3
-  resolution: "husky@npm:8.0.3"
+"husky@npm:9.1.7":
+  version: 9.1.7
+  resolution: "husky@npm:9.1.7"
   bin:
-    husky: lib/bin.js
-  checksum: 10/b754cf70fdc97c3b60fec5b80056b9c11436464953b1691bf2b5dcf0081fb6685d2c5f47abb8b2b1c49f504aabea5321fdd6496f8b755d9f6e7525a493406abb
+    husky: bin.js
+  checksum: 10/c2412753f15695db369634ba70f50f5c0b7e5cb13b673d0826c411ec1bd9ddef08c1dad89ea154f57da2521d2605bd64308af748749b27d08c5f563bcd89975f
   languageName: node
   linkType: hard
 
