@@ -134,7 +134,7 @@ jobs:
 
             - name: Upload coverages to Codecov
               if: ${{ matrix.container == 'node:18-bullseye' }}
-              uses: codecov/codecov-action@v4
+              uses: codecov/codecov-action@v5
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
 
