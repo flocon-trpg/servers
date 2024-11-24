@@ -47,7 +47,7 @@
         "@mikro-orm/sqlite": "^6.3.12",
         "@types/bcrypt": "^5.0.0",
         "@types/color": "^3.0.2",
-        "@types/express": "^4.17.13",
+        "@types/express": "^5.0.0",
         "@types/fs-extra": "^11.0.0",
         "@types/inquirer": "^8.0.0",
         "@types/multer": "^1.4.7",
