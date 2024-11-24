@@ -4267,7 +4267,7 @@ __metadata:
     "@types/node-fetch": "npm:2.6.11"
     "@types/safe-compare": "npm:^1.1.0"
     "@types/url-join": "npm:4.0.3"
-    "@types/uuid": "npm:^9.0.0"
+    "@types/uuid": "npm:^10.0.0"
     "@types/ws": "npm:^8.0.0"
     "@types/yargs": "npm:^17.0.3"
     "@urql/core": "npm:5.0.8"
@@ -7919,7 +7919,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/router-generator@npm:^1.78.3":
+"@tanstack/router-generator@npm:^1.78.3, @tanstack/router-generator@npm:^1.79.0":
   version: 1.81.9
   resolution: "@tanstack/router-generator@npm:1.81.9"
   dependencies:
@@ -7928,18 +7928,6 @@ __metadata:
     tsx: "npm:^4.19.2"
     zod: "npm:^3.23.8"
   checksum: 10/61a44fdc3714c764f8153e8772a12cb136c9319c1d7bea4071c517cd9003bf35598c66996f22f1f0de1fc3244cebb4e3a86aa74deea9611363e079116bdbb910
-  languageName: node
-  linkType: hard
-
-"@tanstack/router-generator@npm:^1.79.0":
-  version: 1.79.0
-  resolution: "@tanstack/router-generator@npm:1.79.0"
-  dependencies:
-    "@tanstack/virtual-file-routes": "npm:^1.64.0"
-    prettier: "npm:^3.3.3"
-    tsx: "npm:^4.19.2"
-    zod: "npm:^3.23.8"
-  checksum: 10/2909f82fba00995bea2a3e16761847de2433a106bbdcdb234202674259abc40380996d9eb09f67a20b6c423b87f63428ad53c886aef0705d25a1aad9acd5a26e
   languageName: node
   linkType: hard
 
@@ -8024,14 +8012,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/virtual-file-routes@npm:^1.64.0":
-  version: 1.64.0
-  resolution: "@tanstack/virtual-file-routes@npm:1.64.0"
-  checksum: 10/f9e19b4216b178c56a58cc413761afb3aebb09dd158ae5a0bc0063b280bc05e5797b0c0c8a5c7e9af2fe2abd8fc07f1abd4c7479ba26ce28f7b58bdb24da070f
-  languageName: node
-  linkType: hard
-
-"@tanstack/virtual-file-routes@npm:^1.81.9":
+"@tanstack/virtual-file-routes@npm:^1.64.0, @tanstack/virtual-file-routes@npm:^1.81.9":
   version: 1.81.9
   resolution: "@tanstack/virtual-file-routes@npm:1.81.9"
   checksum: 10/dd17d7bff244ed8639381008d930c294f12d347f3d485f2c9ff340b46277751f8c3ba81ab07ddb768cc14bbb2efd2b5b716bf459c5bba20074d1feef26a4da75
@@ -9044,7 +9025,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/uuid@npm:^9.0.0, @types/uuid@npm:^9.0.1":
+"@types/uuid@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "@types/uuid@npm:10.0.0"
+  checksum: 10/e3958f8b0fe551c86c14431f5940c3470127293280830684154b91dc7eb3514aeb79fe3216968833cf79d4d1c67f580f054b5be2cd562bebf4f728913e73e944
+  languageName: node
+  linkType: hard
+
+"@types/uuid@npm:^9.0.1":
   version: 9.0.8
   resolution: "@types/uuid@npm:9.0.8"
   checksum: 10/b8c60b7ba8250356b5088302583d1704a4e1a13558d143c549c408bf8920535602ffc12394ede77f8a8083511b023704bc66d1345792714002bfa261b17c5275
