@@ -4255,7 +4255,7 @@ __metadata:
     "@mikro-orm/postgresql": "npm:^6.3.12"
     "@mikro-orm/sqlite": "npm:^6.3.12"
     "@rollup/plugin-json": "npm:6.1.0"
-    "@rollup/plugin-typescript": "npm:11.1.6"
+    "@rollup/plugin-typescript": "npm:12.1.2"
     "@types/bcrypt": "npm:^5.0.0"
     "@types/color": "npm:^3.0.2"
     "@types/express": "npm:^4.17.13"
@@ -4523,7 +4523,7 @@ __metadata:
     "@flocon-trpg/eslint-config": "workspace:^"
     "@flocon-trpg/prettier-config": "workspace:^"
     "@flocon-trpg/tsconfig": "workspace:^"
-    "@rollup/plugin-typescript": "npm:11.1.6"
+    "@rollup/plugin-typescript": "npm:12.1.2"
     "@types/jest": "npm:29.5.14"
     eslint: "npm:9.14.0"
     eslint-config-prettier: "npm:9.1.0"
@@ -6903,9 +6903,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-typescript@npm:11.1.6":
-  version: 11.1.6
-  resolution: "@rollup/plugin-typescript@npm:11.1.6"
+"@rollup/plugin-typescript@npm:12.1.2":
+  version: 12.1.2
+  resolution: "@rollup/plugin-typescript@npm:12.1.2"
   dependencies:
     "@rollup/pluginutils": "npm:^5.1.0"
     resolve: "npm:^1.22.1"
@@ -6918,7 +6918,7 @@ __metadata:
       optional: true
     tslib:
       optional: true
-  checksum: 10/4ae4d6cfc929393171288df2f18b5eb837fa53d8689118d9661b3064567341f6f6cf8389af55f1d5f015e3682abf30a64ab609fdf75ecb5a84224505e407eb69
+  checksum: 10/1fd201b9430125686bcdb3eecfa4f8d9d5005a9d454f2d733c0fdc0f58e28f772209ecbfe4f5d1a42a2a7ac25746a5f37d15897d695326eaea0fe3a30857375d
   languageName: node
   linkType: hard
 
@@ -7919,7 +7919,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/router-generator@npm:^1.78.3":
+"@tanstack/router-generator@npm:^1.78.3, @tanstack/router-generator@npm:^1.79.0":
   version: 1.81.9
   resolution: "@tanstack/router-generator@npm:1.81.9"
   dependencies:
@@ -7928,18 +7928,6 @@ __metadata:
     tsx: "npm:^4.19.2"
     zod: "npm:^3.23.8"
   checksum: 10/61a44fdc3714c764f8153e8772a12cb136c9319c1d7bea4071c517cd9003bf35598c66996f22f1f0de1fc3244cebb4e3a86aa74deea9611363e079116bdbb910
-  languageName: node
-  linkType: hard
-
-"@tanstack/router-generator@npm:^1.79.0":
-  version: 1.79.0
-  resolution: "@tanstack/router-generator@npm:1.79.0"
-  dependencies:
-    "@tanstack/virtual-file-routes": "npm:^1.64.0"
-    prettier: "npm:^3.3.3"
-    tsx: "npm:^4.19.2"
-    zod: "npm:^3.23.8"
-  checksum: 10/2909f82fba00995bea2a3e16761847de2433a106bbdcdb234202674259abc40380996d9eb09f67a20b6c423b87f63428ad53c886aef0705d25a1aad9acd5a26e
   languageName: node
   linkType: hard
 
@@ -8024,14 +8012,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/virtual-file-routes@npm:^1.64.0":
-  version: 1.64.0
-  resolution: "@tanstack/virtual-file-routes@npm:1.64.0"
-  checksum: 10/f9e19b4216b178c56a58cc413761afb3aebb09dd158ae5a0bc0063b280bc05e5797b0c0c8a5c7e9af2fe2abd8fc07f1abd4c7479ba26ce28f7b58bdb24da070f
-  languageName: node
-  linkType: hard
-
-"@tanstack/virtual-file-routes@npm:^1.81.9":
+"@tanstack/virtual-file-routes@npm:^1.64.0, @tanstack/virtual-file-routes@npm:^1.81.9":
   version: 1.81.9
   resolution: "@tanstack/virtual-file-routes@npm:1.81.9"
   checksum: 10/dd17d7bff244ed8639381008d930c294f12d347f3d485f2c9ff340b46277751f8c3ba81ab07ddb768cc14bbb2efd2b5b716bf459c5bba20074d1feef26a4da75
