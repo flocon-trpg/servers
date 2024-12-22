@@ -67,7 +67,7 @@
         "dotenv-expand": "^8.0.0",
         "es-toolkit": "^1.25.2",
         "express": "^4.17.1",
-        "firebase-admin": "^12.6.0",
+        "firebase-admin": "^13.0.0",
         "fs-extra": "^11.0.0",
         "graphql": "^15.6.0",
         "graphql-subscriptions": "^1.1.0",
