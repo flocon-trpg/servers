@@ -1,0 +1,1 @@
+{"version":3,"file":"updateWritingMessageStatus.d.ts","sourceRoot":"","sources":["../../../../src/internal/roomClient/updateWritingMessageStatus.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,6BAA6B,EAAE,MAAM,kCAAkC,CAAC;AAEjF,OAAO,EAAE,uBAAuB,EAAE,MAAM,iBAAiB,CAAC;AAI1D,eAAO,MAAM,0BAA0B,GAAI,aAAa,UAC5C,IAAI,CAAC,uBAAuB,CAAC,aAAa,CAAC,EAAE,qCAAqC,CAAC;sBAGlE,6BAA6B;;CAgBzD,CAAC"}
