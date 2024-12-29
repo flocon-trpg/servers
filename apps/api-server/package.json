@@ -78,7 +78,7 @@
         "npm-run-all2": "^7.0.0",
         "pino": "^9.4.0",
         "pino-http": "^10.3.0",
-        "rate-limiter-flexible": "^2.3.0",
+        "rate-limiter-flexible": "^5.0.0",
         "reflect-metadata": "^0.2.0",
         "rimraf": "5.0.10",
         "rollup": "4.24.4",
