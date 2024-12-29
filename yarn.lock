@@ -4302,7 +4302,7 @@ __metadata:
     pino: "npm:^9.4.0"
     pino-http: "npm:^10.3.0"
     prettier: "npm:3.3.3"
-    rate-limiter-flexible: "npm:^2.3.0"
+    rate-limiter-flexible: "npm:^5.0.0"
     reflect-metadata: "npm:^0.2.0"
     rimraf: "npm:5.0.10"
     rollup: "npm:4.24.4"
@@ -7919,7 +7919,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/router-generator@npm:^1.78.3":
+"@tanstack/router-generator@npm:^1.78.3, @tanstack/router-generator@npm:^1.79.0":
   version: 1.81.9
   resolution: "@tanstack/router-generator@npm:1.81.9"
   dependencies:
@@ -7928,18 +7928,6 @@ __metadata:
     tsx: "npm:^4.19.2"
     zod: "npm:^3.23.8"
   checksum: 10/61a44fdc3714c764f8153e8772a12cb136c9319c1d7bea4071c517cd9003bf35598c66996f22f1f0de1fc3244cebb4e3a86aa74deea9611363e079116bdbb910
-  languageName: node
-  linkType: hard
-
-"@tanstack/router-generator@npm:^1.79.0":
-  version: 1.79.0
-  resolution: "@tanstack/router-generator@npm:1.79.0"
-  dependencies:
-    "@tanstack/virtual-file-routes": "npm:^1.64.0"
-    prettier: "npm:^3.3.3"
-    tsx: "npm:^4.19.2"
-    zod: "npm:^3.23.8"
-  checksum: 10/2909f82fba00995bea2a3e16761847de2433a106bbdcdb234202674259abc40380996d9eb09f67a20b6c423b87f63428ad53c886aef0705d25a1aad9acd5a26e
   languageName: node
   linkType: hard
 
@@ -8024,14 +8012,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/virtual-file-routes@npm:^1.64.0":
-  version: 1.64.0
-  resolution: "@tanstack/virtual-file-routes@npm:1.64.0"
-  checksum: 10/f9e19b4216b178c56a58cc413761afb3aebb09dd158ae5a0bc0063b280bc05e5797b0c0c8a5c7e9af2fe2abd8fc07f1abd4c7479ba26ce28f7b58bdb24da070f
-  languageName: node
-  linkType: hard
-
-"@tanstack/virtual-file-routes@npm:^1.81.9":
+"@tanstack/virtual-file-routes@npm:^1.64.0, @tanstack/virtual-file-routes@npm:^1.81.9":
   version: 1.81.9
   resolution: "@tanstack/virtual-file-routes@npm:1.81.9"
   checksum: 10/dd17d7bff244ed8639381008d930c294f12d347f3d485f2c9ff340b46277751f8c3ba81ab07ddb768cc14bbb2efd2b5b716bf459c5bba20074d1feef26a4da75
@@ -22386,10 +22367,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rate-limiter-flexible@npm:^2.3.0":
-  version: 2.4.2
-  resolution: "rate-limiter-flexible@npm:2.4.2"
-  checksum: 10/5e0997fd8ab76370a5a557eba1e1a882869399f9f78777141bffcd9be44a5df124574c78cc5895f41560f9fef1bef9cf1b66fabc289718e92ae42cd89f3447d4
+"rate-limiter-flexible@npm:^5.0.0":
+  version: 5.0.4
+  resolution: "rate-limiter-flexible@npm:5.0.4"
+  checksum: 10/97b48966a2f1a33df8b552bfc616c053f9b6b98f60e91a7a7d20dcb9b533b1a24ae0a490f45fc5f5d3bb140b4c5ae2af5f672de1b010b5d037cafcfa47531be8
   languageName: node
   linkType: hard
 
