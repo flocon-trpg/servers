@@ -126,20 +126,17 @@ yarn run storybook
 
 一例として、次のコマンドを実行することで、全てのパッケージをテストできます。
 
-#### Linux
+Linux の場合:
 
 ```console
 yarn run build
-REDIS_TEST=0 MYSQL_TEST=0 POSTGRESQL_TEST=0 yarn run test
+yarn run test
 ```
 
-#### Powershell
+PowerShell の場合:
 
 ```powershell
 yarn run build
-$env:REDIS_TEST=0
-$env:MYSQL_TEST=0
-$env:POSTGRESQL_TEST=0
 yarn run test
 ```
 
@@ -149,7 +146,28 @@ yarn run test
 
 #### データベースを用いるテストの設定
 
-Flocon のテストには、リレーショナルデータベースを使用したテストが含まれます。デフォルトでは SQLite のみが用いられますが、環境変数の `MYSQL_TEST`、`POSTGRESQL_TEST` に truthy な値をセットすることで MySQL や PostgreSQL を用いたテストを実行することもできます。逆に、`SQLITE_TEST` に falsy な値をセットすることで SQLite のテストをスキップすることもできます。リレーショナルデータベースを使用したテストは [api-server](./apps/api-server) パッケージにのみ存在します。このパッケージをテストしない場合は`MYSQL_TEST`、`POSTGRESQL_TEST`、`SQLITE_TEST`の値は利用されません。テストに使われるデータベースの URL は [./apps/api-server/test/utils/databaseConfig.ts](./apps/api-server/test/utils/databaseConfig.ts) に記述されています。databaseConfig.ts を編集してテストしても構いません。
+Flocon のテストには、リレーショナルデータベースを使用したテストが含まれます。デフォルトでは SQLite のみが用いられますが、環境変数の `MYSQL_TEST`、`POSTGRESQL_TEST` に truthy な値をセットすることで MySQL や PostgreSQL を用いたテストを実行することもできます。逆に、`SQLITE_TEST` に falsy な値をセットすることで SQLite のテストをスキップすることもできます。
+
+例として、SQLite でのテストは行わず、MySQL と PostgreSQL のテストを行うコマンドは下のとおりになります。
+
+Linux の場合:
+
+```console
+yarn run build
+SQLITE_TEST=0 MYSQL_TEST=1 POSTGRESQL_TEST=1 yarn run test
+```
+
+PowerShell の場合:
+
+```powershell
+yarn run build
+$env:SQLITE_TEST=0
+$env:MYSQL_TEST=1
+$env:POSTGRESQL_TEST=1
+yarn run test
+```
+
+リレーショナルデータベースを使用したテストは [api-server](./apps/api-server) パッケージにのみ存在します。このパッケージをテストしない場合は`MYSQL_TEST`、`POSTGRESQL_TEST`、`SQLITE_TEST`の値は利用されません。テストに使われるデータベースの URL は [./apps/api-server/test/utils/databaseConfig.ts](./apps/api-server/test/utils/databaseConfig.ts) に記述されています。databaseConfig.ts を編集してテストしても構いません。
 
 Flocon のテストには、Redis を使用したテストも含まれます。デフォルトでは Redis を用いたテストはスキップされます。`REDIS_TEST`に truthy な値をセットすることで Redis を使用したテストを実行できます。Redis を使用したテストを実行する場合は Redis サーバーを起動しておく必要があります。Redis を使用したテストは`./packages/cache`パッケージにのみ存在します。このパッケージをテストしない場合は`REDIS_TEST`の値は利用されません。現時点では Flocon の Web サーバーと API サーバーでは Redis を使っていないため、Redis を使用したテストは基本的にスキップして構いません。
 
