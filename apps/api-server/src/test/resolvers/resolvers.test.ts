@@ -807,9 +807,26 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
         });
     });
 
-    it.each(['public', 'unlisted'] as const)(
+    it.each([
+        {
+            fileType: 'image',
+            publicOrUnlisted: 'public',
+        },
+        {
+            fileType: 'sound',
+            publicOrUnlisted: 'public',
+        },
+        {
+            fileType: 'image',
+            publicOrUnlisted: 'unlisted',
+        },
+        {
+            fileType: 'sound',
+            publicOrUnlisted: 'unlisted',
+        },
+    ] as const)(
         'tests upload and delete file in uploader',
-        async publicOrUnlisted => {
+        async ({ fileType, publicOrUnlisted }) => {
             await useTestApplication({}, async () => {
                 const userUid1 = 'User1';
                 const userUid2 = 'User2';
@@ -833,10 +850,10 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                     formData.append(
                         'file',
                         readFileSync(
-                            './src/test/resolvers/pexels-public-domain-pictures-68147.jpg',
+                            `./src/test/resolvers/${fileType === 'image' ? 'pexels-public-domain-pictures-68147.jpg' : 'happy-birthday-254480.mp3'}`,
                         ),
                         {
-                            filename: 'test-image.jpg',
+                            filename: fileType === 'image' ? 'test-image.jpg' : 'test-sound.mp3',
                         },
                     );
                     const postResult = await fetch(
@@ -863,8 +880,19 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                     expect(filesResult).toHaveLength(1);
                     filename = filesResult[0]!.filename;
                     thumbFilename = filesResult[0]!.thumbFilename;
-                    if (thumbFilename == null) {
-                        throw new Error('thumbFilename should not be nullish');
+                    switch (fileType) {
+                        case 'image': {
+                            if (thumbFilename == null) {
+                                throw new Error('thumbFilename should not be nullish');
+                            }
+                            break;
+                        }
+                        case 'sound': {
+                            if (thumbFilename != null) {
+                                throw new Error('thumbFilename should be nullish');
+                            }
+                            break;
+                        }
                     }
                 }
 
@@ -881,14 +909,19 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                     ['thumbs', userUid1],
                     ['thumbs', userUid2],
                 ] as const;
-                for (const [fileType, id] of cases) {
+                for (const [filesOrThumbs, id] of cases) {
+                    let filenameToFetch: string;
+                    if (filesOrThumbs === 'files') {
+                        filenameToFetch = filename;
+                    } else {
+                        if (thumbFilename == null) {
+                            // 音声ファイルを対象としたテストのときはここに来る。
+                            continue;
+                        }
+                        filenameToFetch = thumbFilename;
+                    }
                     const axiosResult = await fetch(
-                        urljoin(
-                            httpUri,
-                            'uploader',
-                            fileType,
-                            fileType === 'files' ? filename : thumbFilename,
-                        ),
+                        urljoin(httpUri, 'uploader', filesOrThumbs, filenameToFetch),
                         {
                             headers: {
                                 [Resources.testAuthorizationHeader]: id,
@@ -943,7 +976,8 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                     }
                 }
 
-                const newScreenname = 'new-screenname.png';
+                const newScreenname =
+                    fileType === 'image' ? 'new-screenname.png' : 'new-screenname.mp3';
                 {
                     const actual = await clientToUploadFiles.renameFilesMutation({
                         input: [
