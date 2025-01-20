@@ -10,7 +10,7 @@ jobs:
     git-diff-main:
         name: git diff remotes/origin/main
 
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
 
         steps:
             - name: List git config
@@ -31,7 +31,7 @@ jobs:
                   fi
 
     release:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         steps:
             - name: Checkout
               uses: actions/checkout@v4
