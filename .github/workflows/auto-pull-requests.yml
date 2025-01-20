@@ -1,6 +1,6 @@
 # set "Allow GitHub Actions to create and approve pull requests" in the repository settings to enable pull request creation.
 
-name: auto-build
+name: auto-pull-requests
 
 on:
     push:
