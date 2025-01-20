@@ -138,6 +138,84 @@ jobs:
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
 
+    ensure-no-migration-create:
+        name: 'Ensure no migration will be created'
+
+        runs-on: ubuntu-22.04
+        container: node:22-bookworm-slim
+
+        services:
+            mysql:
+                image: mysql:8.4
+                env:
+                    MYSQL_ROOT_PASSWORD: root_password
+                    MYSQL_USER: test
+                    MYSQL_PASSWORD: test
+                    MYSQL_DATABASE: test
+                options: >-
+                    --health-cmd "mysqladmin ping"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 3306:3306
+            postgres:
+                image: postgres
+                env:
+                    POSTGRES_USER: test
+                    POSTGRES_PASSWORD: test
+                    POSTGRES_DB: test
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 5432:5432
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v4
+
+            - run: node --version
+
+            - run: yarn
+
+            - run: yarn build
+
+            - name: Migration-up&create SQLite
+              run: yarn migration-up --db sqlite && yarn migration-create --db sqlite
+              working-directory: ./apps/api-server
+              env:
+                  SQLITE: >
+                      {
+                           "clientUrl": "file://test.sqlite3"
+                      }
+
+            - name: Migration-up&create MySQL
+              run: yarn migration-up --db mysql && yarn migration-create --db mysql
+              working-directory: ./apps/api-server
+              env:
+                  MYSQL: >
+                      {
+                          "clientUrl": "mysql://test:test@mysql:3306/test"
+                      }
+
+            - name: Migration-up&create PostgreSQL
+              run: yarn migration-up --db postgresql && yarn migration-create --db postgresql
+              working-directory: ./apps/api-server
+              env:
+                  POSTGRESQL: >
+                      {
+                          "clientUrl": "postgresql://test:test@postgres:5432/test"
+                      }
+
+            - name: Clean CRLF
+              run: git config --local core.autocrlf input && git add . && git reset
+
+            - name: Fail if new files are created
+              uses: numtide/clean-git-action@v2
+
     # 以下のテストを行っている。PnP モードありでのテストは現在行っていない。
     # - DATABASE_URL を用いて API サーバーが起動することの確認
     # - AUTO_MIGRATION が正常に動くことの確認
