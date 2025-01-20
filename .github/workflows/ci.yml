@@ -62,7 +62,7 @@ jobs:
                         'node:22-bookworm-slim', # Dockerfile で用いられるイメージ。
                     ]
 
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         container: ${{ matrix.container }}
 
         services:
@@ -148,7 +148,7 @@ jobs:
             matrix:
                 pnp: [false]
 
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         container: node:18-bullseye-slim
 
         services:
@@ -224,7 +224,7 @@ jobs:
     check-format:
         name: Check lint, prettier, and sort-package-json
 
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
 
         steps:
             - uses: actions/checkout@v4
@@ -254,7 +254,7 @@ jobs:
 
         needs: [tests-with-docker, tests-without-docker]
 
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
 
         steps:
             - uses: actions/checkout@v4

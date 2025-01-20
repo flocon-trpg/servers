@@ -105,7 +105,7 @@ jobs:
     migration-create:
         name: 'Do migration-create and create pull requests'
 
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         container: node:22-bookworm # git は slim には入っていないので通常版を使っている
 
         services:
