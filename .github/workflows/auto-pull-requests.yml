@@ -71,6 +71,8 @@ jobs:
               uses: peter-evans/create-pull-request@v7
               with:
                   title: 'auto build (${{ github.sha }})'
+                  labels: auto-build
+                  branch: create-pull-request/auto-build
                   body: |
                       main ブランチへの push を確認したため、自動的に build を実行して main-build ブランチへの PR を作成しました。
 
@@ -98,9 +100,6 @@ jobs:
                       ```
 
                       </details>
-
-                  labels: auto-build
-                  branch: create-pull-request/auto-build
 
     migration-create:
         name: 'Do migration-create and create pull requests'
@@ -216,6 +215,9 @@ jobs:
               uses: peter-evans/create-pull-request@v7
               with:
                   title: 'auto migration-create (${{ github.sha }})'
+                  commit-message: 'fix(api-server): create migration codes'
+                  labels: auto-migration-create
+                  branch: create-pull-request/auto-migration-create
                   body: |
                       main ブランチへの push を確認したため、自動的に migration-create を実行して auto-migration-create ブランチへの PR を作成しました。
 
@@ -227,6 +229,3 @@ jobs:
                       | actor   | ${{ github.actor }}                     |
                       | sha     | ${{ github.sha }}                       |
                       | message | ${{ github.event.head_commit.message }} |
-
-                  labels: auto-migration-create
-                  branch: create-pull-request/auto-migration-create
