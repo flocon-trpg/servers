@@ -209,6 +209,9 @@ jobs:
                           "clientUrl": "postgresql://test:test@postgres:5432/test"
                       }
 
+            - run: yarn prettier
+              working-directory: ./apps/api-server
+
             - name: Create Pull Request
               uses: peter-evans/create-pull-request@v7
               with:
