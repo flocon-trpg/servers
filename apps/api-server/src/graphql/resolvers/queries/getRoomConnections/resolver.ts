@@ -5,6 +5,7 @@ import { ConnectionManagerService } from '../../../../connection-manager/connect
 import { GetRoomConnectionFailureType } from '../../../../enums/GetRoomConnectionFailureType';
 import { tsTypeObject } from '../../../../graphql/tsTypeObject';
 import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { findRoomAndMyParticipant } from '../../utils/utils';
 
 const GetRoomConnectionSuccessResultType = 'GetRoomConnectionSuccessResultType';
@@ -50,14 +51,9 @@ export class GetRoomConnectionsResolver {
         private readonly connectionManagerService: ConnectionManagerService,
     ) {}
 
-    @Query(() => GetRoomConnectionsResult, {
-        description:
-            '通常はこの Query を直接実行する必要はありません。@flocon-trpg/sdk を用いることで、リアルタイムに値を取得および自動更新できます。',
-    })
-    @Auth(ENTRY)
-    public async getRoomConnections(
-        @Args('roomId') roomId: string,
-        @AuthData() auth: AuthDataType,
+    async #getRoomConnectionsCore(
+        roomId: string,
+        auth: AuthDataType,
     ): Promise<typeof GetRoomConnectionsResult> {
         const em = await this.mikroOrmService.forkEmForMain();
         const authorizedUserUid = auth.user.userUid;
@@ -89,5 +85,21 @@ export class GetRoomConnectionsResolver {
                 .map(([key]) => key),
             fetchedAt: new Date().getTime(),
         };
+    }
+
+    @Query(() => GetRoomConnectionsResult, {
+        description:
+            '通常はこの Query を直接実行する必要はありません。@flocon-trpg/sdk を用いることで、リアルタイムに値を取得および自動更新できます。',
+    })
+    @Auth(ENTRY)
+    public async getRoomConnections(
+        @Args('roomId') roomId: string,
+        @AuthData() auth: AuthDataType,
+    ): Promise<typeof GetRoomConnectionsResult> {
+        // lock が必要かどうかは微妙
+        return await lockByRoomId(
+            roomId,
+            async () => await this.#getRoomConnectionsCore(roomId, auth),
+        );
     }
 }

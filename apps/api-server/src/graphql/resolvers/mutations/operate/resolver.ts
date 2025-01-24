@@ -38,6 +38,7 @@ import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { PubSubService } from '../../../../pub-sub/pub-sub.service';
 import { ServerConfig, ServerConfigService } from '../../../../server-config/server-config.service';
 import { EM } from '../../../../types';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { RoomAsListItem, RoomOperation } from '../../../objects/room';
 import { MessageUpdatePayload, RoomOperationPayload } from '../../subsciptions/roomEvent/payload';
 import { SendTo } from '../../types';
@@ -331,24 +332,26 @@ export class OperateResolver {
         @Args() args: OperateArgs,
         @AuthData() auth: AuthDataType,
     ): Promise<typeof OperateRoomResult> {
-        const operateResult = await operateCore({
-            args,
-            userUid: auth.user.userUid,
-            em: await this.mikroOrmService.forkEmForMain(),
-            serverConfig: this.serverConfigService.getValueForce(),
-        });
-        if (operateResult.type === 'success') {
-            this.pubSubService.roomEvent.next({
-                ...operateResult.roomOperationPayload,
-                sendTo: operateResult.sendTo,
+        return await lockByRoomId(args.id, async () => {
+            const operateResult = await operateCore({
+                args,
+                userUid: auth.user.userUid,
+                em: await this.mikroOrmService.forkEmForMain(),
+                serverConfig: this.serverConfigService.getValueForce(),
             });
-            for (const messageUpdate of operateResult.messageUpdatePayload) {
+            if (operateResult.type === 'success') {
                 this.pubSubService.roomEvent.next({
-                    ...messageUpdate,
+                    ...operateResult.roomOperationPayload,
                     sendTo: operateResult.sendTo,
                 });
+                for (const messageUpdate of operateResult.messageUpdatePayload) {
+                    this.pubSubService.roomEvent.next({
+                        ...messageUpdate,
+                        sendTo: operateResult.sendTo,
+                    });
+                }
             }
-        }
-        return operateResult.result;
+            return operateResult.result;
+        });
     }
 }

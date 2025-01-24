@@ -7,6 +7,7 @@ import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { CloseRollCallFailureType } from '../../../../enums/CloseRollCallFailureType';
 import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { IdOperation, RoomNotFound, operateAsAdminAndFlush } from '../../utils/utils';
 
 @ObjectType()
@@ -22,13 +23,10 @@ export class CloseRollCallResolver {
         private readonly pubSubService: PubSubService,
     ) {}
 
-    // TODO: テストを書く
-    @Mutation(() => CloseRollCallResult, { description: 'since v0.7.13' })
-    @Auth(ENTRY)
-    public async closeRollCall(
-        @Args('roomId') roomId: string,
-        @Args('rollCallId') rollCallId: string,
-        @AuthData() auth: AuthDataType,
+    async #closeRollCallCore(
+        roomId: string,
+        rollCallId: string,
+        auth: AuthDataType,
     ): Promise<CloseRollCallResult> {
         const myUserUid = auth.user.userUid;
         const em = await this.mikroOrmService.forkEmForMain();
@@ -79,5 +77,18 @@ export class CloseRollCallResolver {
         }
         this.pubSubService.roomEvent.next(result.value);
         return {};
+    }
+
+    // TODO: テストを書く
+    @Mutation(() => CloseRollCallResult, { description: 'since v0.7.13' })
+    @Auth(ENTRY)
+    public async closeRollCall(
+        @Args('roomId') roomId: string,
+        @Args('rollCallId') rollCallId: string,
+        @AuthData() auth: AuthDataType,
+    ): Promise<CloseRollCallResult> {
+        return await lockByRoomId(roomId, async () => {
+            return await this.#closeRollCallCore(roomId, rollCallId, auth);
+        });
     }
 }

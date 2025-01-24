@@ -5,6 +5,7 @@ import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { ResetRoomMessagesFailureType } from '../../../../enums/ResetRoomMessagesFailureType';
 import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { ResetRoomMessagesResult, ResetRoomMessagesResultType } from '../../../objects/roomMessage';
 import { findRoomAndMyParticipant } from '../../utils/utils';
 
@@ -15,13 +16,7 @@ export class ResetMessagesResolver {
         private readonly pubSubService: PubSubService,
     ) {}
 
-    // TODO: テストを書く
-    @Mutation(() => ResetRoomMessagesResult)
-    @Auth(ENTRY)
-    public async resetMessages(
-        @Args('roomId') roomId: string,
-        @AuthData() auth: AuthDataType,
-    ): Promise<ResetRoomMessagesResult> {
+    async #resetMessagesCore(roomId: string, auth: AuthDataType): Promise<ResetRoomMessagesResult> {
         const em = await this.mikroOrmService.forkEmForMain();
         const findResult = await findRoomAndMyParticipant({
             em,
@@ -80,5 +75,17 @@ export class ResetMessagesResolver {
         return {
             __tstype: 'ResetRoomMessagesResult',
         };
+    }
+
+    // TODO: テストを書く
+    @Mutation(() => ResetRoomMessagesResult)
+    @Auth(ENTRY)
+    public async resetMessages(
+        @Args('roomId') roomId: string,
+        @AuthData() auth: AuthDataType,
+    ): Promise<ResetRoomMessagesResult> {
+        return await lockByRoomId(roomId, async () => {
+            return await this.#resetMessagesCore(roomId, auth);
+        });
     }
 }

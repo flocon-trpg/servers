@@ -6,6 +6,7 @@ import { PerformRollCallFailureType } from '../../../../enums/PerformRollCallFai
 import { FilePath } from '../../../../graphql/objects/filePath';
 import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { IdOperation, RoomNotFound, operateAsAdminAndFlush } from '../../utils/utils';
 import { performRollCall } from './performRollCall';
 
@@ -49,39 +50,41 @@ export class PerformRollCallResolver {
         @Args('input') input: PerformRollCallInput,
         @AuthData() auth: AuthDataType,
     ): Promise<PerformRollCallResult> {
-        const em = await this.mikroOrmService.forkEmForMain();
-        const myUserUid = auth.user.userUid;
-        const result = await operateAsAdminAndFlush({
-            em,
-            roomId: input.roomId,
-            roomHistCount: undefined,
-            operationType: 'state',
-            operation: roomState => {
-                const soundEffect =
-                    input.soundEffectFile != null && input.soundEffectVolume != null
-                        ? {
-                              file: { ...input.soundEffectFile, $v: 1, $r: 1 } as const,
-                              volume: input.soundEffectVolume,
-                          }
-                        : undefined;
-                return performRollCall(roomState, myUserUid, soundEffect);
-            },
-        });
-        if (result.isError) {
-            if (result.error.type === 'custom') {
-                return { failureType: result.error.error };
+        return await lockByRoomId(input.roomId, async () => {
+            const em = await this.mikroOrmService.forkEmForMain();
+            const myUserUid = auth.user.userUid;
+            const result = await operateAsAdminAndFlush({
+                em,
+                roomId: input.roomId,
+                roomHistCount: undefined,
+                operationType: 'state',
+                operation: roomState => {
+                    const soundEffect =
+                        input.soundEffectFile != null && input.soundEffectVolume != null
+                            ? {
+                                  file: { ...input.soundEffectFile, $v: 1, $r: 1 } as const,
+                                  volume: input.soundEffectVolume,
+                              }
+                            : undefined;
+                    return performRollCall(roomState, myUserUid, soundEffect);
+                },
+            });
+            if (result.isError) {
+                if (result.error.type === 'custom') {
+                    return { failureType: result.error.error };
+                }
+                throw toOtError(result.error.error);
             }
-            throw toOtError(result.error.error);
-        }
-        switch (result.value) {
-            case RoomNotFound:
-                return { failureType: PerformRollCallFailureType.NotFound };
-            case IdOperation:
-                return {};
-            default:
-                break;
-        }
-        this.pubSubService.roomEvent.next(result.value);
-        return {};
+            switch (result.value) {
+                case RoomNotFound:
+                    return { failureType: PerformRollCallFailureType.NotFound };
+                case IdOperation:
+                    return {};
+                default:
+                    break;
+            }
+            this.pubSubService.roomEvent.next(result.value);
+            return {};
+        });
     }
 }

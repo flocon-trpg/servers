@@ -18,6 +18,7 @@ import { RoomPubCh, RoomPubMsg } from '../../../../mikro-orm/entities/roomMessag
 import { User } from '../../../../mikro-orm/entities/user/entity';
 import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import {
     RoomMessageSyntaxErrorType,
     RoomPublicMessage,
@@ -96,11 +97,9 @@ export class WritePublicMessageResolver {
         private readonly pubSubService: PubSubService,
     ) {}
 
-    @Mutation(() => WriteRoomPublicMessageResult)
-    @Auth(ENTRY)
-    public async writePublicMessage(
-        @Args() args: WritePublicMessageArgs,
-        @AuthData() auth: AuthDataType,
+    async #writePublicMessageCore(
+        args: WritePublicMessageArgs,
+        auth: AuthDataType,
     ): Promise<typeof WriteRoomPublicMessageResult> {
         const channelKey = args.channelKey;
         const em = await this.mikroOrmService.forkEmForMain();
@@ -200,5 +199,17 @@ export class WritePublicMessageResolver {
 
         this.pubSubService.roomEvent.next(payload);
         return result;
+    }
+
+    @Mutation(() => WriteRoomPublicMessageResult)
+    @Auth(ENTRY)
+    public async writePublicMessage(
+        @Args() args: WritePublicMessageArgs,
+        @AuthData() auth: AuthDataType,
+    ): Promise<typeof WriteRoomPublicMessageResult> {
+        return await lockByRoomId(
+            args.roomId,
+            async () => await this.#writePublicMessageCore(args, auth),
+        );
     }
 }

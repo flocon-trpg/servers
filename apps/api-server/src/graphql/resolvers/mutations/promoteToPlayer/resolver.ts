@@ -17,6 +17,7 @@ import * as Room$MikroORM from '../../../../mikro-orm/entities/room/entity';
 import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { PubSubService } from '../../../../pub-sub/pub-sub.service';
 import { EM } from '../../../../types';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { RoomEventPayload } from '../../subsciptions/roomEvent/payload';
 import {
     IdOperation,
@@ -42,7 +43,7 @@ class PromoteResult {
     public failureType?: PromoteFailureType;
 }
 
-const promoteMeCore = async ({
+const promoteMeCoreWithoutLock = async ({
     roomId,
     userUid,
     em,
@@ -107,6 +108,12 @@ const promoteMeCore = async ({
         default:
             return { result: {}, payload: flushResult.value };
     }
+};
+
+const promoteMeCore = async (args: Parameters<typeof promoteMeCoreWithoutLock>[0]) => {
+    return await lockByRoomId(args.roomId, async () => {
+        return await promoteMeCoreWithoutLock(args);
+    });
 };
 
 @Resolver(() => PromoteResult)

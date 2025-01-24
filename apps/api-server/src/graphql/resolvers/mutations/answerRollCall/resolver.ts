@@ -7,6 +7,7 @@ import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { AnswerRollCallFailureType } from '../../../../enums/AnswerRollCallFailureType';
 import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { IdOperation, RoomNotFound, operateAsAdminAndFlush } from '../../utils/utils';
 
 @ObjectType()
@@ -24,14 +25,11 @@ export class AnswerRollCallResolver {
         private readonly pubSubService: PubSubService,
     ) {}
 
-    // TODO: テストを書く
-    @Mutation(() => AnswerRollCallResult, { description: 'since v0.7.13' })
-    @Auth(ENTRY)
-    public async answerRollCall(
-        @Args('roomId') roomId: string,
-        @Args('rollCallId') rollCallId: string,
-        @Args('answer') answer: boolean,
-        @AuthData() auth: AuthDataType,
+    async #answerRollCallCore(
+        roomId: string,
+        rollCallId: string,
+        answer: boolean,
+        auth: AuthDataType,
     ): Promise<AnswerRollCallResult> {
         const myUserUid = auth.user.userUid;
         const result = await operateAsAdminAndFlush({
@@ -99,5 +97,19 @@ export class AnswerRollCallResolver {
         }
         this.pubSubService.roomEvent.next(result.value);
         return {};
+    }
+
+    // TODO: テストを書く
+    @Mutation(() => AnswerRollCallResult, { description: 'since v0.7.13' })
+    @Auth(ENTRY)
+    public async answerRollCall(
+        @Args('roomId') roomId: string,
+        @Args('rollCallId') rollCallId: string,
+        @Args('answer') answer: boolean,
+        @AuthData() auth: AuthDataType,
+    ): Promise<AnswerRollCallResult> {
+        return await lockByRoomId(roomId, async () => {
+            return await this.#answerRollCallCore(roomId, rollCallId, answer, auth);
+        });
     }
 }

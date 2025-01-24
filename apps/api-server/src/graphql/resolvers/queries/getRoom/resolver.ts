@@ -20,6 +20,7 @@ import {
 import { isBookmarked } from '../../../../mikro-orm/entities/room/isBookmarked';
 import { role } from '../../../../mikro-orm/entities/room/role';
 import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { RoomAsListItem, RoomGetState } from '../../../objects/room';
 import { findRoomAndMyParticipant } from '../../utils/utils';
 
@@ -73,15 +74,7 @@ const GetRoomResult = createUnionType({
 export class GetRoomResolver {
     public constructor(private readonly mikroOrmService: MikroOrmService) {}
 
-    @Query(() => GetRoomResult, {
-        description:
-            '通常はこの Query を直接実行する必要はありません。@flocon-trpg/sdk を用いることで、リアルタイムに Room を取得および自動更新できます。',
-    })
-    @Auth(ENTRY)
-    public async getRoom(
-        @Args() args: GetRoomArgs,
-        @AuthData() auth: AuthDataType,
-    ): Promise<typeof GetRoomResult> {
+    async #getRoomCore(args: GetRoomArgs, auth: AuthDataType): Promise<typeof GetRoomResult> {
         const em = await this.mikroOrmService.forkEmForMain();
         const authorizedUserUid = auth.user.userUid;
         const findResult = await findRoomAndMyParticipant({
@@ -126,5 +119,18 @@ export class GetRoomResolver {
                 }),
             },
         };
+    }
+
+    @Query(() => GetRoomResult, {
+        description:
+            '通常はこの Query を直接実行する必要はありません。@flocon-trpg/sdk を用いることで、リアルタイムに Room を取得および自動更新できます。',
+    })
+    @Auth(ENTRY)
+    public async getRoom(
+        @Args() args: GetRoomArgs,
+        @AuthData() auth: AuthDataType,
+    ): Promise<typeof GetRoomResult> {
+        // lock が必要かどうかは微妙
+        return await lockByRoomId(args.id, async () => await this.#getRoomCore(args, auth));
     }
 }

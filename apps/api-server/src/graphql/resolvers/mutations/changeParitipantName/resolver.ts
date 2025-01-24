@@ -8,6 +8,7 @@ import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { ChangeParticipantNameFailureType } from '../../../../enums/ChangeParticipantNameFailureType';
 import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { convertToMaxLength100String } from '../../../../utils/convertToMaxLength100String';
 import { IdOperation, RoomNotFound, operateAsAdminAndFlush } from '../../utils/utils';
 
@@ -33,11 +34,9 @@ export class ChangeParticipantNameResolver {
         private readonly pubSubService: PubSubService,
     ) {}
 
-    @Mutation(() => ChangeParticipantNameResult)
-    @Auth(ENTRY)
-    public async changeParticipantName(
-        @Args() args: ChangeParticipantNameArgs,
-        @AuthData() auth: AuthDataType,
+    async #changeParticipantNameCore(
+        args: ChangeParticipantNameArgs,
+        auth: AuthDataType,
     ): Promise<ChangeParticipantNameResult> {
         const em = await this.mikroOrmService.forkEmForMain();
         const authorizedUserUid = auth.user.userUid;
@@ -83,5 +82,16 @@ export class ChangeParticipantNameResolver {
         return {
             failureType: undefined,
         };
+    }
+
+    @Mutation(() => ChangeParticipantNameResult)
+    @Auth(ENTRY)
+    public async changeParticipantName(
+        @Args() args: ChangeParticipantNameArgs,
+        @AuthData() auth: AuthDataType,
+    ): Promise<ChangeParticipantNameResult> {
+        return await lockByRoomId(args.roomId, async () => {
+            return await this.#changeParticipantNameCore(args, auth);
+        });
     }
 }

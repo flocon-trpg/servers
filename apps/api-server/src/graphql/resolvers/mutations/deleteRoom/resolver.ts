@@ -5,6 +5,7 @@ import { DeleteRoomFailureType } from '../../../../enums/DeleteRoomFailureType';
 import * as Room$MikroORM from '../../../../mikro-orm/entities/room/entity';
 import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { all } from '../../types';
 
 @ArgsType()
@@ -26,12 +27,7 @@ export class DeleteRoomResolver {
         private readonly pubSubService: PubSubService,
     ) {}
 
-    @Mutation(() => DeleteRoomResult)
-    @Auth(ENTRY)
-    public async deleteRoom(
-        @Args() args: DeleteRoomArgs,
-        @AuthData() auth: AuthDataType,
-    ): Promise<DeleteRoomResult> {
+    async #deleteRoomCore(args: DeleteRoomArgs, auth: AuthDataType): Promise<DeleteRoomResult> {
         const em = await this.mikroOrmService.forkEmForMain();
         const authorizedUserUid = auth.user.userUid;
 
@@ -59,5 +55,14 @@ export class DeleteRoomResolver {
             sendTo: all,
         });
         return {};
+    }
+
+    @Mutation(() => DeleteRoomResult)
+    @Auth(ENTRY)
+    public async deleteRoom(
+        @Args() args: DeleteRoomArgs,
+        @AuthData() auth: AuthDataType,
+    ): Promise<DeleteRoomResult> {
+        return await lockByRoomId(args.id, async () => await this.#deleteRoomCore(args, auth));
     }
 }

@@ -18,6 +18,7 @@ import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { PubSubService } from '../../../../pub-sub/pub-sub.service';
 import { ServerConfig, ServerConfigService } from '../../../../server-config/server-config.service';
 import { EM } from '../../../../types';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { convertToMaxLength100String } from '../../../../utils/convertToMaxLength100String';
 import { RoomOperation } from '../../../objects/room';
 import { RoomEventPayload } from '../../subsciptions/roomEvent/payload';
@@ -69,7 +70,7 @@ class JoinRoomArgs {
     public password?: string;
 }
 
-const joinRoomCore = async ({
+const joinRoomCoreWithoutLock = async ({
     args,
     serverConfig,
     em,
@@ -149,6 +150,12 @@ const joinRoomCore = async ({
         },
         payload: result.value,
     };
+};
+
+const joinRoomCore = async (functionArgs: Parameters<typeof joinRoomCoreWithoutLock>[0]) => {
+    return await lockByRoomId(functionArgs.args.id, async () => {
+        return await joinRoomCoreWithoutLock(functionArgs);
+    });
 };
 
 @Resolver(() => JoinRoomResult)
