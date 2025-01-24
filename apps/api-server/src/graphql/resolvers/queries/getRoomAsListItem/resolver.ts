@@ -5,6 +5,7 @@ import * as RoomAsListItemGlobal from '../../../../entities-graphql/roomAsListIt
 import { GetRoomFailureType } from '../../../../enums/GetRoomFailureType';
 import * as Room$MikroORM from '../../../../mikro-orm/entities/room/entity';
 import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { RoomAsListItem } from '../../../objects/room';
 
 @ObjectType()
@@ -37,11 +38,9 @@ const GetRoomAsListItemResult = createUnionType({
 export class GetRoomAsListItemResolver {
     public constructor(private readonly mikroOrmService: MikroOrmService) {}
 
-    @Query(() => GetRoomAsListItemResult)
-    @Auth(ENTRY)
-    public async getRoomAsListItem(
-        @Args('roomId') roomId: string,
-        @AuthData() auth: AuthDataType,
+    async #getRoomAsListItemCore(
+        roomId: string,
+        auth: AuthDataType,
     ): Promise<typeof GetRoomAsListItemResult> {
         const em = await this.mikroOrmService.forkEmForMain();
         const authorizedUserUid = auth.user.userUid;
@@ -56,5 +55,18 @@ export class GetRoomAsListItemResolver {
             myUserUid: authorizedUserUid,
         });
         return { room };
+    }
+
+    @Query(() => GetRoomAsListItemResult)
+    @Auth(ENTRY)
+    public async getRoomAsListItem(
+        @Args('roomId') roomId: string,
+        @AuthData() auth: AuthDataType,
+    ): Promise<typeof GetRoomAsListItemResult> {
+        // lock が必要かどうかは微妙
+        return await lockByRoomId(
+            roomId,
+            async () => await this.#getRoomAsListItemCore(roomId, auth),
+        );
     }
 }

@@ -4493,9 +4493,9 @@ __metadata:
     "@nestjs/schematics": "npm:^10.1.0"
     "@nestjs/serve-static": "npm:^4.0.2"
     "@nestjs/testing": "npm:^10.3.2"
-    "@nestjs/throttler": "npm:^6.2.1"
     "@swc/cli": "npm:^0.3.9"
     "@swc/core": "npm:^1.4.0"
+    "@types/async-lock": "npm:^1.4.2"
     "@types/bcrypt": "npm:^5.0.0"
     "@types/copyfiles": "npm:^2"
     "@types/express": "npm:^4.17.21"
@@ -4506,6 +4506,7 @@ __metadata:
     "@types/node": "npm:^20.11.16"
     "@types/safe-compare": "npm:^1.1.0"
     "@types/supertest": "npm:^6.0.2"
+    async-lock: "npm:^1.4.1"
     bcdice: "npm:^4.0.0"
     bcrypt: "npm:^5.0.1"
     class-transformer: "npm:^0.5.1"
@@ -7190,17 +7191,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/throttler@npm:^6.2.1":
-  version: 6.2.1
-  resolution: "@nestjs/throttler@npm:6.2.1"
-  peerDependencies:
-    "@nestjs/common": ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0
-    "@nestjs/core": ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0
-    reflect-metadata: ^0.1.13 || ^0.2.0
-  checksum: 10/4fc05b62f4a115683e3f4072033c1dde5010a9390ee8c6df396a29e90a2599dc18b5c921c2a2958473f7bb66a8336ae014b969c0ff82c2d3b6869b028cb361ee
-  languageName: node
-  linkType: hard
-
 "@nodelib/fs.scandir@npm:2.1.5":
   version: 2.1.5
   resolution: "@nodelib/fs.scandir@npm:2.1.5"
@@ -9045,6 +9035,13 @@ __metadata:
   version: 5.0.1
   resolution: "@types/aria-query@npm:5.0.1"
   checksum: 10/0635081bb506576b937899afa8e76e6b8d2faf5662f309d6fdc3fc89c749d63362cd8cb3baa0a6d786fe8664994fbffbb11461fcad62b5394f2663891e722b86
+  languageName: node
+  linkType: hard
+
+"@types/async-lock@npm:^1.4.2":
+  version: 1.4.2
+  resolution: "@types/async-lock@npm:1.4.2"
+  checksum: 10/d5b18e24bc378ccf7a548720c09bdaa87ad4abf500a96d52b5e64da3b4f26b5ed78f36a04f30769f10b789136efb95428c93493dec9506d2a6b0c96b55187702
   languageName: node
   linkType: hard
 
@@ -11342,6 +11339,13 @@ __metadata:
   bin:
     astring: bin/astring
   checksum: 10/ee88f71d8534557b27993d6d035ae85d78488d8dbc6429cd8e8fdfcafec3c65928a3bdc518cf69767a1298d3361490559a4819cd4b314007edae1e94cf1f9e4c
+  languageName: node
+  linkType: hard
+
+"async-lock@npm:^1.4.1":
+  version: 1.4.1
+  resolution: "async-lock@npm:1.4.1"
+  checksum: 10/80d55ac95f920e880a865968b799963014f6d987dd790dd08173fae6e1af509d8cd0ab45a25daaca82e3ef8e7c939f5d128cd1facfcc5c647da8ac2409e20ef9
   languageName: node
   linkType: hard
 

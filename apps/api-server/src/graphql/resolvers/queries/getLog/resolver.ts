@@ -1,7 +1,6 @@
 import { $system, Spectator } from '@flocon-trpg/core';
 import { ref } from '@mikro-orm/core';
 import { Args, ArgsType, Field, Query, Resolver } from '@nestjs/graphql';
-import { Throttle } from '@nestjs/throttler';
 import { Auth, ENTRY } from '../../../../auth/auth.decorator';
 import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { GetRoomLogFailureType } from '../../../../enums/GetRoomLogFailureType';
@@ -10,6 +9,7 @@ import { RoomPubCh, RoomPubMsg } from '../../../../mikro-orm/entities/roomMessag
 import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { PubSubService } from '../../../../pub-sub/pub-sub.service';
 import { EM } from '../../../../types';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { GetRoomLogFailureResultType, GetRoomLogResult } from '../../../objects/roomMessage';
 import {
     createRoomPublicMessage,
@@ -45,13 +45,7 @@ export class GetLogResolver {
         private readonly pubSubService: PubSubService,
     ) {}
 
-    @Query(() => GetRoomLogResult)
-    @Auth(ENTRY)
-    @Throttle({ default: { limit: 10, ttl: 60000 } })
-    public async getLog(
-        @Args() args: GetLogArgs,
-        @AuthData() auth: AuthDataType,
-    ): Promise<typeof GetRoomLogResult> {
+    async #getLogCore(args: GetLogArgs, auth: AuthDataType): Promise<typeof GetRoomLogResult> {
         const em = await this.mikroOrmService.forkEmForMain();
         const authorizedUserUid = auth.user.userUid;
         const findResult = await findRoomAndMyParticipant({
@@ -103,5 +97,15 @@ export class GetLogResolver {
             visibleTo: undefined,
         });
         return messages;
+    }
+
+    @Query(() => GetRoomLogResult)
+    @Auth(ENTRY)
+    public async getLog(
+        @Args() args: GetLogArgs,
+        @AuthData() auth: AuthDataType,
+    ): Promise<typeof GetRoomLogResult> {
+        // lock が必要かどうかは微妙
+        return await lockByRoomId(args.roomId, async () => await this.#getLogCore(args, auth));
     }
 }

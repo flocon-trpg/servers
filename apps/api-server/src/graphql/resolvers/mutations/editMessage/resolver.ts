@@ -5,6 +5,7 @@ import { EditMessageFailureType } from '../../../../enums/EditMessageFailureType
 import { RoomPrvMsg, RoomPubMsg } from '../../../../mikro-orm/entities/roomMessage/entity';
 import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import {
     EditMessageResult,
     RoomPrivateMessageUpdate,
@@ -43,12 +44,7 @@ export class EditMessageResolver {
     ) {}
 
     // CONSIDER: 例えば'1d100'などダイスを振るメッセージでも現在はedit可能だが、editされてもinitTextなどを参照すれば問題ない。ただしロジックが少しややこしくなるので、そのようなケースはeditを拒否するように仕様変更したほうがいいのかも？
-    @Mutation(() => EditMessageResult)
-    @Auth(ENTRY)
-    public async editMessage(
-        @Args() args: EditMessageArgs,
-        @AuthData() auth: AuthDataType,
-    ): Promise<EditMessageResult> {
+    async #editMessageCore(args: EditMessageArgs, auth: AuthDataType): Promise<EditMessageResult> {
         const em = await this.mikroOrmService.forkEmForMain();
         const authorizedUserUid = auth.user.userUid;
         const findResult = await findRoomAndMyParticipant({
@@ -128,5 +124,14 @@ export class EditMessageResolver {
         return {
             failureType: EditMessageFailureType.MessageNotFound,
         };
+    }
+
+    @Mutation(() => EditMessageResult)
+    @Auth(ENTRY)
+    public async editMessage(
+        @Args() args: EditMessageArgs,
+        @AuthData() auth: AuthDataType,
+    ): Promise<EditMessageResult> {
+        return await lockByRoomId(args.roomId, async () => await this.#editMessageCore(args, auth));
     }
 }

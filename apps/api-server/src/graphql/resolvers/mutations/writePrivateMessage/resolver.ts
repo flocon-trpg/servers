@@ -10,6 +10,7 @@ import { RoomPrvMsg } from '../../../../mikro-orm/entities/roomMessage/entity';
 import { User } from '../../../../mikro-orm/entities/user/entity';
 import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import {
     RoomMessageSyntaxErrorType,
     WriteRoomPrivateMessageFailureResultType,
@@ -62,11 +63,9 @@ export class WritePrivateMessageResolver {
         private readonly pubSubService: PubSubService,
     ) {}
 
-    @Mutation(() => WriteRoomPrivateMessageResult)
-    @Auth(ENTRY)
-    public async writePrivateMessage(
-        @Args() args: WritePrivateMessageArgs,
-        @AuthData() auth: AuthDataType,
+    async #writePrivateMessageCore(
+        args: WritePrivateMessageArgs,
+        auth: AuthDataType,
     ): Promise<typeof WriteRoomPrivateMessageResult> {
         // **** args guard ****
 
@@ -181,5 +180,17 @@ export class WritePrivateMessageResolver {
 
         this.pubSubService.roomEvent.next(payload);
         return result;
+    }
+
+    @Mutation(() => WriteRoomPrivateMessageResult)
+    @Auth(ENTRY)
+    public async writePrivateMessage(
+        @Args() args: WritePrivateMessageArgs,
+        @AuthData() auth: AuthDataType,
+    ): Promise<typeof WriteRoomPrivateMessageResult> {
+        return await lockByRoomId(
+            args.roomId,
+            async () => await this.#writePrivateMessageCore(args, auth),
+        );
     }
 }

@@ -5,6 +5,7 @@ import { DeleteMessageFailureType } from '../../../../enums/DeleteMessageFailure
 import { RoomPrvMsg, RoomPubMsg } from '../../../../mikro-orm/entities/roomMessage/entity';
 import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import {
     DeleteMessageResult,
     RoomPrivateMessageUpdate,
@@ -32,11 +33,9 @@ export class DeleteMessageResolver {
         private readonly pubSubService: PubSubService,
     ) {}
 
-    @Mutation(() => DeleteMessageResult)
-    @Auth(ENTRY)
-    public async deleteMessage(
-        @Args() args: MessageIdArgs,
-        @AuthData() auth: AuthDataType,
+    async #deleteMessageCore(
+        args: MessageIdArgs,
+        auth: AuthDataType,
     ): Promise<DeleteMessageResult> {
         const em = await this.mikroOrmService.forkEmForMain();
         const authorizedUserUid = auth.user.userUid;
@@ -118,5 +117,17 @@ export class DeleteMessageResolver {
         return {
             failureType: DeleteMessageFailureType.MessageNotFound,
         };
+    }
+
+    @Mutation(() => DeleteMessageResult)
+    @Auth(ENTRY)
+    public async deleteMessage(
+        @Args() args: MessageIdArgs,
+        @AuthData() auth: AuthDataType,
+    ): Promise<DeleteMessageResult> {
+        return await lockByRoomId(
+            args.roomId,
+            async () => await this.#deleteMessageCore(args, auth),
+        );
     }
 }

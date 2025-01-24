@@ -9,6 +9,7 @@ import { LeaveRoomFailureType } from '../../../../enums/LeaveRoomFailureType';
 import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { PubSubService } from '../../../../pub-sub/pub-sub.service';
 import { ServerConfigService } from '../../../../server-config/server-config.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { IdOperation, RoomNotFound, operateAsAdminAndFlush } from '../../utils/utils';
 
 @ObjectType()
@@ -25,12 +26,7 @@ export class LeaveRoomResolver {
         private readonly serverConfigService: ServerConfigService,
     ) {}
 
-    @Mutation(() => LeaveRoomResult)
-    @Auth(ENTRY)
-    public async leaveRoom(
-        @Args('id') id: string,
-        @AuthData() auth: AuthDataType,
-    ): Promise<LeaveRoomResult> {
+    async #leaveRoomCore(id: string, auth: AuthDataType): Promise<LeaveRoomResult> {
         const em = await this.mikroOrmService.forkEmForMain();
         const authorizedUserUid = auth.user.userUid;
 
@@ -68,5 +64,14 @@ export class LeaveRoomResolver {
         }
         this.pubSubService.roomEvent.next(flushResult.value);
         return {};
+    }
+
+    @Mutation(() => LeaveRoomResult)
+    @Auth(ENTRY)
+    public async leaveRoom(
+        @Args('id') id: string,
+        @AuthData() auth: AuthDataType,
+    ): Promise<LeaveRoomResult> {
+        return await lockByRoomId(id, async () => await this.#leaveRoomCore(id, auth));
     }
 }

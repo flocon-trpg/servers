@@ -5,6 +5,7 @@ import { DeleteRoomAsAdminFailureType } from '../../../../enums/DeleteRoomAsAdmi
 import * as Room$MikroORM from '../../../../mikro-orm/entities/room/entity';
 import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { all } from '../../types';
 
 @ArgsType()
@@ -26,11 +27,9 @@ export class DeleteRoomAsAdminResolver {
         private readonly pubSubService: PubSubService,
     ) {}
 
-    @Mutation(() => DeleteRoomAsAdminResult, { description: 'since v0.7.2' })
-    @Auth(ADMIN)
-    public async deleteRoomAsAdmin(
-        @Args() args: DeleteRoomAsAdminInput,
-        @AuthData() auth: AuthDataType,
+    async #deleteRoomAsAdminCore(
+        args: DeleteRoomAsAdminInput,
+        auth: AuthDataType,
     ): Promise<DeleteRoomAsAdminResult> {
         const em = await this.mikroOrmService.forkEmForMain();
         const authorizedUserUid = auth.user.userUid;
@@ -52,5 +51,16 @@ export class DeleteRoomAsAdminResolver {
             deletedByAdmin: true,
         });
         return {};
+    }
+
+    @Mutation(() => DeleteRoomAsAdminResult, { description: 'since v0.7.2' })
+    @Auth(ADMIN)
+    public async deleteRoomAsAdmin(
+        @Args() args: DeleteRoomAsAdminInput,
+        @AuthData() auth: AuthDataType,
+    ): Promise<DeleteRoomAsAdminResult> {
+        return await lockByRoomId(args.id, async () => {
+            return await this.#deleteRoomAsAdminCore(args, auth);
+        });
     }
 }

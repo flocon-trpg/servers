@@ -5,6 +5,7 @@ import { MakeMessageNotSecretFailureType } from '../../../../enums/MakeMessageNo
 import { RoomPrvMsg, RoomPubMsg } from '../../../../mikro-orm/entities/roomMessage/entity';
 import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { MakeMessageNotSecretResult } from '../../../objects/roomMessage';
 import {
     createRoomPrivateMessageUpdate,
@@ -28,11 +29,9 @@ export class MakeMessageNotSecretResolver {
         private readonly pubSubService: PubSubService,
     ) {}
 
-    @Mutation(() => MakeMessageNotSecretResult)
-    @Auth(ENTRY)
-    public async makeMessageNotSecret(
-        @Args() args: MessageIdArgs,
-        @AuthData() auth: AuthDataType,
+    async #makeMessageNotSecretCore(
+        args: MessageIdArgs,
+        auth: AuthDataType,
     ): Promise<MakeMessageNotSecretResult> {
         const em = await this.mikroOrmService.forkEmForMain();
         const authorizedUserUid = auth.user.userUid;
@@ -112,5 +111,17 @@ export class MakeMessageNotSecretResolver {
         return {
             failureType: MakeMessageNotSecretFailureType.MessageNotFound,
         };
+    }
+
+    @Mutation(() => MakeMessageNotSecretResult)
+    @Auth(ENTRY)
+    public async makeMessageNotSecret(
+        @Args() args: MessageIdArgs,
+        @AuthData() auth: AuthDataType,
+    ): Promise<MakeMessageNotSecretResult> {
+        return await lockByRoomId(
+            args.roomId,
+            async () => await this.#makeMessageNotSecretCore(args, auth),
+        );
     }
 }

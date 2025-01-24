@@ -8,6 +8,7 @@ import { RoomSe } from '../../../../mikro-orm/entities/roomMessage/entity';
 import { User } from '../../../../mikro-orm/entities/user/entity';
 import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { FilePath } from '../../../objects/filePath';
 import {
     RoomSoundEffect,
@@ -38,11 +39,9 @@ export class WriteRoomSoundEffectResolver {
         private readonly pubSubService: PubSubService,
     ) {}
 
-    @Mutation(() => WriteRoomSoundEffectResult)
-    @Auth(ENTRY)
-    public async writeRoomSoundEffect(
-        @Args() args: WriteRoomSoundEffectArgs,
-        @AuthData() auth: AuthDataType,
+    async #writeRoomSoundEffectCore(
+        args: WriteRoomSoundEffectArgs,
+        auth: AuthDataType,
     ): Promise<typeof WriteRoomSoundEffectResult> {
         const em = await this.mikroOrmService.forkEmForMain();
         const authorizedUser = await em.findOneOrFail(User, { userUid: auth.user.userUid });
@@ -104,5 +103,17 @@ export class WriteRoomSoundEffectResolver {
 
         this.pubSubService.roomEvent.next(payload);
         return result;
+    }
+
+    @Mutation(() => WriteRoomSoundEffectResult)
+    @Auth(ENTRY)
+    public async writeRoomSoundEffect(
+        @Args() args: WriteRoomSoundEffectArgs,
+        @AuthData() auth: AuthDataType,
+    ): Promise<typeof WriteRoomSoundEffectResult> {
+        return await lockByRoomId(
+            args.roomId,
+            async () => await this.#writeRoomSoundEffectCore(args, auth),
+        );
     }
 }
