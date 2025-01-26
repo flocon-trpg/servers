@@ -109,7 +109,7 @@ jobs:
 
         services:
             mysql:
-                image: mysql:8.4
+                image: mysql:9.2
                 env:
                     MYSQL_ROOT_PASSWORD: root_password
                     MYSQL_USER: test
