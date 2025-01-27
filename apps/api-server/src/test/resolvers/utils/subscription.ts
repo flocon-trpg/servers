@@ -107,11 +107,9 @@ export class TestRoomEventSubscription {
         ).toHaveLength(0);
     }
 
-    public toBeExactlyOneDeleteRoomEvent({ deletedBy }: { deletedBy: string }) {
-        expect(this.#values).toHaveLength(1);
-        const deleteRoomOperationEvents = mapCompact(
-            this.#values,
-            x => x.result?.deleteRoomOperation,
+    public toBeExactlyOneDeleteRoomEvent({ deletedBy }: { deletedBy: string }, opts: IgnoreOption) {
+        const deleteRoomOperationEvents = mapCompact(this.#values, x =>
+            shouldIgnore(x.result, opts) ? undefined : x.result?.deleteRoomOperation,
         );
         expect(deleteRoomOperationEvents).toHaveLength(1);
         const actualEvent = deleteRoomOperationEvents[0]!;
