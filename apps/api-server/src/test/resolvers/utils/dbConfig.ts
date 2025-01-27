@@ -48,10 +48,12 @@ export const getPostgresqlTestConfig = (): ServerConfig['postgresql'] | undefine
         return undefined;
     }
     switch (parseStringToBoolean(postgresqlTest).value) {
-        case false:
+        case false: {
+            return undefined;
+        }
         case true: {
             throw new Error(
-                `\`${postgresqlTest}\` is invalid. ${POSTGRESQL_TEST} does not support boolean-like value.`,
+                `\`${postgresqlTest}\` is invalid. ${POSTGRESQL_TEST} does not support truthy value. You need to set database config instead to test PostgreSQL.`,
             );
         }
         case undefined: {
@@ -71,10 +73,12 @@ export const getMysqlTestConfig = (): ServerConfig['mysql'] | undefined => {
         return undefined;
     }
     switch (parseStringToBoolean(mysqlTest).value) {
-        case false:
+        case false: {
+            return undefined;
+        }
         case true: {
             throw new Error(
-                `\`${mysqlTest}\` is invalid. ${MYSQL_TEST} does not support boolean-like value.`,
+                `\`${mysqlTest}\` is invalid. ${MYSQL_TEST} does not support truthy value. You need to set database config instead to test MySQL.`,
             );
         }
         case undefined: {
