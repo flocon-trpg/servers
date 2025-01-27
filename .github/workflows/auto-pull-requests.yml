@@ -109,7 +109,7 @@ jobs:
 
         services:
             mysql:
-                image: mysql:8.4
+                image: mysql:9
                 env:
                     MYSQL_ROOT_PASSWORD: root_password
                     MYSQL_USER: test
@@ -123,7 +123,7 @@ jobs:
                 ports:
                     - 3306:3306
             postgres:
-                image: postgres
+                image: postgres:17
                 env:
                     POSTGRES_USER: test
                     POSTGRES_PASSWORD: test
