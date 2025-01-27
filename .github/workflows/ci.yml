@@ -112,31 +112,19 @@ jobs:
 
             - run: yarn build
 
-            - name: Migration-up MySQL
-              run: yarn migration-up --db mysql
-              working-directory: ./apps/api-server
-              env:
-                  MYSQL: >
-                      {
-                          "clientUrl": "mysql://test:test@mysql:3306/test"
-                      }
-
-            - name: Migration-up PostgreSQL
-              run: yarn migration-up --db postgresql
-              working-directory: ./apps/api-server
-              env:
-                  POSTGRESQL: >
-                      {
-                          "clientUrl": "postgresql://test:test@postgres:5432/test"
-                      }
-
             - name: Test
               run: yarn test-ci
               env:
                   REDIS_TEST: 1
-                  MYSQL_TEST: 1
+                  MYSQL_TEST: >
+                      {
+                          "clientUrl": "mysql://test:test@mysql:3306/test"
+                      }
                   SQLITE_TEST: 1
-                  POSTGRESQL_TEST: 1
+                  POSTGRESQL_TEST: >
+                      {
+                          "clientUrl": "postgresql://test:test@postgres:5432/test"
+                      }
 
             - name: Upload coverages to Codecov
               if: ${{ matrix.container == 'node:18-bullseye' }}

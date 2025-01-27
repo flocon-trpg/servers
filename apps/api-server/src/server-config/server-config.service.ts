@@ -56,13 +56,37 @@ const dbNamePartial = z
     })
     .partial();
 
-export const mysqlDatabase = driverOptionsConfig.merge(dbNamePartial).merge(clientUrlType);
+const mysqlDatabase = driverOptionsConfig.merge(dbNamePartial).merge(clientUrlType);
 
 export type MysqlDatabaseConfig = z.TypeOf<typeof mysqlDatabase>;
 
-export const postgresqlDatabase = driverOptionsConfig.merge(dbNamePartial).merge(clientUrlType);
+export const parseMysqlDatabaseConfig = (json: string): Result<MysqlDatabaseConfig> => {
+    const jsonObject = tryParseJSON(json);
+    if (jsonObject.isError) {
+        return Result.error(jsonObject.error);
+    }
+    const parsed = mysqlDatabase.safeParse(jsonObject.value);
+    if (parsed.success) {
+        return Result.ok(parsed.data);
+    }
+    return Result.error(parsed.error.message);
+};
+
+const postgresqlDatabase = driverOptionsConfig.merge(dbNamePartial).merge(clientUrlType);
 
 export type PostgresqlDatabaseConfig = z.TypeOf<typeof postgresqlDatabase>;
+
+export const parsePostgresqlDatabaseConfig = (json: string): Result<PostgresqlDatabaseConfig> => {
+    const jsonObject = tryParseJSON(json);
+    if (jsonObject.isError) {
+        return Result.error(jsonObject.error);
+    }
+    const parsed = postgresqlDatabase.safeParse(jsonObject.value);
+    if (parsed.success) {
+        return Result.ok(parsed.data);
+    }
+    return Result.error(parsed.error.message);
+};
 
 const sqliteDatabaseCore = z.union([
     z.object({
@@ -79,9 +103,21 @@ const sqliteDatabaseCore = z.union([
     }),
 ]);
 
-export const sqliteDatabase = driverOptionsConfig.and(sqliteDatabaseCore);
+const sqliteDatabase = driverOptionsConfig.and(sqliteDatabaseCore);
 
 export type SqliteDatabaseConfig = z.TypeOf<typeof sqliteDatabase>;
+
+export const parseSqliteDatabaseConfig = (json: string): Result<SqliteDatabaseConfig> => {
+    const jsonObject = tryParseJSON(json);
+    if (jsonObject.isError) {
+        return Result.error(jsonObject.error);
+    }
+    const parsed = sqliteDatabase.safeParse(jsonObject.value);
+    if (parsed.success) {
+        return Result.ok(parsed.data);
+    }
+    return Result.error(parsed.error.message);
+};
 
 export const firebaseAdminSecret = z
     .object({
@@ -403,55 +439,43 @@ class ServerConfigParser {
     private static mysqlProp(
         getValue: (key: string) => string | undefined,
     ): Result<MysqlDatabaseConfig, undefined> | undefined {
-        const mysqlObject = getValue(MYSQL);
-        if (mysqlObject == null) {
+        const text = getValue(MYSQL);
+        if (text == null) {
             return undefined;
         }
-        const json = tryParseJSON(mysqlObject);
-        if (json.isError) {
+        const result = parseMysqlDatabaseConfig(text);
+        if (result.isError) {
             return Result.error(undefined);
         }
-        const j = mysqlDatabase.safeParse(json.value);
-        if (!j.success) {
-            return Result.error(undefined);
-        }
-        return Result.ok(j.data);
+        return result;
     }
 
     private static postgresqlProp(
         getValue: (key: string) => string | undefined,
     ): Result<PostgresqlDatabaseConfig, undefined> | undefined {
-        const postgresqlObject = getValue(POSTGRESQL);
-        if (postgresqlObject == null) {
+        const text = getValue(POSTGRESQL);
+        if (text == null) {
             return undefined;
         }
-        const json = tryParseJSON(postgresqlObject);
-        if (json.isError) {
+        const result = parsePostgresqlDatabaseConfig(text);
+        if (result.isError) {
             return Result.error(undefined);
         }
-        const j = postgresqlDatabase.safeParse(json.value);
-        if (!j.success) {
-            return Result.error(undefined);
-        }
-        return Result.ok(j.data);
+        return result;
     }
 
     private static sqliteProp(
         getValue: (key: string) => string | undefined,
     ): Result<SqliteDatabaseConfig, undefined> | undefined {
-        const sqliteObject = getValue(SQLITE);
-        if (sqliteObject == null) {
+        const text = getValue(SQLITE);
+        if (text == null) {
             return undefined;
         }
-        const json = tryParseJSON(sqliteObject);
-        if (json.isError) {
+        const result = parseSqliteDatabaseConfig(text);
+        if (result.isError) {
             return Result.error(undefined);
         }
-        const j = sqliteDatabase.safeParse(json.value);
-        if (!j.success) {
-            return Result.error(undefined);
-        }
-        return Result.ok(j.data);
+        return result;
     }
 
     private createServerConfigForMigration(): Result<ServerConfigForMigration> {

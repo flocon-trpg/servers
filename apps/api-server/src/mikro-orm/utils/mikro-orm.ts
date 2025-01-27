@@ -11,7 +11,7 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { SqliteDriver } from '@mikro-orm/sqlite';
 import { pickBy } from 'es-toolkit';
 import { z } from 'zod';
-import { sqliteDatabase } from '../../server-config/server-config.service';
+import { SqliteDatabaseConfig } from '../../server-config/server-config.service';
 import { File } from '../entities/file/entity';
 import { FileTag } from '../entities/fileTag/entity';
 import { Participant } from '../entities/participant/entity';
@@ -141,7 +141,7 @@ export const createSQLiteOptions = ({
     sqliteConfig,
     dirName,
 }: {
-    sqliteConfig: z.TypeOf<typeof sqliteDatabase>;
+    sqliteConfig: SqliteDatabaseConfig;
     dirName: DirName;
 }): Options => {
     const opts: Options = {

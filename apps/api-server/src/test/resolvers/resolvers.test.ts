@@ -12,7 +12,7 @@ import {
     WritePrivateMessageDoc,
     WritePublicMessageDoc,
 } from '@flocon-trpg/graphql-documents';
-import { loggerRef, parseStringToBoolean, recordToArray } from '@flocon-trpg/utils';
+import { loggerRef, recordToArray } from '@flocon-trpg/utils';
 import { ResultOf } from '@graphql-typed-document-node/core';
 import { diff, serializeUpOperation, toUpOperation } from '@kizahasi/ot-string';
 import { INestApplication } from '@nestjs/common';
@@ -42,8 +42,7 @@ import { SetupServerService } from '../../setup-server/setup-server.service';
 import { EM } from '../../types';
 import { YargsService } from '../../yargs/yargs.service';
 import { YargsServiceStub } from '../../yargs/yargs.service.stub';
-import { sqlite1DbName, sqlite2DbName } from './utils/databaseConfig';
-import { DbConfig, createDatabaseConfig } from './utils/dbConfig';
+import { getMysqlTestConfig, getPostgresqlTestConfig, getSqliteTestConfig } from './utils/dbConfig';
 import { FirebaseIdTokenServiceFake } from './utils/firebase-id-token.service.fake';
 import { OperationResultByDoc } from './utils/graphqlType';
 import { maskKeys, maskTypeNames } from './utils/maskKeys';
@@ -454,43 +453,38 @@ const httpUri = 'http://localhost:4000';
 const httpGraphQLUri = 'http://localhost:4000/graphql';
 const wsGraphQLUri = 'ws://localhost:4000/graphql';
 
-const sqlite1Type: DbConfig = {
-    type: 'SQLite',
-    dbName: sqlite1DbName,
-};
-const sqlite2Type: DbConfig = {
-    type: 'SQLite',
-    dbName: sqlite2DbName,
-};
-const postgresqlType: DbConfig = {
-    type: 'PostgreSQL',
-};
-const mysqlType: DbConfig = {
-    type: 'MySQL',
-};
+const createCases = (): [
+    Pick<ServerConfig, 'sqlite' | 'postgresql' | 'mysql'>,
+    ServerConfig['entryPassword'] | undefined,
+][] => {
+    const result: [
+        Pick<ServerConfig, 'sqlite' | 'postgresql' | 'mysql'>,
+        ServerConfig['entryPassword'] | undefined,
+    ][] = [];
 
-const createCases = (): [DbConfig, ServerConfig['entryPassword'] | undefined][] => {
-    const result: [DbConfig, ServerConfig['entryPassword'] | undefined][] = [];
-
-    const SQLITE_TEST = process.env.SQLITE_TEST;
-    if (parseStringToBoolean(SQLITE_TEST).value === false) {
-        loggerRef.info('Skips SQLite tests because SQLITE_TEST env is falsy.');
-    } else {
-        result.push([sqlite1Type, undefined], [sqlite2Type, plainEntryPassword]);
+    const sqliteConfig = getSqliteTestConfig();
+    if (sqliteConfig != null) {
+        result.push([{ sqlite: sqliteConfig, postgresql: undefined, mysql: undefined }, undefined]);
+        result.push([
+            { sqlite: sqliteConfig, postgresql: undefined, mysql: undefined },
+            plainEntryPassword,
+        ]);
     }
 
-    const POSTGRESQL_TEST = process.env.POSTGRESQL_TEST;
-    if (parseStringToBoolean(POSTGRESQL_TEST).value === true) {
-        result.push([postgresqlType, plainEntryPassword]);
-    } else {
-        loggerRef.info('Skips PostgreSQL tests because POSTGRESQL_TEST env is not truthy.');
+    const postgresqlConfig = getPostgresqlTestConfig();
+    if (postgresqlConfig != null) {
+        result.push([
+            { sqlite: undefined, postgresql: postgresqlConfig, mysql: undefined },
+            plainEntryPassword,
+        ]);
     }
 
-    const MYSQL_TEST = process.env.MYSQL_TEST;
-    if (parseStringToBoolean(MYSQL_TEST).value === true) {
-        result.push([mysqlType, plainEntryPassword]);
-    } else {
-        loggerRef.info('Skips MySQL tests because MYSQL_TEST env is truthy.');
+    const mysqlConfig = getMysqlTestConfig();
+    if (mysqlConfig != null) {
+        result.push([
+            { sqlite: undefined, postgresql: undefined, mysql: mysqlConfig },
+            plainEntryPassword,
+        ]);
     }
 
     return result;
@@ -586,7 +580,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
     }) => {
         const serverConfigServiceStub = new ServerConfigServiceStub({
             serverConfig: {
-                ...createDatabaseConfig(dbConfig),
+                ...dbConfig,
                 accessControlAllowOrigin: '*',
                 admins: [],
                 firebaseAdminSecret: undefined,
@@ -639,9 +633,6 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
     beforeAll(async () => {
         systemTimeManager.useFakeTimers();
         await onFinally.dispose();
-        if (dbConfig.type !== 'SQLite') {
-            return;
-        }
         const app = await createTestApplication({
             overrideServerConfig: source =>
                 produce(source, source => {
