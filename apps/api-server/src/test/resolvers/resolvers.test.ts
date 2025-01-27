@@ -1569,7 +1569,10 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                     expect(maskTypeNames(spectatorSubscriptionResult)).toEqual(
                         maskTypeNames(operationResult.operation),
                     );
-                    subscriptions.value[Resources.UserUid.notJoin].toBeEmpty({});
+                    subscriptions.value[Resources.UserUid.notJoin].toBeEmpty({
+                        ignoreRoomConnectionEvents: true,
+                        ignoreWritingMessageStatusDisconnected: true,
+                    });
 
                     const room = Assert.GetRoomQuery.toBeSuccess(
                         await clients[Resources.UserUid.player1].getRoomQuery({
@@ -1712,7 +1715,10 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                                     .except(Resources.UserUid.notJoin)
                                     .distinct(x => x.toBeExactlyOneRoomPublicMessage()),
                             ).toEqual(authorMessage);
-                            subscriptions.value[Resources.UserUid.notJoin].toBeEmpty({});
+                            subscriptions.value[Resources.UserUid.notJoin].toBeEmpty({
+                                ignoreRoomConnectionEvents: true,
+                                ignoreWritingMessageStatusDisconnected: true,
+                            });
 
                             for (const userUid of [
                                 Resources.UserUid.master,
@@ -1764,7 +1770,10 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                                 updatedAt: undefined,
                                 updatedText: undefined,
                             });
-                            subscriptions.value[Resources.UserUid.notJoin].toBeEmpty({});
+                            subscriptions.value[Resources.UserUid.notJoin].toBeEmpty({
+                                ignoreRoomConnectionEvents: true,
+                                ignoreWritingMessageStatusDisconnected: true,
+                            });
 
                             for (const userUid of [
                                 Resources.UserUid.master,
@@ -1805,7 +1814,10 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                                 updatedAt: undefined,
                                 updatedText: undefined,
                             });
-                            subscriptions.value[Resources.UserUid.notJoin].toBeEmpty({});
+                            subscriptions.value[Resources.UserUid.notJoin].toBeEmpty({
+                                ignoreRoomConnectionEvents: true,
+                                ignoreWritingMessageStatusDisconnected: true,
+                            });
 
                             for (const userUid of [
                                 Resources.UserUid.master,
@@ -1878,7 +1890,10 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                                             .distinct(x => x.toBeExactlyOneRoomPublicMessage()),
                                     ),
                                 ).toEqual(maskTypeNames(authorMessage));
-                                subscriptions.value[Resources.UserUid.notJoin].toBeEmpty({});
+                                subscriptions.value[Resources.UserUid.notJoin].toBeEmpty({
+                                    ignoreRoomConnectionEvents: true,
+                                    ignoreWritingMessageStatusDisconnected: true,
+                                });
 
                                 for (const userUid of [
                                     Resources.UserUid.master,
@@ -1924,7 +1939,10 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                                         'updatedText',
                                     ]),
                                 );
-                                subscriptions.value[Resources.UserUid.notJoin].toBeEmpty({});
+                                subscriptions.value[Resources.UserUid.notJoin].toBeEmpty({
+                                    ignoreRoomConnectionEvents: true,
+                                    ignoreWritingMessageStatusDisconnected: true,
+                                });
                             }
 
                             {
@@ -1952,7 +1970,10 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                                         'updatedText',
                                     ]),
                                 );
-                                subscriptions.value[Resources.UserUid.notJoin].toBeEmpty({});
+                                subscriptions.value[Resources.UserUid.notJoin].toBeEmpty({
+                                    ignoreRoomConnectionEvents: true,
+                                    ignoreWritingMessageStatusDisconnected: true,
+                                });
                             }
                             subscriptions.all.unsubscribe();
                         });
@@ -2029,7 +2050,10 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                                 expect(maskKeys(nonAuthorMessage, maskingKeys)).toEqual(
                                     maskKeys(authorMessage, maskingKeys),
                                 );
-                                subscriptions.value[Resources.UserUid.notJoin].toBeEmpty({});
+                                subscriptions.value[Resources.UserUid.notJoin].toBeEmpty({
+                                    ignoreRoomConnectionEvents: true,
+                                    ignoreWritingMessageStatusDisconnected: true,
+                                });
 
                                 for (const userUid of [
                                     Resources.UserUid.master,
@@ -2118,7 +2142,10 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                                 expect(
                                     maskKeys(updatedNonAuthorMessage, maskingKeysForNonAuthor),
                                 ).toEqual(maskKeys(authorMessage, maskingKeysForNonAuthor));
-                                subscriptions.value[Resources.UserUid.notJoin].toBeEmpty({});
+                                subscriptions.value[Resources.UserUid.notJoin].toBeEmpty({
+                                    ignoreRoomConnectionEvents: true,
+                                    ignoreWritingMessageStatusDisconnected: true,
+                                });
                             }
 
                             Assert.MakeMessageNotSecretMutation.toBeFailure(
@@ -2188,7 +2215,10 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                                 expect(maskKeys(deletedMessage, maskingKeys)).toEqual(
                                     maskKeys(authorMessage, maskingKeys),
                                 );
-                                subscriptions.value[Resources.UserUid.notJoin].toBeEmpty({});
+                                subscriptions.value[Resources.UserUid.notJoin].toBeEmpty({
+                                    ignoreRoomConnectionEvents: true,
+                                    ignoreWritingMessageStatusDisconnected: true,
+                                });
                             }
                             subscriptions.all.unsubscribe();
                         });
@@ -2464,12 +2494,22 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                         }),
                     );
 
-                    subscriptions.value[Resources.UserUid.player1].toBeExactlyOneDeleteRoomEvent({
-                        deletedBy: Resources.UserUid.master,
-                    });
+                    subscriptions.value[Resources.UserUid.player1].toBeExactlyOneDeleteRoomEvent(
+                        {
+                            deletedBy: Resources.UserUid.master,
+                        },
+                        {
+                            ignoreRoomConnectionEvents: true,
+                            ignoreWritingMessageStatusDisconnected: true,
+                        },
+                    );
                     subscriptions.value[Resources.UserUid.spectator1].toBeExactlyOneDeleteRoomEvent(
                         {
                             deletedBy: Resources.UserUid.master,
+                        },
+                        {
+                            ignoreRoomConnectionEvents: true,
+                            ignoreWritingMessageStatusDisconnected: true,
                         },
                     );
 
@@ -2596,17 +2636,33 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                             {
                                 deletedBy: Resources.UserUid.admin,
                             },
+                            {
+                                ignoreRoomConnectionEvents: true,
+                                ignoreWritingMessageStatusDisconnected: true,
+                            },
                         );
                         subscriptions.value[
                             Resources.UserUid.player1
-                        ].toBeExactlyOneDeleteRoomEvent({
-                            deletedBy: Resources.UserUid.admin,
-                        });
+                        ].toBeExactlyOneDeleteRoomEvent(
+                            {
+                                deletedBy: Resources.UserUid.admin,
+                            },
+                            {
+                                ignoreRoomConnectionEvents: true,
+                                ignoreWritingMessageStatusDisconnected: true,
+                            },
+                        );
                         subscriptions.value[
                             Resources.UserUid.spectator1
-                        ].toBeExactlyOneDeleteRoomEvent({
-                            deletedBy: Resources.UserUid.admin,
-                        });
+                        ].toBeExactlyOneDeleteRoomEvent(
+                            {
+                                deletedBy: Resources.UserUid.admin,
+                            },
+                            {
+                                ignoreRoomConnectionEvents: true,
+                                ignoreWritingMessageStatusDisconnected: true,
+                            },
+                        );
 
                         for (const userUid of userUids) {
                             Assert.GetRoomQuery.toBeNotFound(
