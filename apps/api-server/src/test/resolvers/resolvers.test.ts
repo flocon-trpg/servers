@@ -32,14 +32,10 @@ import {
 import { InitializeFirebaseService } from '../../initialize-firebase/initialize-firebase.service';
 import { InitializeFirebaseServiceStub } from '../../initialize-firebase/initialize-firebase.service.stub';
 import { MigrationService } from '../../migration/migration.service';
-import { File as File$MikroORM } from '../../mikro-orm/entities/file/entity';
-import * as $MikroORM from '../../mikro-orm/entities/room/entity';
-import { User as User$MikroORM } from '../../mikro-orm/entities/user/entity';
 import { MikroOrmService } from '../../mikro-orm/mikro-orm.service';
 import { ServerConfig, ServerConfigService } from '../../server-config/server-config.service';
 import { ServerConfigServiceStub } from '../../server-config/server-config.service.stub';
 import { SetupServerService } from '../../setup-server/setup-server.service';
-import { EM } from '../../types';
 import { YargsService } from '../../yargs/yargs.service';
 import { YargsServiceStub } from '../../yargs/yargs.service.stub';
 import { getMysqlTestConfig, getPostgresqlTestConfig, getSqliteTestConfig } from './utils/dbConfig';
@@ -104,36 +100,6 @@ const textDiff = ({ prev, next }: { prev: string; next: string }) => {
     });
     const upOperation = toUpOperation(d);
     return serializeUpOperation(upOperation);
-};
-
-const clearAllRooms = async (em: EM): Promise<void> => {
-    for (const room of await em.find($MikroORM.Room, {})) {
-        await $MikroORM.deleteRoom(em, room);
-    }
-    await em.flush();
-};
-
-const clearAllFiles = async (em: EM): Promise<void> => {
-    for (const file of await em.find(File$MikroORM, {})) {
-        await file.fileTags.init();
-        file.fileTags.getItems().forEach(x => em.remove(x));
-        file.fileTags.removeAll();
-        em.remove(file);
-    }
-    await em.flush();
-};
-
-const clearAllUsers = async (em: EM): Promise<void> => {
-    for (const user of await em.find(User$MikroORM, {})) {
-        await user.fileTags.init();
-        user.fileTags.getItems().forEach(x => em.remove(x));
-        user.fileTags.removeAll();
-        await user.files.init();
-        user.files.getItems().forEach(x => em.remove(x));
-        user.files.removeAll();
-        em.remove(user);
-    }
-    await em.flush();
 };
 
 const plainEntryPassword: ServerConfig['entryPassword'] = {
