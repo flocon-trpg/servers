@@ -294,7 +294,7 @@ const createORMOptionsWithoutDatabaseUrl = (
  * ```
  */
 export const createORMOptions = (
-    serverConfig: ServerConfigForMigration,
+    serverConfig: ServerConfig | ServerConfigForMigration,
     databaseArg: typeof postgresql | typeof sqlite | typeof mysql | null,
     dirName: DirName,
 ): Result<Options> => {
