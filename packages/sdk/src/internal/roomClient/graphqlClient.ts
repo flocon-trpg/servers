@@ -221,6 +221,7 @@ export class GraphQLClientWithStatus<TGraphQLError> {
         return this.source.operateMutation({ ...variables, id: this.roomId });
     }
 
+    // Urql などではおそらく Subscription が開始したかどうかを検知できないため、Subscription の接続が確立する前に他の Operation を行い、Subscription の値を逃してしまう可能性があるので注意。現時点では Subscription を要求してから少し待って他の Operation を実行してもらうくらいしか対策が思いつかない。
     get roomEventSubscription() {
         return this.#roomEventSubscription;
     }

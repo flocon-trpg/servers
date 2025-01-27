@@ -12,7 +12,7 @@ import {
     WritePrivateMessageDoc,
     WritePublicMessageDoc,
 } from '@flocon-trpg/graphql-documents';
-import { loggerRef, recordToArray } from '@flocon-trpg/utils';
+import { delay, loggerRef, recordToArray } from '@flocon-trpg/utils';
 import { ResultOf } from '@graphql-typed-document-node/core';
 import { diff, serializeUpOperation, toUpOperation } from '@kizahasi/ot-string';
 import { INestApplication } from '@nestjs/common';
@@ -780,11 +780,14 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
             }
         }
 
+        const subscriptions = clients.beginSubscriptions(roomId);
+        // Subscription が開始される前に他の Operation が実行されてしまい Subscription による値を逃すことがあるので、delay を入れている。
+        await delay(200);
         return {
             roomId,
             roomRevision,
             clients: clients.clients,
-            subscriptions: clients.beginSubscriptions(roomId),
+            subscriptions,
         };
     };
 
