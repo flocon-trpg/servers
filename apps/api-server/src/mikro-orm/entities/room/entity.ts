@@ -11,9 +11,8 @@ import {
     Ref,
     Unique,
 } from '@mikro-orm/core';
-import { v4 } from 'uuid';
+import { v7 } from 'uuid';
 import { EM } from '../../../types';
-import { easyFlake } from '../../../utils/easyFlake';
 import { Participant } from '../participant/entity';
 import {
     DicePieceLog as DicePieceLogEntity,
@@ -46,7 +45,7 @@ export class Room {
     }
 
     @PrimaryKey()
-    public id: string = easyFlake();
+    public id: string = v7();
 
     @Property({ version: true, index: true })
     public version: number = 1;
@@ -127,7 +126,7 @@ export class RoomOp {
     }
 
     @PrimaryKey()
-    public id: string = v4();
+    public id: string = v7();
 
     @Property({
         type: Date,

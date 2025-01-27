@@ -17,9 +17,8 @@ import {
     Unique,
     ref,
 } from '@mikro-orm/core';
-import { v4 } from 'uuid';
+import { v7 } from 'uuid';
 import { FileSourceType } from '../../../enums/FileSourceType';
-import { easyFlake } from '../../../utils/easyFlake';
 import { Room } from '../room/entity';
 import { User } from '../user/entity';
 
@@ -69,7 +68,7 @@ export class RoomPubCh {
     }
 
     @PrimaryKey()
-    public id: string = v4();
+    public id: string = v7();
 
     @Property({ version: true, index: true })
     public version: number = 1;
@@ -105,7 +104,7 @@ export class RoomPubMsg {
     }
 
     @PrimaryKey()
-    public id: string = easyFlake();
+    public id: string = v7();
 
     @Property({ version: true, index: true })
     public version: number = 1;
@@ -221,7 +220,7 @@ export class RoomPrvMsg {
     }
 
     @PrimaryKey()
-    public id: string = easyFlake();
+    public id: string = v7();
 
     @Property({ version: true, index: true })
     public version: number = 1;
@@ -343,7 +342,7 @@ export class DicePieceLog {
     }
 
     @PrimaryKey()
-    public id: string = easyFlake();
+    public id: string = v7();
 
     @Property({ type: Date, onCreate: () => new Date() })
     public createdAt: Date = new Date();
@@ -375,7 +374,7 @@ export class StringPieceLog {
     }
 
     @PrimaryKey()
-    public id: string = easyFlake();
+    public id: string = v7();
 
     @Property({ type: Date, onCreate: () => new Date() })
     public createdAt: Date = new Date();
@@ -408,7 +407,7 @@ export class RoomSe {
     }
 
     @PrimaryKey()
-    public id: string = easyFlake();
+    public id: string = v7();
 
     @Property({ type: Date, onCreate: () => new Date() })
     public createdAt: Date = new Date();

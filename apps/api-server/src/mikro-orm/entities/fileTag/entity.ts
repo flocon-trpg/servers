@@ -7,7 +7,7 @@ import {
     Property,
     Ref,
 } from '@mikro-orm/core';
-import { v4 } from 'uuid';
+import { v7 } from 'uuid';
 import { File } from '../file/entity';
 import { User } from '../user/entity';
 
@@ -18,7 +18,7 @@ export class FileTag {
     }
 
     @PrimaryKey()
-    public id: string = v4();
+    public id: string = v7();
 
     @Property()
     public name!: string;

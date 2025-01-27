@@ -22,6 +22,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ensureDir } from 'fs-extra';
 import sanitize from 'sanitize-filename';
 import sharp from 'sharp';
+import { v7 } from 'uuid';
 import { AccessControlAllowHeadersInterceptor } from '../access-control-allow-headers/access-control-allow-headers.interceptor';
 import { AccessControlAllowOriginInterceptor } from '../access-control-allow-origin/access-control-allow-origin.interceptor';
 import { Auth, ENTRY } from '../auth/auth.decorator';
@@ -32,7 +33,6 @@ import { User } from '../mikro-orm/entities/user/entity';
 import { MikroOrmService } from '../mikro-orm/mikro-orm.service';
 import { ServerConfigService } from '../server-config/server-config.service';
 import { UploaderEnabledPipe } from '../uploader-enabled/uploader-enabled.pipe';
-import { easyFlake } from '../utils/easyFlake';
 
 export const thumbsDir = 'thumbs';
 
@@ -164,7 +164,7 @@ export class ApiUploaderController implements OnModuleInit {
             throw new BadRequestException('File size quota exceeded');
         }
 
-        const fileId = easyFlake();
+        const fileId = v7();
         const filename = fileId + path.extname(file.originalname);
         // 例えば元のファイル名が FILENAME.png に対して FILENAME.webp というファイル名にするとファイル名が同じで拡張子が異なる2つのファイル名が衝突してしまうことがあるので、FILENAME.png.webp というファイル名になるようにしている
         const thumbFilename = `${filename}.webp`;
