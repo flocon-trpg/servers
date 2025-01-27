@@ -5,6 +5,7 @@ import {
     RoomEventDoc,
     RoomOperationFragmentDoc,
 } from '@flocon-trpg/graphql-documents';
+import { delay } from '@flocon-trpg/utils';
 import { ResultOf } from '@graphql-typed-document-node/core';
 import { EMPTY, Observable, Subject, Subscription, map, mergeAll, sampleTime } from 'rxjs';
 import { BehaviorEvent } from '../rxjs/behaviorEvent';
@@ -164,7 +165,8 @@ export class RoomStateManager<TGraphQLError> {
             subscriptionSubscription.unsubscribe();
         };
 
-        this.#executeGetRoomQuery({ client, userUid, clientId });
+        // HACK: Subscription の接続が確立する前に他の Operation (RoomのStateやメッセージの全取得など)を行ってしまうと Subscription による変更イベントをいくつか逃すおそれがあるため、接続が確立する前に少し待っている。Subscription の接続が確立されたことを検知する方法がおそらくないので苦肉の策。「API サーバーに ping を送り、Subscription で pong が返ってくるようにしてそれを確認してから他の Operation を行う」などの解決方法は考えられるが、ロジックが複雑化してコードの管理が困難になるおそれがあるため現状はこの方法を採用している。ただし余裕ができたら対処したい。
+        void delay(500).then(() => this.#executeGetRoomQuery({ client, userUid, clientId }));
     }
 
     #setState(
