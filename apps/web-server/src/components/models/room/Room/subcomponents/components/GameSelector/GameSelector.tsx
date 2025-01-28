@@ -1,13 +1,11 @@
 import * as Icons from '@ant-design/icons';
-import {
-    GetAvailableGameSystemsDocument,
-    GetDiceHelpMessagesDocument,
-} from '@flocon-trpg/typed-document-node';
 import { Button, Popover, Select } from 'antd';
 import classNames from 'classnames';
 import { Draft } from 'immer';
 import React from 'react';
 import { useQuery } from 'urql';
+import { GetAvailableGameSystemsDoc } from '../../../../../../../graphql/GetAvailableGameSystemsDoc';
+import { GetDiceHelpMessagesDoc } from '../../../../../../../graphql/GetDiceHelpMessagesDoc';
 import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { InputDescription } from '@/components/ui/InputDescription/InputDescription';
@@ -21,8 +19,8 @@ type HelpMessageProps = {
 
 const HelpMessage = ({ gameSystemId }: HelpMessageProps) => {
     const [message] = useQuery({
-        query: GetDiceHelpMessagesDocument,
-        variables: { id: gameSystemId },
+        query: GetDiceHelpMessagesDoc,
+        variables: { gameSystemId },
     });
     if (message.error != null) {
         return <div>取得中にエラーが発生しました。</div>;
@@ -62,7 +60,7 @@ export const GameSelector: React.FC<Props> = ({
 }: Props) => {
     const addRoomNotification = useAddNotification();
 
-    const [availableGameSystems] = useQuery({ query: GetAvailableGameSystemsDocument });
+    const [availableGameSystems] = useQuery({ query: GetAvailableGameSystemsDoc });
     const sortedAvailableGameSystems = React.useMemo(
         () =>
             [...(availableGameSystems.data?.result.value ?? [])]

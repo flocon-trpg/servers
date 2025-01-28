@@ -1,19 +1,12 @@
 import {
-    GetMessagesQuery,
-    GetMessagesQueryVariables,
-    GetRoomConnectionsQuery,
-    GetRoomConnectionsQueryVariables,
-    GetRoomQuery,
-    GetRoomQueryVariables,
-    OperateMutation,
-    OperateMutationVariables,
-    RoomEventSubscription,
-    RoomEventSubscriptionVariables,
-    RoomOperationInput,
-    UpdateWritingMessageStatusMutation,
-    UpdateWritingMessageStatusMutationVariables,
-    WritingMessageStatusInputType,
-} from '@flocon-trpg/typed-document-node';
+    GetMessagesDoc,
+    GetRoomConnectionsDoc,
+    GetRoomDoc,
+    OperateRoomDoc,
+    RoomEventDoc,
+    UpdateWritingMessageStatusDoc,
+} from '@flocon-trpg/graphql-documents';
+import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Result } from '@kizahasi/result';
 import { EMPTY, Observable, catchError, mergeMap, of, shareReplay } from 'rxjs';
 import { BehaviorEvent } from '../rxjs/behaviorEvent';
@@ -28,28 +21,28 @@ import { ReadonlyBehaviorEvent } from '../rxjs/readonlyBehaviorEvent';
  */
 export type GraphQLClient<TGraphQLError> = {
     getMessagesQuery: (
-        variables: GetMessagesQueryVariables,
-    ) => Promise<Result<GetMessagesQuery, TGraphQLError>>;
+        variables: VariablesOf<typeof GetMessagesDoc>,
+    ) => Promise<Result<ResultOf<typeof GetMessagesDoc>, TGraphQLError>>;
 
     getRoomConnectionsQuery: (
-        variables: GetRoomConnectionsQueryVariables,
-    ) => Promise<Result<GetRoomConnectionsQuery, TGraphQLError>>;
+        variables: VariablesOf<typeof GetRoomConnectionsDoc>,
+    ) => Promise<Result<ResultOf<typeof GetRoomConnectionsDoc>, TGraphQLError>>;
 
     getRoomQuery: (
-        variables: GetRoomQueryVariables,
-    ) => Promise<Result<GetRoomQuery, TGraphQLError>>;
+        variables: VariablesOf<typeof GetRoomDoc>,
+    ) => Promise<Result<ResultOf<typeof GetRoomDoc>, TGraphQLError>>;
 
-    operateMutation: (
-        variables: OperateMutationVariables,
-    ) => Promise<Result<OperateMutation, TGraphQLError>>;
+    operateRoomMutation: (
+        variables: VariablesOf<typeof OperateRoomDoc>,
+    ) => Promise<Result<ResultOf<typeof OperateRoomDoc>, TGraphQLError>>;
 
     roomEventSubscription: (
-        variables: RoomEventSubscriptionVariables,
-    ) => Observable<Result<RoomEventSubscription, TGraphQLError>>;
+        variables: VariablesOf<typeof RoomEventDoc>,
+    ) => Observable<Result<ResultOf<typeof RoomEventDoc>, TGraphQLError>>;
 
     updateWritingMessagesStatusMutation: (
-        variables: UpdateWritingMessageStatusMutationVariables,
-    ) => Promise<Result<UpdateWritingMessageStatusMutation, TGraphQLError>>;
+        variables: VariablesOf<typeof UpdateWritingMessageStatusDoc>,
+    ) => Promise<Result<ResultOf<typeof UpdateWritingMessageStatusDoc>, TGraphQLError>>;
 };
 
 const fetching = 'fetching';
@@ -135,7 +128,7 @@ export class GraphQLClientWithStatus<TGraphQLError> {
         private readonly source: GraphQLClient<TGraphQLError>,
         private readonly roomId: string,
     ) {
-        this.#roomEventSubscription = this.source.roomEventSubscription({ id: roomId }).pipe(
+        this.#roomEventSubscription = this.source.roomEventSubscription({ roomId }).pipe(
             catchError(e => {
                 this.#e.next(prevValue => ({
                     ...prevValue,
@@ -219,22 +212,29 @@ export class GraphQLClientWithStatus<TGraphQLError> {
     }
 
     getRoomQuery() {
-        return this.#catchPromiseError(this.source.getRoomQuery({ id: this.roomId }), GetRoomQuery);
+        return this.#catchPromiseError(
+            this.source.getRoomQuery({ roomId: this.roomId }),
+            GetRoomQuery,
+        );
     }
 
-    operateMutation(variables: {
-        revisionFrom: number;
-        operation: RoomOperationInput;
-        requestId: string;
-    }) {
-        return this.source.operateMutation({ ...variables, id: this.roomId });
+    operateMutation(
+        variables: Pick<
+            VariablesOf<typeof OperateRoomDoc>,
+            'revisionFrom' | 'operation' | 'requestId'
+        >,
+    ) {
+        return this.source.operateRoomMutation({ ...variables, roomId: this.roomId });
     }
 
+    // Urql などではおそらく Subscription が開始したかどうかを検知できないため、Subscription の接続が確立する前に他の Operation を行い、Subscription の値を逃してしまう可能性があるので注意。現時点では Subscription を要求してから少し待って他の Operation を実行してもらうくらいしか対策が思いつかない。
     get roomEventSubscription() {
         return this.#roomEventSubscription;
     }
 
-    updateWritingMessagesStatusMutation(variables: { newStatus: WritingMessageStatusInputType }) {
+    updateWritingMessagesStatusMutation(
+        variables: Pick<VariablesOf<typeof UpdateWritingMessageStatusDoc>, 'newStatus'>,
+    ) {
         return this.source.updateWritingMessagesStatusMutation({
             ...variables,
             roomId: this.roomId,

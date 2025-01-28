@@ -11,10 +11,11 @@ import {
     roomTemplate,
 } from '@flocon-trpg/core';
 import {
-    RoomMessages,
-    RoomPrivateMessage,
-    RoomPublicMessage,
-} from '@flocon-trpg/typed-document-node';
+    GetMessagesDoc,
+    RoomPrivateMessageFragmentDoc,
+    RoomPublicMessageFragmentDoc,
+} from '@flocon-trpg/graphql-documents';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import Color from 'color';
 import ColorName from 'color-name';
 import { Auth, Config, IdTokenResult, Unsubscribe, User } from 'firebase/auth';
@@ -22,6 +23,13 @@ import moment from 'moment';
 import { AnyVariables, Client, Operation, createClient } from 'urql';
 import { UserConfig, defaultUserConfig } from '../atoms/userConfigAtom/types';
 import { WebConfig } from '../configType';
+
+type RoomPublicMessage = ResultOf<typeof RoomPublicMessageFragmentDoc>;
+type RoomPrivateMessage = ResultOf<typeof RoomPrivateMessageFragmentDoc>;
+type RoomMessages = Omit<
+    Extract<ResultOf<typeof GetMessagesDoc>['result'], { __typename: 'RoomMessages' }>,
+    '__typename'
+>;
 
 type State = S<typeof roomTemplate>;
 type BoardState = S<typeof boardTemplate>;

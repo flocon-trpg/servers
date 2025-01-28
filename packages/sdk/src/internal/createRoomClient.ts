@@ -1,5 +1,5 @@
 import { simpleId } from '@flocon-trpg/core';
-import { WritingMessageStatusInputType } from '@flocon-trpg/typed-document-node';
+import { WritingMessageStatusInputType } from '@flocon-trpg/graphql-documents';
 import { filter, mergeMap, take } from 'rxjs';
 import { GraphQLClient, GraphQLClientWithStatus } from './roomClient/graphqlClient';
 import { subscribeRoomConnections } from './roomClient/roomConnections';
@@ -24,7 +24,7 @@ export const createRoomClient = <TCustomMessage = any, TGraphQLError = any>({
     const roomStateManager = new RoomStateManager({
         client,
         subscription: client.roomEventSubscription.pipe(
-            mergeMap(e => (e.roomEvent == null ? [] : [e.roomEvent])),
+            mergeMap(e => (e.result == null ? [] : [e.result])),
         ),
         clientId,
         userUid,
@@ -33,22 +33,20 @@ export const createRoomClient = <TCustomMessage = any, TGraphQLError = any>({
     const createMessagesResult = createRoomMessagesClient<TCustomMessage, TGraphQLError>({
         client,
         roomEventSubscription: client.roomEventSubscription.pipe(
-            mergeMap(e =>
-                e?.roomEvent?.roomMessageEvent == null ? [] : [e.roomEvent.roomMessageEvent],
-            ),
+            mergeMap(e => (e?.result?.roomMessageEvent == null ? [] : [e.result.roomMessageEvent])),
         ),
     });
 
     const writingMessageStatusResult = subscribeWritingMessageStatus({
         subscription: client.roomEventSubscription.pipe(
-            mergeMap(e => (e.roomEvent == null ? [] : [e.roomEvent])),
+            mergeMap(e => (e.result == null ? [] : [e.result])),
         ),
     });
 
     const subscribeRoomConnectionsResult = subscribeRoomConnections({
         client,
         subscription: client.roomEventSubscription.pipe(
-            mergeMap(e => (e.roomEvent == null ? [] : [e.roomEvent])),
+            mergeMap(e => (e.result == null ? [] : [e.result])),
         ),
     });
 

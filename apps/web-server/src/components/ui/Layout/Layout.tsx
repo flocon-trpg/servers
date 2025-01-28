@@ -1,11 +1,4 @@
 import * as Icon from '@ant-design/icons';
-import {
-    EntryToServerDocument,
-    EntryToServerResultType,
-    IsEntryDocument,
-    IsEntryQuery,
-    IsEntryQueryVariables,
-} from '@flocon-trpg/typed-document-node';
 import { Link, useNavigate } from '@tanstack/react-router';
 import {
     Alert,
@@ -21,8 +14,10 @@ import {
     Spin,
 } from 'antd';
 import { useAtomValue } from 'jotai';
-import React, { Children, PropsWithChildren } from 'react';
+import React, { PropsWithChildren } from 'react';
 import { useClient, useMutation } from 'urql';
+import { EntryToServerDoc } from '../../../graphql/EntryToServerDoc';
+import { EntryWithPasswordResultType } from '../../../graphql-codegen/graphql';
 import { AwaitableButton } from '../AwaitableButton/AwaitableButton';
 import { Center } from '../Center/Center';
 import { LoadingResult } from '../LoadingResult/LoadingResult';
@@ -40,7 +35,7 @@ type EntryFormComponentProps = {
 };
 
 const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormComponentProps) => {
-    const [entryToServerResult, entryToServer] = useMutation(EntryToServerDocument);
+    const [entryToServerResult, entryToServer] = useMutation(EntryToServerDoc);
     const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
     const [isFinishedSuccessfully, setIsFinishedSuccessfully] = React.useState<boolean>(false);
 
@@ -61,7 +56,7 @@ const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormC
                     if (resultType == null) {
                         return;
                     }
-                    if (resultType === EntryToServerResultType.WrongPassword) {
+                    if (resultType === EntryWithPasswordResultType.WrongPassword) {
                         setIsSubmitting(false);
                         return;
                     }
@@ -89,7 +84,7 @@ const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormC
                 </Button>
                 {isSubmitting ? <Spin /> : null}
                 {entryToServerResult?.data?.result.type ===
-                EntryToServerResultType.WrongPassword ? (
+                EntryWithPasswordResultType.WrongPassword ? (
                     <Alert message="wrong password" type="error" showIcon />
                 ) : null}
                 {entryToServerResult?.error == null ? null : (
@@ -145,8 +140,8 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
             }
             let unsubscribed = false;
             urqlClient
-                .query<IsEntryQuery, IsEntryQueryVariables>(
-                    IsEntryDocument,
+                .mutation(
+                    EntryToServerDoc,
                     {},
                     {
                         requestPolicy: 'network-only',
@@ -157,7 +152,12 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                     if (unsubscribed || queryResult.data == null) {
                         return;
                     }
-                    setIsEntry(queryResult.data.result);
+                    const challengeResult = queryResult.data.result.type;
+                    const successChallengeList: EntryWithPasswordResultType[] = [
+                        EntryWithPasswordResultType.AlreadyEntried,
+                        EntryWithPasswordResultType.Success,
+                    ];
+                    setIsEntry(successChallengeList.includes(challengeResult));
                 })
                 .catch(e => {
                     if (e instanceof Error) {

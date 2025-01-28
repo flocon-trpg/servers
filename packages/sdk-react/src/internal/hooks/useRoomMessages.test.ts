@@ -1,8 +1,11 @@
+import { RoomPublicMessageFragmentDoc } from '@flocon-trpg/graphql-documents';
 import { createTestRoomClient } from '@flocon-trpg/sdk';
-import { RoomPublicMessage } from '@flocon-trpg/typed-document-node';
 import { Message } from '@flocon-trpg/web-server-utils';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import { act, renderHook } from '@testing-library/react';
 import { useRoomMessages } from './useRoomMessages';
+
+type RoomPublicMessage = ResultOf<typeof RoomPublicMessageFragmentDoc>;
 
 describe('useRoomMessages', () => {
     it('tests init messages', () => {

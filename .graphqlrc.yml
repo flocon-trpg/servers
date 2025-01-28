@@ -1,0 +1,3 @@
+# vscode の "GraphQL: Language Feature Support" という extension のための設定ファイル
+schema: './apps/api-server/schema.gql'
+documents: 'src/**/*.{graphql,ts,tsx}'

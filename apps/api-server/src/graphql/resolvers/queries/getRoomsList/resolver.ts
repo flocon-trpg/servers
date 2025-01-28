@@ -1,22 +1,11 @@
-import {
-    Authorized,
-    Ctx,
-    Field,
-    ObjectType,
-    Query,
-    Resolver,
-    UseMiddleware,
-    createUnionType,
-} from 'type-graphql';
-import * as Room$MikroORM from '../../../../entities/room/entity';
+import { Field, ObjectType, Query, Resolver, createUnionType } from '@nestjs/graphql';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import * as RoomAsListItemGlobal from '../../../../entities-graphql/roomAsListItem';
 import { GetRoomFailureType } from '../../../../enums/GetRoomFailureType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import * as Room$MikroORM from '../../../../mikro-orm/entities/room/entity';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { RoomAsListItem } from '../../../objects/room';
-import { ensureAuthorizedUser } from '../../utils/utils';
 
 @ObjectType()
 class GetRoomsListSuccessResult {
@@ -46,12 +35,13 @@ const GetRoomsListResult = createUnionType({
 
 @Resolver()
 export class GetRoomsListResolver {
+    public constructor(private readonly mikroOrmService: MikroOrmService) {}
+
     @Query(() => GetRoomsListResult)
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
-    public async getRoomsList(@Ctx() context: ResolverContext): Promise<typeof GetRoomsListResult> {
-        const em = context.em;
-        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+    @Auth(ENTRY)
+    public async getRoomsList(@AuthData() auth: AuthDataType): Promise<typeof GetRoomsListResult> {
+        const em = await this.mikroOrmService.forkEmForMain();
+        const authorizedUserUid = auth.user.userUid;
 
         // TODO: すべてを取得しているので重い
         const roomModels = await em.find(Room$MikroORM.Room, {});

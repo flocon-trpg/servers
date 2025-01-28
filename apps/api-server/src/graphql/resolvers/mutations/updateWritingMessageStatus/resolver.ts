@@ -1,22 +1,12 @@
-import {
-    Args,
-    ArgsType,
-    Authorized,
-    Ctx,
-    Field,
-    Mutation,
-    PubSub,
-    PubSubEngine,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
+import { Args, ArgsType, Field, Mutation, Resolver } from '@nestjs/graphql';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
+import { ConnectionManagerService } from '../../../../connection-manager/connection-manager.service';
 import { WritingMessageStatusInputType } from '../../../../enums/WritingMessageStatusInputType';
 import { WritingMessageStatusType } from '../../../../enums/WritingMessageStatusType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { PubSubService } from '../../../../pub-sub/pub-sub.service';
 import { all } from '../../types';
-import { ensureAuthorizedUser, publishRoomEvent } from '../../utils/utils';
 
 @ArgsType()
 class UpdateWritingMessageStateArgs {
@@ -29,18 +19,21 @@ class UpdateWritingMessageStateArgs {
 
 @Resolver()
 export class UpdateWritingMessageStatusResolver {
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly pubSubService: PubSubService,
+        private readonly connectionManagerService: ConnectionManagerService,
+    ) {}
+
     @Mutation(() => Boolean, {
         description:
             'この Mutation を直接実行することは非推奨です。代わりに @flocon-trpg/sdk を用いてください。',
     })
-    @Authorized(ENTRY)
-    @UseMiddleware(RateLimitMiddleware(2))
+    @Auth(ENTRY)
     public async updateWritingMessageStatus(
         @Args() args: UpdateWritingMessageStateArgs,
-        @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine,
+        @AuthData() auth: AuthDataType,
     ): Promise<boolean> {
-        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
         let status: WritingMessageStatusType;
         switch (args.newStatus) {
             case WritingMessageStatusInputType.Cleared:
@@ -54,16 +47,16 @@ export class UpdateWritingMessageStatusResolver {
                 break;
         }
 
-        const returns = await context.connectionManager.onWritingMessageStatusUpdate({
+        const returns = await this.connectionManagerService.value.onWritingMessageStatusUpdate({
             roomId: args.roomId,
-            userUid: authorizedUserUid,
+            userUid: auth.user.userUid,
             status,
         });
         if (returns != null) {
-            await publishRoomEvent(pubSub, {
+            this.pubSubService.roomEvent.next({
                 type: 'writingMessageStatusUpdatePayload',
                 roomId: args.roomId,
-                userUid: authorizedUserUid,
+                userUid: auth.user.userUid,
                 status: returns,
                 updatedAt: new Date().getTime(),
 

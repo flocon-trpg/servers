@@ -1,4 +1,5 @@
-import { GetMessagesQuery, GetMessagesQueryVariables, GetRoomConnectionsQuery, GetRoomConnectionsQueryVariables, GetRoomQuery, GetRoomQueryVariables, OperateMutation, OperateMutationVariables, RoomEventSubscription, RoomEventSubscriptionVariables, RoomOperationInput, UpdateWritingMessageStatusMutation, UpdateWritingMessageStatusMutationVariables, WritingMessageStatusInputType } from '@flocon-trpg/typed-document-node';
+import { GetMessagesDoc, GetRoomConnectionsDoc, GetRoomDoc, OperateRoomDoc, RoomEventDoc, UpdateWritingMessageStatusDoc } from '@flocon-trpg/graphql-documents';
+import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Result } from '@kizahasi/result';
 import { Observable } from 'rxjs';
 import { ReadonlyBehaviorEvent } from '../rxjs/readonlyBehaviorEvent';
@@ -10,12 +11,12 @@ import { ReadonlyBehaviorEvent } from '../rxjs/readonlyBehaviorEvent';
  * urql を使わない場合は、自作する必要があります。エラーは、Promise の reject や Observable の error ではなく、Promise の resolve や Observable の next から Result.error を返すことで、型を any にせずにエラーを渡すことができます。
  */
 export type GraphQLClient<TGraphQLError> = {
-    getMessagesQuery: (variables: GetMessagesQueryVariables) => Promise<Result<GetMessagesQuery, TGraphQLError>>;
-    getRoomConnectionsQuery: (variables: GetRoomConnectionsQueryVariables) => Promise<Result<GetRoomConnectionsQuery, TGraphQLError>>;
-    getRoomQuery: (variables: GetRoomQueryVariables) => Promise<Result<GetRoomQuery, TGraphQLError>>;
-    operateMutation: (variables: OperateMutationVariables) => Promise<Result<OperateMutation, TGraphQLError>>;
-    roomEventSubscription: (variables: RoomEventSubscriptionVariables) => Observable<Result<RoomEventSubscription, TGraphQLError>>;
-    updateWritingMessagesStatusMutation: (variables: UpdateWritingMessageStatusMutationVariables) => Promise<Result<UpdateWritingMessageStatusMutation, TGraphQLError>>;
+    getMessagesQuery: (variables: VariablesOf<typeof GetMessagesDoc>) => Promise<Result<ResultOf<typeof GetMessagesDoc>, TGraphQLError>>;
+    getRoomConnectionsQuery: (variables: VariablesOf<typeof GetRoomConnectionsDoc>) => Promise<Result<ResultOf<typeof GetRoomConnectionsDoc>, TGraphQLError>>;
+    getRoomQuery: (variables: VariablesOf<typeof GetRoomDoc>) => Promise<Result<ResultOf<typeof GetRoomDoc>, TGraphQLError>>;
+    operateRoomMutation: (variables: VariablesOf<typeof OperateRoomDoc>) => Promise<Result<ResultOf<typeof OperateRoomDoc>, TGraphQLError>>;
+    roomEventSubscription: (variables: VariablesOf<typeof RoomEventDoc>) => Observable<Result<ResultOf<typeof RoomEventDoc>, TGraphQLError>>;
+    updateWritingMessagesStatusMutation: (variables: VariablesOf<typeof UpdateWritingMessageStatusDoc>) => Promise<Result<ResultOf<typeof UpdateWritingMessageStatusDoc>, TGraphQLError>>;
 };
 declare const fetching = "fetching";
 declare const success = "success";
@@ -72,18 +73,12 @@ export declare class GraphQLClientWithStatus<TGraphQLError> {
     private readonly source;
     private readonly roomId;
     constructor(source: GraphQLClient<TGraphQLError>, roomId: string);
-    getMessagesQuery(): Promise<Result<GetMessagesQuery, PromiseError<TGraphQLError>>>;
-    getRoomConnectionsQuery(): Promise<Result<GetRoomConnectionsQuery, PromiseError<TGraphQLError>>>;
-    getRoomQuery(): Promise<Result<GetRoomQuery, PromiseError<TGraphQLError>>>;
-    operateMutation(variables: {
-        revisionFrom: number;
-        operation: RoomOperationInput;
-        requestId: string;
-    }): Promise<Result<OperateMutation, TGraphQLError>>;
-    get roomEventSubscription(): Observable<RoomEventSubscription>;
-    updateWritingMessagesStatusMutation(variables: {
-        newStatus: WritingMessageStatusInputType;
-    }): Promise<Result<UpdateWritingMessageStatusMutation, TGraphQLError>>;
+    getMessagesQuery(): Promise<Result<import("@flocon-trpg/graphql-documents/dist/cjs/graphql-codegen/graphql").GetMessagesQuery, PromiseError<TGraphQLError>>>;
+    getRoomConnectionsQuery(): Promise<Result<import("@flocon-trpg/graphql-documents/dist/cjs/graphql-codegen/graphql").GetRoomConnectionsQuery, PromiseError<TGraphQLError>>>;
+    getRoomQuery(): Promise<Result<import("@flocon-trpg/graphql-documents/dist/cjs/graphql-codegen/graphql").GetRoomQuery, PromiseError<TGraphQLError>>>;
+    operateMutation(variables: Pick<VariablesOf<typeof OperateRoomDoc>, 'revisionFrom' | 'operation' | 'requestId'>): Promise<Result<import("@flocon-trpg/graphql-documents/dist/cjs/graphql-codegen/graphql").OperateRoomMutation, TGraphQLError>>;
+    get roomEventSubscription(): Observable<import("@flocon-trpg/graphql-documents/dist/cjs/graphql-codegen/graphql").RoomEventSubscription>;
+    updateWritingMessagesStatusMutation(variables: Pick<VariablesOf<typeof UpdateWritingMessageStatusDoc>, 'newStatus'>): Promise<Result<import("@flocon-trpg/graphql-documents/dist/cjs/graphql-codegen/graphql").UpdateWritingMessageStatusMutation, TGraphQLError>>;
     get status(): ReadonlyBehaviorEvent<GraphQLStatus<TGraphQLError>>;
 }
 export {};

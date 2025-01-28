@@ -1,31 +1,22 @@
 {
     "compilerOptions": {
-        // Visit https://aka.ms/tsconfig.json to read more about this file
-
-        // Node 14 で推奨される設定を使用している
-        // https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping#node-14
-
-        "resolveJsonModule": true,
-        "target": "ES2020",
-        "module": "ES2015",
-        "sourceMap": true,
-        // https://typegraphql.com/docs/installation.html#packages-installation
-        "lib": ["es2020", "esnext.asynciterable"],
-        "moduleResolution": "node",
+        "module": "commonjs",
+        "declaration": true,
         "removeComments": true,
-        "strict": true,
-        "esModuleInterop": true,
-        "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-        "skipLibCheck": true,
+        "experimentalDecorators": true,
+        "allowSyntheticDefaultImports": true,
+        "target": "ES2021",
+        "sourceMap": true,
+        "outDir": "./dist",
+        "baseUrl": "./",
+        "incremental": true,
         "forceConsistentCasingInFileNames": true,
-        "noUncheckedIndexedAccess": true,
+        "skipLibCheck": true,
 
-        "baseUrl": ".",
-        "paths": {
-            "@/*": ["./src/*"]
-        }
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
+        "esModuleInterop": true
     },
-    "exclude": ["node_modules"],
-    "include": ["src/**/*.ts", "test/**/*.ts"]
+    "include": ["src/**/*.ts", "codegen.ts", "jest.config.ts"]
 }

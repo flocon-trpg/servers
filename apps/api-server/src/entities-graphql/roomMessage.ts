@@ -1,11 +1,11 @@
 import { decodeDicePiece, decodeStringPiece } from '@flocon-trpg/core';
-import {
-    DicePieceLog as DicePieceLog$MikroORM,
-    StringPieceLog as StringPieceLog$MikroORM,
-} from '../entities/roomMessage/entity';
 
 import { PieceLogType as PieceLogTypeEnum } from '../enums/PieceLogType';
 import { PieceLog, PieceLogType } from '../graphql/objects/roomMessage';
+import {
+    DicePieceLog as DicePieceLog$MikroORM,
+    StringPieceLog as StringPieceLog$MikroORM,
+} from '../mikro-orm/entities/roomMessage/entity';
 
 export namespace DicePieceLog {
     export namespace MikroORM {

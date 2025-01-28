@@ -1,4 +1,4 @@
-import { Field, InputType, ObjectType } from 'type-graphql';
+import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { PrereleaseType } from '../../enums/PrereleaseType';
 
 @ObjectType()

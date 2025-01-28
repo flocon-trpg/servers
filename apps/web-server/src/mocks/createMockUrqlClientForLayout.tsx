@@ -1,7 +1,8 @@
-import * as Doc from '@flocon-trpg/typed-document-node';
 import { loggerRef } from '@flocon-trpg/utils';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import { Client } from 'urql';
 import { fromValue } from 'wonka';
+import { GetMyRolesDoc } from '../graphql/GetMyRolesDoc';
 import { withPromise } from './withPromise';
 import { createDummyUrqlOperation, createMockUrqlClient } from '.';
 
@@ -9,8 +10,8 @@ export const createMockUrqlClientForLayout = (): Client => {
     return createMockUrqlClient({
         mockQuery: query => {
             switch (query.query) {
-                case Doc.GetMyRolesDocument: {
-                    const res: Doc.GetMyRolesQuery = {
+                case GetMyRolesDoc: {
+                    const res: ResultOf<typeof GetMyRolesDoc> = {
                         __typename: 'Query',
                         result: {
                             __typename: 'Roles',

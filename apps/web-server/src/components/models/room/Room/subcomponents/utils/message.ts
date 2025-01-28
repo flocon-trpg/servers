@@ -1,4 +1,9 @@
-import { RoomPrivateMessage, RoomPublicMessage } from '@flocon-trpg/typed-document-node';
+import { RoomPrivateMessageFragmentDoc } from '@flocon-trpg/graphql-documents';
+import { RoomPublicMessageFragmentDoc } from '@flocon-trpg/graphql-documents/dist/cjs/graphql-codegen/graphql';
+import { ResultOf } from '@graphql-typed-document-node/core';
+
+type RoomPublicMessage = ResultOf<typeof RoomPublicMessageFragmentDoc>;
+type RoomPrivateMessage = ResultOf<typeof RoomPrivateMessageFragmentDoc>;
 
 export const isDeleted = (
     message: Omit<RoomPublicMessage | RoomPrivateMessage, 'createdAt'>,

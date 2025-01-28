@@ -1,11 +1,6 @@
 import * as Icons from '@ant-design/icons';
 import { Master, Player, State, getOpenRollCall, roomTemplate } from '@flocon-trpg/core';
-import {
-    AnswerRollCallDocument,
-    CloseRollCallDocument,
-    FileSourceType,
-    PerformRollCallDocument,
-} from '@flocon-trpg/typed-document-node';
+import { FileSourceType } from '@flocon-trpg/graphql-documents';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { Alert, Button, Modal, Tooltip } from 'antd';
 import classNames from 'classnames';
@@ -14,6 +9,9 @@ import { maxBy, sortBy } from 'es-toolkit';
 import React from 'react';
 import { useInterval } from 'react-use';
 import { useMutation } from 'urql';
+import { AnswerRollCallDoc } from '../../../../../../../graphql/AnswerRollCallDoc';
+import { CloseRollCallDoc } from '../../../../../../../graphql/CloseRollCallDoc';
+import { PerformRollCallDoc } from '../../../../../../../graphql/PerformRollCallDoc';
 import { useJoinParticipants } from '../../hooks/useJoinParticipants';
 import { useRoomId } from '../../hooks/useRoomId';
 import { prettyElapsed } from './prettyElapsed';
@@ -68,7 +66,7 @@ const RollCallResult: React.FC<RollCallResultProps> = ({
 }) => {
     const myUserUid = useMyUserUid();
     const participants = useJoinParticipants(rollCall.participants);
-    const [answerRollCallResult, answerRollCall] = useMutation(AnswerRollCallDocument);
+    const [answerRollCallResult, answerRollCall] = useMutation(AnswerRollCallDoc);
     const roomId = useRoomId();
     const failureType = answerRollCallResult.data?.result.failureType;
 
@@ -192,7 +190,7 @@ const HasOpenRollCall: React.FC<{
     mockDate?: () => Date;
 }> = ({ rollCall, rollCallId, mockDate }) => {
     const roomId = useRoomId();
-    const [closeRollCallResult, closeRollCall] = useMutation(CloseRollCallDocument);
+    const [closeRollCallResult, closeRollCall] = useMutation(CloseRollCallDoc);
     const disableClose = closeRollCallResult.fetching;
     const [showModal, setShowModal] = React.useState(false);
     const failureType = closeRollCallResult.data?.result.failureType;
@@ -249,7 +247,7 @@ const HasOpenRollCall: React.FC<{
 
 const NoOpenRollCall: React.FC<{ mockDate?: () => Date }> = ({ mockDate }) => {
     const roomId = useRoomId();
-    const [performRollCallResult, performRollCall] = useMutation(PerformRollCallDocument);
+    const [performRollCallResult, performRollCall] = useMutation(PerformRollCallDoc);
     const rollCalls = useRoomStateValueSelector(state => state.rollCalls);
     const latestRollCall = React.useMemo(() => {
         return maxBy(recordToArray(rollCalls ?? {}), r => r.value.createdAt);
