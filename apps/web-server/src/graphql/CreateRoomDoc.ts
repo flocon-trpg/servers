@@ -5,7 +5,7 @@ export const CreateRoomDoc = graphql(`
         result: createRoom(input: $input) {
             __typename
             ... on CreateRoomSuccessResult {
-                id
+                roomId
                 room {
                     createdAt
                     createdBy

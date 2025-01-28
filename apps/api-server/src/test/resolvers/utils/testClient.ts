@@ -8,13 +8,7 @@ import {
 import { VariablesOf } from '@graphql-typed-document-node/core';
 import { createClient as createWsClient } from 'graphql-ws';
 import ws from 'isomorphic-ws';
-import {
-    TypedDocumentNode,
-    cacheExchange,
-    createClient,
-    fetchExchange,
-    subscriptionExchange,
-} from 'urql';
+import { cacheExchange, createClient, fetchExchange, subscriptionExchange } from 'urql';
 import { graphql } from '../../../graphql-codegen';
 import { Resources } from './resources';
 import { TestRoomEventSubscription } from './subscription';
@@ -126,8 +120,8 @@ export class TestClient {
     }
 
     public static deleteRoomMutationDoc = graphql(`
-        mutation DeleteRoom($id: String!) {
-            result: deleteRoom(id: $id) {
+        mutation DeleteRoom($roomId: String!) {
+            result: deleteRoom(roomId: $roomId) {
                 failureType
             }
         }
@@ -141,8 +135,8 @@ export class TestClient {
     }
 
     public static deleteRoomAsAdminMutationDoc = graphql(`
-        mutation DeleteRoomAsAdmin($id: String!) {
-            result: deleteRoomAsAdmin(id: $id) {
+        mutation DeleteRoomAsAdmin($roomId: String!) {
+            result: deleteRoomAsAdmin(roomId: $roomId) {
                 failureType
             }
         }
@@ -225,8 +219,8 @@ export class TestClient {
     }
 
     public static getRoomQueryDoc = graphql(`
-        query GetRoom($id: String!) {
-            result: getRoom(id: $id) {
+        query GetRoom($roomId: String!) {
+            result: getRoom(roomId: $roomId) {
                 __typename
                 ... on GetJoinedRoomResult {
                     role
@@ -244,7 +238,7 @@ export class TestClient {
                     roomAsListItem {
                         createdAt
                         createdBy
-                        id
+                        roomId
                         isBookmarked
                         name
                         requiresPlayerPassword
@@ -275,7 +269,7 @@ export class TestClient {
                     rooms {
                         createdAt
                         createdBy
-                        id
+                        roomId
                         isBookmarked
                         name
                         requiresPlayerPassword
@@ -317,7 +311,7 @@ export class TestClient {
                     failureType
                 }
                 ... on CreateRoomSuccessResult {
-                    id
+                    roomId
                     room {
                         createdAt
                         createdBy
@@ -372,8 +366,8 @@ export class TestClient {
     }
 
     public static joinRoomAsPlayerMutationDoc = graphql(`
-        mutation JoinRoomAsPlayer($id: String!, $name: String!, $password: String) {
-            result: joinRoomAsPlayer(id: $id, name: $name, password: $password) {
+        mutation JoinRoomAsPlayer($roomId: String!, $name: String!, $password: String) {
+            result: joinRoomAsPlayer(roomId: $roomId, name: $name, password: $password) {
                 ... on JoinRoomFailureResult {
                     failureType
                 }
@@ -401,8 +395,8 @@ export class TestClient {
     }
 
     public static joinRoomAsSpectatorDoc = graphql(`
-        mutation JoinRoomAsSpectator($id: String!, $name: String!, $password: String) {
-            result: joinRoomAsSpectator(id: $id, name: $name, password: $password) {
+        mutation JoinRoomAsSpectator($roomId: String!, $name: String!, $password: String) {
+            result: joinRoomAsSpectator(roomId: $roomId, name: $name, password: $password) {
                 ... on JoinRoomFailureResult {
                     failureType
                 }
@@ -430,8 +424,8 @@ export class TestClient {
     }
 
     public static leaveRoomMutationDoc = graphql(`
-        mutation LeaveRoom($id: String!) {
-            result: leaveRoom(id: $id) {
+        mutation LeaveRoom($roomId: String!) {
+            result: leaveRoom(roomId: $roomId) {
                 failureType
             }
         }
@@ -523,7 +517,7 @@ export class TestClient {
     public roomEventSubscription({ roomId }: { roomId: string }) {
         return new TestRoomEventSubscription(
             this.#core.subscription(RoomEventDoc, {
-                id: roomId,
+                roomId,
             }),
         );
     }

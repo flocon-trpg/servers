@@ -39,7 +39,7 @@ const BookmarkButton: React.FC<{ data: Data }> = ({ data }) => {
             onChange={async checked => {
                 setLoading(true);
                 const updateBookmarkResult = await updateBookmark({
-                    roomId: data.id,
+                    roomId: data.roomId,
                     newValue: checked,
                 });
                 if (updateBookmarkResult.error != null) {
@@ -97,7 +97,7 @@ const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
                                 onClick: () => {
                                     modal.warning({
                                         onOk: async () => {
-                                            await deleteRoomAsAdmin({ id: roomId });
+                                            await deleteRoomAsAdmin({ roomId });
                                             getRooms();
                                         },
                                         okCancel: true,
@@ -211,7 +211,7 @@ const actionColumn = {
     title: 'Action',
     dataIndex: '',
     key: 'Action',
-    render: (_: unknown, record: Data) => <RoomButton roomId={record.id} />,
+    render: (_: unknown, record: Data) => <RoomButton roomId={record.roomId} />,
 };
 
 const columns = [

@@ -36,7 +36,7 @@ const error = 'error';
 export type SetAction<State> = State | ((prevState: State) => State);
 
 type NonJoinedRoom = {
-    id: string;
+    roomId: string;
     name: string;
     createdBy: string;
     requiresPlayerPassword: boolean;

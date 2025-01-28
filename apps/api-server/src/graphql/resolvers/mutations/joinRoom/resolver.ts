@@ -61,7 +61,7 @@ export const JoinRoomResult = createUnionType({
 @ArgsType()
 class JoinRoomArgs {
     @Field()
-    public id!: string;
+    public roomId!: string;
 
     @Field()
     public name!: string;
@@ -95,7 +95,7 @@ const joinRoomCoreWithoutLock = async ({
 }): Promise<{ result: typeof JoinRoomResult; payload: RoomEventPayload | undefined }> => {
     const result = await operateAsAdminAndFlush({
         em,
-        roomId: args.id,
+        roomId: args.roomId,
         roomHistCount: serverConfig.roomHistCount,
         operationType: 'state',
         operation: async (roomState, { room }) => {
@@ -153,7 +153,7 @@ const joinRoomCoreWithoutLock = async ({
 };
 
 const joinRoomCore = async (functionArgs: Parameters<typeof joinRoomCoreWithoutLock>[0]) => {
-    return await lockByRoomId(functionArgs.args.id, async () => {
+    return await lockByRoomId(functionArgs.args.roomId, async () => {
         return await joinRoomCoreWithoutLock(functionArgs);
     });
 };

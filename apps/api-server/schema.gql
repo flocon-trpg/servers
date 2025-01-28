@@ -72,8 +72,8 @@ input CreateRoomInput {
 union CreateRoomResult = CreateRoomFailureResult | CreateRoomSuccessResult
 
 type CreateRoomSuccessResult {
-  id: String!
   room: RoomGetState!
+  roomId: String!
 }
 
 enum DeleteMessageFailureType {
@@ -336,10 +336,10 @@ type Mutation {
   """since v0.7.8"""
   deleteFiles(filenames: [String!]!): [String!]!
   deleteMessage(messageId: String!, roomId: String!): DeleteMessageResult!
-  deleteRoom(id: String!): DeleteRoomResult!
+  deleteRoom(roomId: String!): DeleteRoomResult!
 
   """since v0.7.2"""
-  deleteRoomAsAdmin(id: String!): DeleteRoomAsAdminResult!
+  deleteRoomAsAdmin(roomId: String!): DeleteRoomAsAdminResult!
   editFileTags(input: EditFileTagsInput!): Boolean! @deprecated(reason: "Use screenname to group files by folders instead.")
   editMessage(messageId: String!, roomId: String!, text: String!): EditMessageResult!
 
@@ -347,13 +347,13 @@ type Mutation {
   エントリーを試みます。エントリーパスワードが設定されている場合は password を渡す必要があります。エントリーしているかどうかの確認にも用いることができ、その際は password は渡す必要はありません。
   """
   entryToServer(password: String): EntryToServerResult!
-  joinRoomAsPlayer(id: String!, name: String!, password: String): JoinRoomResult!
-  joinRoomAsSpectator(id: String!, name: String!, password: String): JoinRoomResult!
-  leaveRoom(id: String!): LeaveRoomResult!
+  joinRoomAsPlayer(name: String!, password: String, roomId: String!): JoinRoomResult!
+  joinRoomAsSpectator(name: String!, password: String, roomId: String!): JoinRoomResult!
+  leaveRoom(roomId: String!): LeaveRoomResult!
   makeMessageNotSecret(messageId: String!, roomId: String!): MakeMessageNotSecretResult!
 
   """この Mutation を直接実行することは非推奨です。代わりに @flocon-trpg/sdk を用いてください。"""
-  operate(id: String!, operation: RoomOperationInput!, prevRevision: Int!, requestId: String!): OperateRoomResult!
+  operate(operation: RoomOperationInput!, prevRevision: Int!, requestId: String!, roomId: String!): OperateRoomResult!
 
   """since v0.7.13"""
   performRollCall(input: PerformRollCallInput!): PerformRollCallResult!
@@ -485,7 +485,7 @@ type PromoteResult {
 
 type Query {
   getAvailableGameSystems: GetAvailableGameSystemsResult!
-  getDiceHelpMessage(id: String!): String
+  getDiceHelpMessage(gameSystemId: String!): String
   getFiles(input: GetFilesInput!): GetFilesResult!
   getLog(roomId: String!): GetRoomLogResult!
   getMessages(roomId: String!): GetRoomMessagesResult!
@@ -496,7 +496,7 @@ type Query {
   """
   通常はこの Query を直接実行する必要はありません。@flocon-trpg/sdk を用いることで、リアルタイムに Room を取得および自動更新できます。
   """
-  getRoom(id: String!): GetRoomResult!
+  getRoom(roomId: String!): GetRoomResult!
   getRoomAsListItem(roomId: String!): GetRoomAsListItemResult!
 
   """
@@ -532,7 +532,6 @@ type RoomAsListItem {
 
   """この部屋の作成者。Firebase AuthenticationのUserUidで表現される。"""
   createdBy: String!
-  id: ID!
 
   """since v0.7.2"""
   isBookmarked: Boolean!
@@ -542,6 +541,7 @@ type RoomAsListItem {
 
   """since v0.7.2"""
   role: ParticipantRole
+  roomId: ID!
 
   """
   データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。
@@ -738,7 +738,7 @@ type ServerInfo {
 
 type Subscription {
   """この Subscription を直接実行することは非推奨です。代わりに @flocon-trpg/sdk を用いてください。"""
-  roomEvent(id: String!): RoomEvent!
+  roomEvent(roomId: String!): RoomEvent!
 }
 
 type UpdateBookmarkFailureResult {

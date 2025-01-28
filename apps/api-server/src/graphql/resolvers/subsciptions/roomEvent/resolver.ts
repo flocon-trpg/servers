@@ -87,13 +87,13 @@ export class RoomEventResolver {
     })
     @Auth(ENTRY)
     public roomEvent(
-        @Args('id') id: string,
+        @Args('roomId') roomId: string,
         @AuthData() auth: AuthDataType,
     ): AsyncIterableIterator<RoomEvent> {
         const userUid = auth.user.userUid;
         const roomEventsStream: Observable<RoomEvent> = this.pubSubService.roomEvent.pipe(
             filter(payload => {
-                if (id !== payload.roomId) {
+                if (roomId !== payload.roomId) {
                     return false;
                 }
                 if (payload.sendTo !== all) {

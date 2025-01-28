@@ -27,7 +27,7 @@ import { findRoomAndMyParticipant } from '../../utils/utils';
 @ArgsType()
 class GetRoomArgs {
     @Field()
-    public id!: string;
+    public roomId!: string;
 }
 
 @ObjectType()
@@ -80,7 +80,7 @@ export class GetRoomResolver {
         const findResult = await findRoomAndMyParticipant({
             em,
             userUid: authorizedUserUid,
-            roomId: args.id,
+            roomId: args.roomId,
         });
         if (findResult == null) {
             return {
@@ -131,6 +131,6 @@ export class GetRoomResolver {
         @AuthData() auth: AuthDataType,
     ): Promise<typeof GetRoomResult> {
         // lock が必要かどうかは微妙
-        return await lockByRoomId(args.id, async () => await this.#getRoomCore(args, auth));
+        return await lockByRoomId(args.roomId, async () => await this.#getRoomCore(args, auth));
     }
 }

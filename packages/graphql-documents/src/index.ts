@@ -161,7 +161,7 @@ export const RoomGetStateFragmentDoc = graphql(`
 
 export const RoomAsListItemFragmentDoc = graphql(`
     fragment RoomAsListItem on RoomAsListItem {
-        id
+        roomId
         name
         createdBy
         createdAt
@@ -185,8 +185,8 @@ export const RoomOperationFragmentDoc = graphql(`
 `);
 
 export const RoomEventDoc = graphql(`
-    subscription RoomEvent($id: String!) {
-        result: roomEvent(id: $id) {
+    subscription RoomEvent($roomId: String!) {
+        result: roomEvent(roomId: $roomId) {
             isRoomMessagesResetEvent
             roomOperation {
                 ...RoomOperation
@@ -345,13 +345,13 @@ export const WritePrivateMessageDoc = graphql(`
 
 export const OperateDoc = graphql(`
     mutation operate(
-        $id: String!
+        $roomId: String!
         $revisionFrom: Int!
         $operation: RoomOperationInput!
         $requestId: String!
     ) {
         result: operate(
-            id: $id
+            roomId: $roomId
             prevRevision: $revisionFrom
             operation: $operation
             requestId: $requestId
@@ -378,8 +378,8 @@ export const OperateDoc = graphql(`
 `);
 
 export const GetRoomDoc = graphql(`
-    query GetRoom($id: String!) {
-        result: getRoom(id: $id) {
+    query GetRoom($roomId: String!) {
+        result: getRoom(roomId: $roomId) {
             __typename
             ... on GetJoinedRoomResult {
                 role

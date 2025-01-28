@@ -20,7 +20,7 @@ type HelpMessageProps = {
 const HelpMessage = ({ gameSystemId }: HelpMessageProps) => {
     const [message] = useQuery({
         query: GetDiceHelpMessagesDoc,
-        variables: { id: gameSystemId },
+        variables: { gameSystemId },
     });
     if (message.error != null) {
         return <div>取得中にエラーが発生しました。</div>;

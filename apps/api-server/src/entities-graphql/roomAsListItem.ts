@@ -12,6 +12,7 @@ export const stateToGraphQL = async ({
 }): Promise<RoomAsListItem> => {
     return {
         ...roomEntity,
+        roomId: roomEntity.id,
         createdAt: roomEntity.createdAt?.getTime(),
         updatedAt: roomEntity.completeUpdatedAt?.getTime(),
         requiresPlayerPassword: roomEntity.playerPasswordHash != null,

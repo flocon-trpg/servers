@@ -711,7 +711,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
             },
         });
         const actualData = Assert.CreateRoomMutation.toBeSuccess(actual);
-        const roomId = actualData.id;
+        const roomId = actualData.roomId;
         let roomRevision = actualData.room.revision;
 
         if (autoJoin != null) {
@@ -727,14 +727,14 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                 switch (autoJoinValue) {
                     case 'player':
                         await client.joinRoomAsPlayerMutation({
-                            id: roomId,
+                            roomId,
                             name: 'test player',
                             password: playerPassword,
                         });
                         break;
                     case 'spectator':
                         await client.joinRoomAsSpectatorMutation({
-                            id: roomId,
+                            roomId,
                             name: 'test spectator',
                             password: spectatorPassword,
                         });
@@ -1026,7 +1026,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
             );
             loggerRef.trace({ roomMasterResult }, 'getRoomsList query result');
             expect(roomMasterResult.rooms).toHaveLength(1);
-            expect(roomMasterResult.rooms[0]!.id).toBe(roomId);
+            expect(roomMasterResult.rooms[0]!.roomId).toBe(roomId);
             expect(roomMasterResult.rooms[0]!.name).toBe(roomName);
             expect(roomMasterResult.rooms[0]!.createdAt).toBeTruthy();
             expect(roomMasterResult.rooms[0]!.role).toBe(ParticipantRole.Master);
@@ -1065,7 +1065,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                 const incorrectPassword = 'INCORRECT_PASSWORD';
                 Assert.JoinRoomMutation.toBeFailure(
                     await clients[Resources.UserUid.player1].joinRoomAsPlayerMutation({
-                        id: roomId,
+                        roomId,
                         name: Resources.Participant.Name.player1,
                         password: incorrectPassword,
                     }),
@@ -1095,7 +1095,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                 const incorrectPassword = 'INCORRECT_PASSWORD';
                 Assert.JoinRoomMutation.toBeFailure(
                     await clients[Resources.UserUid.player1].joinRoomAsSpectatorMutation({
-                        id: roomId,
+                        roomId,
                         name: Resources.Participant.Name.player1,
                         password: incorrectPassword,
                     }),
@@ -1146,7 +1146,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                 const anotherRoom = await clients[Resources.UserUid.master].createRoomMutation({
                     input: { participantName: '', roomName: '' },
                 });
-                const { id: room2Id } = Assert.CreateRoomMutation.toBeSuccess(anotherRoom);
+                const { roomId: room2Id } = Assert.CreateRoomMutation.toBeSuccess(anotherRoom);
 
                 const testRooms = async ({
                     room1ValueAsMaster,
@@ -1160,13 +1160,13 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                     room2ValueAsPlayer: boolean;
                 }) => {
                     const room1AsMaster = Assert.GetRoomQuery.toBeSuccess(
-                        await clients[Resources.UserUid.master].getRoomQuery({ id: room1Id }),
+                        await clients[Resources.UserUid.master].getRoomQuery({ roomId: room1Id }),
                     );
                     const room2AsMaster = Assert.GetRoomQuery.toBeSuccess(
-                        await clients[Resources.UserUid.master].getRoomQuery({ id: room2Id }),
+                        await clients[Resources.UserUid.master].getRoomQuery({ roomId: room2Id }),
                     );
                     const room1AsPlayer = Assert.GetRoomQuery.toBeSuccess(
-                        await clients[Resources.UserUid.player1].getRoomQuery({ id: room1Id }),
+                        await clients[Resources.UserUid.player1].getRoomQuery({ roomId: room1Id }),
                     );
                     expect(room1AsMaster.room.isBookmarked).toBe(room1ValueAsMaster);
                     expect(room2AsMaster.room.isBookmarked).toBe(room2ValueAsMaster);
@@ -1178,18 +1178,18 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                     const roomsListAsPlayer = Assert.GetRoomsListQuery.toBeSuccess(
                         await clients[Resources.UserUid.player1].getRoomsListQuery(),
                     );
-                    expect(roomsListAsMaster.rooms.find(r => r.id === room1Id)?.isBookmarked).toBe(
-                        room1ValueAsMaster,
-                    );
-                    expect(roomsListAsMaster.rooms.find(r => r.id === room2Id)?.isBookmarked).toBe(
-                        room2ValueAsMaster,
-                    );
-                    expect(roomsListAsPlayer.rooms.find(r => r.id === room1Id)?.isBookmarked).toBe(
-                        room1ValueAsPlayer,
-                    );
-                    expect(roomsListAsPlayer.rooms.find(r => r.id === room2Id)?.isBookmarked).toBe(
-                        room2ValueAsPlayer,
-                    );
+                    expect(
+                        roomsListAsMaster.rooms.find(r => r.roomId === room1Id)?.isBookmarked,
+                    ).toBe(room1ValueAsMaster);
+                    expect(
+                        roomsListAsMaster.rooms.find(r => r.roomId === room2Id)?.isBookmarked,
+                    ).toBe(room2ValueAsMaster);
+                    expect(
+                        roomsListAsPlayer.rooms.find(r => r.roomId === room1Id)?.isBookmarked,
+                    ).toBe(room1ValueAsPlayer);
+                    expect(
+                        roomsListAsPlayer.rooms.find(r => r.roomId === room2Id)?.isBookmarked,
+                    ).toBe(room2ValueAsPlayer);
                 };
 
                 // bookmark room1
@@ -1301,7 +1301,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
 
                     Assert.JoinRoomMutation.toBeSuccess(
                         await clients[Resources.UserUid.player1].joinRoomAsPlayerMutation({
-                            id: roomId,
+                            roomId,
                             name: Resources.Participant.Name.player1,
                             password: playerPassword,
                         }),
@@ -1318,7 +1318,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
 
                     Assert.JoinRoomMutation.toBeFailure(
                         await clients[Resources.UserUid.player1].joinRoomAsPlayerMutation({
-                            id: roomId,
+                            roomId,
                             name: Resources.Participant.Name.player1,
                             password: playerPassword,
                         }),
@@ -1348,7 +1348,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
 
                     Assert.JoinRoomMutation.toBeSuccess(
                         await clients[Resources.UserUid.player1].joinRoomAsSpectatorMutation({
-                            id: roomId,
+                            roomId,
                             name: Resources.Participant.Name.player1,
                             password: spectatorPassword,
                         }),
@@ -1365,7 +1365,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
 
                     Assert.JoinRoomMutation.toBeFailure(
                         await clients[Resources.UserUid.player1].joinRoomAsSpectatorMutation({
-                            id: roomId,
+                            roomId,
                             name: Resources.Participant.Name.player1,
                             password: spectatorPassword,
                         }),
@@ -1378,7 +1378,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
 
                     Assert.JoinRoomMutation.toBeFailure(
                         await clients[Resources.UserUid.player1].joinRoomAsPlayerMutation({
-                            id: roomId,
+                            roomId,
                             name: Resources.Participant.Name.player1,
                             password: playerPassword,
                         }),
@@ -1416,7 +1416,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
 
                 const masterResult = Assert.GetRoomQuery.toBeSuccess(
                     await clients[Resources.UserUid.master].getRoomQuery({
-                        id: roomId,
+                        roomId,
                     }),
                 );
                 expect(masterResult.role).toBe(ParticipantRole.Master);
@@ -1426,7 +1426,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                     .toBeCloseToSystemTimeType(1);
                 const player1Result = Assert.GetRoomQuery.toBeSuccess(
                     await clients[Resources.UserUid.player1].getRoomQuery({
-                        id: roomId,
+                        roomId,
                     }),
                 );
                 expect(player1Result.role).toBe(ParticipantRole.Player);
@@ -1436,7 +1436,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
 
                 const spectatorResult = Assert.GetRoomQuery.toBeSuccess(
                     await clients[Resources.UserUid.spectator1].getRoomQuery({
-                        id: roomId,
+                        roomId,
                     }),
                 );
                 expect(spectatorResult.role).toBe(ParticipantRole.Spectator);
@@ -1446,10 +1446,10 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
 
                 const nonJoinedResult = Assert.GetRoomQuery.toBeNonJoined(
                     await clients[Resources.UserUid.notJoin].getRoomQuery({
-                        id: roomId,
+                        roomId,
                     }),
                 );
-                expect(nonJoinedResult.roomAsListItem.id).toBe(roomId);
+                expect(nonJoinedResult.roomAsListItem.roomId).toBe(roomId);
                 systemTimeManager
                     .expect(nonJoinedResult.roomAsListItem.createdAt)
                     .toBeCloseToSystemTimeType(1);
@@ -1497,7 +1497,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                     };
                     const operationResult = await Assert.OperateMutation.toBeSuccess(
                         clients[Resources.UserUid.player1].operateMutation({
-                            id: roomId,
+                            roomId,
                             requestId,
                             revisionFrom: roomRevision,
                             operation: {
@@ -1542,7 +1542,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
 
                     const room = Assert.GetRoomQuery.toBeSuccess(
                         await clients[Resources.UserUid.player1].getRoomQuery({
-                            id: roomId,
+                            roomId,
                         }),
                     );
                     expect(parseState(room.room.stateJson).name).toBe(newRoomName);
@@ -1578,7 +1578,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                     systemTimeManager.set(2);
                     await Assert.OperateMutation.toBeFailure(
                         clients[Resources.UserUid.player1].operateMutation({
-                            id: roomId,
+                            roomId,
                             requestId,
                             revisionFrom: roomRevision + 1,
                             operation: {
@@ -1596,7 +1596,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
 
                     const room = Assert.GetRoomQuery.toBeSuccess(
                         await clients[Resources.UserUid.player1].getRoomQuery({
-                            id: roomId,
+                            roomId,
                         }),
                     );
                     systemTimeManager.expect(room.room.updatedAt).toBeCloseToSystemTimeType(1);
@@ -1701,7 +1701,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                                 );
                                 const room = Assert.GetRoomQuery.toBeSuccess(
                                     await clients[userUid].getRoomQuery({
-                                        id: roomId,
+                                        roomId,
                                     }),
                                 );
                                 systemTimeManager
@@ -1748,7 +1748,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                             ] as const) {
                                 const room = Assert.GetRoomQuery.toBeSuccess(
                                     await clients[userUid].getRoomQuery({
-                                        id: roomId,
+                                        roomId,
                                     }),
                                 );
                                 systemTimeManager
@@ -1792,7 +1792,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                             ] as const) {
                                 const room = Assert.GetRoomQuery.toBeSuccess(
                                     await clients[userUid].getRoomQuery({
-                                        id: roomId,
+                                        roomId,
                                     }),
                                 );
                                 systemTimeManager
@@ -2267,7 +2267,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
 
                     const room = Assert.GetRoomQuery.toBeSuccess(
                         await clients[userUid].getRoomQuery({
-                            id: roomId,
+                            roomId,
                         }),
                     );
                     systemTimeManager.expect(room.room.updatedAt).toBeCloseToSystemTimeType(1);
@@ -2363,7 +2363,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                     ] as const) {
                         const room = Assert.GetRoomQuery.toBeSuccess(
                             await clients[userUid].getRoomQuery({
-                                id: roomId,
+                                roomId,
                             }),
                         );
                         systemTimeManager.expect(room.room.updatedAt).toBeCloseToSystemTimeType(2);
@@ -2397,7 +2397,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
 
                     Assert.LeaveRoomMutation.toBeSuccess(
                         await clients[Resources.UserUid.player1].leaveRoomMutation({
-                            id: roomId,
+                            roomId,
                         }),
                     );
 
@@ -2411,7 +2411,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
 
                     const room = Assert.GetRoomQuery.toBeSuccess(
                         await clients[Resources.UserUid.master].getRoomQuery({
-                            id: roomId,
+                            roomId,
                         }),
                     );
                     expect(
@@ -2456,7 +2456,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
 
                     Assert.DeleteRoomMutation.toBeSuccess(
                         await clients[Resources.UserUid.master].deleteRoomMutation({
-                            id: roomId,
+                            roomId,
                         }),
                     );
 
@@ -2481,17 +2481,17 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
 
                     Assert.GetRoomQuery.toBeNotFound(
                         await clients[Resources.UserUid.master].getRoomQuery({
-                            id: roomId,
+                            roomId,
                         }),
                     );
                     Assert.GetRoomQuery.toBeNotFound(
                         await clients[Resources.UserUid.player1].getRoomQuery({
-                            id: roomId,
+                            roomId,
                         }),
                     );
                     Assert.GetRoomQuery.toBeNotFound(
                         await clients[Resources.UserUid.spectator1].getRoomQuery({
-                            id: roomId,
+                            roomId,
                         }),
                     );
                 });
@@ -2526,7 +2526,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                     systemTimeManager.set(2);
                     Assert.DeleteRoomMutation.toBeNotCreatedByYou(
                         await clients[mutatedBy].deleteRoomMutation({
-                            id: roomId,
+                            roomId,
                         }),
                     );
 
@@ -2537,22 +2537,22 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
 
                     const room = Assert.GetRoomQuery.toBeSuccess(
                         await clients[Resources.UserUid.master].getRoomQuery({
-                            id: roomId,
+                            roomId,
                         }),
                     );
                     Assert.GetRoomQuery.toBeSuccess(
                         await clients[Resources.UserUid.player1].getRoomQuery({
-                            id: roomId,
+                            roomId,
                         }),
                     );
                     Assert.GetRoomQuery.toBeSuccess(
                         await clients[Resources.UserUid.spectator1].getRoomQuery({
-                            id: roomId,
+                            roomId,
                         }),
                     );
                     Assert.GetRoomQuery.toBeNonJoined(
                         await clients[Resources.UserUid.notJoin].getRoomQuery({
-                            id: roomId,
+                            roomId,
                         }),
                     );
 
@@ -2594,7 +2594,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
 
                         Assert.DeleteRoomAsAdminMutation.toBeSuccess(
                             await clients[Resources.UserUid.admin].deleteRoomAsAdminMutation({
-                                id: roomId,
+                                roomId,
                             }),
                         );
 
@@ -2633,7 +2633,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                         for (const userUid of userUids) {
                             Assert.GetRoomQuery.toBeNotFound(
                                 await clients[userUid].getRoomQuery({
-                                    id: roomId,
+                                    roomId,
                                 }),
                             );
                         }
@@ -2671,7 +2671,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                     systemTimeManager.set(2);
                     Assert.DeleteRoomAsAdminMutation.toBeError(
                         await clients[mutatedBy].deleteRoomAsAdminMutation({
-                            id: roomId,
+                            roomId,
                         }),
                     );
 
@@ -2687,7 +2687,7 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                     ] as const) {
                         const room = Assert.GetRoomQuery.toBeSuccess(
                             await clients[userUid].getRoomQuery({
-                                id: roomId,
+                                roomId,
                             }),
                         );
                         systemTimeManager

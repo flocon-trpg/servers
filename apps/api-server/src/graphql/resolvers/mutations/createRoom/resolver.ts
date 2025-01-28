@@ -25,7 +25,7 @@ const bcryptSaltRounds = 10;
 @ObjectType()
 class CreateRoomSuccessResult {
     @Field()
-    public id!: string;
+    public roomId!: string;
 
     @Field()
     public room!: RoomGetState;
@@ -152,7 +152,7 @@ export class CreateRoomResolver {
                 role: newParticipant.role,
                 isBookmarked: false,
             },
-            id: newRoom.id,
+            roomId: newRoom.id,
         };
     }
 }

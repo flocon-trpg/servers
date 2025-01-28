@@ -6,7 +6,7 @@ export const GetRoomAsListItemDoc = graphql(`
             __typename
             ... on GetRoomAsListItemSuccessResult {
                 room {
-                    id
+                    roomId
                     name
                     createdBy
                     createdAt

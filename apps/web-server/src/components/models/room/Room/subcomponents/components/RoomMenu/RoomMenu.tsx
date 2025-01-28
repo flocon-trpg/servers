@@ -219,7 +219,7 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
     const addRoomNotification = useAddNotification();
     const [, deleteRoom] = useMutation(DeleteRoomDoc);
     const { execute, isExecuting } = useSingleExecuteAsync0(async () => {
-        const e = await deleteRoom({ id: roomId });
+        const e = await deleteRoom({ roomId });
         if (e.error != null) {
             addRoomNotification({
                 type: 'error',
@@ -994,7 +994,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
 
     const { execute: executeLeaveRoomMutation, isExecuting: isExecutingLeaveRoomMutation } =
         useSingleExecuteAsync0(async () => {
-            const result = await leaveRoomMutation({ id: roomId });
+            const result = await leaveRoomMutation({ roomId });
             if (result.data == null) {
                 return;
             }

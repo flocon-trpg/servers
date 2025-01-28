@@ -11,7 +11,7 @@ import { all } from '../../types';
 @ArgsType()
 class DeleteRoomArgs {
     @Field()
-    public id!: string;
+    public roomId!: string;
 }
 
 @ObjectType()
@@ -33,7 +33,7 @@ export class DeleteRoomResolver {
 
         // そのRoomのParticipantでない場合でも削除できるようになっている。ただし、もしキック機能が実装されて部屋作成者がキックされた場合は再考の余地があるか。
 
-        const room = await em.findOne(Room$MikroORM.Room, { id: args.id });
+        const room = await em.findOne(Room$MikroORM.Room, { id: args.roomId });
         if (room == null) {
             return {
                 failureType: DeleteRoomFailureType.NotFound,
@@ -63,6 +63,6 @@ export class DeleteRoomResolver {
         @Args() args: DeleteRoomArgs,
         @AuthData() auth: AuthDataType,
     ): Promise<DeleteRoomResult> {
-        return await lockByRoomId(args.id, async () => await this.#deleteRoomCore(args, auth));
+        return await lockByRoomId(args.roomId, async () => await this.#deleteRoomCore(args, auth));
     }
 }

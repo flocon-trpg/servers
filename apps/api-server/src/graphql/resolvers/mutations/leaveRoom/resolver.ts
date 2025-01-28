@@ -69,9 +69,9 @@ export class LeaveRoomResolver {
     @Mutation(() => LeaveRoomResult)
     @Auth(ENTRY)
     public async leaveRoom(
-        @Args('id') id: string,
+        @Args('roomId') roomId: string,
         @AuthData() auth: AuthDataType,
     ): Promise<LeaveRoomResult> {
-        return await lockByRoomId(id, async () => await this.#leaveRoomCore(id, auth));
+        return await lockByRoomId(roomId, async () => await this.#leaveRoomCore(roomId, auth));
     }
 }

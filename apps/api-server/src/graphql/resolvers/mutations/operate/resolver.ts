@@ -63,7 +63,7 @@ export class RoomOperationInput {
 @ArgsType()
 class OperateArgs {
     @Field()
-    public id!: string;
+    public roomId!: string;
 
     @Field(() => Int)
     public prevRevision!: number;
@@ -162,7 +162,7 @@ async function operateCore({
     const findResult = await findRoomAndMyParticipant({
         em,
         userUid,
-        roomId: args.id,
+        roomId: args.roomId,
     });
     if (findResult == null) {
         return {
@@ -280,7 +280,7 @@ async function operateCore({
     };
     const roomOperationPayload: RoomOperationPayload = {
         type: 'roomOperationPayload',
-        roomId: args.id,
+        roomId: args.roomId,
         generateOperation,
     };
     return {
@@ -332,7 +332,7 @@ export class OperateResolver {
         @Args() args: OperateArgs,
         @AuthData() auth: AuthDataType,
     ): Promise<typeof OperateRoomResult> {
-        return await lockByRoomId(args.id, async () => {
+        return await lockByRoomId(args.roomId, async () => {
             const operateResult = await operateCore({
                 args,
                 userUid: auth.user.userUid,

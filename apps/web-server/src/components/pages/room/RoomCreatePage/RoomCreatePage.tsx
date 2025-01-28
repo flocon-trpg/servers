@@ -61,7 +61,7 @@ export const RoomCreatePage: React.FC = () => {
                         case 'CreateRoomSuccessResult': {
                             void router({
                                 to: `/rooms/$id`,
-                                params: { id: r.data.result.id },
+                                params: { id: r.data.result.roomId },
                             }).finally(() => setIsSubmitting(false));
                             return;
                         }

@@ -11,7 +11,7 @@ import { all } from '../../types';
 @ArgsType()
 class DeleteRoomAsAdminInput {
     @Field()
-    public id!: string;
+    public roomId!: string;
 }
 
 @ObjectType()
@@ -34,7 +34,7 @@ export class DeleteRoomAsAdminResolver {
         const em = await this.mikroOrmService.forkEmForMain();
         const authorizedUserUid = auth.user.userUid;
 
-        const room = await em.findOne(Room$MikroORM.Room, { id: args.id });
+        const room = await em.findOne(Room$MikroORM.Room, { id: args.roomId });
         if (room == null) {
             return {
                 failureType: DeleteRoomAsAdminFailureType.NotFound,
@@ -59,7 +59,7 @@ export class DeleteRoomAsAdminResolver {
         @Args() args: DeleteRoomAsAdminInput,
         @AuthData() auth: AuthDataType,
     ): Promise<DeleteRoomAsAdminResult> {
-        return await lockByRoomId(args.id, async () => {
+        return await lockByRoomId(args.roomId, async () => {
             return await this.#deleteRoomAsAdminCore(args, auth);
         });
     }

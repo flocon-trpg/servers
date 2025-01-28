@@ -105,8 +105,8 @@ export type CreateRoomResult = CreateRoomFailureResult | CreateRoomSuccessResult
 
 export type CreateRoomSuccessResult = {
     __typename?: 'CreateRoomSuccessResult';
-    id: Scalars['String']['output'];
     room: RoomGetState;
+    roomId: Scalars['String']['output'];
 };
 
 export const DeleteMessageFailureType = {
@@ -481,11 +481,11 @@ export type MutationDeleteMessageArgs = {
 };
 
 export type MutationDeleteRoomArgs = {
-    id: Scalars['String']['input'];
+    roomId: Scalars['String']['input'];
 };
 
 export type MutationDeleteRoomAsAdminArgs = {
-    id: Scalars['String']['input'];
+    roomId: Scalars['String']['input'];
 };
 
 export type MutationEditFileTagsArgs = {
@@ -503,19 +503,19 @@ export type MutationEntryToServerArgs = {
 };
 
 export type MutationJoinRoomAsPlayerArgs = {
-    id: Scalars['String']['input'];
     name: Scalars['String']['input'];
     password?: InputMaybe<Scalars['String']['input']>;
+    roomId: Scalars['String']['input'];
 };
 
 export type MutationJoinRoomAsSpectatorArgs = {
-    id: Scalars['String']['input'];
     name: Scalars['String']['input'];
     password?: InputMaybe<Scalars['String']['input']>;
+    roomId: Scalars['String']['input'];
 };
 
 export type MutationLeaveRoomArgs = {
-    id: Scalars['String']['input'];
+    roomId: Scalars['String']['input'];
 };
 
 export type MutationMakeMessageNotSecretArgs = {
@@ -524,10 +524,10 @@ export type MutationMakeMessageNotSecretArgs = {
 };
 
 export type MutationOperateArgs = {
-    id: Scalars['String']['input'];
     operation: RoomOperationInput;
     prevRevision: Scalars['Int']['input'];
     requestId: Scalars['String']['input'];
+    roomId: Scalars['String']['input'];
 };
 
 export type MutationPerformRollCallArgs = {
@@ -715,7 +715,7 @@ export type Query = {
 };
 
 export type QueryGetDiceHelpMessageArgs = {
-    id: Scalars['String']['input'];
+    gameSystemId: Scalars['String']['input'];
 };
 
 export type QueryGetFilesArgs = {
@@ -731,7 +731,7 @@ export type QueryGetMessagesArgs = {
 };
 
 export type QueryGetRoomArgs = {
-    id: Scalars['String']['input'];
+    roomId: Scalars['String']['input'];
 };
 
 export type QueryGetRoomAsListItemArgs = {
@@ -771,7 +771,6 @@ export type RoomAsListItem = {
     createdAt?: Maybe<Scalars['Float']['output']>;
     /** この部屋の作成者。Firebase AuthenticationのUserUidで表現される。 */
     createdBy: Scalars['String']['output'];
-    id: Scalars['ID']['output'];
     /** since v0.7.2 */
     isBookmarked: Scalars['Boolean']['output'];
     name: Scalars['String']['output'];
@@ -779,6 +778,7 @@ export type RoomAsListItem = {
     requiresSpectatorPassword: Scalars['Boolean']['output'];
     /** since v0.7.2 */
     role?: Maybe<ParticipantRole>;
+    roomId: Scalars['ID']['output'];
     /**
      * データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。
      * since v0.7.2
@@ -983,7 +983,7 @@ export type Subscription = {
 };
 
 export type SubscriptionRoomEventArgs = {
-    id: Scalars['String']['input'];
+    roomId: Scalars['String']['input'];
 };
 
 export type UpdateBookmarkFailureResult = {
@@ -1111,7 +1111,7 @@ export type DeleteFileTagMutationVariables = Exact<{
 export type DeleteFileTagMutation = { __typename?: 'Mutation'; result: boolean };
 
 export type DeleteRoomMutationVariables = Exact<{
-    id: Scalars['String']['input'];
+    roomId: Scalars['String']['input'];
 }>;
 
 export type DeleteRoomMutation = {
@@ -1120,7 +1120,7 @@ export type DeleteRoomMutation = {
 };
 
 export type DeleteRoomAsAdminMutationVariables = Exact<{
-    id: Scalars['String']['input'];
+    roomId: Scalars['String']['input'];
 }>;
 
 export type DeleteRoomAsAdminMutation = {
@@ -1174,7 +1174,7 @@ export type GetMyRolesQuery = {
 };
 
 export type GetRoomQueryVariables = Exact<{
-    id: Scalars['String']['input'];
+    roomId: Scalars['String']['input'];
 }>;
 
 export type GetRoomQuery = {
@@ -1200,7 +1200,7 @@ export type GetRoomQuery = {
                   __typename?: 'RoomAsListItem';
                   createdAt?: number | null;
                   createdBy: string;
-                  id: string;
+                  roomId: string;
                   isBookmarked: boolean;
                   name: string;
                   requiresPlayerPassword: boolean;
@@ -1224,7 +1224,7 @@ export type GetRoomsListQuery = {
                   __typename?: 'RoomAsListItem';
                   createdAt?: number | null;
                   createdBy: string;
-                  id: string;
+                  roomId: string;
                   isBookmarked: boolean;
                   name: string;
                   requiresPlayerPassword: boolean;
@@ -1245,7 +1245,7 @@ export type CreateRoomMutation = {
         | { __typename?: 'CreateRoomFailureResult'; failureType: CreateRoomFailureType }
         | {
               __typename?: 'CreateRoomSuccessResult';
-              id: string;
+              roomId: string;
               room: {
                   __typename?: 'RoomGetState';
                   createdAt?: number | null;
@@ -1281,7 +1281,7 @@ export type EditMessageMutation = {
 };
 
 export type JoinRoomAsPlayerMutationVariables = Exact<{
-    id: Scalars['String']['input'];
+    roomId: Scalars['String']['input'];
     name: Scalars['String']['input'];
     password?: InputMaybe<Scalars['String']['input']>;
 }>;
@@ -1306,7 +1306,7 @@ export type JoinRoomAsPlayerMutation = {
 };
 
 export type JoinRoomAsSpectatorMutationVariables = Exact<{
-    id: Scalars['String']['input'];
+    roomId: Scalars['String']['input'];
     name: Scalars['String']['input'];
     password?: InputMaybe<Scalars['String']['input']>;
 }>;
@@ -1331,7 +1331,7 @@ export type JoinRoomAsSpectatorMutation = {
 };
 
 export type LeaveRoomMutationVariables = Exact<{
-    id: Scalars['String']['input'];
+    roomId: Scalars['String']['input'];
 }>;
 
 export type LeaveRoomMutation = {
@@ -1513,7 +1513,7 @@ export const DeleteRoomDocument = {
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
-                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
                     type: {
                         kind: 'NonNullType',
                         type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
@@ -1530,8 +1530,11 @@ export const DeleteRoomDocument = {
                         arguments: [
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'id' },
-                                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
                             },
                         ],
                         selectionSet: {
@@ -1556,7 +1559,7 @@ export const DeleteRoomAsAdminDocument = {
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
-                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
                     type: {
                         kind: 'NonNullType',
                         type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
@@ -1573,8 +1576,11 @@ export const DeleteRoomAsAdminDocument = {
                         arguments: [
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'id' },
-                                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
                             },
                         ],
                         selectionSet: {
@@ -1779,7 +1785,7 @@ export const GetRoomDocument = {
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
-                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
                     type: {
                         kind: 'NonNullType',
                         type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
@@ -1796,8 +1802,11 @@ export const GetRoomDocument = {
                         arguments: [
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'id' },
-                                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
                             },
                         ],
                         selectionSet: {
@@ -1906,7 +1915,7 @@ export const GetRoomDocument = {
                                                         },
                                                         {
                                                             kind: 'Field',
-                                                            name: { kind: 'Name', value: 'id' },
+                                                            name: { kind: 'Name', value: 'roomId' },
                                                         },
                                                         {
                                                             kind: 'Field',
@@ -2023,7 +2032,7 @@ export const GetRoomsListDocument = {
                                                         },
                                                         {
                                                             kind: 'Field',
-                                                            name: { kind: 'Name', value: 'id' },
+                                                            name: { kind: 'Name', value: 'roomId' },
                                                         },
                                                         {
                                                             kind: 'Field',
@@ -2153,7 +2162,10 @@ export const CreateRoomDocument = {
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
-                                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'roomId' },
+                                            },
                                             {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'room' },
@@ -2367,7 +2379,7 @@ export const JoinRoomAsPlayerDocument = {
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
-                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
                     type: {
                         kind: 'NonNullType',
                         type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
@@ -2397,8 +2409,11 @@ export const JoinRoomAsPlayerDocument = {
                         arguments: [
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'id' },
-                                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
                             },
                             {
                                 kind: 'Argument',
@@ -2512,7 +2527,7 @@ export const JoinRoomAsSpectatorDocument = {
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
-                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
                     type: {
                         kind: 'NonNullType',
                         type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
@@ -2542,8 +2557,11 @@ export const JoinRoomAsSpectatorDocument = {
                         arguments: [
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'id' },
-                                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
                             },
                             {
                                 kind: 'Argument',
@@ -2657,7 +2675,7 @@ export const LeaveRoomDocument = {
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
-                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
                     type: {
                         kind: 'NonNullType',
                         type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
@@ -2674,8 +2692,11 @@ export const LeaveRoomDocument = {
                         arguments: [
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'id' },
-                                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
                             },
                         ],
                         selectionSet: {

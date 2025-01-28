@@ -128,7 +128,7 @@ export class GraphQLClientWithStatus<TGraphQLError> {
         private readonly source: GraphQLClient<TGraphQLError>,
         private readonly roomId: string,
     ) {
-        this.#roomEventSubscription = this.source.roomEventSubscription({ id: roomId }).pipe(
+        this.#roomEventSubscription = this.source.roomEventSubscription({ roomId }).pipe(
             catchError(e => {
                 this.#e.next(prevValue => ({
                     ...prevValue,
@@ -212,13 +212,16 @@ export class GraphQLClientWithStatus<TGraphQLError> {
     }
 
     getRoomQuery() {
-        return this.#catchPromiseError(this.source.getRoomQuery({ id: this.roomId }), GetRoomQuery);
+        return this.#catchPromiseError(
+            this.source.getRoomQuery({ roomId: this.roomId }),
+            GetRoomQuery,
+        );
     }
 
     operateMutation(
         variables: Pick<VariablesOf<typeof OperateDoc>, 'revisionFrom' | 'operation' | 'requestId'>,
     ) {
-        return this.source.operateMutation({ ...variables, id: this.roomId });
+        return this.source.operateMutation({ ...variables, roomId: this.roomId });
     }
 
     // Urql などではおそらく Subscription が開始したかどうかを検知できないため、Subscription の接続が確立する前に他の Operation を行い、Subscription の値を逃してしまう可能性があるので注意。現時点では Subscription を要求してから少し待って他の Operation を実行してもらうくらいしか対策が思いつかない。

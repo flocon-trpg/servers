@@ -20,16 +20,16 @@ export const JoinRoomResultFragmentDoc = graphql(`
 `);
 
 export const JoinRoomAsPlayerDoc = graphql(`
-    mutation JoinRoomAsPlayer($id: String!, $name: String!, $password: String) {
-        result: joinRoomAsPlayer(id: $id, name: $name, password: $password) {
+    mutation JoinRoomAsPlayer($roomId: String!, $name: String!, $password: String) {
+        result: joinRoomAsPlayer(roomId: $roomId, name: $name, password: $password) {
             ...JoinRoomResult
         }
     }
 `);
 
 export const JoinRoomAsSpectatorDoc = graphql(`
-    mutation JoinRoomAsSpectator($id: String!, $name: String!, $password: String) {
-        result: joinRoomAsSpectator(id: $id, name: $name, password: $password) {
+    mutation JoinRoomAsSpectator($roomId: String!, $name: String!, $password: String) {
+        result: joinRoomAsSpectator(roomId: $roomId, name: $name, password: $password) {
             ...JoinRoomResult
         }
     }

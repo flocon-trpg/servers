@@ -168,14 +168,14 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
             return;
         }
         const password = roomState.requiresPlayerPassword ? playerPassword : undefined;
-        await joinRoomAsPlayer({ id: roomState.id, password, name }).then(OnGetResult);
+        await joinRoomAsPlayer({ roomId: roomState.roomId, password, name }).then(OnGetResult);
     };
     const onJoinAsSpectatorButtonClick = async () => {
         if (disableJoinActions) {
             return;
         }
         const password = roomState.requiresSpectatorPassword ? spectatorPassword : undefined;
-        await joinRoomAsSpectator({ id: roomState.id, password, name }).then(OnGetResult);
+        await joinRoomAsSpectator({ roomId: roomState.roomId, password, name }).then(OnGetResult);
     };
     return (
         <Spin spinning={disableJoinActions}>

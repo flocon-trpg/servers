@@ -4,8 +4,10 @@ import { helpMessage } from '../../utils/messageAnalyzer';
 @Resolver()
 export class GetDiceHelpMessageResolver {
     @Query(() => String, { nullable: true })
-    public async getDiceHelpMessage(@Args('id') id: string): Promise<string | null> {
-        return await helpMessage(id).catch(err => {
+    public async getDiceHelpMessage(
+        @Args('gameSystemId') gameSystemId: string,
+    ): Promise<string | null> {
+        return await helpMessage(gameSystemId).catch(err => {
             if (err instanceof Error) {
                 if (err.message === 'GameSystem is not found') {
                     return null;

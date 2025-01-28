@@ -65,7 +65,7 @@ export const createMockUrqlClientForRoomMessage = () => {
                             __typename: 'GetRoomAsListItemSuccessResult',
                             room: {
                                 __typename: 'RoomAsListItem',
-                                id: 'test-id',
+                                roomId: 'test-id',
                                 name: 'test-name',
                                 createdBy: 'test-createdBy',
                                 createdAt: 1704034800,

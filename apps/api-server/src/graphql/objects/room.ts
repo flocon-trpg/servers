@@ -64,7 +64,7 @@ export class RoomOperation {
 @ObjectType()
 export class RoomAsListItem {
     @Field(() => ID)
-    public id!: string;
+    public roomId!: string;
 
     @Field()
     public name!: string;

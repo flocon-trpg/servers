@@ -1,8 +1,8 @@
 import { graphql } from '../graphql-codegen';
 
 export const DeleteRoomAsAdminDoc = graphql(`
-    mutation DeleteRoomAsAdmin($id: String!) {
-        result: deleteRoomAsAdmin(id: $id) {
+    mutation DeleteRoomAsAdmin($roomId: String!) {
+        result: deleteRoomAsAdmin(roomId: $roomId) {
             failureType
         }
     }
