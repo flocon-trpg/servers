@@ -103,8 +103,6 @@ enum DeleteRoomFailureType {
 
 type DeleteRoomOperation {
   deletedBy: String!
-
-  """since v0.7.2"""
   deletedByAdmin: Boolean!
 }
 
@@ -323,22 +321,15 @@ type MakeMessageNotSecretResult {
 }
 
 type Mutation {
-  """since v0.7.13"""
   answerRollCall(answer: Boolean!, rollCallId: String!, roomId: String!): AnswerRollCallResult!
   changeParticipantName(newName: String!, roomId: String!): ChangeParticipantNameResult!
-
-  """since v0.7.13"""
   closeRollCall(rollCallId: String!, roomId: String!): CloseRollCallResult!
   createFileTag(tagName: String!): FileTag @deprecated(reason: "Use screenname to group files by folders instead.")
   createRoom(input: CreateRoomInput!): CreateRoomResult!
   deleteFileTag(tagId: String!): Boolean! @deprecated(reason: "Use screenname to group files by folders instead.")
-
-  """since v0.7.8"""
   deleteFiles(filenames: [String!]!): [String!]!
   deleteMessage(messageId: String!, roomId: String!): DeleteMessageResult!
   deleteRoom(roomId: String!): DeleteRoomResult!
-
-  """since v0.7.2"""
   deleteRoomAsAdmin(roomId: String!): DeleteRoomAsAdminResult!
   editFileTags(input: EditFileTagsInput!): Boolean! @deprecated(reason: "Use screenname to group files by folders instead.")
   editMessage(messageId: String!, roomId: String!, text: String!): EditMessageResult!
@@ -354,8 +345,6 @@ type Mutation {
 
   """この Mutation を直接実行することは非推奨です。代わりに @flocon-trpg/sdk を用いてください。"""
   operate(operation: RoomOperationInput!, prevRevision: Int!, requestId: String!, roomId: String!): OperateRoomResult!
-
-  """since v0.7.13"""
   performRollCall(input: PerformRollCallInput!): PerformRollCallResult!
   promoteToPlayer(password: String, roomId: String!): PromoteResult!
   renameFiles(input: [RenameFileInput!]!): [String!]!
@@ -489,8 +478,6 @@ type Query {
   getFiles(input: GetFilesInput!): GetFilesResult!
   getLog(roomId: String!): GetRoomLogResult!
   getMessages(roomId: String!): GetRoomMessagesResult!
-
-  """since v0.7.2"""
   getMyRoles: Roles!
 
   """
@@ -527,25 +514,19 @@ type Roles {
 }
 
 type RoomAsListItem {
-  """since v0.7.2"""
   createdAt: Float
 
   """この部屋の作成者。Firebase AuthenticationのUserUidで表現される。"""
   createdBy: String!
-
-  """since v0.7.2"""
   isBookmarked: Boolean!
   name: String!
   requiresPlayerPassword: Boolean!
   requiresSpectatorPassword: Boolean!
-
-  """since v0.7.2"""
   role: ParticipantRole
   roomId: ID!
 
   """
   データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。
-  since v0.7.2
   """
   updatedAt: Float
 }
@@ -566,21 +547,16 @@ type RoomEvent {
 }
 
 type RoomGetState {
-  """since v0.7.2"""
   createdAt: Float
 
   """この部屋の作成者。Firebase AuthenticationのUserUidで表現される。"""
   createdBy: String!
-
-  """since v0.7.2"""
   isBookmarked: Boolean!
 
   """
   Current revision of Room. Whenever Room is updated, this value is incremented by 1. This value is required when you apply RoomOperation. / Roomの現在のリビジョン。Roomが更新されるたび、この値は1増加する。RoomOperationを適用する際に必要となる。
   """
   revision: Float!
-
-  """since v0.7.2"""
   role: ParticipantRole
 
   """room.state をJSON化したもの"""
@@ -588,7 +564,6 @@ type RoomGetState {
 
   """
   データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。
-  since v0.7.2
   """
   updatedAt: Float
 }

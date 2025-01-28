@@ -80,7 +80,7 @@ export class CloseRollCallResolver {
     }
 
     // TODO: テストを書く
-    @Mutation(() => CloseRollCallResult, { description: 'since v0.7.13' })
+    @Mutation(() => CloseRollCallResult)
     @Auth(ENTRY)
     public async closeRollCall(
         @Args('roomId') roomId: string,

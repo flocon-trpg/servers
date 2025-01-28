@@ -17,7 +17,7 @@ export class DeleteFilesResolver {
         private readonly serverConfigService: ServerConfigService,
     ) {}
 
-    @Mutation(() => [String], { description: 'since v0.7.8' })
+    @Mutation(() => [String])
     @Auth(ENTRY)
     public async deleteFiles(
         @Args('filenames', { type: () => [String] }) filenames: string[],

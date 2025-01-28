@@ -1,3 +1,4 @@
+/* eslint-disable */
 import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
@@ -145,7 +146,6 @@ export type DeleteRoomFailureType =
 export type DeleteRoomOperation = {
     __typename?: 'DeleteRoomOperation';
     deletedBy: Scalars['String']['output'];
-    /** since v0.7.2 */
     deletedByAdmin: Scalars['Boolean']['output'];
 };
 
@@ -403,21 +403,17 @@ export type MakeMessageNotSecretResult = {
 
 export type Mutation = {
     __typename?: 'Mutation';
-    /** since v0.7.13 */
     answerRollCall: AnswerRollCallResult;
     changeParticipantName: ChangeParticipantNameResult;
-    /** since v0.7.13 */
     closeRollCall: CloseRollCallResult;
     /** @deprecated Use screenname to group files by folders instead. */
     createFileTag?: Maybe<FileTag>;
     createRoom: CreateRoomResult;
     /** @deprecated Use screenname to group files by folders instead. */
     deleteFileTag: Scalars['Boolean']['output'];
-    /** since v0.7.8 */
     deleteFiles: Array<Scalars['String']['output']>;
     deleteMessage: DeleteMessageResult;
     deleteRoom: DeleteRoomResult;
-    /** since v0.7.2 */
     deleteRoomAsAdmin: DeleteRoomAsAdminResult;
     /** @deprecated Use screenname to group files by folders instead. */
     editFileTags: Scalars['Boolean']['output'];
@@ -430,7 +426,6 @@ export type Mutation = {
     makeMessageNotSecret: MakeMessageNotSecretResult;
     /** この Mutation を直接実行することは非推奨です。代わりに @flocon-trpg/sdk を用いてください。 */
     operate: OperateRoomResult;
-    /** since v0.7.13 */
     performRollCall: PerformRollCallResult;
     promoteToPlayer: PromoteResult;
     renameFiles: Array<Scalars['String']['output']>;
@@ -703,7 +698,6 @@ export type Query = {
     getFiles: GetFilesResult;
     getLog: GetRoomLogResult;
     getMessages: GetRoomMessagesResult;
-    /** since v0.7.2 */
     getMyRoles: Roles;
     /** 通常はこの Query を直接実行する必要はありません。@flocon-trpg/sdk を用いることで、リアルタイムに Room を取得および自動更新できます。 */
     getRoom: GetRoomResult;
@@ -767,22 +761,16 @@ export type Roles = {
 
 export type RoomAsListItem = {
     __typename?: 'RoomAsListItem';
-    /** since v0.7.2 */
     createdAt?: Maybe<Scalars['Float']['output']>;
     /** この部屋の作成者。Firebase AuthenticationのUserUidで表現される。 */
     createdBy: Scalars['String']['output'];
-    /** since v0.7.2 */
     isBookmarked: Scalars['Boolean']['output'];
     name: Scalars['String']['output'];
     requiresPlayerPassword: Scalars['Boolean']['output'];
     requiresSpectatorPassword: Scalars['Boolean']['output'];
-    /** since v0.7.2 */
     role?: Maybe<ParticipantRole>;
     roomId: Scalars['ID']['output'];
-    /**
-     * データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。
-     * since v0.7.2
-     */
+    /** データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。 */
     updatedAt?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -805,22 +793,16 @@ export type RoomEvent = {
 
 export type RoomGetState = {
     __typename?: 'RoomGetState';
-    /** since v0.7.2 */
     createdAt?: Maybe<Scalars['Float']['output']>;
     /** この部屋の作成者。Firebase AuthenticationのUserUidで表現される。 */
     createdBy: Scalars['String']['output'];
-    /** since v0.7.2 */
     isBookmarked: Scalars['Boolean']['output'];
     /** Current revision of Room. Whenever Room is updated, this value is incremented by 1. This value is required when you apply RoomOperation. / Roomの現在のリビジョン。Roomが更新されるたび、この値は1増加する。RoomOperationを適用する際に必要となる。 */
     revision: Scalars['Float']['output'];
-    /** since v0.7.2 */
     role?: Maybe<ParticipantRole>;
     /** room.state をJSON化したもの */
     stateJson: Scalars['String']['output'];
-    /**
-     * データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。
-     * since v0.7.2
-     */
+    /** データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。 */
     updatedAt?: Maybe<Scalars['Float']['output']>;
 };
 

@@ -13,9 +13,7 @@ export class Roles {
 export class GetMyRolesResolver {
     public constructor(private readonly serverConfigService: ServerConfigService) {}
 
-    @Query(() => Roles, {
-        description: 'since v0.7.2',
-    })
+    @Query(() => Roles)
     @Auth(LOGIN)
     public async getMyRoles(@AuthData() auth: AuthDataType): Promise<Roles> {
         return {

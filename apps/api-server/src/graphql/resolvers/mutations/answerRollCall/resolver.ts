@@ -100,7 +100,7 @@ export class AnswerRollCallResolver {
     }
 
     // TODO: テストを書く
-    @Mutation(() => AnswerRollCallResult, { description: 'since v0.7.13' })
+    @Mutation(() => AnswerRollCallResult)
     @Auth(ENTRY)
     public async answerRollCall(
         @Args('roomId') roomId: string,

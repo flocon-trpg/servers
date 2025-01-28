@@ -44,7 +44,7 @@ export class PerformRollCallResolver {
     ) {}
 
     // TODO: テストを書く
-    @Mutation(() => PerformRollCallResult, { description: 'since v0.7.13' })
+    @Mutation(() => PerformRollCallResult)
     @Auth(ENTRY)
     public async performRollCall(
         @Args('input') input: PerformRollCallInput,

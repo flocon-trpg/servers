@@ -25,7 +25,7 @@ class DeleteRoomOperation {
     @Field()
     public deletedBy!: string;
 
-    @Field({ description: 'since v0.7.2' })
+    @Field()
     public deletedByAdmin!: boolean;
 }
 

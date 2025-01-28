@@ -53,7 +53,7 @@ export class DeleteRoomAsAdminResolver {
         return {};
     }
 
-    @Mutation(() => DeleteRoomAsAdminResult, { description: 'since v0.7.2' })
+    @Mutation(() => DeleteRoomAsAdminResult)
     @Auth(ADMIN)
     public async deleteRoomAsAdmin(
         @Args() args: DeleteRoomAsAdminInput,
