@@ -2,7 +2,7 @@ import {
     GetMessagesDoc,
     GetRoomConnectionsDoc,
     GetRoomDoc,
-    OperateDoc,
+    OperateRoomDoc,
     RoomEventDoc,
     UpdateWritingMessageStatusDoc,
 } from '@flocon-trpg/graphql-documents';
@@ -32,9 +32,9 @@ export type GraphQLClient<TGraphQLError> = {
         variables: VariablesOf<typeof GetRoomDoc>,
     ) => Promise<Result<ResultOf<typeof GetRoomDoc>, TGraphQLError>>;
 
-    operateMutation: (
-        variables: VariablesOf<typeof OperateDoc>,
-    ) => Promise<Result<ResultOf<typeof OperateDoc>, TGraphQLError>>;
+    operateRoomMutation: (
+        variables: VariablesOf<typeof OperateRoomDoc>,
+    ) => Promise<Result<ResultOf<typeof OperateRoomDoc>, TGraphQLError>>;
 
     roomEventSubscription: (
         variables: VariablesOf<typeof RoomEventDoc>,
@@ -219,9 +219,12 @@ export class GraphQLClientWithStatus<TGraphQLError> {
     }
 
     operateMutation(
-        variables: Pick<VariablesOf<typeof OperateDoc>, 'revisionFrom' | 'operation' | 'requestId'>,
+        variables: Pick<
+            VariablesOf<typeof OperateRoomDoc>,
+            'revisionFrom' | 'operation' | 'requestId'
+        >,
     ) {
-        return this.source.operateMutation({ ...variables, roomId: this.roomId });
+        return this.source.operateRoomMutation({ ...variables, roomId: this.roomId });
     }
 
     // Urql などではおそらく Subscription が開始したかどうかを検知できないため、Subscription の接続が確立する前に他の Operation を行い、Subscription の値を逃してしまう可能性があるので注意。現時点では Subscription を要求してから少し待って他の Operation を実行してもらうくらいしか対策が思いつかない。

@@ -17,7 +17,7 @@ import {
 } from './mutations/joinRoom/resolver';
 import { LeaveRoomResolver } from './mutations/leaveRoom/resolver';
 import { MakeMessageNotSecretResolver } from './mutations/makeMessageNotSecret/resolver';
-import { OperateResolver } from './mutations/operate/resolver';
+import { OperateRoomResolver } from './mutations/operateRoom/resolver';
 import { PerformRollCallResolver } from './mutations/performRollCall/resolver';
 import { PromoteToPlayerResolver } from './mutations/promoteToPlayer/resolver';
 import { RenameFilesResolver } from './mutations/renameFiles/resolver';
@@ -58,7 +58,7 @@ export const allResolvers = [
     JoinRoomAsSpectatorResolver,
     LeaveRoomResolver,
     MakeMessageNotSecretResolver,
-    OperateResolver,
+    OperateRoomResolver,
     PerformRollCallResolver,
     PromoteToPlayerResolver,
     RenameFilesResolver,

@@ -7,7 +7,7 @@ import { readFileSync } from 'fs';
 import { $free, UpOperation as U, parseState, roomTemplate } from '@flocon-trpg/core';
 import {
     GetMessagesDoc,
-    OperateDoc,
+    OperateRoomDoc,
     RoomPublicMessageFragmentDoc,
     WritePrivateMessageDoc,
     WritePublicMessageDoc,
@@ -339,9 +339,9 @@ namespace Assert {
         };
     }
 
-    export namespace OperateMutation {
+    export namespace OperateRoomMutation {
         export const toBeSuccess = async (
-            source: Promise<OperationResultByDoc<typeof OperateDoc>>,
+            source: Promise<OperationResultByDoc<typeof OperateRoomDoc>>,
         ) => {
             const sourceResult = await source;
             if (sourceResult.data?.result.__typename !== 'OperateRoomSuccessResult') {
@@ -352,7 +352,7 @@ namespace Assert {
         };
 
         export const toBeFailure = async (
-            source: Promise<OperationResultByDoc<typeof OperateDoc>>,
+            source: Promise<OperationResultByDoc<typeof OperateRoomDoc>>,
             errorType: 'GraphQL',
         ) => {
             const sourceResult = await source;
@@ -1495,8 +1495,8 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                         $r: 1,
                         name: textDiff({ prev: Resources.Room.name, next: newRoomName }),
                     };
-                    const operationResult = await Assert.OperateMutation.toBeSuccess(
-                        clients[Resources.UserUid.player1].operateMutation({
+                    const operationResult = await Assert.OperateRoomMutation.toBeSuccess(
+                        clients[Resources.UserUid.player1].operateRoomMutation({
                             roomId,
                             requestId,
                             revisionFrom: roomRevision,
@@ -1576,8 +1576,8 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                     const invalidJSON = JSON.stringify({});
 
                     systemTimeManager.set(2);
-                    await Assert.OperateMutation.toBeFailure(
-                        clients[Resources.UserUid.player1].operateMutation({
+                    await Assert.OperateRoomMutation.toBeFailure(
+                        clients[Resources.UserUid.player1].operateRoomMutation({
                             roomId,
                             requestId,
                             revisionFrom: roomRevision + 1,

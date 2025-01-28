@@ -1,4 +1,3 @@
-/* eslint-disable */
 import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
@@ -425,7 +424,7 @@ export type Mutation = {
     leaveRoom: LeaveRoomResult;
     makeMessageNotSecret: MakeMessageNotSecretResult;
     /** この Mutation を直接実行することは非推奨です。代わりに @flocon-trpg/sdk を用いてください。 */
-    operate: OperateRoomResult;
+    operateRoom: OperateRoomResult;
     performRollCall: PerformRollCallResult;
     promoteToPlayer: PromoteResult;
     renameFiles: Array<Scalars['String']['output']>;
@@ -518,7 +517,7 @@ export type MutationMakeMessageNotSecretArgs = {
     roomId: Scalars['String']['input'];
 };
 
-export type MutationOperateArgs = {
+export type MutationOperateRoomArgs = {
     operation: RoomOperationInput;
     prevRevision: Scalars['Int']['input'];
     requestId: Scalars['String']['input'];
@@ -1658,14 +1657,14 @@ export type WritePrivateMessageMutation = {
           };
 };
 
-export type OperateMutationVariables = Exact<{
+export type OperateRoomMutationVariables = Exact<{
     roomId: Scalars['String']['input'];
     revisionFrom: Scalars['Int']['input'];
     operation: RoomOperationInput;
     requestId: Scalars['String']['input'];
 }>;
 
-export type OperateMutation = {
+export type OperateRoomMutation = {
     __typename?: 'Mutation';
     result:
         | { __typename: 'OperateRoomFailureResult'; failureType: OperateRoomFailureType }
@@ -3869,13 +3868,13 @@ export const WritePrivateMessageDocument = {
         },
     ],
 } as unknown as DocumentNode<WritePrivateMessageMutation, WritePrivateMessageMutationVariables>;
-export const OperateDocument = {
+export const OperateRoomDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'mutation',
-            name: { kind: 'Name', value: 'operate' },
+            name: { kind: 'Name', value: 'operateRoom' },
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
@@ -3919,7 +3918,7 @@ export const OperateDocument = {
                     {
                         kind: 'Field',
                         alias: { kind: 'Name', value: 'result' },
-                        name: { kind: 'Name', value: 'operate' },
+                        name: { kind: 'Name', value: 'operateRoom' },
                         arguments: [
                             {
                                 kind: 'Argument',
@@ -4095,7 +4094,7 @@ export const OperateDocument = {
             },
         },
     ],
-} as unknown as DocumentNode<OperateMutation, OperateMutationVariables>;
+} as unknown as DocumentNode<OperateRoomMutation, OperateRoomMutationVariables>;
 export const GetRoomDocument = {
     kind: 'Document',
     definitions: [

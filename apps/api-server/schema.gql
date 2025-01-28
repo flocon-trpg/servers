@@ -344,7 +344,7 @@ type Mutation {
   makeMessageNotSecret(messageId: String!, roomId: String!): MakeMessageNotSecretResult!
 
   """この Mutation を直接実行することは非推奨です。代わりに @flocon-trpg/sdk を用いてください。"""
-  operate(operation: RoomOperationInput!, prevRevision: Int!, requestId: String!, roomId: String!): OperateRoomResult!
+  operateRoom(operation: RoomOperationInput!, prevRevision: Int!, requestId: String!, roomId: String!): OperateRoomResult!
   performRollCall(input: PerformRollCallInput!): PerformRollCallResult!
   promoteToPlayer(password: String, roomId: String!): PromoteResult!
   renameFiles(input: [RenameFileInput!]!): [String!]!

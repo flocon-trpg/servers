@@ -61,7 +61,7 @@ export class RoomOperationInput {
 }
 
 @ArgsType()
-class OperateArgs {
+class OperateRoomArgs {
     @Field()
     public roomId!: string;
 
@@ -126,7 +126,7 @@ const OperateRoomResult = createUnionType({
     },
 });
 
-type OperateCoreResult =
+type OperateRoomCoreResult =
     | ({
           type: 'success';
           result: OperateRoomSuccessResult;
@@ -146,17 +146,17 @@ type OperateCoreResult =
           result: OperateRoomFailureResult;
       };
 
-async function operateCore({
+async function operateRoomCore({
     args,
     userUid,
     em,
     serverConfig,
 }: {
-    args: OperateArgs;
+    args: OperateRoomArgs;
     userUid: string;
     em: EM;
     serverConfig: ServerConfig;
-}): Promise<OperateCoreResult> {
+}): Promise<OperateRoomCoreResult> {
     // Spectatorであっても自分の名前などはoperateで変更する必要があるため、Spectatorならば無条件で弾くという手法は使えない
 
     const findResult = await findRoomAndMyParticipant({
@@ -316,7 +316,7 @@ async function operateCore({
 }
 
 @Resolver(() => OperateRoomResult)
-export class OperateResolver {
+export class OperateRoomResolver {
     public constructor(
         private readonly mikroOrmService: MikroOrmService,
         private readonly pubSubService: PubSubService,
@@ -328,12 +328,12 @@ export class OperateResolver {
             'この Mutation を直接実行することは非推奨です。代わりに @flocon-trpg/sdk を用いてください。',
     })
     @Auth(ENTRY)
-    public async operate(
-        @Args() args: OperateArgs,
+    public async operateRoom(
+        @Args() args: OperateRoomArgs,
         @AuthData() auth: AuthDataType,
     ): Promise<typeof OperateRoomResult> {
         return await lockByRoomId(args.roomId, async () => {
-            const operateResult = await operateCore({
+            const operateResult = await operateRoomCore({
                 args,
                 userUid: auth.user.userUid,
                 em: await this.mikroOrmService.forkEmForMain(),

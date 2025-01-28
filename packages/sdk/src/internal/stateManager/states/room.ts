@@ -6,7 +6,7 @@ import {
     roomTemplate,
     stringifyUpOperation,
 } from '@flocon-trpg/core';
-import { OperateDoc, RoomGetStateFragmentDoc } from '@flocon-trpg/graphql-documents';
+import { OperateRoomDoc, RoomGetStateFragmentDoc } from '@flocon-trpg/graphql-documents';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 
 type State = S<typeof roomTemplate>;
@@ -19,7 +19,7 @@ export namespace Room {
 
     export const createGetOperation = (
         source: Extract<
-            ResultOf<typeof OperateDoc>['result'],
+            ResultOf<typeof OperateRoomDoc>['result'],
             { __typename?: 'OperateRoomSuccessResult' }
         >['operation'],
     ): UpOperation => {
@@ -29,7 +29,7 @@ export namespace Room {
     export const toGraphQLInput = (
         source: UpOperation,
         clientId: string,
-    ): VariablesOf<typeof OperateDoc>['operation'] => {
+    ): VariablesOf<typeof OperateRoomDoc>['operation'] => {
         return {
             clientId,
             valueJson: stringifyUpOperation(source),

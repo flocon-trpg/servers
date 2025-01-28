@@ -1,6 +1,6 @@
 import {
     GetMessagesDoc,
-    OperateDoc,
+    OperateRoomDoc,
     RoomEventDoc,
     WritePrivateMessageDoc,
     WritePublicMessageDoc,
@@ -453,9 +453,9 @@ export class TestClient {
             .toPromise();
     }
 
-    public operateMutation(variables: VariablesOf<typeof OperateDoc>) {
+    public operateRoomMutation(variables: VariablesOf<typeof OperateRoomDoc>) {
         return this.#core
-            .mutation(OperateDoc, variables, {
+            .mutation(OperateRoomDoc, variables, {
                 requestPolicy: 'network-only',
             })
             .toPromise();

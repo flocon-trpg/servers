@@ -2,7 +2,7 @@ import {
     GetMessagesDoc,
     GetRoomConnectionsDoc,
     GetRoomDoc,
-    OperateDoc,
+    OperateRoomDoc,
     RoomEventDoc,
     UpdateWritingMessageStatusDoc,
 } from '@flocon-trpg/graphql-documents';
@@ -47,9 +47,9 @@ export const createGraphQLClientForRoomClient = (client: Client): GraphQLClient<
                     }
                     return Result.error(result.error!);
                 }),
-        operateMutation: variables =>
+        operateRoomMutation: variables =>
             client
-                .mutation(OperateDoc, variables)
+                .mutation(OperateRoomDoc, variables)
                 .toPromise()
                 .then(result => {
                     if (result.data != null) {

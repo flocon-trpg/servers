@@ -343,14 +343,14 @@ export const WritePrivateMessageDoc = graphql(`
     }
 `);
 
-export const OperateDoc = graphql(`
-    mutation operate(
+export const OperateRoomDoc = graphql(`
+    mutation operateRoom(
         $roomId: String!
         $revisionFrom: Int!
         $operation: RoomOperationInput!
         $requestId: String!
     ) {
-        result: operate(
+        result: operateRoom(
             roomId: $roomId
             prevRevision: $revisionFrom
             operation: $operation
