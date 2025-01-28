@@ -1807,8 +1807,6 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
 
                 describe.each([undefined, 'Kamigakari'])('gameType: %o', gameType => {
                     it('writePublicMessage(1d100) -> edit -> delete mutation', async () => {
-                        jest.useRealTimers();
-
                         await useTestApplication({}, async () => {
                             const userUids = [
                                 author,
@@ -1946,8 +1944,6 @@ describe.each(cases)('tests of resolvers %o', (dbConfig, entryPasswordConfig) =>
                     });
 
                     it('writePublicMessage(s1d100) -> edit -> reveal value -> delete mutation', async () => {
-                        jest.useRealTimers();
-
                         await useTestApplication({}, async () => {
                             const userUids = [
                                 author,
