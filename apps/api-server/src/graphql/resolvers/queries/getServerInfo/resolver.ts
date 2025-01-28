@@ -5,6 +5,7 @@ import { PrereleaseType } from '../../../../enums/PrereleaseType';
 import { ServerConfigService } from '../../../../server-config/server-config.service';
 import { ServerInfo } from '../../../objects/serverInfo';
 
+// この Query はあらゆるバージョンの Web サーバーから呼び出されることを想定しているため、破壊的変更を行うのはなるべく避けること！
 @Resolver()
 export class GetServerInfoResolver {
     public constructor(private readonly serverConfigService: ServerConfigService) {}
