@@ -1,7 +1,8 @@
+import { readFileSync } from 'fs';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
-import WebPackageJson from '../../web-server/package.json';
+import { z } from 'zod';
 import { VERSION } from './VERSION';
 
 let isDayjsExtended = false;
@@ -27,8 +28,13 @@ export const getApiServerTag = (): string => {
     return `api/v${getApiServerVersion()}`;
 };
 
+const packageJsonObject = z.object({ version: z.string() });
+
 export const getWebServerVersion = (): string => {
-    return WebPackageJson.version;
+    // JSON ファイルは TypeScript で import できるが、ビルドしたときのフォルダ構造が変わってしまい nest.js が正常に動作しなくなるので import は使っていない
+    const webPackageJsonString = readFileSync('../../web-server/package.json', 'utf-8');
+    const webPackageJson: unknown = JSON.parse(webPackageJsonString);
+    return packageJsonObject.parse(webPackageJson).version;
 };
 
 export const getWebServerTag = (): string => {

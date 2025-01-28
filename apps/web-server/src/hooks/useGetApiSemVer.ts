@@ -1,11 +1,12 @@
-import { GetServerInfoDocument, PrereleaseType } from '@flocon-trpg/typed-document-node';
 import { SemVer, alpha, beta, rc } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import React from 'react';
 import { useQuery } from 'urql';
+import { GetServerInfoDoc } from '../graphql/GetServerInfoDoc';
+import { PrereleaseType } from '../graphql-codegen/graphql';
 
 export const useGetApiSemVer = () => {
-    const [{ data: serverInfo, error }] = useQuery({ query: GetServerInfoDocument });
+    const [{ data: serverInfo, error }] = useQuery({ query: GetServerInfoDoc });
 
     return React.useMemo(() => {
         if (error != null) {

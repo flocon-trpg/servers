@@ -1,33 +1,16 @@
 import { toOtError } from '@flocon-trpg/core';
 import { loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
+import { Args, ArgsType, Field, Mutation, ObjectType, Resolver } from '@nestjs/graphql';
 import { produce } from 'immer';
-import {
-    Args,
-    ArgsType,
-    Authorized,
-    Ctx,
-    Field,
-    Mutation,
-    ObjectType,
-    PubSub,
-    PubSubEngine,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { ChangeParticipantNameFailureType } from '../../../../enums/ChangeParticipantNameFailureType';
-import { ResolverContext } from '../../../../types';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { convertToMaxLength100String } from '../../../../utils/convertToMaxLength100String';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import {
-    IdOperation,
-    RoomNotFound,
-    ensureAuthorizedUser,
-    operateAsAdminAndFlush,
-    publishRoomEvent,
-} from '../../utils/utils';
+import { IdOperation, RoomNotFound, operateAsAdminAndFlush } from '../../utils/utils';
 
 @ArgsType()
 class ChangeParticipantNameArgs {
@@ -44,18 +27,19 @@ class ChangeParticipantNameResult {
     public failureType?: ChangeParticipantNameFailureType;
 }
 
-@Resolver()
+@Resolver(() => ChangeParticipantNameResult)
 export class ChangeParticipantNameResolver {
-    @Mutation(() => ChangeParticipantNameResult)
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
-    public async changeParticipantName(
-        @Args() args: ChangeParticipantNameArgs,
-        @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine,
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly pubSubService: PubSubService,
+    ) {}
+
+    async #changeParticipantNameCore(
+        args: ChangeParticipantNameArgs,
+        auth: AuthDataType,
     ): Promise<ChangeParticipantNameResult> {
-        const em = context.em;
-        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+        const em = await this.mikroOrmService.forkEmForMain();
+        const authorizedUserUid = auth.user.userUid;
         const flushResult = await operateAsAdminAndFlush({
             em,
             operationType: 'state',
@@ -94,9 +78,20 @@ export class ChangeParticipantNameResolver {
             default:
                 break;
         }
-        await publishRoomEvent(pubSub, flushResult.value);
+        this.pubSubService.roomEvent.next(flushResult.value);
         return {
             failureType: undefined,
         };
+    }
+
+    @Mutation(() => ChangeParticipantNameResult)
+    @Auth(ENTRY)
+    public async changeParticipantName(
+        @Args() args: ChangeParticipantNameArgs,
+        @AuthData() auth: AuthDataType,
+    ): Promise<ChangeParticipantNameResult> {
+        return await lockByRoomId(args.roomId, async () => {
+            return await this.#changeParticipantNameCore(args, auth);
+        });
     }
 }

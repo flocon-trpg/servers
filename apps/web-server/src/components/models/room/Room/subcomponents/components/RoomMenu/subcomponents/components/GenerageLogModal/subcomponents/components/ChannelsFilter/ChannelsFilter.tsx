@@ -1,10 +1,17 @@
 import { $free, $system } from '@flocon-trpg/core';
-import { RoomPrivateMessage, RoomPublicMessage } from '@flocon-trpg/typed-document-node';
+import {
+    RoomPrivateMessageFragmentDoc,
+    RoomPublicMessageFragmentDoc,
+} from '@flocon-trpg/graphql-documents';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import { Checkbox } from 'antd';
 import classNames from 'classnames';
 import React from 'react';
 import { usePublicChannelNames } from '../../../../../../../../hooks/usePublicChannelNames';
 import { flex, flexColumn } from '@/styles/className';
+
+type RoomPublicMessage = ResultOf<typeof RoomPublicMessageFragmentDoc>;
+type RoomPrivateMessage = ResultOf<typeof RoomPrivateMessageFragmentDoc>;
 
 export type ChannelsFilterOptions = {
     includesPublicChannel1: boolean;

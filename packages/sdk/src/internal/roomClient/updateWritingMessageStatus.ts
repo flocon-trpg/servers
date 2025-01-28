@@ -1,4 +1,4 @@
-import { WritingMessageStatusInputType } from '@flocon-trpg/typed-document-node';
+import { WritingMessageStatusInputType } from '@flocon-trpg/graphql-documents';
 import { Subject, bufferTime, mergeMap } from 'rxjs';
 import { GraphQLClientWithStatus } from './graphqlClient';
 

@@ -5,13 +5,6 @@ import {
     sanitizeFilename,
     sanitizeFoldername,
 } from '@flocon-trpg/core';
-import {
-    DeleteFilesDocument,
-    FileListType,
-    GetFilesDocument,
-    GetServerInfoDocument,
-    RenameFilesDocument,
-} from '@flocon-trpg/typed-document-node';
 import { loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import { App, Modal, Upload, UploadProps } from 'antd';
@@ -24,6 +17,11 @@ import { useLatest } from 'react-use';
 import urljoin from 'url-join';
 import { useMutation, useQuery } from 'urql';
 import useConstant from 'use-constant';
+import { DeleteFilesDoc } from '../../../../graphql/DeleteFilesDoc';
+import { GetFilesDoc } from '../../../../graphql/GetFilesDoc';
+import { GetServerInfoDoc } from '../../../../graphql/GetServerInfoDoc';
+import { RenameFilesDoc } from '../../../../graphql/RenameFilesDoc';
+import { FileListType } from '../../../../graphql-codegen/graphql';
 import { FileBrowser, FilePath } from '../FileBrowser/FileBrowser';
 import { ImageView } from '../ImageView/ImageView';
 import { accept } from './utils/helper';
@@ -139,12 +137,12 @@ const useFirebaseStorageFiles = (onSelect: OnSelect | null) => {
 
 const useFloconUploaderFiles = (onSelect: OnSelect | null, pause: boolean) => {
     const [getFilesQueryResult] = useQuery({
-        query: GetFilesDocument,
+        query: GetFilesDoc,
         variables: { input: { fileTagIds: [] } },
         pause,
     });
-    const [, deleteFilesMutation] = useMutation(DeleteFilesDocument);
-    const [, renameFilesMutation] = useMutation(RenameFilesDocument);
+    const [, deleteFilesMutation] = useMutation(DeleteFilesDoc);
+    const [, renameFilesMutation] = useMutation(RenameFilesDoc);
     const data = getFilesQueryResult.data?.result;
     const { open } = useOpenFloconUploaderFile();
     const onSelectRef = useLatest(onSelect);
@@ -403,7 +401,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
     defaultFileTypeFilter,
     height,
 }: Props) => {
-    const [{ data: serverInfo }] = useQuery({ query: GetServerInfoDocument });
+    const [{ data: serverInfo }] = useQuery({ query: GetServerInfoDoc });
     /** `true` ならば enabled、`false` ならば disabled、nullish ならば判定中だということを示します。 */
     const isEmbeddedUploaderEnabled = serverInfo?.result.uploaderEnabled;
     const firebaseStorageFiles = useFirebaseStorageFiles(onSelect);
@@ -419,7 +417,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
     }>();
     const { refetch: refetchFirebaseStorage } = useFirebaseStorageListAllQuery();
     const [, refetchFloconUploader] = useQuery({
-        query: GetFilesDocument,
+        query: GetFilesDoc,
         variables: { input: { fileTagIds: [] } },
         pause: true,
     });

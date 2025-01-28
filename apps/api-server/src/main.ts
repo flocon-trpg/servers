@@ -1,165 +1,74 @@
-import { authToken } from '@flocon-trpg/core';
-import { loggerRef } from '@flocon-trpg/utils';
-import { Result } from '@kizahasi/result';
-import admin from 'firebase-admin';
-import { Context } from 'graphql-ws';
-import { VERSION } from './VERSION';
-import { buildSchema } from './buildSchema';
-import { createORM } from './config/createORM';
-import { createORMOptions } from './config/createORMOptions';
-import { LogConfigParser } from './config/logConfigParser';
-import { ServerConfigParser } from './config/serverConfigParser';
-import { ServerConfig } from './config/types';
-import { InMemoryConnectionManager, pubSub } from './connection/main';
-import { createServer, createServerAsError } from './createServer';
-import { BaasType } from './enums/BaasType';
-import { FIREBASE_PROJECT_ID } from './env';
-import { initializeLogger } from './initializeLogger';
-import { checkMigrationsBeforeStart, doAutoMigrationBeforeStart } from './migrate';
+import { Logger } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import execa from 'execa';
+import { AppAsErrorModule, AppModule, AppWithWebServerModule } from './app.module';
+import { FloconLoggerService } from './flocon-logger/flocon-logger.service';
+import { PortConfigService } from './port-config/port-config.service';
+import { PrepareAppModule } from './prepare-app/prepare-app.module';
+import { SetupServerService } from './setup-server/setup-server.service';
 import { AppConsole } from './utils/appConsole';
-import { loadAsMain } from './utils/commandLineArgs';
-import { PromiseQueue } from './utils/promiseQueue';
+import { WebServerConfigService } from './web-server-config/web-server-config.service';
 
-const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
-    if (serverConfig.entryPassword == null) {
-        AppConsole.infoAsNotice({
-            icon: '🔓',
-            en: 'Entry password is disabled.',
-            ja: 'エントリーパスワードは無効化されています。',
-        });
-    } else {
-        AppConsole.infoAsNotice({
-            icon: '🔐',
-            en: 'Entry password is enabled.',
-            ja: 'エントリーパスワードは有効化されています。',
-        });
-    }
-};
+async function bootstrap() {
+    const prepareAppModule = await NestFactory.create(PrepareAppModule, { logger: false });
+    const portConfig = prepareAppModule.get(PortConfigService).getValueForce();
 
-export const main = async (params: { debug: boolean }): Promise<void> => {
-    const logConfigResult = new LogConfigParser(process.env).logConfig;
-    initializeLogger(logConfigResult);
+    try {
+        const logger = prepareAppModule.get(FloconLoggerService).getLogger();
+        const webServerConfig = prepareAppModule.get(WebServerConfigService).getValueForce();
 
-    AppConsole.infoAsNotice({
-        en: `Flocon API Server v${VERSION.toString()}`,
-    });
-
-    const port = process.env.PORT ?? 4000;
-
-    const onError = async (message: string) => {
-        loggerRef.error(message);
-        await createServerAsError({
-            port,
-        });
-    };
-
-    const commandLineArgs = await loadAsMain();
-
-    const serverConfigParser = new ServerConfigParser(process.env);
-    const serverConfigResult = serverConfigParser.serverConfig;
-
-    if (serverConfigResult.isError) {
-        await onError(serverConfigResult.error);
-        return;
-    }
-
-    const serverConfig = serverConfigResult.value;
-    const orm = await createORM(createORMOptions(serverConfig, commandLineArgs.db, 'dist'));
-
-    if (orm.isError) {
-        await onError(orm.error);
-        return;
-    }
-
-    // credentialにundefinedを渡すと`Invalid Firebase app options passed as the first argument to initializeApp() for the app named "[DEFAULT]". The "credential" property must be an object which implements the Credential interface.`というエラーが出るので回避している
-    if (serverConfig.firebaseAdminSecret == null) {
-        if (serverConfig.firebaseProjectId == null) {
-            await onError(
-                `FirebaseのプロジェクトIDを取得できませんでした。${FIREBASE_PROJECT_ID} にプロジェクトIDをセットしてください。`,
-            );
-            return;
-        }
-
-        admin.initializeApp({
-            projectId: serverConfig.firebaseProjectId,
-        });
-    } else {
-        const projectId =
-            serverConfig.firebaseAdminSecret.project_id ?? serverConfig.firebaseProjectId;
-        admin.initializeApp({
-            projectId,
-            credential: admin.credential.cert({
-                projectId,
-                clientEmail: serverConfig.firebaseAdminSecret.client_email,
-                privateKey: serverConfig.firebaseAdminSecret.private_key,
-            }),
-        });
-    }
-
-    const schema = await buildSchema(serverConfig)({ emitSchemaFile: false, pubSub });
-    if (serverConfig.autoMigration) {
-        await doAutoMigrationBeforeStart(orm.value);
-    }
-    await checkMigrationsBeforeStart(orm.value);
-    logEntryPasswordConfig(serverConfig);
-
-    const getDecodedIdToken = async (
-        idToken: string,
-    ): Promise<Result<admin.auth.DecodedIdToken & { type: BaasType.Firebase }, unknown>> => {
-        const decodedIdToken = await admin
-            .auth()
-            .verifyIdToken(idToken)
-            .then(Result.ok)
-            .catch(Result.error);
-        if (decodedIdToken.isError) {
-            return decodedIdToken;
-        }
-        return Result.ok({
-            ...decodedIdToken.value,
-            type: BaasType.Firebase,
-        });
-    };
-
-    const getDecodedIdTokenFromBearer = async (
-        bearer: string | undefined,
-    ): Promise<
-        Result<admin.auth.DecodedIdToken & { type: BaasType.Firebase }, unknown> | undefined
-    > => {
-        // bearerのフォーマットはだいたいこんな感じ
-        // 'Bearer aNGoGo3ngC.oepGJoGoeo34Ha.Oge03mvQgeo4H'
-        if (bearer == null || !bearer.startsWith('Bearer ')) {
-            return undefined;
-        }
-        const idToken = bearer.replace('Bearer ', '');
-        return await getDecodedIdToken(idToken);
-    };
-
-    const getDecodedIdTokenFromWsContext = async (ctx: Context) => {
-        let authTokenValue: string | undefined;
-        if (ctx.connectionParams != null) {
-            const authTokenValueAsUnknown = ctx.connectionParams[authToken];
-            if (typeof authTokenValueAsUnknown === 'string') {
-                authTokenValue = authTokenValueAsUnknown;
+        if (webServerConfig.enableWebServerExperimental) {
+            AppConsole.infoAsNotice({
+                ja: '同梱Webサーバーが有効化されています。',
+                en: 'The bundled web server is enabled.',
+            });
+            if (webServerConfig.skipBuildWebServerExperimental) {
+                AppConsole.infoAsNotice({
+                    ja: '同梱Webサーバーのビルドをスキップします。',
+                    en: 'Skip building the bundled web server.',
+                });
+            } else {
+                AppConsole.infoAsNotice({
+                    ja: '同梱Webサーバーのビルドを開始します。これには時間がかかる場合があります。',
+                    en: 'Start building the bundled web server. This may take some time.',
+                });
+                const buildResult = await execa(`yarn run build-web-server`);
+                if (buildResult.failed) {
+                    AppConsole.fatal({
+                        ja: '同梱Webサーバーのビルドに失敗しました。Webサーバーに依存するパッケージがビルドされていない可能性があります。それが原因である場合は、web-server ディレクトリで `yarn build:deps` もしくは `yarn build` を実行することで解決できます。',
+                        en: 'Failed to build the bundled web server. It is likely that the packages that depend on the web server are not built. If so, you can resolve it by running `yarn build:deps` or `yarn build` in the web-server directory.',
+                    });
+                    throw new Error();
+                }
+                AppConsole.infoAsNotice({
+                    ja: '同梱Webサーバーのビルドが完了しました。',
+                    en: 'The bundled web server has been built.',
+                });
             }
         }
-        return authTokenValue == null ? undefined : await getDecodedIdToken(authTokenValue);
-    };
-
-    const connectionManager = new InMemoryConnectionManager();
-
-    // TODO: queueLimitの値をきちんと決める
-    const promiseQueue = new PromiseQueue({ queueLimit: 50 });
-
-    await createServer({
-        promiseQueue,
-        serverConfig,
-        connectionManager,
-        em: orm.value.em,
-        schema,
-        debug: params.debug,
-        port: process.env.PORT ?? 4000,
-        getDecodedIdTokenFromExpressRequest: context =>
-            getDecodedIdTokenFromBearer(context.headers.authorization),
-        getDecodedIdTokenFromWsContext,
-    });
-};
+        const app = webServerConfig.enableWebServerExperimental
+            ? await NestFactory.create(AppWithWebServerModule, { logger })
+            : await NestFactory.create(AppModule, { logger });
+        const setupServerService = app.get(SetupServerService);
+        const setupResult = await setupServerService.setup();
+        if (setupResult.isError) {
+            Logger.fatal(setupResult.error);
+            throw new Error();
+        }
+        app.enableCors();
+        await app.listen(portConfig.port);
+        AppConsole.infoAsNotice({
+            en: `🚀 Server ready at http://localhost:${portConfig.port}`,
+        });
+    } catch {
+        const app = await NestFactory.create(AppAsErrorModule);
+        app.enableCors();
+        await app.listen(portConfig.port);
+        AppConsole.infoAsNotice({
+            en: `⚠️ Server ready at http://localhost:${
+                portConfig.port
+            }, but not working. Please check the logs.`,
+        });
+    }
+}
+void bootstrap();

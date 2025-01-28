@@ -22,8 +22,10 @@
     },
     "dependencies": {
         "@flocon-trpg/core": "workspace:^",
-        "@flocon-trpg/typed-document-node": "workspace:^",
+        "@flocon-trpg/graphql-documents": "workspace:^",
         "@flocon-trpg/utils": "workspace:^",
+        "@graphql-typed-document-node/core": "^3.2.0",
+        "graphql": "^16.10.0",
         "immer": "^10.0.0",
         "rxjs": "^7.5.6"
     },

@@ -1,13 +1,7 @@
 /** @jsxImportSource @emotion/react */
-import * as Icon from '@ant-design/icons';
 import * as Icons from '@ant-design/icons';
 import { css } from '@emotion/react';
-import {
-    DeleteMessageDocument,
-    EditMessageDocument,
-    MakeMessageNotSecretDocument,
-    WritingMessageStatusType,
-} from '@flocon-trpg/typed-document-node';
+import { WritingMessageStatusType } from '@flocon-trpg/graphql-documents';
 import { keyNames, recordToMap } from '@flocon-trpg/utils';
 import {
     CustomMessage,
@@ -40,6 +34,10 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai/react';
 import moment from 'moment';
 import React from 'react';
 import { CombinedError, useMutation } from 'urql';
+import { DeleteMessageDoc } from '../../../../../../../graphql/DeleteMessageDoc';
+import { EditMessageDoc } from '../../../../../../../graphql/EditMessageDoc';
+import { MakeMessageNotSecretDoc } from '../../../../../../../graphql/MakeMessageNotSecretDoc';
+import { EditMessageDocument } from '../../../../../../../graphql-codegen/graphql';
 import { useMessageFilter } from '../../hooks/useMessageFilter';
 import { usePublicChannelNames } from '../../hooks/usePublicChannelNames';
 import { useRoomId } from '../../hooks/useRoomId';
@@ -414,7 +412,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
     const { message, showPrivateMessageMembers, publicChannelNames } = props;
 
     const firebaseUser = useAtomValue(firebaseUserValueAtom);
-    const [, editMessageMutation] = useMutation(EditMessageDocument);
+    const [, editMessageMutation] = useMutation(EditMessageDoc);
     const editMessageAwaited = useSingleExecuteAsync1(
         async ({
             text,
@@ -435,14 +433,14 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
             }).then(() => onResolve());
         },
     );
-    const [, deleteMessageMutation] = useMutation(DeleteMessageDocument);
+    const [, deleteMessageMutation] = useMutation(DeleteMessageDoc);
     const deleteMessageAwaited = useSingleExecuteAsync1(async (messageId: string) => {
         if (roomId == null) {
             return;
         }
         await deleteMessageMutation({ messageId, roomId });
     });
-    const [, makeMessageNotSecret] = useMutation(MakeMessageNotSecretDocument);
+    const [, makeMessageNotSecret] = useMutation(MakeMessageNotSecretDoc);
     const makeMessageNotSecretAwaited = useSingleExecuteAsync1(async (messageId: string) => {
         if (roomId == null) {
             return;
@@ -679,7 +677,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                         trigger={['click']}
                     >
                         <Button type="text" size="small">
-                            <Icon.EllipsisOutlined />
+                            <Icons.EllipsisOutlined />
                         </Button>
                     </Dropdown>
                 )}
@@ -942,13 +940,13 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                                             {
                                                 key: '編集@RoomMessages',
                                                 label: '編集',
-                                                icon: <Icon.SettingOutlined />,
+                                                icon: <Icons.SettingOutlined />,
                                                 onClick: () => setEditingTabConfigKey(tab.key),
                                             },
                                             {
                                                 key: '削除@RoomMessages',
                                                 label: '削除',
-                                                icon: <Icon.DeleteOutlined />,
+                                                icon: <Icons.DeleteOutlined />,
                                                 onClick: () => onTabDelete(),
                                             },
                                         ]}
@@ -968,7 +966,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                                     size="small"
                                     onClick={e => e.stopPropagation()}
                                 >
-                                    <Icon.EllipsisOutlined />
+                                    <Icons.EllipsisOutlined />
                                 </Button>
                             </Dropdown>
                         </div>

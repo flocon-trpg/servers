@@ -1,36 +1,32 @@
 import { ParticipantRole, Player, Spectator, State, participantTemplate } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
-import { produce } from 'immer';
 import {
     Args,
     ArgsType,
-    Authorized,
-    Ctx,
     Field,
     Mutation,
     ObjectType,
-    PubSub,
-    PubSubEngine,
     Resolver,
-    UseMiddleware,
     createUnionType,
-} from 'type-graphql';
-import * as Room$MikroORM from '../../../../entities/room/entity';
+} from '@nestjs/graphql';
+import { produce } from 'immer';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { JoinRoomFailureType } from '../../../../enums/JoinRoomFailureType';
-import { ResolverContext } from '../../../../types';
+import * as Room$MikroORM from '../../../../mikro-orm/entities/room/entity';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { ServerConfig, ServerConfigService } from '../../../../server-config/server-config.service';
+import { EM } from '../../../../types';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { convertToMaxLength100String } from '../../../../utils/convertToMaxLength100String';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import { RoomOperation } from '../../../objects/room';
 import { RoomEventPayload } from '../../subsciptions/roomEvent/payload';
 import {
     IdOperation,
     RoomNotFound,
     bcryptCompareNullable,
-    ensureAuthorizedUser,
     operateAsAdminAndFlush,
-    publishRoomEvent,
 } from '../../utils/utils';
 
 type ParticipantState = State<typeof participantTemplate>;
@@ -65,7 +61,7 @@ export const JoinRoomResult = createUnionType({
 @ArgsType()
 class JoinRoomArgs {
     @Field()
-    public id!: string;
+    public roomId!: string;
 
     @Field()
     public name!: string;
@@ -74,13 +70,17 @@ class JoinRoomArgs {
     public password?: string;
 }
 
-const joinRoomCore = async ({
+const joinRoomCoreWithoutLock = async ({
     args,
-    context,
+    serverConfig,
+    em,
+    userUid,
     strategy,
 }: {
     args: JoinRoomArgs;
-    context: ResolverContext;
+    serverConfig: ServerConfig;
+    em: EM;
+    userUid: string;
     // 新たにRoleを設定する場合はParticipantRoleを返す。Roleを変えない場合は'id'を返す。
     strategy: (params: {
         room: Room$MikroORM.Room;
@@ -93,15 +93,13 @@ const joinRoomCore = async ({
         | 'id'
     >;
 }): Promise<{ result: typeof JoinRoomResult; payload: RoomEventPayload | undefined }> => {
-    const em = context.em;
-    const authorizedUser = ensureAuthorizedUser(context);
     const result = await operateAsAdminAndFlush({
         em,
-        roomId: args.id,
-        roomHistCount: context.serverConfig.roomHistCount,
+        roomId: args.roomId,
+        roomHistCount: serverConfig.roomHistCount,
         operationType: 'state',
         operation: async (roomState, { room }) => {
-            const me = roomState.participants?.[authorizedUser.userUid];
+            const me = roomState.participants?.[userUid];
             const strategyResult = await strategy({ room, args, me });
             switch (strategyResult) {
                 case JoinRoomFailureType.WrongPassword:
@@ -113,7 +111,7 @@ const joinRoomCore = async ({
                     break;
             }
             const nextRoomState = produce(roomState, roomState => {
-                const target = roomState.participants?.[authorizedUser.userUid];
+                const target = roomState.participants?.[userUid];
                 if (target != null) {
                     target.role = strategyResult;
                     return;
@@ -121,7 +119,7 @@ const joinRoomCore = async ({
                 if (roomState.participants == null) {
                     roomState.participants = {};
                 }
-                roomState.participants[authorizedUser.userUid] = {
+                roomState.participants[userUid] = {
                     $v: 2,
                     $r: 1,
                     name: convertToMaxLength100String(args.name),
@@ -148,25 +146,37 @@ const joinRoomCore = async ({
     }
     return {
         result: {
-            operation: result.value.generateOperation(authorizedUser.userUid),
+            operation: result.value.generateOperation(userUid),
         },
         payload: result.value,
     };
 };
 
-@Resolver()
-export class JoinRoomResolver {
+const joinRoomCore = async (functionArgs: Parameters<typeof joinRoomCoreWithoutLock>[0]) => {
+    return await lockByRoomId(functionArgs.args.roomId, async () => {
+        return await joinRoomCoreWithoutLock(functionArgs);
+    });
+};
+
+@Resolver(() => JoinRoomResult)
+export class JoinRoomAsPlayerResolver {
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly pubSubService: PubSubService,
+        private readonly serverConfigService: ServerConfigService,
+    ) {}
+
     @Mutation(() => JoinRoomResult)
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
+    @Auth(ENTRY)
     public async joinRoomAsPlayer(
         @Args() args: JoinRoomArgs,
-        @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine,
+        @AuthData() auth: AuthDataType,
     ): Promise<typeof JoinRoomResult> {
         const { result, payload } = await joinRoomCore({
             args,
-            context,
+            serverConfig: this.serverConfigService.getValueForce(),
+            em: await this.mikroOrmService.forkEmForMain(),
+            userUid: auth.user.userUid,
             strategy: async ({ me, room }) => {
                 if (me != null) {
                     switch (me.role) {
@@ -183,22 +193,30 @@ export class JoinRoomResolver {
             },
         });
         if (payload != null) {
-            await publishRoomEvent(pubSub, payload);
+            this.pubSubService.roomEvent.next(payload);
         }
         return result;
     }
+}
 
+@Resolver(() => JoinRoomResult)
+export class JoinRoomAsSpectatorResolver {
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly pubSubService: PubSubService,
+        private readonly serverConfigService: ServerConfigService,
+    ) {}
     @Mutation(() => JoinRoomResult)
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
+    @Auth(ENTRY)
     public async joinRoomAsSpectator(
         @Args() args: JoinRoomArgs,
-        @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine,
+        @AuthData() auth: AuthDataType,
     ): Promise<typeof JoinRoomResult> {
         const { result, payload } = await joinRoomCore({
             args,
-            context,
+            serverConfig: this.serverConfigService.getValueForce(),
+            em: await this.mikroOrmService.forkEmForMain(),
+            userUid: auth.user.userUid,
             strategy: async ({ me, room }) => {
                 if (me != null) {
                     switch (me.role) {
@@ -215,7 +233,7 @@ export class JoinRoomResolver {
             },
         });
         if (payload != null) {
-            await publishRoomEvent(pubSub, payload);
+            this.pubSubService.roomEvent.next(payload);
         }
         return result;
     }

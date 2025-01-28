@@ -1,21 +1,11 @@
-import {
-    Args,
-    ArgsType,
-    Authorized,
-    Ctx,
-    Field,
-    Mutation,
-    PubSub,
-    PubSubEngine,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
-import { RoomPrvMsg, RoomPubMsg } from '../../../../entities/roomMessage/entity';
+import { Args, ArgsType, Field, Mutation, Resolver } from '@nestjs/graphql';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { DeleteMessageFailureType } from '../../../../enums/DeleteMessageFailureType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import { RoomPrvMsg, RoomPubMsg } from '../../../../mikro-orm/entities/roomMessage/entity';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import {
     DeleteMessageResult,
     RoomPrivateMessageUpdate,
@@ -24,9 +14,7 @@ import {
 import {
     createRoomPrivateMessageUpdate,
     createRoomPublicMessageUpdate,
-    ensureAuthorizedUser,
     findRoomAndMyParticipant,
-    publishRoomEvent,
 } from '../../utils/utils';
 
 @ArgsType()
@@ -38,18 +26,19 @@ class MessageIdArgs {
     public messageId!: string;
 }
 
-@Resolver()
+@Resolver(() => DeleteMessageResult)
 export class DeleteMessageResolver {
-    @Mutation(() => DeleteMessageResult)
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
-    public async deleteMessage(
-        @Args() args: MessageIdArgs,
-        @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine,
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly pubSubService: PubSubService,
+    ) {}
+
+    async #deleteMessageCore(
+        args: MessageIdArgs,
+        auth: AuthDataType,
     ): Promise<DeleteMessageResult> {
-        const em = context.em;
-        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+        const em = await this.mikroOrmService.forkEmForMain();
+        const authorizedUserUid = auth.user.userUid;
         const findResult = await findRoomAndMyParticipant({
             em,
             userUid: authorizedUserUid,
@@ -85,7 +74,7 @@ export class DeleteMessageResolver {
             await em.flush();
 
             const payloadValue: RoomPublicMessageUpdate = createRoomPublicMessageUpdate(publicMsg);
-            await publishRoomEvent(pubSub, {
+            this.pubSubService.roomEvent.next({
                 type: 'messageUpdatePayload',
                 sendTo: findResult.participantIds(),
                 roomId: room.id,
@@ -115,7 +104,7 @@ export class DeleteMessageResolver {
 
             const payloadValue: RoomPrivateMessageUpdate =
                 createRoomPrivateMessageUpdate(privateMsg);
-            await publishRoomEvent(pubSub, {
+            this.pubSubService.roomEvent.next({
                 type: 'messageUpdatePayload',
                 sendTo: findResult.participantIds(),
                 roomId: room.id,
@@ -128,5 +117,17 @@ export class DeleteMessageResolver {
         return {
             failureType: DeleteMessageFailureType.MessageNotFound,
         };
+    }
+
+    @Mutation(() => DeleteMessageResult)
+    @Auth(ENTRY)
+    public async deleteMessage(
+        @Args() args: MessageIdArgs,
+        @AuthData() auth: AuthDataType,
+    ): Promise<DeleteMessageResult> {
+        return await lockByRoomId(
+            args.roomId,
+            async () => await this.#deleteMessageCore(args, auth),
+        );
     }
 }

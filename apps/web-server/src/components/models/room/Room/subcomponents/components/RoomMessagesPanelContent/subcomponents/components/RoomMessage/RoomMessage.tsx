@@ -7,11 +7,11 @@ import {
     replace,
 } from '@flocon-trpg/core';
 import {
-    PieceLogFragment,
+    PieceLogFragmentDoc,
     PieceLogType,
-    RoomPrivateMessageFragment,
-    RoomPublicMessageFragment,
-} from '@flocon-trpg/typed-document-node';
+    RoomPrivateMessageFragmentDoc,
+    RoomPublicMessageFragmentDoc,
+} from '@flocon-trpg/graphql-documents';
 import { recordToMap } from '@flocon-trpg/utils';
 import {
     CustomMessage,
@@ -20,6 +20,7 @@ import {
     privateMessage,
     publicMessage,
 } from '@flocon-trpg/web-server-utils';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import { Popover, Tooltip } from 'antd';
 import classNames from 'classnames';
 import React from 'react';
@@ -31,6 +32,10 @@ import { Jdenticon } from '@/components/ui/Jdenticon/Jdenticon';
 import { NewTabLinkify } from '@/components/ui/NewTabLinkify/NewTabLinkify';
 import { flex, flexRow, itemsCenter } from '@/styles/className';
 import { PublicChannelNames } from '@/utils/types';
+
+type PieceLogFragment = ResultOf<typeof PieceLogFragmentDoc>;
+type RoomPrivateMessageFragment = ResultOf<typeof RoomPrivateMessageFragmentDoc>;
+type RoomPublicMessageFragment = ResultOf<typeof RoomPublicMessageFragmentDoc>;
 
 type ParticipantState = State<typeof participantTemplate>;
 

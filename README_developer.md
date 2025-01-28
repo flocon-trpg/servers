@@ -126,20 +126,8 @@ yarn run storybook
 
 一例として、次のコマンドを実行することで、全てのパッケージをテストできます。
 
-#### Linux
-
 ```console
 yarn run build
-REDIS_TEST=0 MYSQL_TEST=0 POSTGRESQL_TEST=0 yarn run test
-```
-
-#### Powershell
-
-```powershell
-yarn run build
-$env:REDIS_TEST=0
-$env:MYSQL_TEST=0
-$env:POSTGRESQL_TEST=0
 yarn run test
 ```
 
@@ -147,17 +135,36 @@ yarn run test
 
 パッケージのディレクトリ内で`yarn run test`を実行することで、パッケージ単体をテストすることもできます。
 
-#### 環境変数
+#### データベースを用いるテストの設定
 
-`REDIS_TEST`に falsy な値をセットすることで Redis を使用したテストをスキップできます。Redis を使用したテストを実行する場合は Redis サーバーを起動しておく必要があります。
+Flocon のテストには、リレーショナルデータベースを使用したテストが含まれます。
 
-Redis を使用したテストは`./packages/cache`パッケージにのみ存在します。このパッケージをテストしない場合は`REDIS_TEST`の値は利用されません。現時点では Flocon の Web サーバーと API サーバーでは Redis を使っていないため、Redis を使用したテストは基本的にスキップして構いません。
+デフォルトでは SQLite のみが用いられますが、環境変数の `MYSQL_TEST`、`POSTGRESQL_TEST` に値をセットすることで MySQL や PostgreSQL を用いたテストを実行することもできます。値の形式はそれぞれ `MYSQL`、`POSTGRESQL` と同じです。SQLite でも、`SQLITE_TEST` に `SQLITE` と同様の形式の値をセットすることでテストに用いるデータベースの指定ができます。
 
-`MYSQL_TEST`、`POSTGRESQL_TEST`、`SQLITE_TEST`に falsy な値をセットすることで、それぞれのリレーショナルデータベースを使用したテストをスキップできます。MySQL や PostgreSQL を使用したテストを実行する場合は、それぞれのデータベースを準備しておく必要があります。SQLite は事前の準備は必要ありません。
-
-テストに使われるデータベースの URL は [./apps/api-server/test/utils/databaseConfig.ts](./apps/api-server/test/utils/databaseConfig.ts) に記述されています。databaseConfig.ts を編集してテストしても構いません。
+SQLite のテストではデータベースの指定をせずとも自動的に SQLite のファイルが作成されるので指定は必須ではありません。指定したい場合は PostgreSQL や MySQL のテストのときと同様に `SQLITE_TEST` に `SQLITE` と同じ形式の値をセットすることができます。`SQLITE_TEST` ではそれ以外にも boolean-like な値をセットすることもでき、falsy な値をセットすることで SQLite のテストをスキップさせることができます。truthy な値をセットした場合はデフォルトの動作と同じように SQLite のテストが実行されます。
 
 リレーショナルデータベースを使用したテストは [api-server](./apps/api-server) パッケージにのみ存在します。このパッケージをテストしない場合は`MYSQL_TEST`、`POSTGRESQL_TEST`、`SQLITE_TEST`の値は利用されません。
+
+例として、SQLite でのテストは行わず、MySQL と PostgreSQL のテストを行うコマンドは下のとおりになります。
+
+Linux の場合:
+
+```console
+yarn run build
+SQLITE_TEST=0 MYSQL_TEST="{\"clientUrl\": \"mysql://test:test@localhost:3306/test\"}" POSTGRESQL_TEST="{\"clientUrl\": \"postgresql://test:test@localhost:5432/test\"}" yarn run test
+```
+
+PowerShell の場合:
+
+```powershell
+yarn run build
+$env:SQLITE_TEST=0
+$env:MYSQL_TEST="{\"clientUrl\": \"mysql://test:test@localhost:3306/test\"}"
+$env:POSTGRESQL_TEST="{\"clientUrl\": \"postgresql://test:test@localhost:5432/test\"}"
+yarn run test
+```
+
+Flocon のテストには、Redis を使用したテストも含まれます。デフォルトでは Redis を用いたテストはスキップされます。`REDIS_TEST`に truthy な値をセットすることで Redis を使用したテストを実行できます。Redis を使用したテストを実行する場合は Redis サーバーを起動しておく必要があります。Redis を使用したテストは`./packages/cache`パッケージにのみ存在します。このパッケージをテストしない場合は`REDIS_TEST`の値は利用されません。現時点では Flocon の Web サーバーと API サーバーでは Redis を使っていないため、Redis を使用したテストは基本的にスキップして構いません。
 
 ## ブランチ名について
 

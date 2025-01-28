@@ -1,5 +1,9 @@
-import { FileSourceType, PieceLogType, RoomMessages } from '@flocon-trpg/typed-document-node';
+import { FileSourceType, GetMessagesDoc, PieceLogType } from '@flocon-trpg/graphql-documents';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import { Message, pieceLog, privateMessage, publicMessage, soundEffect } from '../src';
+
+type GetRoomMessagesQueryResult = ResultOf<typeof GetMessagesDoc>['result'];
+type RoomMessages = Extract<GetRoomMessagesQueryResult, { __typename?: 'RoomMessages' }>;
 
 export type TestCustomMessage = string;
 

@@ -1,22 +1,18 @@
 import {
     Args,
     ArgsType,
-    Authorized,
-    Ctx,
     Field,
     Mutation,
     ObjectType,
     Resolver,
-    UseMiddleware,
     createUnionType,
-} from 'type-graphql';
-import * as Room$MikroORM from '../../../../entities/room/entity';
+} from '@nestjs/graphql';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { UpdateBookmarkFailureType } from '../../../../enums/UpdateBookmarkFailureType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import { ensureAuthorizedUser } from '../../utils/utils';
+import * as Room$MikroORM from '../../../../mikro-orm/entities/room/entity';
+import { User } from '../../../../mikro-orm/entities/user/entity';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 
 @ArgsType()
 class UpdateBookmarkArgs {
@@ -58,15 +54,16 @@ export const UpdateBookmarkResult = createUnionType({
 
 @Resolver()
 export class UpdateBookmarkResolver {
+    public constructor(private readonly mikroOrmService: MikroOrmService) {}
+
     @Mutation(() => UpdateBookmarkResult)
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
+    @Auth(ENTRY)
     public async updateBookmark(
         @Args() args: UpdateBookmarkArgs,
-        @Ctx() context: ResolverContext,
+        @AuthData() auth: AuthDataType,
     ): Promise<typeof UpdateBookmarkResult> {
-        const em = context.em;
-        const authorizedUser = ensureAuthorizedUser(context);
+        const em = await this.mikroOrmService.forkEmForMain();
+        const authorizedUser = await em.findOneOrFail(User, { userUid: auth.user.userUid });
         const room = await em.findOne(Room$MikroORM.Room, { id: args.roomId });
         if (room == null) {
             return {

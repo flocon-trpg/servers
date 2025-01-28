@@ -1,31 +1,20 @@
 import { $system, Spectator } from '@flocon-trpg/core';
-import { Reference, ref } from '@mikro-orm/core';
-import {
-    Args,
-    ArgsType,
-    Authorized,
-    Ctx,
-    Field,
-    PubSub,
-    PubSubEngine,
-    Query,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
-import { Room } from '../../../../entities/room/entity';
-import { RoomPubCh, RoomPubMsg } from '../../../../entities/roomMessage/entity';
+import { ref } from '@mikro-orm/core';
+import { Args, ArgsType, Field, Query, Resolver } from '@nestjs/graphql';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { GetRoomLogFailureType } from '../../../../enums/GetRoomLogFailureType';
-import { EM, ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import { Room } from '../../../../mikro-orm/entities/room/entity';
+import { RoomPubCh, RoomPubMsg } from '../../../../mikro-orm/entities/roomMessage/entity';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { EM } from '../../../../types';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { GetRoomLogFailureResultType, GetRoomLogResult } from '../../../objects/roomMessage';
 import {
     createRoomPublicMessage,
-    ensureAuthorizedUser,
     findRoomAndMyParticipant,
     getRoomMessagesFromDb,
-    publishRoomEvent,
 } from '../../utils/utils';
 
 @ArgsType()
@@ -35,15 +24,7 @@ class GetLogArgs {
 }
 
 // flushはこのメソッドでは行われないため、flushのし忘れに注意。
-export const writeSystemMessage = async ({
-    em,
-    text,
-    room,
-}: {
-    em: EM;
-    text: string;
-    room: Room;
-}) => {
+const writeSystemMessage = async ({ em, text, room }: { em: EM; text: string; room: Room }) => {
     const entity = new RoomPubMsg({ initText: text, initTextSource: undefined });
     entity.initText = text;
     let ch = await em.findOne(RoomPubCh, { key: $system, room: room.id });
@@ -59,16 +40,14 @@ export const writeSystemMessage = async ({
 
 @Resolver()
 export class GetLogResolver {
-    @Query(() => GetRoomLogResult)
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(10))
-    public async getLog(
-        @Args() args: GetLogArgs,
-        @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine,
-    ): Promise<typeof GetRoomLogResult> {
-        const em = context.em;
-        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly pubSubService: PubSubService,
+    ) {}
+
+    async #getLogCore(args: GetLogArgs, auth: AuthDataType): Promise<typeof GetRoomLogResult> {
+        const em = await this.mikroOrmService.forkEmForMain();
+        const authorizedUserUid = auth.user.userUid;
         const findResult = await findRoomAndMyParticipant({
             em,
             userUid: authorizedUserUid,
@@ -106,7 +85,7 @@ export class GetLogResolver {
         });
         await em.flush();
 
-        await publishRoomEvent(pubSub, {
+        this.pubSubService.roomEvent.next({
             type: 'messageUpdatePayload',
             sendTo: findResult.participantIds(),
             roomId: room.id,
@@ -118,5 +97,15 @@ export class GetLogResolver {
             visibleTo: undefined,
         });
         return messages;
+    }
+
+    @Query(() => GetRoomLogResult)
+    @Auth(ENTRY)
+    public async getLog(
+        @Args() args: GetLogArgs,
+        @AuthData() auth: AuthDataType,
+    ): Promise<typeof GetRoomLogResult> {
+        // lock が必要かどうかは微妙
+        return await lockByRoomId(args.roomId, async () => await this.#getLogCore(args, auth));
     }
 }

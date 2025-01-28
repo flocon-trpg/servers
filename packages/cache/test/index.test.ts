@@ -7,10 +7,10 @@ To run tests in this file, you need to prepare a redis instance. If you want to 
 */
 
 const REDIS_TEST = process.env.REDIS_TEST;
-const skipRedis = parseStringToBoolean(REDIS_TEST).value === false;
+const skipRedis = parseStringToBoolean(REDIS_TEST).value !== true;
 
 if (skipRedis) {
-    loggerRef.info('Skips Redis tests because `REDIS_TEST` is falsy.');
+    loggerRef.info('Skips Redis tests because `REDIS_TEST` is not truthy.');
 }
 
 const createEach = (redis: Redis): Cache[] => {

@@ -2,7 +2,7 @@ import { Logger } from 'pino';
 import { PinoLogLevel } from './parsePinoLogLevel';
 interface LogFn {
     (msg: string, ...args: readonly unknown[]): void;
-    (obj: Error | Record<string, unknown>, msg?: string, ...args: readonly unknown[]): void;
+    (obj: Error | Record<string, unknown>, msg: string, ...args: readonly unknown[]): void;
 }
 export declare const createDefaultLogger: (args?: {
     logLevel?: PinoLogLevel;

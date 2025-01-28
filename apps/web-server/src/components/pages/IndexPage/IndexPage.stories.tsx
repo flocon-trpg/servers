@@ -1,15 +1,18 @@
-import * as Doc from '@flocon-trpg/typed-document-node';
+import { PrereleaseType } from '@flocon-trpg/graphql-documents';
 import { loggerRef } from '@flocon-trpg/utils';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { Client, CombinedError } from 'urql';
 import { fromValue, never } from 'wonka';
+import { GetMyRolesDoc } from '../../../graphql/GetMyRolesDoc';
+import { GetServerInfoDoc } from '../../../graphql/GetServerInfoDoc';
 import { IndexPage } from './IndexPage';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { createDummyUrqlOperation, createMockUrqlClient } from '@/mocks';
 import { withPromise } from '@/mocks/withPromise';
 
-type Version = Doc.GetServerInfoQuery['result']['version'];
+type Version = ResultOf<typeof GetServerInfoDoc>['result']['version'];
 
 const createMockClient = (version: Version | 'error' | 'never'): Client => {
     return createMockUrqlClient({
@@ -30,8 +33,8 @@ const createMockClient = (version: Version | 'error' | 'never'): Client => {
                     break;
             }
             switch (query.query) {
-                case Doc.GetServerInfoDocument: {
-                    const res: Doc.GetServerInfoQuery = {
+                case GetServerInfoDoc: {
+                    const res: ResultOf<typeof GetServerInfoDoc> = {
                         __typename: 'Query',
                         result: {
                             __typename: 'ServerInfo',
@@ -48,8 +51,8 @@ const createMockClient = (version: Version | 'error' | 'never'): Client => {
                         }),
                     );
                 }
-                case Doc.GetMyRolesDocument: {
-                    const res: Doc.GetMyRolesQuery = {
+                case GetMyRolesDoc: {
+                    const res: ResultOf<typeof GetMyRolesDoc> = {
                         __typename: 'Query',
                         result: {
                             __typename: 'Roles',
@@ -112,7 +115,7 @@ export const Prerelease: Story = {
             major: 0,
             minor: 7,
             patch: 100,
-            prerelease: { type: Doc.PrereleaseType.Alpha, version: 1 },
+            prerelease: { type: PrereleaseType.Alpha, version: 1 },
         },
     },
 };

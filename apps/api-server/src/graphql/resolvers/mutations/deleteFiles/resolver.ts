@@ -1,35 +1,40 @@
 import path from 'path';
 import { loggerRef } from '@flocon-trpg/utils';
+import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { remove, stat } from 'fs-extra';
-import { Arg, Authorized, Ctx, Mutation, Resolver, UseMiddleware } from 'type-graphql';
-import { File } from '../../../../entities/file/entity';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
+import { File } from '../../../../mikro-orm/entities/file/entity';
+import { User } from '../../../../mikro-orm/entities/user/entity';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { ServerConfigService } from '../../../../server-config/server-config.service';
 import { thumbsDir } from '../../../../utils/thumbsDir';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import { ensureAuthorizedUser } from '../../utils/utils';
 
-@Resolver()
+@Resolver(() => [String])
 export class DeleteFilesResolver {
-    @Mutation(() => [String], { description: 'since v0.7.8' })
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly serverConfigService: ServerConfigService,
+    ) {}
+
+    @Mutation(() => [String])
+    @Auth(ENTRY)
     public async deleteFiles(
-        @Arg('filenames', () => [String]) filenames: string[],
-        @Ctx() context: ResolverContext,
+        @Args('filenames', { type: () => [String] }) filenames: string[],
+        @AuthData() auth: AuthDataType,
     ): Promise<string[]> {
-        const directory = context.serverConfig.uploader?.directory;
+        const directory = this.serverConfigService.getValueForce().uploader?.directory;
         if (directory == null) {
             return [];
         }
 
+        const em = await this.mikroOrmService.forkEmForMain();
         const filenamesToDelete: string[] = [];
         const thumbFilenamesToDelete: string[] = [];
-        const user = ensureAuthorizedUser(context);
+        const user = await em.findOneOrFail(User, { userUid: auth.user.userUid });
         for (const filename of filenames) {
-            const file = await context.em.findOne(File, {
-                createdBy: user,
+            const file = await em.findOne(File, {
+                createdBy: { userUid: user.userUid },
                 filename,
             });
             if (file != null) {
@@ -41,10 +46,10 @@ export class DeleteFilesResolver {
                 user.files.remove(file);
                 await file.fileTags.init();
                 file.fileTags.removeAll();
-                context.em.remove(file);
+                em.remove(file);
             }
         }
-        await context.em.flush();
+        await em.flush();
         for (const filename of filenamesToDelete) {
             const filePath = path.resolve(directory, filename);
             const statResult = await stat(filePath).catch((err: Error) => {

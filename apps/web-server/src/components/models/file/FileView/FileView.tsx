@@ -1,10 +1,11 @@
 import * as Core from '@flocon-trpg/core';
-import { FileSourceType, GetFilesDocument } from '@flocon-trpg/typed-document-node';
+import { FileSourceType } from '@flocon-trpg/graphql-documents';
 import { Alert, Button, Tooltip } from 'antd';
 import classNames from 'classnames';
 import { StorageReference } from 'firebase/storage';
 import * as React from 'react';
 import { useQuery } from 'urql';
+import { GetFilesDoc } from '../../../../graphql/GetFilesDoc';
 import { FileSelectorModal } from '../FileSelectorModal/FileSelectorModal';
 import { ImageView } from '../ImageView/ImageView';
 import { useFirebaseStorageUrl } from '@/hooks/useFirebaseStorageUrl';
@@ -45,7 +46,7 @@ const FloconUploaderLink: React.FC<{
     filename: string;
 }> = ({ filename }) => {
     const [getFilesQueryResult] = useQuery({
-        query: GetFilesDocument,
+        query: GetFilesDoc,
         variables: { input: { fileTagIds: [] } },
     });
     const fileItem = getFilesQueryResult.data?.result.files.find(
@@ -108,8 +109,7 @@ export const FileView: React.FC<Props> = props => {
             return <span>（ファイルが選択されていません）</span>;
         }
         switch (filePath.sourceType) {
-            case FileSourceType.Default:
-            case 'Default': {
+            case FileSourceType.Default: {
                 const a = (ellipsis: boolean) => (
                     <a
                         href={filePath.path}
@@ -132,10 +132,8 @@ export const FileView: React.FC<Props> = props => {
                 return <Tooltip overlay={a(false)}>{a(true)}</Tooltip>;
             }
             case FileSourceType.FirebaseStorage:
-            case 'FirebaseStorage':
                 return <FirebaseStorageLink reference={filePath.path} />;
             case FileSourceType.Uploader:
-            case 'Uploader':
                 return <FloconUploaderLink filename={filePath.path} />;
         }
     })();

@@ -1,10 +1,10 @@
-import { migrateByNpmScript } from './migrate';
-import { AppConsole } from './utils/appConsole';
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { MigrationService } from './migration/migration.service';
 
-migrateByNpmScript('down').catch((err: Error) => {
-    AppConsole.fatal({
-        en: 'migration-down failed. ',
-        errorObject: err,
-    });
-    process.exit(1);
-});
+async function main() {
+    const app = await NestFactory.create(AppModule);
+    const migrationService = app.get(MigrationService);
+    await migrationService.doMigrationDown();
+}
+void main();

@@ -1,6 +1,8 @@
-import { registerEnumType } from 'type-graphql';
+import { registerEnumType } from '@nestjs/graphql';
+import { AnswerRollCallFailureType } from '../enums/AnswerRollCallFailureType';
 import { BaasType } from '../enums/BaasType';
 import { ChangeParticipantNameFailureType } from '../enums/ChangeParticipantNameFailureType';
+import { CloseRollCallFailureType } from '../enums/CloseRollCallFailureType';
 import { CreateRoomFailureType } from '../enums/CreateRoomFailureType';
 import { DeleteMessageFailureType } from '../enums/DeleteMessageFailureType';
 import { DeleteRoomAsAdminFailureType } from '../enums/DeleteRoomAsAdminFailureType';
@@ -19,6 +21,7 @@ import { LeaveRoomFailureType } from '../enums/LeaveRoomFailureType';
 import { MakeMessageNotSecretFailureType } from '../enums/MakeMessageNotSecretFailureType';
 import { OperateRoomFailureType } from '../enums/OperateRoomFailureType';
 import { ParticipantRoleType } from '../enums/ParticipantRoleType';
+import { PerformRollCallFailureType } from '../enums/PerformRollCallFailureType';
 import { PieceLogType } from '../enums/PieceLogType';
 import { PrereleaseType } from '../enums/PrereleaseType';
 import { PromoteFailureType } from '../enums/PromoteFailureType';
@@ -30,9 +33,6 @@ import { WriteRoomPublicMessageFailureType } from '../enums/WriteRoomPublicMessa
 import { WriteRoomSoundEffectFailureType } from '../enums/WriteRoomSoundEffectFailureType';
 import { WritingMessageStatusInputType } from '../enums/WritingMessageStatusInputType';
 import { WritingMessageStatusType } from '../enums/WritingMessageStatusType';
-import { AnswerRollCallFailureType } from '@/enums/AnswerRollCallFailureType';
-import { CloseRollCallFailureType } from '@/enums/CloseRollCallFailureType';
-import { PerformRollCallFailureType } from '@/enums/PerformRollCallFailureType';
 
 let hasRegistered = false;
 export const registerEnumTypes = (): void => {
@@ -68,7 +68,7 @@ export const registerEnumTypes = (): void => {
         name: 'EditMessageFailureType',
     });
     registerEnumType(EntryToServerResultType, {
-        name: 'EntryToServerResultType',
+        name: 'EntryWithPasswordResultType',
     });
     registerEnumType(FileListType, {
         name: 'FileListType',

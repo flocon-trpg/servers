@@ -1,23 +1,11 @@
-import {
-    Arg,
-    Authorized,
-    Ctx,
-    Field,
-    InputType,
-    ObjectType,
-    Query,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
-import { File } from '../../../../entities/file/entity';
+import { Args, Field, InputType, ObjectType, Query, Resolver } from '@nestjs/graphql';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { FileListType } from '../../../../enums/FileListType';
 import { FilePermissionType } from '../../../../enums/FilePermissionType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import { File } from '../../../../mikro-orm/entities/file/entity';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 import { FileItem } from '../../../objects/fileItem';
-import { ensureAuthorizedUser } from '../../utils/utils';
 
 @InputType()
 class GetFilesInput {
@@ -36,14 +24,16 @@ class GetFilesResult {
 
 @Resolver()
 export class GetFilesResolver {
+    public constructor(private readonly mikroOrmService: MikroOrmService) {}
+
     @Query(() => GetFilesResult)
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
+    @Auth(ENTRY)
     public async getFiles(
-        @Arg('input') input: GetFilesInput,
-        @Ctx() context: ResolverContext,
+        @Args('input') input: GetFilesInput,
+        @AuthData() auth: AuthDataType,
     ): Promise<GetFilesResult> {
-        const user = ensureAuthorizedUser(context);
+        const em = await this.mikroOrmService.forkEmForMain();
+        const userUid = auth.user.userUid;
         const fileTagsFilter = input.fileTagIds.map(
             id =>
                 ({
@@ -52,14 +42,11 @@ export class GetFilesResolver {
                     },
                 }) as const,
         );
-        const files = await context.em.find(File, {
+        const files = await em.find(File, {
             $and: [
                 ...fileTagsFilter,
                 {
-                    $or: [
-                        { listPermission: FilePermissionType.Entry },
-                        { createdBy: { userUid: user.userUid } },
-                    ],
+                    $or: [{ listPermission: FilePermissionType.Entry }, { createdBy: { userUid } }],
                 },
             ],
         });

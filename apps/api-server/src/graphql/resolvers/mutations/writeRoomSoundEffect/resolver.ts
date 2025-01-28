@@ -1,24 +1,14 @@
 import { Spectator } from '@flocon-trpg/core';
-import { Reference, ref } from '@mikro-orm/core';
-import {
-    Args,
-    ArgsType,
-    Authorized,
-    Ctx,
-    Field,
-    Mutation,
-    PubSub,
-    PubSubEngine,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
-import { RoomSe } from '../../../../entities/roomMessage/entity';
-import { User } from '../../../../entities/user/entity';
+import { ref } from '@mikro-orm/core';
+import { Args, ArgsType, Field, Mutation, Resolver } from '@nestjs/graphql';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { WriteRoomSoundEffectFailureType } from '../../../../enums/WriteRoomSoundEffectFailureType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import { RoomSe } from '../../../../mikro-orm/entities/roomMessage/entity';
+import { User } from '../../../../mikro-orm/entities/user/entity';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { FilePath } from '../../../objects/filePath';
 import {
     RoomSoundEffect,
@@ -28,11 +18,7 @@ import {
 } from '../../../objects/roomMessage';
 import { MessageUpdatePayload } from '../../subsciptions/roomEvent/payload';
 import { SendTo } from '../../types';
-import {
-    ensureAuthorizedUser,
-    findRoomAndMyParticipant,
-    publishRoomEvent,
-} from '../../utils/utils';
+import { findRoomAndMyParticipant } from '../../utils/utils';
 
 @ArgsType()
 class WriteRoomSoundEffectArgs {
@@ -48,16 +34,17 @@ class WriteRoomSoundEffectArgs {
 
 @Resolver()
 export class WriteRoomSoundEffectResolver {
-    @Mutation(() => WriteRoomSoundEffectResult)
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(3))
-    public async writeRoomSoundEffect(
-        @Args() args: WriteRoomSoundEffectArgs,
-        @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine,
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly pubSubService: PubSubService,
+    ) {}
+
+    async #writeRoomSoundEffectCore(
+        args: WriteRoomSoundEffectArgs,
+        auth: AuthDataType,
     ): Promise<typeof WriteRoomSoundEffectResult> {
-        const em = context.em;
-        const authorizedUser = ensureAuthorizedUser(context);
+        const em = await this.mikroOrmService.forkEmForMain();
+        const authorizedUser = await em.findOneOrFail(User, { userUid: auth.user.userUid });
         const findResult = await findRoomAndMyParticipant({
             em,
             userUid: authorizedUser.userUid,
@@ -114,7 +101,19 @@ export class WriteRoomSoundEffectResolver {
             value: result,
         };
 
-        await publishRoomEvent(pubSub, payload);
+        this.pubSubService.roomEvent.next(payload);
         return result;
+    }
+
+    @Mutation(() => WriteRoomSoundEffectResult)
+    @Auth(ENTRY)
+    public async writeRoomSoundEffect(
+        @Args() args: WriteRoomSoundEffectArgs,
+        @AuthData() auth: AuthDataType,
+    ): Promise<typeof WriteRoomSoundEffectResult> {
+        return await lockByRoomId(
+            args.roomId,
+            async () => await this.#writeRoomSoundEffectCore(args, auth),
+        );
     }
 }

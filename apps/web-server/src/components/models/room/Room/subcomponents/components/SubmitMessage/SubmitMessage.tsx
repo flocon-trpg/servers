@@ -2,10 +2,10 @@
 import * as Icon from '@ant-design/icons';
 import { $free, PublicChannelKey } from '@flocon-trpg/core';
 import {
-    WritePrivateMessageDocument,
-    WritePublicMessageDocument,
+    WritePrivateMessageDoc,
+    WritePublicMessageDoc,
     WriteRoomPublicMessageFailureType,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/graphql-documents';
 import { Button, Input } from 'antd';
 import { TextAreaRef } from 'antd/lib/input/TextArea';
 import classNames from 'classnames';
@@ -82,7 +82,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
 }: PrivateMessageElementProps) => {
     const addRoomNotification = useAddNotification();
     const [text, setText] = useAtom(roomPrivateMessageInputAtom);
-    const [, writePrivateMessage] = useMutation(WritePrivateMessageDocument);
+    const [, writePrivateMessage] = useMutation(WritePrivateMessageDoc);
     const textAreaRef = React.useRef<TextAreaRef | null>(null);
     const [isPostingState, setIsPostingState] = React.useState<IsPostingState>({
         isPosting: false,
@@ -248,7 +248,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
 }: PublicMessageElementProps) => {
     const addRoomNotification = useAddNotification();
     const [text, setText] = useAtom(roomPublicMessageInputAtom);
-    const [, writePublicMessage] = useMutation(WritePublicMessageDocument);
+    const [, writePublicMessage] = useMutation(WritePublicMessageDoc);
     const textAreaRef = React.useRef<TextAreaRef | null>(null);
     const [isPostingState, setIsPostingState] = React.useState<IsPostingState>({
         isPosting: false,

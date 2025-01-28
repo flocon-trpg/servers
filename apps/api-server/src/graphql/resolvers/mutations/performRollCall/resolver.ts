@@ -1,32 +1,14 @@
 import { toOtError } from '@flocon-trpg/core';
-import {
-    Arg,
-    Args,
-    Authorized,
-    Ctx,
-    Field,
-    InputType,
-    Mutation,
-    ObjectType,
-    PubSub,
-    PubSubEngine,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import {
-    IdOperation,
-    RoomNotFound,
-    ensureUserUid,
-    operateAsAdminAndFlush,
-    publishRoomEvent,
-} from '../../utils/utils';
+import { Args, Field, InputType, Mutation, ObjectType, Resolver } from '@nestjs/graphql';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
+import { PerformRollCallFailureType } from '../../../../enums/PerformRollCallFailureType';
+import { FilePath } from '../../../../graphql/objects/filePath';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
+import { IdOperation, RoomNotFound, operateAsAdminAndFlush } from '../../utils/utils';
 import { performRollCall } from './performRollCall';
-import { PerformRollCallFailureType } from '@/enums/PerformRollCallFailureType';
-import { FilePath } from '@/graphql/objects/filePath';
 
 @ObjectType()
 class PerformRollCallResult {
@@ -54,49 +36,55 @@ class PerformRollCallInput {
 }
 
 // 過去の点呼の自動削除や、作成日時をサーバーでセットする必要があるため、Operate mutation ではなくこの mutation で点呼を作成するようにしている。
-@Resolver()
+@Resolver(() => PerformRollCallResult)
 export class PerformRollCallResolver {
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly pubSubService: PubSubService,
+    ) {}
+
     // TODO: テストを書く
-    @Mutation(() => PerformRollCallResult, { description: 'since v0.7.13' })
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
+    @Mutation(() => PerformRollCallResult)
+    @Auth(ENTRY)
     public async performRollCall(
-        @Arg('input') input: PerformRollCallInput,
-        @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine,
+        @Args('input') input: PerformRollCallInput,
+        @AuthData() auth: AuthDataType,
     ): Promise<PerformRollCallResult> {
-        const myUserUid = ensureUserUid(context);
-        const result = await operateAsAdminAndFlush({
-            em: context.em,
-            roomId: input.roomId,
-            roomHistCount: undefined,
-            operationType: 'state',
-            operation: roomState => {
-                const soundEffect =
-                    input.soundEffectFile != null && input.soundEffectVolume != null
-                        ? {
-                              file: { ...input.soundEffectFile, $v: 1, $r: 1 } as const,
-                              volume: input.soundEffectVolume,
-                          }
-                        : undefined;
-                return performRollCall(roomState, myUserUid, soundEffect);
-            },
-        });
-        if (result.isError) {
-            if (result.error.type === 'custom') {
-                return { failureType: result.error.error };
+        return await lockByRoomId(input.roomId, async () => {
+            const em = await this.mikroOrmService.forkEmForMain();
+            const myUserUid = auth.user.userUid;
+            const result = await operateAsAdminAndFlush({
+                em,
+                roomId: input.roomId,
+                roomHistCount: undefined,
+                operationType: 'state',
+                operation: roomState => {
+                    const soundEffect =
+                        input.soundEffectFile != null && input.soundEffectVolume != null
+                            ? {
+                                  file: { ...input.soundEffectFile, $v: 1, $r: 1 } as const,
+                                  volume: input.soundEffectVolume,
+                              }
+                            : undefined;
+                    return performRollCall(roomState, myUserUid, soundEffect);
+                },
+            });
+            if (result.isError) {
+                if (result.error.type === 'custom') {
+                    return { failureType: result.error.error };
+                }
+                throw toOtError(result.error.error);
             }
-            throw toOtError(result.error.error);
-        }
-        switch (result.value) {
-            case RoomNotFound:
-                return { failureType: PerformRollCallFailureType.NotFound };
-            case IdOperation:
-                return {};
-            default:
-                break;
-        }
-        await publishRoomEvent(pubSub, result.value);
-        return {};
+            switch (result.value) {
+                case RoomNotFound:
+                    return { failureType: PerformRollCallFailureType.NotFound };
+                case IdOperation:
+                    return {};
+                default:
+                    break;
+            }
+            this.pubSubService.roomEvent.next(result.value);
+            return {};
+        });
     }
 }

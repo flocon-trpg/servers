@@ -8,7 +8,7 @@ const defaultLogLevel = 'info';
 // pino の関数は any や可変パラメーターが多く引数のミスが起こりやすいので、型を変更したり制限をかけている。
 interface LogFn {
     (msg: string, ...args: readonly unknown[]): void;
-    (obj: Error | Record<string, unknown>, msg?: string, ...args: readonly unknown[]): void;
+    (obj: Error | Record<string, unknown>, msg: string, ...args: readonly unknown[]): void;
 }
 
 type PinoMethodName = 'debug' | 'error' | 'fatal' | 'info' | 'warn' | 'silent' | 'trace';
@@ -17,7 +17,7 @@ const printFn = (logger: Logger, methodName: PinoMethodName): LogFn => {
     function result(msg: string, ...args: readonly unknown[]): void;
     function result(
         obj: Error | Record<string, unknown>,
-        msg?: string,
+        msg: string,
         ...args: readonly unknown[]
     ): void;
     function result(

@@ -1,31 +1,16 @@
 import { toOtError } from '@flocon-trpg/core';
 import { loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
+import { Args, Field, Mutation, ObjectType, Resolver } from '@nestjs/graphql';
 import { produce } from 'immer';
-import {
-    Arg,
-    Authorized,
-    Ctx,
-    Field,
-    Mutation,
-    ObjectType,
-    PubSub,
-    PubSubEngine,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { LeaveRoomFailureType } from '../../../../enums/LeaveRoomFailureType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import {
-    IdOperation,
-    RoomNotFound,
-    ensureAuthorizedUser,
-    operateAsAdminAndFlush,
-    publishRoomEvent,
-} from '../../utils/utils';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { ServerConfigService } from '../../../../server-config/server-config.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
+import { IdOperation, RoomNotFound, operateAsAdminAndFlush } from '../../utils/utils';
 
 @ObjectType()
 class LeaveRoomResult {
@@ -33,23 +18,22 @@ class LeaveRoomResult {
     public failureType?: LeaveRoomFailureType;
 }
 
-@Resolver()
+@Resolver(() => LeaveRoomResult)
 export class LeaveRoomResolver {
-    @Mutation(() => LeaveRoomResult)
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
-    public async leaveRoom(
-        @Arg('id') id: string,
-        @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine,
-    ): Promise<LeaveRoomResult> {
-        const em = context.em;
-        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly pubSubService: PubSubService,
+        private readonly serverConfigService: ServerConfigService,
+    ) {}
+
+    async #leaveRoomCore(id: string, auth: AuthDataType): Promise<LeaveRoomResult> {
+        const em = await this.mikroOrmService.forkEmForMain();
+        const authorizedUserUid = auth.user.userUid;
 
         const flushResult = await operateAsAdminAndFlush({
             em,
             roomId: id,
-            roomHistCount: context.serverConfig.roomHistCount,
+            roomHistCount: this.serverConfigService.getValueForce().roomHistCount,
             operationType: 'state',
             operation: async roomState => {
                 if (roomState.participants?.[authorizedUserUid] == null) {
@@ -78,7 +62,16 @@ export class LeaveRoomResolver {
             default:
                 break;
         }
-        await publishRoomEvent(pubSub, flushResult.value);
+        this.pubSubService.roomEvent.next(flushResult.value);
         return {};
+    }
+
+    @Mutation(() => LeaveRoomResult)
+    @Auth(ENTRY)
+    public async leaveRoom(
+        @Args('roomId') roomId: string,
+        @AuthData() auth: AuthDataType,
+    ): Promise<LeaveRoomResult> {
+        return await lockByRoomId(roomId, async () => await this.#leaveRoomCore(roomId, auth));
     }
 }

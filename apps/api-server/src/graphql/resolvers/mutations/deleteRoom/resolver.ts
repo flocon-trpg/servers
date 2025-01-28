@@ -1,29 +1,17 @@
-import {
-    Args,
-    ArgsType,
-    Authorized,
-    Ctx,
-    Field,
-    Mutation,
-    ObjectType,
-    PubSub,
-    PubSubEngine,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
-import * as Room$MikroORM from '../../../../entities/room/entity';
+import { Args, ArgsType, Field, Mutation, ObjectType, Resolver } from '@nestjs/graphql';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { DeleteRoomFailureType } from '../../../../enums/DeleteRoomFailureType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import * as Room$MikroORM from '../../../../mikro-orm/entities/room/entity';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { all } from '../../types';
-import { ensureAuthorizedUser, publishRoomEvent } from '../../utils/utils';
 
 @ArgsType()
 class DeleteRoomArgs {
     @Field()
-    public id!: string;
+    public roomId!: string;
 }
 
 @ObjectType()
@@ -32,22 +20,20 @@ class DeleteRoomResult {
     public failureType?: DeleteRoomFailureType;
 }
 
-@Resolver()
+@Resolver(() => DeleteRoomResult)
 export class DeleteRoomResolver {
-    @Mutation(() => DeleteRoomResult)
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
-    public async deleteRoom(
-        @Args() args: DeleteRoomArgs,
-        @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine,
-    ): Promise<DeleteRoomResult> {
-        const em = context.em;
-        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly pubSubService: PubSubService,
+    ) {}
+
+    async #deleteRoomCore(args: DeleteRoomArgs, auth: AuthDataType): Promise<DeleteRoomResult> {
+        const em = await this.mikroOrmService.forkEmForMain();
+        const authorizedUserUid = auth.user.userUid;
 
         // そのRoomのParticipantでない場合でも削除できるようになっている。ただし、もしキック機能が実装されて部屋作成者がキックされた場合は再考の余地があるか。
 
-        const room = await em.findOne(Room$MikroORM.Room, { id: args.id });
+        const room = await em.findOne(Room$MikroORM.Room, { id: args.roomId });
         if (room == null) {
             return {
                 failureType: DeleteRoomFailureType.NotFound,
@@ -61,7 +47,7 @@ export class DeleteRoomResolver {
         }
         await Room$MikroORM.deleteRoom(em, room);
         await em.flush();
-        await publishRoomEvent(pubSub, {
+        this.pubSubService.roomEvent.next({
             type: 'deleteRoomPayload',
             roomId,
             deletedBy: authorizedUserUid,
@@ -69,5 +55,14 @@ export class DeleteRoomResolver {
             sendTo: all,
         });
         return {};
+    }
+
+    @Mutation(() => DeleteRoomResult)
+    @Auth(ENTRY)
+    public async deleteRoom(
+        @Args() args: DeleteRoomArgs,
+        @AuthData() auth: AuthDataType,
+    ): Promise<DeleteRoomResult> {
+        return await lockByRoomId(args.roomId, async () => await this.#deleteRoomCore(args, auth));
     }
 }

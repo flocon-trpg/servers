@@ -1,12 +1,12 @@
 import * as Icon from '@ant-design/icons';
 import { State, StrIndex5, bgmTemplate } from '@flocon-trpg/core';
-import { WriteRoomSoundEffectDocument } from '@flocon-trpg/typed-document-node';
 import { keyNames } from '@flocon-trpg/utils';
 import { Button, Checkbox, Modal, Tooltip } from 'antd';
 import classNames from 'classnames';
 import React from 'react';
 import { useLatest } from 'react-use';
 import { useMutation } from 'urql';
+import { WriteRoomSoundEffectDoc } from '../../../../../../../graphql/WriteRoomSoundEffectDoc';
 import { useRoomId } from '../../hooks/useRoomId';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { FileSelector } from '@/components/models/file/FileSelector/FileSelector';
@@ -254,7 +254,7 @@ type SeModalProps = {
 const SeModal: React.FC<SeModalProps> = ({ visible, onClose }) => {
     const roomId = useRoomId();
 
-    const [, writeRoomSoundEffect] = useMutation(WriteRoomSoundEffectDocument);
+    const [, writeRoomSoundEffect] = useMutation(WriteRoomSoundEffectDoc);
     const [volumeInput, setVolumeInput] = React.useState<number>(defaultVolume);
 
     if (roomId == null) {

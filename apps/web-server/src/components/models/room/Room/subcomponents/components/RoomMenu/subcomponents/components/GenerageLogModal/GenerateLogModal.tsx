@@ -1,9 +1,3 @@
-import {
-    GetLogDocument,
-    GetLogQuery,
-    GetLogQueryVariables,
-    GetRoomLogFailureType,
-} from '@flocon-trpg/typed-document-node';
 import { Button, Checkbox, Modal, Progress, Radio } from 'antd';
 import classNames from 'classnames';
 import { useAtomValue } from 'jotai/react';
@@ -12,6 +6,8 @@ import moment from 'moment';
 import React from 'react';
 import { useLatest } from 'react-use';
 import { useClient } from 'urql';
+import { GetLogDoc } from '../../../../../../../../../../graphql/GetLogDoc';
+import { GetRoomLogFailureType } from '../../../../../../../../../../graphql-codegen/graphql';
 import { useParticipants } from '../../../../../hooks/useParticipants';
 import { usePublicChannelNames } from '../../../../../hooks/usePublicChannelNames';
 import { generateAsRichLog, generateAsStaticHtml } from '../../../../../utils/roomLogGenerator';
@@ -90,8 +86,8 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
 
             setProgress(0);
             const logData = await clientRef.current
-                .query<GetLogQuery, GetLogQueryVariables>(
-                    GetLogDocument,
+                .query(
+                    GetLogDoc,
                     {
                         roomId: roomIdRef.current,
                     },

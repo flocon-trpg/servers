@@ -1,7 +1,9 @@
-import { GetRoomMessagesFailureType, RoomEventSubscription } from '@flocon-trpg/typed-document-node';
+import { GetRoomMessagesFailureType, RoomEventDoc } from '@flocon-trpg/graphql-documents';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import { Observable } from 'rxjs';
 import { ReadonlyBehaviorEvent } from '../rxjs/readonlyBehaviorEvent';
 import { GraphQLClientWithStatus, PromiseError } from './graphqlClient';
+type RoomEventSubscriptionResult = ResultOf<typeof RoomEventDoc>['result'];
 declare const success = "success";
 declare const fetching = "fetching";
 declare const error = "error";
@@ -21,7 +23,7 @@ export type GetMessagesQueryStatus<TGraphQLError> = {
 };
 export declare const createRoomMessagesClient: <TCustomMessage, TGraphQLError>({ client, roomEventSubscription, }: {
     client: Pick<GraphQLClientWithStatus<TGraphQLError>, "getMessagesQuery">;
-    roomEventSubscription: Observable<NonNullable<NonNullable<RoomEventSubscription["roomEvent"]>["roomMessageEvent"]>>;
+    roomEventSubscription: Observable<NonNullable<NonNullable<RoomEventSubscriptionResult>["roomMessageEvent"]>>;
 }) => {
     value: {
         messages: import("@flocon-trpg/web-server-utils").AllRoomMessages<TCustomMessage>;

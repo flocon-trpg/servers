@@ -1,7 +1,9 @@
-import { RoomEventSubscription } from '@flocon-trpg/typed-document-node';
+import { RoomEventDoc } from '@flocon-trpg/graphql-documents';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import { Observable } from 'rxjs';
 import { ReadonlyBehaviorEvent } from '../rxjs/readonlyBehaviorEvent';
 import { GraphQLClientWithStatus } from './graphqlClient';
+type RoomEventSubscriptionResult = ResultOf<typeof RoomEventDoc>['result'];
 export type RoomConnectionStatus = {
     isConnected: boolean;
     /** 接続状況が最後に更新された日時です。`value` が true の場合は最後に接続を開始した日時を、false の場合は切断した日時を表します。 */
@@ -32,7 +34,7 @@ export declare class RoomConnectionsManager {
 }
 export declare const subscribeRoomConnections: ({ client, subscription, }: {
     client: Pick<GraphQLClientWithStatus<any>, "getRoomConnectionsQuery">;
-    subscription: Observable<Pick<NonNullable<RoomEventSubscription["roomEvent"]>, "roomConnectionEvent">>;
+    subscription: Observable<Pick<NonNullable<RoomEventSubscriptionResult>, "roomConnectionEvent">>;
 }) => {
     value: ReadonlyBehaviorEvent<{
         current: ReadonlyMap<string, RoomConnectionStatus>;
@@ -41,4 +43,5 @@ export declare const subscribeRoomConnections: ({ client, subscription, }: {
     executeQuery: () => void;
     unsubscribe: () => void;
 };
+export {};
 //# sourceMappingURL=roomConnections.d.ts.map

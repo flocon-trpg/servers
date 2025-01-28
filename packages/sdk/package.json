@@ -22,9 +22,9 @@
     },
     "dependencies": {
         "@flocon-trpg/core": "workspace:^",
-        "@flocon-trpg/typed-document-node": "workspace:^",
         "@flocon-trpg/utils": "workspace:^",
         "@flocon-trpg/web-server-utils": "workspace:^",
+        "@graphql-typed-document-node/core": "^3.2.0",
         "@kizahasi/option": "^1.1.0",
         "@kizahasi/result": "^1.1.0",
         "rxjs": "^7.5.6"
