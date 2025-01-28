@@ -57,9 +57,18 @@ async function bootstrap() {
         }
         app.enableCors();
         await app.listen(portConfig.port);
+        AppConsole.infoAsNotice({
+            en: `🚀 Server ready at http://localhost:${portConfig.port}`,
+        });
     } catch {
         const app = await NestFactory.create(AppAsErrorModule);
+        app.enableCors();
         await app.listen(portConfig.port);
+        AppConsole.infoAsNotice({
+            en: `⚠️ Server ready at http://localhost:${
+                portConfig.port
+            }, but not working. Please check the logs.`,
+        });
     }
 }
 void bootstrap();
