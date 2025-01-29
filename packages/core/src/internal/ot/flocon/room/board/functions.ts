@@ -4,6 +4,7 @@ import { isIdRecord } from '../../../record';
 import * as RecordOperation from '../../../recordOperation';
 import {
     RequestedBy,
+    admin,
     anyValue,
     canChangeCharacterValue,
     canChangeOwnerParticipantId,
@@ -14,6 +15,8 @@ import * as TextOperation from '../../../textOperation';
 import * as ReplaceOperation from '../../../util/replaceOperation';
 import { ServerTransform, TwoWayError } from '../../../util/type';
 import * as Room from '../types';
+import * as DeckPiece from './deckPiece/functions';
+import * as DeckPieceTypes from './deckPiece/types';
 import * as DicePiece from './dicePiece/functions';
 import * as DicePieceTypes from './dicePiece/types';
 import * as ImagePiece from './imagePiece/functions';
@@ -29,6 +32,14 @@ export const toClientState =
     (source: State<typeof template>): State<typeof template> => {
         return {
             ...source,
+            deckPieces: RecordOperation.toClientState<
+                State<typeof DeckPieceTypes.template>,
+                State<typeof DeckPieceTypes.template>
+            >({
+                serverState: source.deckPieces,
+                isPrivate: () => false,
+                toClientState: ({ state }) => DeckPiece.toClientState(requestedBy)(state),
+            }),
             dicePieces: RecordOperation.toClientState<
                 State<typeof DicePieceTypes.template>,
                 State<typeof DicePieceTypes.template>
@@ -123,6 +134,34 @@ export const serverTransform =
                     ownerParticipantId: state.ownerParticipantId ?? anyValue,
                 }),
         };
+
+        const deckPieces = RecordOperation.serverTransform<
+            State<typeof DeckPieceTypes.template>,
+            State<typeof DeckPieceTypes.template>,
+            TwoWayOperation<typeof DeckPieceTypes.template>,
+            UpOperation<typeof DeckPieceTypes.template>,
+            TwoWayError
+        >({
+            first: serverOperation?.deckPieces,
+            second: clientOperation.deckPieces,
+            stateBeforeFirst: stateBeforeServerOperation.deckPieces ?? {},
+            stateAfterFirst: stateAfterServerOperation.deckPieces ?? {},
+            innerTransform: ({ first, second, prevState, nextState }) =>
+                DeckPiece.serverTransform(requestedBy)({
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {
+                cancelCreate: () => requestedBy.type !== admin,
+                cancelRemove: () => requestedBy.type !== admin,
+            },
+        });
+        if (deckPieces.isError) {
+            return deckPieces;
+        }
 
         const dicePieces = RecordOperation.serverTransform<
             State<typeof DicePieceTypes.template>,
@@ -233,6 +272,7 @@ export const serverTransform =
         const twoWayOperation: TwoWayOperation<typeof template> = {
             $v: 2,
             $r: 1,
+            deckPieces: deckPieces.value,
             dicePieces: dicePieces.value,
             imagePieces: imagePieces.value,
             shapePieces: shapePieces.value,

@@ -52,6 +52,8 @@ export { fakeFirebaseConfig1, fakeFirebaseConfig2 } from './internal/fake/fakeFi
 
 export { $index, arrayToIndexObjects, indexObjectsToArray, IndexObject } from './internal/ot/array';
 
+export { FilePath } from './internal/ot/flocon/cardImage/types';
+
 export {
     Default,
     Uploader,
@@ -96,6 +98,17 @@ export {
 export { OmitVersion } from './internal/ot/generator/omitVersion';
 
 export { toClientState, serverTransform } from './internal/ot/flocon/room/functions';
+
+export { cardImageValue } from './internal/ot/flocon/cardImage/types';
+
+export {
+    template as deckTemplateTemplate,
+    FilePath as filePath,
+} from './internal/ot/flocon/deckTemplate/types';
+
+export { serverTransform as serverTransformDeckTemplate } from './internal/ot/flocon/deckTemplate/functions';
+
+export { template as deckTemplateCardTemplate } from './internal/ot/flocon/deckTemplate/card/types';
 
 export {
     template as roomTemplate,
@@ -149,6 +162,10 @@ export { template as shapeTemplate } from './internal/ot/flocon/shape/types';
 
 export { template as shapePieceTemplate } from './internal/ot/flocon/room/board/shapePiece/types';
 
+export { template as deckPieceTemplate } from './internal/ot/flocon/room/board/deckPiece/types';
+
+export { template as deckPieceCardTemplate } from './internal/ot/flocon/room/board/deckPiece/card/types';
+
 export {
     template as dicePieceTemplate,
     dicePieceStrIndexes,
@@ -165,6 +182,8 @@ export {
     type as dicePieceLog,
     Type as DicePieceLog,
 } from './internal/ot/flocon/room/board/dicePiece/log';
+
+export * from './internal/ot/flocon/room/board/deckPiece/utils';
 
 export { template as imagePieceTemplate } from './internal/ot/flocon/room/board/imagePiece/types';
 
@@ -191,6 +210,8 @@ export { getOpenRollCall } from './internal/ot/flocon/room/rollCall/getOpenRollC
 export { isOpenRollCall } from './internal/ot/flocon/room/rollCall/isOpenRollCall';
 
 export { OtError, toOtError } from './internal/ot/otError';
+
+export { create as createRoomStats } from './internal/ot/flocon/room/stats/create';
 
 export {
     DownOperation as NullableTextDownOperation,

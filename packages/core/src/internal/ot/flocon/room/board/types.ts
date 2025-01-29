@@ -7,6 +7,7 @@ import {
     createTextValueTemplate,
 } from '../../../generator/types';
 import { filePathValue } from '../../filePath/types';
+import * as DeckPiece from './deckPiece/types';
 import * as DicePiece from './dicePiece/types';
 import * as ImagePiece from './imagePiece/types';
 import * as ShapePiece from './shapePiece/types';
@@ -27,6 +28,7 @@ export const template = createObjectValueTemplate(
         name: createTextValueTemplate(false),
         ownerParticipantId: createReplaceValueTemplate(maybe(z.string())),
 
+        deckPieces: createRecordValueTemplate(DeckPiece.template),
         dicePieces: createRecordValueTemplate(DicePiece.template),
         imagePieces: createRecordValueTemplate(ImagePiece.template),
         shapePieces: createRecordValueTemplate(ShapePiece.template),

@@ -32,6 +32,7 @@ import * as Participant from './participant/functions';
 import * as ParticipantTypes from './participant/types';
 import * as RollCalls from './rollCall/functions';
 import { getOpenRollCall } from './rollCall/getOpenRollCall';
+import * as Stats from './stats/functions';
 import { template } from './types';
 
 const oneToTenArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
@@ -100,6 +101,7 @@ export const toClientState =
                 isPrivate: () => false,
                 toClientState: ({ state }) => Participant.toClientState(state),
             }),
+            stats: Stats.toClientState(source.stats),
             strParamNames: RecordOperation.toClientState({
                 serverState: source.strParamNames,
                 isPrivate: () => false,
