@@ -13,6 +13,7 @@ import * as Memo from './memo/types';
 import * as ParamNames from './paramName/types';
 import * as Participant from './participant/types';
 import * as RollCall from './rollCall/types';
+import * as Stats from './stats/types';
 
 const templateBase = {
     activeBoardId: createReplaceValueTemplate(maybe(z.string())),
@@ -48,13 +49,14 @@ const templateBase = {
 
 export const dbTemplate = createObjectValueTemplate(templateBase, 2, 1);
 
-// nameとcreatedByはDBから頻繁に取得されると思われる値なので独立させている。
+// RoomのほとんどのデータはDBでJSONとして保存されるが、nameとcreatedByとparticipantsは、DBから頻繁に取得されると思われる値なので他のカラムなどで管理される。statsはdbTemplateなどから自動生成される値であるため、DBには保存されない。
 export const template = createObjectValueTemplate(
     {
         ...templateBase,
         createdBy: createReplaceValueTemplate(z.string()),
         name: createTextValueTemplate(false),
         participants: createRecordValueTemplate(Participant.template),
+        stats: Stats.template,
     },
     2,
     1,
