@@ -1,8 +1,10 @@
 import { AnswerRollCallResolver } from './mutations/answerRollCall/resolver';
 import { ChangeParticipantNameResolver } from './mutations/changeParitipantName/resolver';
 import { CloseRollCallResolver } from './mutations/closeRollCall/resolver';
+import { CreateCustomDeckTemplateResolver } from './mutations/createDeckTemplate/resolver';
 import { CreateFileTagResolver } from './mutations/createFileTag/resolver';
 import { CreateRoomResolver } from './mutations/createRoom/resolver';
+import { DeleteCustomDeckTemplateResolver } from './mutations/deleteDeckTemplate/resolver';
 import { DeleteFileTagResolver } from './mutations/deleteFileTag/resolver';
 import { DeleteFilesResolver } from './mutations/deleteFiles/resolver';
 import { DeleteMessageResolver } from './mutations/deleteMessage/resolver';
@@ -23,11 +25,15 @@ import { PromoteToPlayerResolver } from './mutations/promoteToPlayer/resolver';
 import { RenameFilesResolver } from './mutations/renameFiles/resolver';
 import { ResetMessagesResolver } from './mutations/resetMessages/resolver';
 import { UpdateBookmarkResolver } from './mutations/updateBookmark/resolver';
+import { UpdateDeckTemplateResolver } from './mutations/updateDeckTemplate/resolver';
 import { UpdateWritingMessageStatusResolver } from './mutations/updateWritingMessageStatus/resolver';
 import { WritePrivateMessageResolver } from './mutations/writePrivateMessage/resolver';
 import { WritePublicMessageResolver } from './mutations/writePublicMessage/resolver';
 import { WriteRoomSoundEffectResolver } from './mutations/writeRoomSoundEffect/resolver';
 import { GetAvailableGameSystemsResolver } from './queries/getAvailableGameSystems/resolver';
+import { GetCustomDeckTemplateResolver } from './queries/getCustomDeckTemplate/resolver';
+import { GetCustomDeckTemplatesListResolver } from './queries/getCustomDeckTemplatesList/resolver';
+import { GetDefaultDeckTemplatesListResolver } from './queries/getDefaultDeckTemplatesList/resolver';
 import { GetDiceHelpMessageResolver } from './queries/getDiceHelpMessage/resolver';
 import { GetFilesResolver } from './queries/getFiles/resolver';
 import { GetLogResolver } from './queries/getLog/resolver';
@@ -44,8 +50,10 @@ export const allResolvers = [
     AnswerRollCallResolver,
     ChangeParticipantNameResolver,
     CloseRollCallResolver,
+    CreateCustomDeckTemplateResolver,
     CreateFileTagResolver,
     CreateRoomResolver,
+    DeleteCustomDeckTemplateResolver,
     DeleteFilesResolver,
     DeleteFileTagResolver,
     DeleteMessageResolver,
@@ -64,12 +72,16 @@ export const allResolvers = [
     RenameFilesResolver,
     ResetMessagesResolver,
     UpdateBookmarkResolver,
+    UpdateDeckTemplateResolver,
     UpdateWritingMessageStatusResolver,
     WritePrivateMessageResolver,
     WritePublicMessageResolver,
     WriteRoomSoundEffectResolver,
 
     GetAvailableGameSystemsResolver,
+    GetCustomDeckTemplateResolver,
+    GetDefaultDeckTemplatesListResolver,
+    GetCustomDeckTemplatesListResolver,
     GetDiceHelpMessageResolver,
     GetFilesResolver,
     GetLogResolver,
