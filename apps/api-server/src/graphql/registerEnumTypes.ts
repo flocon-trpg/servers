@@ -22,12 +22,14 @@ import { MakeMessageNotSecretFailureType } from '../enums/MakeMessageNotSecretFa
 import { OperateRoomFailureType } from '../enums/OperateRoomFailureType';
 import { ParticipantRoleType } from '../enums/ParticipantRoleType';
 import { PerformRollCallFailureType } from '../enums/PerformRollCallFailureType';
+import { PermissionType } from '../enums/PermissionType';
 import { PieceLogType } from '../enums/PieceLogType';
 import { PrereleaseType } from '../enums/PrereleaseType';
 import { PromoteFailureType } from '../enums/PromoteFailureType';
 import { ResetRoomMessagesFailureType } from '../enums/ResetRoomMessagesFailureType';
 import { RoomParameterNameType } from '../enums/RoomParameterNameType';
 import { UpdateBookmarkFailureType } from '../enums/UpdateBookmarkFailureType';
+import { UpdateDeckTemplateFailureType } from '../enums/UpdateDeckTemplateFailureType';
 import { WriteRoomPrivateMessageFailureType } from '../enums/WriteRoomPrivateMessageFailureType';
 import { WriteRoomPublicMessageFailureType } from '../enums/WriteRoomPublicMessageFailureType';
 import { WriteRoomSoundEffectFailureType } from '../enums/WriteRoomSoundEffectFailureType';
@@ -111,6 +113,9 @@ export const registerEnumTypes = (): void => {
     registerEnumType(PerformRollCallFailureType, {
         name: 'PerformRollCallFailureType',
     });
+    registerEnumType(PermissionType, {
+        name: 'PermissionType',
+    });
     registerEnumType(PieceLogType, {
         name: 'PieceLogType',
     });
@@ -128,6 +133,9 @@ export const registerEnumTypes = (): void => {
     });
     registerEnumType(UpdateBookmarkFailureType, {
         name: 'UpdateBookmarkFailureType',
+    });
+    registerEnumType(UpdateDeckTemplateFailureType, {
+        name: 'UpdateDeckTemplateFailureType',
     });
     registerEnumType(WriteRoomPrivateMessageFailureType, {
         name: 'WriteRoomPrivateMessageFailureType',

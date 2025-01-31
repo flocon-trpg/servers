@@ -62,6 +62,7 @@ const baseState: RoomState = {
     publicChannel8Name: '',
     publicChannel9Name: '',
     publicChannel10Name: '',
+    stats: { $v: 1, $r: 1, boards: {} },
 };
 
 describe('startRollCall', () => {
