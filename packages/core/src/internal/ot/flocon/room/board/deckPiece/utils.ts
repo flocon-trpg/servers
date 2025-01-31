@@ -10,7 +10,7 @@ type BoardState = S<typeof boardTemplate>;
 type IndexObject = { [$index]: number };
 
 const shuffleDeckCore = <T extends IndexObject>(
-    state: Record<string, T | undefined>
+    state: Record<string, T | undefined>,
 ): Result<Record<string, T | undefined>> => {
     const sourceArray = indexObjectsToArray(state);
     if (sourceArray.isError) {
@@ -48,7 +48,7 @@ export const shuffleDeck = ({
         deckPiece.cards = shuffled.value;
         if (mode === 'server') {
             recordForEach(deckPiece.cards, card => {
-                card.revealStatus = 'back';
+                card.revealStatus = { type: 'back' };
             });
         }
         return;

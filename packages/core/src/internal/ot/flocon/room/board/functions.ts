@@ -15,6 +15,8 @@ import * as TextOperation from '../../../textOperation';
 import * as ReplaceOperation from '../../../util/replaceOperation';
 import { ServerTransform, TwoWayError } from '../../../util/type';
 import * as Room from '../types';
+import * as CardGroup from './cardGroup/functions';
+import * as CardGroupTypes from './cardGroup/types';
 import * as DeckPiece from './deckPiece/functions';
 import * as DeckPieceTypes from './deckPiece/types';
 import * as DicePiece from './dicePiece/functions';
@@ -134,6 +136,32 @@ export const serverTransform =
                     ownerParticipantId: state.ownerParticipantId ?? anyValue,
                 }),
         };
+
+        // 空のグループ、言い換えるとカードのないグループは存在できるほうが、グループ作成の方法などにおいて UI 的にわかりやすいと思うので、空のグループを自動削除する機能はつけていない
+        const cardGroups = RecordOperation.serverTransform<
+            State<typeof CardGroupTypes.template>,
+            State<typeof CardGroupTypes.template>,
+            TwoWayOperation<typeof CardGroupTypes.template>,
+            UpOperation<typeof CardGroupTypes.template>,
+            TwoWayError
+        >({
+            first: serverOperation?.cardGroups,
+            second: clientOperation.cardGroups,
+            stateBeforeFirst: stateBeforeServerOperation.cardGroups ?? {},
+            stateAfterFirst: stateAfterServerOperation.cardGroups ?? {},
+            innerTransform: ({ first, second, prevState, nextState }) =>
+                CardGroup.serverTransform({
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {},
+        });
+        if (cardGroups.isError) {
+            return cardGroups;
+        }
 
         const deckPieces = RecordOperation.serverTransform<
             State<typeof DeckPieceTypes.template>,

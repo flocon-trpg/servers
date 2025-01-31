@@ -5,7 +5,7 @@ import * as Room from '../types';
 import * as Stats from './types';
 
 export const create = (
-    source: Omit<State<typeof Room.template>, 'stats'>
+    source: Omit<State<typeof Room.template>, 'stats'>,
 ): State<typeof Stats.template> => {
     let boards: State<typeof Stats.template>['boards'] | undefined = undefined;
     for (const board of recordToArray(source.boards ?? {})) {
@@ -16,8 +16,8 @@ export const create = (
                     $v: 1,
                     $r: 1,
                     face: card.value.face,
-                    back: card.value.back,
                     revealStatus: card.value.revealStatus,
+                    groupId: card.value.groupId,
                     name: card.value.name,
                     description: card.value.description,
                 };

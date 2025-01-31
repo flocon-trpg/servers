@@ -52,6 +52,7 @@ export namespace Fixtures {
             cellOffsetY: 0,
             cellRowCount: 0,
             cellWidth: 0,
+            cardGroups: {},
             deckPieces: {},
             dicePieces: {},
             imagePieces: {},
@@ -196,6 +197,8 @@ export namespace Fixtures {
                 cellOffsetY: 10,
                 cellRowCount: 10,
                 cellWidth: 10,
+                // TODO: 適当な値を入れる
+                cardGroups: {},
                 // TODO: 適当な値を入れる
                 deckPieces: {},
                 dicePieces: {

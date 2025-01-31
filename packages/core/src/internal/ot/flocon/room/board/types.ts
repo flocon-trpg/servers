@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { maybe } from '../../../../maybe';
 import {
     createObjectValueTemplate,
     createRecordValueTemplate,
@@ -7,6 +6,7 @@ import {
     createTextValueTemplate,
 } from '../../../generator/types';
 import { filePathValue } from '../../filePath/types';
+import * as CardGroup from './cardGroup/types';
 import * as DeckPiece from './deckPiece/types';
 import * as DicePiece from './dicePiece/types';
 import * as ImagePiece from './imagePiece/types';
@@ -26,13 +26,15 @@ export const template = createObjectValueTemplate(
         cellRowCount: createReplaceValueTemplate(z.number()),
         cellWidth: createReplaceValueTemplate(z.number()),
         name: createTextValueTemplate(false),
-        ownerParticipantId: createReplaceValueTemplate(maybe(z.string())),
+        ownerParticipantId: createReplaceValueTemplate(z.string().optional()),
 
         deckPieces: createRecordValueTemplate(DeckPiece.template),
         dicePieces: createRecordValueTemplate(DicePiece.template),
         imagePieces: createRecordValueTemplate(ImagePiece.template),
         shapePieces: createRecordValueTemplate(ShapePiece.template),
         stringPieces: createRecordValueTemplate(StringPiece.template),
+
+        cardGroups: createRecordValueTemplate(CardGroup.template),
     },
     2,
     1,
