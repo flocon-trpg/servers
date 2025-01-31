@@ -1,15 +1,17 @@
 import { Result } from '@kizahasi/result';
 import { z } from 'zod';
-import { State, TwoWayOperation } from '../../../../../generator';
-import { admin, client, restrict } from '../../../../../requestedBy';
+import { State, TwoWayOperation } from '../../../../../generator/types';
+import { RequestedBy, admin, client, restrict } from '../../../../../requestedBy';
 import { cardImageValue } from '../../../../cardImage/types';
 import { Default } from '../../../../filePath/types';
 import { serverTransform, toClientState } from './functions';
-import { back, backButRevealedOnce, face, template } from './types';
+import { back, backButRevealedOnce, face, revealStatus, revealedAtCreate, template } from './types';
 
 type CardState = State<typeof template>;
 type CardImage = z.TypeOf<typeof cardImageValue>;
 type CardTwoWayOperation = TwoWayOperation<typeof template>;
+
+type RevealStatus = z.TypeOf<typeof revealStatus>;
 
 const createFaceFile = (n?: number): CardImage => ({
     $v: 1,
@@ -19,18 +21,6 @@ const createFaceFile = (n?: number): CardImage => ({
         $v: 1,
         $r: 1,
         path: `https://example.com/face${n ?? 0}.png`,
-        sourceType: Default,
-    },
-});
-
-const createBackFile = (n?: number): CardState['back'] => ({
-    $v: 1,
-    $r: 1,
-    type: 'FilePath',
-    filePath: {
-        $v: 1,
-        $r: 1,
-        path: `https://example.com/back${n ?? 0}.png`,
         sourceType: Default,
     },
 });
@@ -46,8 +36,8 @@ describe('toClientState', () => {
             $r: 1,
             $index: 0,
             face: createFaceFile(),
-            back: createBackFile(),
-            revealStatus: face,
+            revealStatus: { type: face, revealedBy: { type: client, userUid: 'client_user_uid' } },
+            groupId: 'group_id',
             name: 'name',
             description: 'discription',
         };
@@ -66,8 +56,11 @@ describe('toClientState', () => {
             $r: 1,
             $index: 0,
             face: createFaceFile(),
-            back: createBackFile(),
-            revealStatus: backButRevealedOnce,
+            revealStatus: {
+                type: backButRevealedOnce,
+                revealedBy: { type: client, userUid: 'client_user_uid' },
+            },
+            groupId: 'group_id',
             name: 'name',
             description: 'discription',
         };
@@ -85,8 +78,8 @@ describe('toClientState', () => {
             $r: 1,
             $index: 0,
             face: createFaceFile(),
-            back: createBackFile(),
-            revealStatus: back,
+            revealStatus: { type: back },
+            groupId: 'group_id',
             name: 'name',
             description: 'discription',
         };
@@ -104,8 +97,8 @@ describe('toClientState', () => {
             $r: 1,
             $index: 0,
             face: createFaceFile(),
-            back: createBackFile(),
-            revealStatus: back,
+            revealStatus: { type: back },
+            groupId: 'group_id',
             name: 'name',
             description: 'discription',
         };
@@ -118,52 +111,65 @@ describe('toClientState', () => {
 describe('serverTransform', () => {
     it.each([
         {
-            prevRevealStatus: face,
-            nextRevealStatus: back,
+            prevRevealStatus: { type: face, revealedBy: { type: revealedAtCreate } },
+            nextRevealStatus: { type: back },
             requestedBy: {
                 type: restrict,
             },
         },
         {
-            prevRevealStatus: face,
-            nextRevealStatus: back,
+            prevRevealStatus: { type: face, revealedBy: { type: revealedAtCreate } },
+            nextRevealStatus: { type: back },
             requestedBy: {
                 type: client,
                 userUid: 'test_user_uid',
             },
         },
         {
-            prevRevealStatus: backButRevealedOnce,
-            nextRevealStatus: back,
+            prevRevealStatus: {
+                type: backButRevealedOnce,
+                revealedBy: { type: client, userUid: 'test_revealed_user_uid' },
+            },
+            nextRevealStatus: { type: back },
             requestedBy: {
                 type: restrict,
             },
         },
         {
-            prevRevealStatus: backButRevealedOnce,
-            nextRevealStatus: back,
+            prevRevealStatus: {
+                type: backButRevealedOnce,
+                revealedBy: { type: client, userUid: 'test_revealed_user_uid' },
+            },
+            nextRevealStatus: { type: back },
             requestedBy: {
                 type: client,
                 userUid: 'test_user_uid',
             },
         },
         {
-            prevRevealStatus: back,
-            nextRevealStatus: backButRevealedOnce,
+            prevRevealStatus: { type: back },
+            nextRevealStatus: {
+                type: backButRevealedOnce,
+                revealedBy: { type: client, userUid: 'test_revealed_user_uid' },
+            },
             requestedBy: {
                 type: admin,
             },
         },
-    ] as const)(
+    ] satisfies {
+        prevRevealStatus: RevealStatus;
+        nextRevealStatus: RevealStatus;
+        requestedBy: RequestedBy;
+    }[])(
         'should avoid updating revealStatus - %j',
         ({ prevRevealStatus, nextRevealStatus, requestedBy }) => {
             const state: CardState = {
                 $v: 1,
                 $r: 1,
                 $index: 0,
-                back: createBackFile(),
                 face: createFaceFile(),
                 revealStatus: prevRevealStatus,
+                groupId: 'group_id',
                 name: 'name',
                 description: 'discription',
             };
@@ -180,49 +186,68 @@ describe('serverTransform', () => {
                 },
             });
             expect(actual).toEqual(Result.ok(undefined));
-        }
+        },
     );
 
     it.each([
         {
-            prevRevealStatus: face,
-            nextRevealStatus: back,
+            prevRevealStatus: { type: face, revealedBy: { type: revealedAtCreate } },
+            nextRevealStatus: { type: back },
             requestedBy: {
                 type: admin,
             },
         },
         {
-            prevRevealStatus: backButRevealedOnce,
-            nextRevealStatus: back,
+            prevRevealStatus: {
+                type: backButRevealedOnce,
+                revealedBy: { type: client, userUid: 'test_revealed_user_uid' },
+            },
+            nextRevealStatus: { type: back },
             requestedBy: {
                 type: admin,
             },
         },
         {
-            prevRevealStatus: face,
-            nextRevealStatus: backButRevealedOnce,
+            prevRevealStatus: {
+                type: face,
+                revealedBy: { type: client, userUid: 'test_revealed_user_uid' },
+            },
+            nextRevealStatus: {
+                type: backButRevealedOnce,
+                revealedBy: { type: client, userUid: 'test_revealed_user_uid' },
+            },
             requestedBy: {
                 type: restrict,
             },
         },
         {
-            prevRevealStatus: backButRevealedOnce,
-            nextRevealStatus: face,
+            prevRevealStatus: {
+                type: backButRevealedOnce,
+                revealedBy: { type: client, userUid: 'test_revealed_user_uid' },
+            },
+            nextRevealStatus: {
+                type: face,
+                revealedBy: { type: client, userUid: 'test_revealed_user_uid' },
+            },
             requestedBy: {
                 type: client,
                 userUid: 'test_user_uid',
             },
         },
-    ] as const)(
+    ] satisfies {
+        prevRevealStatus: RevealStatus;
+        nextRevealStatus: RevealStatus;
+        requestedBy: RequestedBy;
+    }[])(
         'should successfully update revealStatus - %j',
         ({ prevRevealStatus, nextRevealStatus, requestedBy }) => {
             const state: CardState = {
                 $v: 1,
                 $r: 1,
                 $index: 0,
-                back: createBackFile(),
                 face: createFaceFile(),
                 revealStatus: prevRevealStatus,
+                groupId: 'group_id',
                 name: 'name',
                 description: 'discription',
             };
@@ -247,6 +272,6 @@ describe('serverTransform', () => {
                 },
             };
             expect(actual).toEqual(Result.ok(expected));
-        }
+        },
     );
 });

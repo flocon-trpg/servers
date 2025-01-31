@@ -6,7 +6,7 @@ const board = createObjectValueTemplate(
         cards: createRecordValueTemplate(Card.statTemplate),
     },
     1,
-    1
+    1,
 );
 
 const templateValue = {

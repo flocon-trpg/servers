@@ -4,17 +4,17 @@ import { isIdRecord } from '../../../../../record';
 import { RequestedBy, admin, client, restrict } from '../../../../../requestedBy';
 import * as ReplaceOperation from '../../../../../util/replaceOperation';
 import { ServerTransform } from '../../../../../util/type';
-import { back, backButRevealedOnce, face, template } from './types';
+import { areRevealedByEqual, back, backButRevealedOnce, face, template } from './types';
 
 export const toClientState =
     (
         requestedBy: RequestedBy,
         /** deckPiece.revealedTo と等しい。 */
-        revealedTo: { revealedTo: readonly string[] }
+        revealedTo: { revealedTo: readonly string[] },
     ) =>
     (source: State<typeof template>): State<typeof template> => {
         let includeFace: boolean;
-        if (source.revealStatus === back) {
+        if (source.revealStatus.type === back) {
             switch (requestedBy.type) {
                 case restrict:
                     includeFace = false;
@@ -27,7 +27,7 @@ export const toClientState =
                         includeFace = true;
                         break;
                     }
-                    includeFace = source.revealStatus !== back;
+                    includeFace = source.revealStatus.type !== back;
                     break;
                 }
             }
@@ -42,7 +42,7 @@ export const toClientState =
 
 export const serverTransform =
     (
-        requestedBy: RequestedBy
+        requestedBy: RequestedBy,
     ): ServerTransform<
         State<typeof template>,
         TwoWayOperation<typeof template>,
@@ -61,21 +61,21 @@ export const serverTransform =
             $r: 1,
         };
 
-        twoWayOperation.back = ReplaceOperation.serverTransform({
-            first: serverOperation?.back,
-            second: clientOperation.back,
-            prevState: stateBeforeServerOperation.back,
+        twoWayOperation.groupId = ReplaceOperation.serverTransform({
+            first: serverOperation?.groupId,
+            second: clientOperation.groupId,
+            prevState: stateBeforeServerOperation.groupId,
         });
 
         // 表面の画像を変更する処理。ただし、admin でない場合、カードが表でないときは変更は拒否する。
         // CONSIDER: 現時点では表面の変更を許可する条件が revealStatus === face である。backButRevealedOnce のときも許可することも考えたが、ユーザーがブラウザで画像変更を試してみて、変更できるかどうかで表になったことがあるかどうかを確認できるという不正を防ぐために拒否としている。だが、backButRevealedOnce である画像の表面のデータはどのみちブラウザに存在するため、それによる不正が可能なのにこの画像変更による不正のみに対処するのは少し違和感がある。
-        if (isAdmin || stateAfterServerOperation.revealStatus === face) {
-        twoWayOperation.face = ReplaceOperation.serverTransform({
-            first: serverOperation?.face,
-            second: clientOperation.face,
-            prevState: stateBeforeServerOperation.face,
-        });
-    }
+        if (isAdmin || stateAfterServerOperation.revealStatus.type === face) {
+            twoWayOperation.face = ReplaceOperation.serverTransform({
+                first: serverOperation?.face,
+                second: clientOperation.face,
+                prevState: stateBeforeServerOperation.face,
+            });
+        }
 
         twoWayOperation.revealStatus = (() => {
             if (clientOperation.revealStatus == null) {
@@ -88,19 +88,50 @@ export const serverTransform =
                     prevState: stateBeforeServerOperation.revealStatus,
                 });
             if (
-                stateAfterServerOperation.revealStatus === back &&
-                clientOperation.revealStatus.newValue === backButRevealedOnce
+                stateAfterServerOperation.revealStatus.type === back &&
+                clientOperation.revealStatus.newValue.type === backButRevealedOnce
             ) {
                 return undefined;
             }
+
             if (isAdmin) {
                 return xform();
             }
-            // admin 以外は、(back 以外から)back に変更することはできない
-            if (clientOperation.revealStatus.newValue === back) {
-                return undefined;
+
+            switch (stateAfterServerOperation.revealStatus.type) {
+                case face: {
+                    if (clientOperation.revealStatus.newValue.type !== backButRevealedOnce) {
+                        return undefined;
+                    }
+                    if (
+                        !areRevealedByEqual(
+                            stateAfterServerOperation.revealStatus.revealedBy,
+                            clientOperation.revealStatus.newValue.revealedBy,
+                        )
+                    ) {
+                        return undefined;
+                    }
+                    return xform();
+                }
+                case back: {
+                    // admin 以外は、(back 以外から)back に変更することはできない
+                    return undefined;
+                }
+                case backButRevealedOnce: {
+                    if (clientOperation.revealStatus.newValue.type !== face) {
+                        return undefined;
+                    }
+                    if (
+                        !areRevealedByEqual(
+                            stateAfterServerOperation.revealStatus.revealedBy,
+                            clientOperation.revealStatus.newValue.revealedBy,
+                        )
+                    ) {
+                        return undefined;
+                    }
+                    return xform();
+                }
             }
-            return xform();
         })();
 
         if (isIdRecord(twoWayOperation)) {

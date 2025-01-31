@@ -19,14 +19,14 @@ export const toClientState =
                 source.cards == null
                     ? undefined
                     : chooseRecord(source.cards, state =>
-                          Card.toClientState(requestedBy, source)(state)
+                          Card.toClientState(requestedBy, source)(state),
                       ),
         };
     };
 
 export const serverTransform =
     (
-        requestedBy: RequestedBy
+        requestedBy: RequestedBy,
     ): ServerTransform<
         State<typeof template>,
         TwoWayOperation<typeof template>,
@@ -82,7 +82,7 @@ export const serverTransform =
                 recordName: 'cards',
                 maxRecordLength: 1000,
             },
-            mapOperation: operation => ({ ...operation, $v: 1, $r: 1 } as const),
+            mapOperation: operation => ({ ...operation, $v: 1, $r: 1 }) as const,
         });
         if (cards.isError) {
             return cards;
