@@ -35,6 +35,10 @@ export default [
                 ],
                 '@typescript-eslint/no-unused-vars': 'off', // 誤検知が多いため off にしている
                 '@typescript-eslint/require-await': 'off',
+                '@typescript-eslint/no-unused-expressions': [
+                    'warn',
+                    { allowTernary: true, allowShortCircuit: true },
+                ],
                 eqeqeq: ['warn', 'smart'],
                 'prefer-promise-reject-errors': 'error',
                 'space-before-blocks': 'warn',
