@@ -35,16 +35,16 @@
         "@flocon-trpg/rollup-config": "workspace:^",
         "@flocon-trpg/tsconfig": "workspace:^",
         "@types/jest": "29.5.14",
-        "eslint": "9.14.0",
+        "eslint": "9.19.0",
         "eslint-config-prettier": "9.1.0",
         "eslint-plugin-import": "2.31.0",
         "jest": "29.7.0",
-        "prettier": "3.3.3",
+        "prettier": "3.4.2",
         "rimraf": "5.0.10",
-        "rollup": "4.24.4",
+        "rollup": "4.32.1",
         "ts-jest": "29.2.5",
         "typescript": "5.6.2",
-        "typescript-eslint": "8.13.0"
+        "typescript-eslint": "8.22.0"
     },
     "engines": {
         "node": ">=18"
