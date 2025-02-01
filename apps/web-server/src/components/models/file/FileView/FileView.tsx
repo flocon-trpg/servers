@@ -68,6 +68,7 @@ type PropsBase = {
     showImage?: boolean;
     maxWidthOfLink: number | null;
     uploaderFileBrowserHeight: number | null;
+    hideClear?: boolean;
     style?: React.CSSProperties;
 };
 
@@ -85,7 +86,7 @@ type ModeProps =
 type Props = PropsBase & ModeProps;
 
 export const FileView: React.FC<Props> = props => {
-    const { filePath, showImage, maxWidthOfLink, style } = props;
+    const { filePath, showImage, maxWidthOfLink, style, hideClear } = props;
     let onPathChange: OnPathChange | null;
     let defaultFileTypeFilter: FileType | null;
     if (props.onPathChange == null) {
@@ -149,7 +150,7 @@ export const FileView: React.FC<Props> = props => {
                     <Button onClick={() => setModalVisible(true)}>
                         {filePath == null ? '開く' : '変更'}
                     </Button>
-                    {filePath != null && (
+                    {!hideClear && filePath != null && (
                         <Button
                             onClick={() => {
                                 onPathChange?.(null);

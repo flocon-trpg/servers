@@ -1,3 +1,5 @@
+// TODO: このファイルを適切なディレクトリに移動する
+
 import Konva from 'konva';
 import React from 'react';
 import * as ReactKonva from 'react-konva';

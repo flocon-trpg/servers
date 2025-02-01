@@ -50,6 +50,11 @@ export const anotherPlayerCharacterId1 = 'character-id-3';
 export const defaultBoardId = 'board-id-1';
 export const anotherBoardId = 'board-id-2';
 
+export const cardGroupId = 'card-group';
+
+export const deckPieceKey1 = 'deck-piece-1';
+export const deckPieceKey2 = 'deck-piece-2';
+
 export const dicePieceKey1 = 'dice-piece-1';
 export const dicePieceKey2 = 'dice-piece-2';
 
@@ -145,6 +150,8 @@ const boardBase: BoardState = {
     cellWidth: 50,
     cellOffsetX: 0,
     cellOffsetY: 0,
+    cardGroups: undefined,
+    deckPieces: undefined,
     dicePieces: undefined,
     imagePieces: undefined,
     shapePieces: undefined,
@@ -343,6 +350,7 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
             },
         },
         rollCalls: undefined,
+        stats: { $v: 1, $r: 1, boards: undefined },
     };
 
     if (params.setBoards) {
@@ -363,6 +371,178 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
                 },
                 name: 'board-1-name',
                 ownerParticipantId: myUserUid,
+                cardGroups: {
+                    [cardGroupId]: {
+                        $v: 1,
+                        $r: 1,
+                        name: 'card-group-name',
+                        back: {
+                            $v: 1,
+                            $r: 1,
+                            type: 'FilePath',
+                            filePath: {
+                                $v: 1,
+                                $r: 1,
+                                sourceType: 'Default',
+                                path: generateDummyImage({
+                                    width: 200,
+                                    height: 300,
+                                    bgColor: ColorName.blue,
+                                }),
+                            },
+                        },
+                    },
+                },
+                deckPieces: {
+                    [deckPieceKey1]: {
+                        $v: 1,
+                        $r: 1,
+                        cards: {
+                            'card-1-key': {
+                                $v: 1,
+                                $r: 1,
+                                $index: 0,
+                                groupId: cardGroupId,
+                                description: undefined,
+                                face: {
+                                    $v: 1,
+                                    $r: 1,
+                                    type: 'FilePath',
+                                    filePath: {
+                                        $v: 1,
+                                        $r: 1,
+                                        sourceType: 'Default',
+                                        path: generateDummyImage({
+                                            width: 200,
+                                            height: 300,
+                                            bgColor: ColorName.blue,
+                                        }),
+                                    },
+                                },
+                                name: 'card-1-name',
+                                revealStatus: {
+                                    type: 'face',
+                                    revealedBy: { type: 'revealedAtCreate' },
+                                },
+                            },
+                            'card-2-key': {
+                                $v: 1,
+                                $r: 1,
+                                $index: 1,
+                                groupId: cardGroupId,
+                                description: undefined,
+                                face: {
+                                    $v: 1,
+                                    $r: 1,
+                                    type: 'FilePath',
+                                    filePath: {
+                                        $v: 1,
+                                        $r: 1,
+                                        sourceType: 'Default',
+                                        path: generateDummyImage({
+                                            width: 200,
+                                            height: 300,
+                                            bgColor: ColorName.blue,
+                                        }),
+                                    },
+                                },
+                                name: 'card-1-name',
+                                revealStatus: {
+                                    type: 'face',
+                                    revealedBy: { type: 'client', userUid: anotherPlayerUserUid },
+                                },
+                            },
+                        },
+                        revealedTo: [],
+                        cellX: 0,
+                        cellY: 3,
+                        cellW: 1,
+                        cellH: 1,
+                        x: 10,
+                        y: 10,
+                        w: 40,
+                        h: 30,
+                        isCellMode: true,
+                        isPositionLocked: false,
+                        memo: 'deck-memo-1',
+                        name: 'deck-name-1',
+                        opacity: 0.7,
+                    },
+                    [deckPieceKey2]: {
+                        $v: 1,
+                        $r: 1,
+                        cards: {
+                            'card-1-key': {
+                                $v: 1,
+                                $r: 1,
+                                $index: 0,
+                                groupId: cardGroupId,
+                                description: undefined,
+                                face: {
+                                    $v: 1,
+                                    $r: 1,
+                                    type: 'FilePath',
+                                    filePath: {
+                                        $v: 1,
+                                        $r: 1,
+                                        sourceType: 'Default',
+                                        path: generateDummyImage({
+                                            width: 200,
+                                            height: 300,
+                                            bgColor: ColorName.blue,
+                                        }),
+                                    },
+                                },
+                                name: 'card-1-name',
+                                revealStatus: {
+                                    type: 'face',
+                                    revealedBy: { type: 'client', userUid: myUserUid },
+                                },
+                            },
+                            'card-2-key': {
+                                $v: 1,
+                                $r: 1,
+                                $index: 1,
+                                groupId: cardGroupId,
+                                description: undefined,
+                                face: {
+                                    $v: 1,
+                                    $r: 1,
+                                    type: 'FilePath',
+                                    filePath: {
+                                        $v: 1,
+                                        $r: 1,
+                                        sourceType: 'Default',
+                                        path: generateDummyImage({
+                                            width: 200,
+                                            height: 300,
+                                            bgColor: ColorName.blue,
+                                        }),
+                                    },
+                                },
+                                name: 'card-1-name',
+                                revealStatus: {
+                                    type: 'face',
+                                    revealedBy: { type: 'client', userUid: anotherPlayerUserUid },
+                                },
+                            },
+                        },
+                        revealedTo: [],
+                        cellX: 1,
+                        cellY: 3,
+                        cellW: 1,
+                        cellH: 1,
+                        x: 10,
+                        y: 10,
+                        w: 40,
+                        h: 30,
+                        isCellMode: true,
+                        isPositionLocked: false,
+                        memo: 'deck-memo-1',
+                        name: 'deck-name-1',
+                        opacity: 0.7,
+                    },
+                },
                 dicePieces: {
                     [dicePieceKey1]: {
                         $v: 2,
