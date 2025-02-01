@@ -1,5 +1,6 @@
 import {
     State,
+    boardTemplate,
     dicePieceStrIndexes,
     dicePieceTemplate,
     dieValueTemplate,
@@ -10,7 +11,8 @@ import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { useSpring } from '@react-spring/konva';
 import React from 'react';
 import * as ReactKonva from 'react-konva';
-import { usePrevious } from 'react-use';
+import { useMouse, usePrevious } from 'react-use';
+import { ValueOf } from 'type-fest';
 import { DicePieceValue } from '../../../../../utils/dicePieceValue';
 import { PixelSize } from '../../../../../utils/positionAndSizeAndRect';
 import { StringPieceValue } from '../../../../../utils/stringPieceValue';
@@ -20,9 +22,13 @@ import {
     AnimatedRectAsAnyProps,
     AnimatedTextAsAnyProps,
 } from '@/components/ui/AnimatedKonvaAsAnyProps/AnimatedKonvaAsAnyProps';
+import { success, useImageFromFilePath } from '@/hooks/imageHooks';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
 
+type BoardState = State<typeof boardTemplate>;
 type DieValueState = State<typeof dieValueTemplate>;
 type DicePieceState = State<typeof dicePieceTemplate>;
+type DeckPieceState = NonNullable<ValueOf<NonNullable<BoardState['deckPieces']>>>;
 type ShapePieceState = State<typeof shapePieceTemplate>;
 type StringPieceState = State<typeof stringPieceTemplate>;
 

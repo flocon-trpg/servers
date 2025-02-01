@@ -83,6 +83,11 @@ const baseRoomState: RoomState = {
         },
     },
     rollCalls: undefined,
+    stats: {
+        $v: 1,
+        $r: 1,
+        boards: undefined,
+    },
 };
 
 const closedRollCall: RollCallState = {

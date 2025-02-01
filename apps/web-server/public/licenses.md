@@ -26,6 +26,10 @@ assets ディレクトリ内のいくつかのファイルは、次の素材を�
 
 <http://byronknoll.blogspot.com/2011/03/vector-playing-cards.html>
 
+### 警告アイコンの画像
+
+<https://publicdomainvectors.org/en/free-clipart/Warning-notification-sign-vector-image/8154.html>
+
 ## ライブラリのライセンス一覧
 
 [licenses-npm-package.txt](./licenses-npm-package.txt) をご覧ください。なお、これらば Web サーバーから参照されているライブラリのライセンスの一覧であり、API サーバーなどは含まれていません。
