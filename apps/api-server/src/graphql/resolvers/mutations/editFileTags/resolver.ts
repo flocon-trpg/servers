@@ -39,7 +39,6 @@ export class EditFileTagsResolver {
         @AuthData() auth: AuthDataType,
     ): Promise<boolean> {
         const em = await this.mikroOrmService.forkEmForMain();
-        const user = await em.findOneOrFail(User, { userUid: auth.user.userUid });
         const map = new DualKeyMap<string, string, number>();
         input.actions.forEach(action => {
             action.add.forEach(a => {
@@ -60,7 +59,7 @@ export class EditFileTagsResolver {
                 if (fileEntity == null) {
                     fileEntity = await em.findOne(File, {
                         filename,
-                        createdBy: { userUid: user.userUid },
+                        createdBy: { userUid: auth.user.userUid },
                     });
                 }
                 if (fileEntity == null) {
