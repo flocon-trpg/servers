@@ -5,6 +5,7 @@ import {
     Dictionary,
     IDatabaseDriver,
     LogContext,
+    MigrationsOptions,
 } from '@mikro-orm/core';
 import { MySqlDriver } from '@mikro-orm/mysql';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
@@ -43,15 +44,17 @@ const entities = [
 
 export type DirName = 'src' | 'dist';
 
-const migrations = ({
+const migrationsOptions = ({
     dirName,
     dbType,
 }: {
     dirName: DirName;
     dbType: 'sqlite' | 'mysql' | 'postgresql';
-}) => {
+}): MigrationsOptions => {
     return {
         path: `./${dirName}/__migrations__/${dbType}`,
+        // snapshotName を指定しないとデータベースの名前ごとに異なるスナップショットが作られてしまうので固定している。
+        snapshotName: 'snapshot',
     };
 };
 
@@ -149,7 +152,7 @@ export const createSQLiteOptions = ({
         entities,
         dbName: sqliteConfig.dbName,
         clientUrl: sqliteConfig.clientUrl,
-        migrations: migrations({ dbType: 'sqlite', dirName }),
+        migrations: migrationsOptions({ dbType: 'sqlite', dirName }),
         driver: SqliteDriver,
         forceUndefined: true,
     };
@@ -172,7 +175,7 @@ export const createPostgreSQLOptions = ({
         entities,
         dbName,
         migrations: {
-            ...migrations({ dbType: 'postgresql', dirName }),
+            ...migrationsOptions({ dbType: 'postgresql', dirName }),
 
             // https://github.com/mikro-orm/mikro-orm/issues/190#issuecomment-655763246
             disableForeignKeys: false,
@@ -200,7 +203,7 @@ export const createMySQLOptions = ({
         ...optionsBase,
         entities,
         dbName,
-        migrations: migrations({ dbType: 'mysql', dirName }),
+        migrations: migrationsOptions({ dbType: 'mysql', dirName }),
         driver: MySqlDriver,
         forceUndefined: true,
         clientUrl,
