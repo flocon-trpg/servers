@@ -22,9 +22,12 @@ export class User {
         this.baasType = baasType;
     }
 
-    // CONSIDER: Mikro-ORMではidやuuidという名前が想定されている模様。機会があれば id 等にリネームしたい。他に [PrimaryKeyProp] を試してみたが、Ubuntu で 'insert into `user` (`user_uid`, `baas_type`, `is_entry`) values ('Player1User', 'Firebase', true) - SQLITE_CONSTRAINT: UNIQUE constraint failed: user.user_uid' というエラーが出たため、この方法は使えない。
+    // TODO: 機会があれば 'id' 等にリネームしたい。理由は [PrimaryKeyProp] のコメントを参照。
     @PrimaryKey()
     public userUid: string;
+
+    // mikro-orm では主キーの名前は 'id' か 'uuid' が想定されているようなので、これら以外だと Relationship における Reference を直接作成することができない。多少無理やり感があるが、PrimaryKeyProp で指定することで対処している。
+    [PrimaryKeyProp]?: ['userUid'];
 
     @Property({ type: 'string', index: true })
     public baasType: BaasType;

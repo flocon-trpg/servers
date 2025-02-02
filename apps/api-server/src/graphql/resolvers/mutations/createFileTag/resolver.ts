@@ -1,6 +1,5 @@
-import { ref } from '@mikro-orm/core';
+import { Reference } from '@mikro-orm/core';
 import { Args, Field, Mutation, ObjectType, Resolver } from '@nestjs/graphql';
-import e from 'express';
 import { Auth, ENTRY } from '../../../../auth/auth.decorator';
 import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { FileTag as FileTagEntity } from '../../../../mikro-orm/entities/fileTag/entity';
@@ -39,8 +38,7 @@ export class CreateFileTagResolver {
         }
         const newFileTag = em.create(FileTagEntity, {
             name: tagName,
-            // HACK: mikro-orm では本来 entity の id のみで構わないが、テストが失敗するので User を find している。詳細は User クラスのコメントを参照。
-            user: await em.findOneOrFail(User, { userUid: user.userUid }),
+            user: Reference.createFromPK(User, [user.userUid]),
         });
         // `em.create` calls `em.persist` automatically, so flush is enough - https://mikro-orm.io/docs/guide/relationships#creating-entity-graph
         await em.flush();
