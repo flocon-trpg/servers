@@ -300,7 +300,7 @@ export class RoomPrvMsg {
     public charaImagePath?: string;
 
     // 「書き込んだとき」のCharaのimageSourceType
-    @Property({ type: () => FileSourceType, nullable: true, default: null })
+    @Property({ nullable: true, type: TextType, default: null })
     public charaImageSourceType?: FileSourceType;
 
     // 「書き込んだとき」のCharaのimagePath
