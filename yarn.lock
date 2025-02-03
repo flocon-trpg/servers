@@ -4833,7 +4833,6 @@ __metadata:
     "@ltd/j-toml": "npm:^1.23.0"
     "@types/estree": "npm:1.0.6"
     "@types/jest": "npm:29.5.14"
-    "@types/sanitize-filename": "npm:1.6.3"
     "@types/truncate-utf8-bytes": "npm:1.0.2"
     es-toolkit: "npm:^1.25.2"
     eslint: "npm:9.19.0"
@@ -9790,15 +9789,6 @@ __metadata:
   version: 1.1.2
   resolution: "@types/safe-compare@npm:1.1.2"
   checksum: 10/700d55adb18f5a98a9b906d05339179e59fe1d1596f7849fadaf8802ea48f021f28c0b08584ab008dfa8b1e73047644cde3a90a01163014b771d4830aaefaf17
-  languageName: node
-  linkType: hard
-
-"@types/sanitize-filename@npm:1.6.3":
-  version: 1.6.3
-  resolution: "@types/sanitize-filename@npm:1.6.3"
-  dependencies:
-    sanitize-filename: "npm:*"
-  checksum: 10/009d69b8d1dc68640d1fa7e45d292562f34cf556e7def713794ba2e3a3f90c0b304e48f0bec01d82484dee9212b7ee8b541c97aba0e6b10b42a71ca851395941
   languageName: node
   linkType: hard
 
@@ -26084,7 +26074,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sanitize-filename@npm:*, sanitize-filename@npm:^1.6.3":
+"sanitize-filename@npm:^1.6.3":
   version: 1.6.3
   resolution: "sanitize-filename@npm:1.6.3"
   dependencies:
