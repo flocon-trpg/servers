@@ -21,7 +21,7 @@
         "test-ci": "jest --passWithNoTests --ci --coverage"
     },
     "dependencies": {
-        "pino-abstract-transport": "^1.0.0"
+        "pino-abstract-transport": "^2.0.0"
     },
     "devDependencies": {
         "@flocon-trpg/eslint-config": "workspace:^",
