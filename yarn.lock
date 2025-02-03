@@ -5320,7 +5320,7 @@ __metadata:
     react-dnd-html5-backend: "npm:^16.0.0"
     react-dom: "npm:^18.3.1"
     react-draggable: "npm:^4.4.4"
-    react-konva: "npm:^18.1.1"
+    react-konva: "npm:^19.0.0"
     react-markdown: "npm:^8.0.0"
     react-rnd: "npm:^10.3.7"
     react-use: "npm:^17.3.1"
@@ -9924,12 +9924,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-reconciler@npm:^0.28.0, @types/react-reconciler@npm:^0.28.2":
-  version: 0.28.2
-  resolution: "@types/react-reconciler@npm:0.28.2"
-  dependencies:
-    "@types/react": "npm:*"
-  checksum: 10/de2a98cd1381363f69435c73d25192a977410c2d219cca2de44f85a850d7541dc37e7fba89045b1072d97168926644cd5db66c37124721d43e0f2921027d6fec
+"@types/react-reconciler@npm:^0.28.0, @types/react-reconciler@npm:^0.28.8":
+  version: 0.28.9
+  resolution: "@types/react-reconciler@npm:0.28.9"
+  peerDependencies:
+    "@types/react": "*"
+  checksum: 10/2450e3df6169fb887591f2a949ca8f08439ac76c756124feeee7370f1a79b5060ba8e5f612302dc70169433e043da7f617dd7ea3b14a3c2bb39559d66b7a0986
   languageName: node
   linkType: hard
 
@@ -18724,14 +18724,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"its-fine@npm:^1.1.1":
-  version: 1.1.1
-  resolution: "its-fine@npm:1.1.1"
+"its-fine@npm:^1.2.5":
+  version: 1.2.5
+  resolution: "its-fine@npm:1.2.5"
   dependencies:
     "@types/react-reconciler": "npm:^0.28.0"
   peerDependencies:
     react: ">=18.0"
-  checksum: 10/3b9dc466888743932e3e92e3e4c08a50379166b01ba4c97cece7531d3bc2afb20ff1370946c860876b7f0923128be856bec7a28852f8d69cf4a1b1a5370f8fa7
+  checksum: 10/a4f1e3dd5e271e4f78df626cb56279bbddaa5f065d53bb94d266396e1d8d773c8c9ba4ed268c11e15a1879814e7c8ca1601c08759a8d666bdcfee8f4737c54fa
   languageName: node
   linkType: hard
 
@@ -25133,19 +25133,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-konva@npm:^18.1.1":
-  version: 18.2.10
-  resolution: "react-konva@npm:18.2.10"
+"react-konva@npm:^19.0.0":
+  version: 19.0.2
+  resolution: "react-konva@npm:19.0.2"
   dependencies:
-    "@types/react-reconciler": "npm:^0.28.2"
-    its-fine: "npm:^1.1.1"
-    react-reconciler: "npm:~0.29.0"
-    scheduler: "npm:^0.23.0"
+    "@types/react-reconciler": "npm:^0.28.8"
+    its-fine: "npm:^1.2.5"
+    react-reconciler: "npm:0.31.0"
+    scheduler: "npm:0.25.0"
   peerDependencies:
     konva: ^8.0.1 || ^7.2.5 || ^9.0.0
-    react: ">=18.0.0"
-    react-dom: ">=18.0.0"
-  checksum: 10/ee30d1908d28025345672708b3b1bd58473d774e156b67b28f8e19c8c148cfec0895acb85be42e5aea0f27b171964e114b2ca01fa475d745ebef12083a63c439
+    react: ^18.3.1 || ^19.0.0
+    react-dom: ^18.3.1 || ^19.0.0
+  checksum: 10/d70d84543a44c66eefc7fc76b8a2b3a7c4af6e04fb768969893040d725ced71bda332c42c1770ae32262ef58f11648f0784928c54e6b75572d3035acc9897575
   languageName: node
   linkType: hard
 
@@ -25198,15 +25198,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-reconciler@npm:~0.29.0":
-  version: 0.29.0
-  resolution: "react-reconciler@npm:0.29.0"
+"react-reconciler@npm:0.31.0":
+  version: 0.31.0
+  resolution: "react-reconciler@npm:0.31.0"
   dependencies:
-    loose-envify: "npm:^1.1.0"
-    scheduler: "npm:^0.23.0"
+    scheduler: "npm:^0.25.0"
   peerDependencies:
-    react: ^18.2.0
-  checksum: 10/71f69399152a47fa51aa39e35c1d680906ae089fe932725f62b20b9af9a1b232575fc21f7a4d9aad789a401094d674d0ecabaffb0b9a2dab67edc6069854aae3
+    react: ^19.0.0
+  checksum: 10/e7235fa08947296c2084a89dc264651fd7cb9dc3a26c3b132b84ecf2a30c46b9b98cd004c30adfe2a24741cd1e49a618858a48080008ce2b4e964a2c4233041e
   languageName: node
   linkType: hard
 
@@ -26550,7 +26549,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"scheduler@npm:^0.23.0, scheduler@npm:^0.23.2":
+"scheduler@npm:0.25.0, scheduler@npm:^0.25.0":
+  version: 0.25.0
+  resolution: "scheduler@npm:0.25.0"
+  checksum: 10/e661e38503ab29a153429a99203fefa764f28b35c079719eb5efdd2c1c1086522f6653d8ffce388209682c23891a6d1d32fa6badf53c35fb5b9cd0c55ace42de
+  languageName: node
+  linkType: hard
+
+"scheduler@npm:^0.23.2":
   version: 0.23.2
   resolution: "scheduler@npm:0.23.2"
   dependencies:
