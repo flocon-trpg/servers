@@ -5180,7 +5180,7 @@ __metadata:
     "@kizahasi/option": "npm:^1.1.0"
     "@kizahasi/result": "npm:^1.1.0"
     "@types/jest": "npm:29.5.14"
-    browser-or-node: "npm:^2.0.0"
+    browser-or-node: "npm:^3.0.0"
     es-toolkit: "npm:^1.25.2"
     eslint: "npm:9.19.0"
     eslint-config-prettier: "npm:9.1.0"
@@ -12066,10 +12066,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"browser-or-node@npm:^2.0.0":
-  version: 2.1.1
-  resolution: "browser-or-node@npm:2.1.1"
-  checksum: 10/b1650b579345574d2c1905c73d385915a032523066ef9589036cf129b23b27b85096b6713476dffb88feb83cda798ed0774363e699117aa2724a0409adea25aa
+"browser-or-node@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "browser-or-node@npm:3.0.0"
+  checksum: 10/51d74cc5d0139da3d37e83ff3906fcca20d02c42aa8b81a48d9ea01806f36df1a4b55006670071b1d7423967777275920054ec8b723410534b580b0232c5093d
   languageName: node
   linkType: hard
 
