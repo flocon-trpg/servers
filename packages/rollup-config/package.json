@@ -15,7 +15,7 @@
         "test-ci": "jest --passWithNoTests --ci --coverage"
     },
     "dependencies": {
-        "@rollup/plugin-typescript": "11.1.6"
+        "@rollup/plugin-typescript": "12.1.2"
     },
     "devDependencies": {
         "@flocon-trpg/eslint-config": "workspace:^",
