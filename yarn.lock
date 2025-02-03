@@ -5266,7 +5266,7 @@ __metadata:
     "@tanstack/router-plugin": "npm:1.98.6"
     "@testing-library/dom": "npm:10.4.0"
     "@testing-library/react": "npm:16.2.0"
-    "@types/color": "npm:3.0.6"
+    "@types/color": "npm:4.2.0"
     "@types/color-name": "npm:1.1.5"
     "@types/howler": "npm:2.2.12"
     "@types/html-escaper": "npm:3.0.2"
@@ -9178,12 +9178,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/color@npm:3.0.6":
-  version: 3.0.6
-  resolution: "@types/color@npm:3.0.6"
+"@types/color@npm:4.2.0":
+  version: 4.2.0
+  resolution: "@types/color@npm:4.2.0"
   dependencies:
     "@types/color-convert": "npm:*"
-  checksum: 10/0f16dcf4e202896d5425019c44a1f99713fca998052ab2fd836cdd38048398a0caf5b79a2efe560e41fca4b9401e8d8f6f02ed541cfea30cca3a8cb1b50b80f7
+  checksum: 10/4f9ddddac07f9c2d79823a5dfaf8689330f3e102c183200c5f772545ac421942ed9e42a2591afe96bbccddf5d5a87ad1bb46671da6056583ebf9c9fdc238b54e
   languageName: node
   linkType: hard
 
