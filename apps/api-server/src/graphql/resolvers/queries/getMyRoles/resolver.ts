@@ -1,7 +1,7 @@
-import { Authorized, Ctx, Field, ObjectType, Query, Resolver } from 'type-graphql';
-import { ResolverContext } from '../../../../types';
-import { ADMIN, getRoles } from '../../../../utils/roles';
-import { NotSignIn } from '../../utils/utils';
+import { Field, ObjectType, Query, Resolver } from '@nestjs/graphql';
+import { Auth, LOGIN } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
+import { ServerConfigService } from '../../../../server-config/server-config.service';
 
 @ObjectType()
 export class Roles {
@@ -11,17 +11,13 @@ export class Roles {
 
 @Resolver()
 export class GetMyRolesResolver {
-    @Query(() => Roles, {
-        description: 'since v0.7.2',
-    })
-    @Authorized()
-    public async getMyRoles(@Ctx() context: ResolverContext): Promise<Roles> {
-        const roles = getRoles({ context, isEntry: false });
-        if (roles === NotSignIn) {
-            throw new Error('This should not happen');
-        }
+    public constructor(private readonly serverConfigService: ServerConfigService) {}
+
+    @Query(() => Roles)
+    @Auth(LOGIN)
+    public async getMyRoles(@AuthData() auth: AuthDataType): Promise<Roles> {
         return {
-            admin: roles.value.has(ADMIN),
+            admin: this.serverConfigService.getValueForce().admins.includes(auth.user.userUid),
         };
     }
 }

@@ -4,8 +4,8 @@
 
 このパッケージには、Flocon の部屋のモデルに関するコードが主に含まれています。これは主に次の 2 つから構成されます。
 
--   部屋のモデル
--   部屋のモデルを、Operational Transformation(OT)の手法を用いて差分を取ったり変換したりする関数の集合
+- 部屋のモデル
+- 部屋のモデルを、Operational Transformation(OT)の手法を用いて差分を取ったり変換したりする関数の集合
 
 ## Flocon の部屋のモデル
 
@@ -57,16 +57,16 @@ State オブジェクトの更新内容を ブラウザ ←→ API サーバー 
 
 State や Operation に関する関数は次の 10 個があります。
 
--   toUpOperation
--   toDownOperation
--   apply
--   applyBack
--   composeDownOperation
--   restore
--   diff
--   clientTransform
--   serverTransform
--   toClientState
+- toUpOperation
+- toDownOperation
+- apply
+- applyBack
+- composeDownOperation
+- restore
+- diff
+- clientTransform
+- serverTransform
+- toClientState
 
 serverTransform と toClientState は、import したものを直接使うことができます。これら以外の関数は、次のコードのように roomTemplate というテンプレートから自動生成できます。これら 10 個の関数の解説は、該当する JSDoc/TSDoc をお読みください。
 

@@ -1,9 +1,9 @@
 import { Master, Player, Spectator, State, roomTemplate } from '@flocon-trpg/core';
 import { recordToArray } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
+import { PerformRollCallFailureType } from '../../../../enums/PerformRollCallFailureType';
+import { convertToMaxLength100String } from '../../../../utils/convertToMaxLength100String';
 import { performRollCall } from './performRollCall';
-import { PerformRollCallFailureType } from '@/enums/PerformRollCallFailureType';
-import { convertToMaxLength100String } from '@/utils/convertToMaxLength100String';
 
 const playerUserUid = 'user2';
 

@@ -110,7 +110,7 @@ class GraphQLClientWithStatus {
     constructor(source, roomId) {
         this.source = source;
         this.roomId = roomId;
-        this.#roomEventSubscription = this.source.roomEventSubscription({ id: roomId }).pipe(rxjs.catchError(e => {
+        this.#roomEventSubscription = this.source.roomEventSubscription({ roomId }).pipe(rxjs.catchError(e => {
             this.#e.next(prevValue => ({
                 ...prevValue,
                 RoomEventSubscription: {
@@ -177,11 +177,12 @@ class GraphQLClientWithStatus {
         return this.#catchPromiseError(this.source.getRoomConnectionsQuery({ roomId: this.roomId }), GetRoomConnectionsQuery);
     }
     getRoomQuery() {
-        return this.#catchPromiseError(this.source.getRoomQuery({ id: this.roomId }), GetRoomQuery);
+        return this.#catchPromiseError(this.source.getRoomQuery({ roomId: this.roomId }), GetRoomQuery);
     }
     operateMutation(variables) {
-        return this.source.operateMutation({ ...variables, id: this.roomId });
+        return this.source.operateRoomMutation({ ...variables, roomId: this.roomId });
     }
+    // Urql などではおそらく Subscription が開始したかどうかを検知できないため、Subscription の接続が確立する前に他の Operation を行い、Subscription の値を逃してしまう可能性があるので注意。現時点では Subscription を要求してから少し待って他の Operation を実行してもらうくらいしか対策が思いつかない。
     get roomEventSubscription() {
         return this.#roomEventSubscription;
     }
@@ -920,7 +921,8 @@ class RoomStateManager {
             onStateChangedSubscription.unsubscribe();
             subscriptionSubscription.unsubscribe();
         };
-        this.#executeGetRoomQuery({ client, userUid, clientId });
+        // HACK: Subscription の接続が確立する前に他の Operation (RoomのStateやメッセージの全取得など)を行ってしまうと Subscription による変更イベントをいくつか逃すおそれがあるため、接続が確立する前に少し待っている。Subscription の接続が確立されたことを検知する方法がおそらくないので苦肉の策。「API サーバーに ping を送り、Subscription で pong が返ってくるようにしてそれを確認してから他の Operation を行う」などの解決方法は考えられるが、ロジックが複雑化してコードの管理が困難になるおそれがあるため現状はこの方法を採用している。ただし余裕ができたら対処したい。
+        void utils.delay(500).then(() => this.#executeGetRoomQuery({ client, userUid, clientId }));
     }
     #setState(action) {
         const prevValue = this.stateStream.getValue();
@@ -1239,20 +1241,20 @@ const createRoomClient = ({ client: clientSource, roomId, userUid, }) => {
     const clientId = core.simpleId();
     const roomStateManager = new RoomStateManager({
         client,
-        subscription: client.roomEventSubscription.pipe(rxjs.mergeMap(e => (e.roomEvent == null ? [] : [e.roomEvent]))),
+        subscription: client.roomEventSubscription.pipe(rxjs.mergeMap(e => (e.result == null ? [] : [e.result]))),
         clientId,
         userUid,
     });
     const createMessagesResult = createRoomMessagesClient({
         client,
-        roomEventSubscription: client.roomEventSubscription.pipe(rxjs.mergeMap(e => e?.roomEvent?.roomMessageEvent == null ? [] : [e.roomEvent.roomMessageEvent])),
+        roomEventSubscription: client.roomEventSubscription.pipe(rxjs.mergeMap(e => (e?.result?.roomMessageEvent == null ? [] : [e.result.roomMessageEvent]))),
     });
     const writingMessageStatusResult = subscribeWritingMessageStatus({
-        subscription: client.roomEventSubscription.pipe(rxjs.mergeMap(e => (e.roomEvent == null ? [] : [e.roomEvent]))),
+        subscription: client.roomEventSubscription.pipe(rxjs.mergeMap(e => (e.result == null ? [] : [e.result]))),
     });
     const subscribeRoomConnectionsResult = subscribeRoomConnections({
         client,
-        subscription: client.roomEventSubscription.pipe(rxjs.mergeMap(e => (e.roomEvent == null ? [] : [e.roomEvent]))),
+        subscription: client.roomEventSubscription.pipe(rxjs.mergeMap(e => (e.result == null ? [] : [e.result]))),
     });
     const updateWritingMessageStatusResult = updateWritingMessageStatus(client);
     const roomJoinedSubscription = roomStateManager.stateStream

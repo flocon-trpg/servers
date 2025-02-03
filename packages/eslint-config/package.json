@@ -8,18 +8,18 @@
     "main": "index.mjs",
     "scripts": {
         "prettier": "yarn prettier:base --write --cache",
-        "prettier-check": "yarn prettier:base --check",
-        "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\" \"index.mjs\""
+        "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\" \"index.mjs\"",
+        "prettier-check": "yarn prettier:base --check"
     },
     "devDependencies": {
-        "@eslint/js": "9.14.0",
+        "@eslint/js": "9.19.0",
         "@flocon-trpg/prettier-config": "workspace:^",
         "@types/eslint__js": "8.42.3",
-        "eslint": "9.14.0",
+        "eslint": "9.19.0",
         "eslint-plugin-import": "2.31.0",
-        "prettier": "3.3.3",
+        "prettier": "3.4.2",
         "typescript": "5.6.2",
-        "typescript-eslint": "8.13.0"
+        "typescript-eslint": "8.22.0"
     },
     "peerDependencies": {
         "eslint": "^9.0.0",

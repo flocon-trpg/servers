@@ -1,12 +1,13 @@
 import {
-    PieceLogFragment,
-    RoomMessageEventFragment,
-    RoomMessages,
-    RoomPrivateMessageFragment,
-    RoomPublicMessageFragment,
-    RoomSoundEffectFragment,
-} from '@flocon-trpg/typed-document-node';
+    GetMessagesDoc,
+    PieceLogFragmentDoc,
+    RoomEventDoc,
+    RoomPrivateMessageFragmentDoc,
+    RoomPublicMessageFragmentDoc,
+    RoomSoundEffectFragmentDoc,
+} from '@flocon-trpg/graphql-documents';
 import { loggerRef } from '@flocon-trpg/utils';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import { produce } from 'immer';
 import { Observable, Subject, map } from 'rxjs';
 import { FilteredSortedArray, SortedArray } from './filteredArray';
@@ -23,6 +24,18 @@ import {
     reset,
     soundEffect,
 } from './roomMessageTypes';
+
+type GetRoomMessagesQueryResult = ResultOf<typeof GetMessagesDoc>['result'];
+type RoomMessages = Omit<
+    Extract<GetRoomMessagesQueryResult, { __typename?: 'RoomMessages' }>,
+    '__typename'
+>;
+type RoomEventSubscriptionResult = ResultOf<typeof RoomEventDoc>['result'];
+type RoomMessageEvent = NonNullable<RoomEventSubscriptionResult['roomMessageEvent']>;
+type RoomPrivateMessageFragment = ResultOf<typeof RoomPrivateMessageFragmentDoc>;
+type RoomPublicMessageFragment = ResultOf<typeof RoomPublicMessageFragmentDoc>;
+type PieceLogFragment = ResultOf<typeof PieceLogFragmentDoc>;
+type RoomSoundEffectFragment = ResultOf<typeof RoomSoundEffectFragmentDoc>;
 
 const createRoomMessage = (
     source:
@@ -77,7 +90,7 @@ const compareUpdatedAt = (
 
 const noChange = 'noChange';
 
-// switch 文で場合分けしやすいように、__typename を用いている 。
+// switch 文で場合分けしやすいように、__typename を用いている。
 type AddCustomMessageEvent<TCustomMessage> = {
     __typename: typeof custom;
     value: CustomMessage<TCustomMessage>;
@@ -92,7 +105,7 @@ const reduceEvent = <
     event,
 }: {
     messages: T;
-    event: RoomMessageEventFragment | AddCustomMessageEvent<TCustomMessage>;
+    event: RoomMessageEvent | AddCustomMessageEvent<TCustomMessage>;
 }): { messages: T; diff: Diff<TCustomMessage> | null } | typeof noChange => {
     const messages = messagesSource.clone() as T;
     switch (event.__typename) {
@@ -192,7 +205,7 @@ type MessagesChangeCore<TCustomMessage> =
           current: SortedArray<Message<TCustomMessage>>;
           // nullの場合、イベントにより変更されたMessageが無かったことを表す。
           diff: Diff<TCustomMessage> | null;
-          event: RoomMessageEventFragment | AddCustomMessageEvent<TCustomMessage>;
+          event: RoomMessageEvent | AddCustomMessageEvent<TCustomMessage>;
       }
     | {
           type: typeof query;
@@ -240,7 +253,7 @@ export class RoomMessagesClient<TCustomMessage> {
     #messagesState:
         | {
               isQueryFetched: false;
-              eventsQueue: RoomMessageEventFragment[];
+              eventsQueue: RoomMessageEvent[];
           }
         | {
               isQueryFetched: true;
@@ -342,7 +355,7 @@ export class RoomMessagesClient<TCustomMessage> {
     }: {
         state: readonly Message<TCustomMessage>[];
         messages: RoomMessages;
-        events: readonly RoomMessageEventFragment[];
+        events: readonly RoomMessageEvent[];
     }): readonly Message<TCustomMessage>[] {
         const messagesSet = new MessageSet<TCustomMessage>();
         state.forEach(msg => {
@@ -478,7 +491,7 @@ export class RoomMessagesClient<TCustomMessage> {
     }
 
     // `#reduceOnQuery` と比べて、重複したメッセージは取り除かれないが、そのぶん処理は軽め。
-    onEvent(event: RoomMessageEventFragment): void {
+    onEvent(event: RoomMessageEvent): void {
         const messages = this.#messages;
         if (!this.#messagesState.isQueryFetched) {
             this.#messagesState = {

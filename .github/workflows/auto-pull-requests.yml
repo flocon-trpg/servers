@@ -1,0 +1,231 @@
+# set "Allow GitHub Actions to create and approve pull requests" in the repository settings to enable pull request creation.
+
+name: auto-pull-requests
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    main-build:
+        name: Build artifacts and push to main-build branch
+
+        runs-on: ubuntu-latest
+
+        permissions:
+            contents: write
+            pull-requests: write
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v4
+              with:
+                  # without this, "git checkout main-build" will fail because the main-build branch is not present in the local repository.
+                  fetch-depth: 0
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20.x
+                  cache: yarn
+
+            - run: git config --local user.email "auto-pull-requests.yml[bot]@example.com" # fake user email for pushing build
+            - run: git config --local user.name "auto-pull-requests.yml[bot]" # fake user name for pushing build
+
+              # create a temporary "main-build-temp" branch here, so do not create "main-build-temp" branch in GitHub repository.
+            - run: git checkout -b main-build-temp
+
+            - run: cat ./.gitignore
+
+            - name: Comment out dist/ from .gitignore
+              run: "sed -i 's/^dist\\//# dist\\//g' ./.gitignore"
+
+            - run: cat ./.gitignore
+
+            - run: yarn
+            - run: yarn build
+
+            - run: git add --all
+
+            - run: 'git commit -m "build: comment out dist/ in .gitignore and build artifacts"'
+
+            # you need to have "main-build" branch in GitHub repository before running this workflow.
+            - run: git checkout main-build
+
+            # 当初は "git merge -s theirs main-build-temp" に相当することがしたかったため、main-build-temp ブランチで "git merge -s ours main-build" を実行して main-build ブランチを fast-forward merge することで再現しようとしたが、コミットグラフが複雑になるため、単純に -X theirs で merge することにした。
+            - run: git merge -X theirs --no-ff --no-commit main-build-temp
+
+            # by default, the message of merge commit is "Merge branch 'main-build-temp' into main-build", so the message is changed not to include "main-build-temp".
+            # if this merge is first and no --allow-empty, this job fails because there is nothing to commit.
+            - run: git commit --allow-empty -m "merge auto-build PR into main-build"
+
+            - name: set git diff to GITHUB_ENV
+              run: |
+                  git_diff=$(git diff --stat main-build-temp) 
+                  echo "git_diff<<EOF" >> $GITHUB_ENV
+                  echo "$git_diff" >> $GITHUB_ENV
+                  echo "EOF" >> $GITHUB_ENV
+
+            - name: Create Pull Request
+              uses: peter-evans/create-pull-request@v7
+              with:
+                  title: 'auto build (${{ github.sha }})'
+                  labels: auto-build
+                  branch: create-pull-request/auto-build
+                  body: |
+                      main ブランチへの push を確認したため、自動的に build を実行して main-build ブランチへの PR を作成しました。
+
+                      承認しない場合はこの PR を無視するか close してください。
+
+                      # last commit information
+                      | Name | Value |
+                      |------|-------|
+                      | actor   | ${{ github.actor }}                     |
+                      | sha     | ${{ github.sha }}                       |
+                      | message | ${{ github.event.head_commit.message }} |
+
+                      # diff
+
+                      ${{ env.git_diff == '' && '✔ main ブランチとの差分は見つかりませんでした。' || '❌ main ブランチとの差分が見つかりました。この PR はこのまま accept しないほうがよさそうです。' }}
+
+                      <details>
+
+                      <summary>差分の内容</summary>
+
+                      ```
+
+                      ${{ env.git_diff }}
+
+                      ```
+
+                      </details>
+
+    migration-create:
+        name: 'Do migration-create and create pull requests'
+
+        runs-on: ubuntu-22.04
+        container: node:22-bookworm # git は slim には入っていないので通常版を使っている
+
+        services:
+            mysql:
+                image: mysql:9
+                env:
+                    MYSQL_ROOT_PASSWORD: root_password
+                    MYSQL_USER: test
+                    MYSQL_PASSWORD: test
+                    MYSQL_DATABASE: test
+                options: >-
+                    --health-cmd "mysqladmin ping"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 3306:3306
+            postgres:
+                image: postgres:17
+                env:
+                    POSTGRES_USER: test
+                    POSTGRES_PASSWORD: test
+                    POSTGRES_DB: test
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 5432:5432
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v4
+
+            - run: git --version
+
+            - name: Disable "detected dubious ownership in repository" error
+              run: git config --global --add safe.directory '*'
+
+            - run: git config --local user.email "auto-pull-requests.yml[bot]@example.com" # fake user email for pushing build
+            - run: git config --local user.name "auto-pull-requests.yml[bot]" # fake user name for pushing build
+
+            - run: node --version
+
+            - run: yarn
+
+            - run: yarn build
+
+            - name: Migration-up SQLite
+              run: yarn migration-up --db sqlite
+              working-directory: ./apps/api-server
+              env:
+                  SQLITE: >
+                      {
+                           "clientUrl": "file://./test.sqlite3"
+                      }
+
+            - name: Migration-create SQLite
+              run: yarn migration-create --db sqlite
+              working-directory: ./apps/api-server
+              env:
+                  SQLITE: >
+                      {
+                           "clientUrl": "file://./test.sqlite3"
+                      }
+
+            - name: Migration-up MySQL
+              run: yarn migration-up --db mysql
+              working-directory: ./apps/api-server
+              env:
+                  MYSQL: >
+                      {
+                          "clientUrl": "mysql://test:test@mysql:3306/test"
+                      }
+
+            - name: Migration-create MySQL
+              run: yarn migration-create --db mysql
+              working-directory: ./apps/api-server
+              env:
+                  MYSQL: >
+                      {
+                          "clientUrl": "mysql://test:test@mysql:3306/test"
+                      }
+
+            - name: Migration-up PostgreSQL
+              run: yarn migration-up --db postgresql
+              working-directory: ./apps/api-server
+              env:
+                  POSTGRESQL: >
+                      {
+                          "clientUrl": "postgresql://test:test@postgres:5432/test"
+                      }
+
+            - name: Migration-create PostgreSQL
+              run: yarn migration-create --db postgresql
+              working-directory: ./apps/api-server
+              env:
+                  POSTGRESQL: >
+                      {
+                          "clientUrl": "postgresql://test:test@postgres:5432/test"
+                      }
+
+            - run: yarn prettier
+              working-directory: ./apps/api-server
+
+            - name: Create Pull Request
+              uses: peter-evans/create-pull-request@v7
+              with:
+                  title: 'auto migration-create (${{ github.sha }})'
+                  commit-message: 'fix(api-server): create migration codes'
+                  labels: auto-migration-create
+                  branch: create-pull-request/auto-migration-create
+                  body: |
+                      main ブランチへの push を確認したため、自動的に migration-create を実行して auto-migration-create ブランチへの PR を作成しました。
+
+                      承認しない場合はこの PR を無視するか close してください。
+
+                      # last commit information
+                      | Name | Value |
+                      |------|-------|
+                      | actor   | ${{ github.actor }}                     |
+                      | sha     | ${{ github.sha }}                       |
+                      | message | ${{ github.event.head_commit.message }} |

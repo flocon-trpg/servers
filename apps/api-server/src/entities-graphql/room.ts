@@ -26,11 +26,11 @@ import {
 } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import { ref } from '@mikro-orm/core';
-import { Participant } from '../entities/participant/entity';
-import { Room, RoomOp } from '../entities/room/entity';
-import { User } from '../entities/user/entity';
 import { nullableStringToParticipantRoleType } from '../enums/ParticipantRoleType';
 import { RoomGetState } from '../graphql/objects/room';
+import { Participant } from '../mikro-orm/entities/participant/entity';
+import { Room, RoomOp } from '../mikro-orm/entities/room/entity';
+import { User } from '../mikro-orm/entities/user/entity';
 import { EM } from '../types';
 import { convertToMaxLength100String } from '../utils/convertToMaxLength100String';
 

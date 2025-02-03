@@ -1,20 +1,9 @@
-import {
-    Arg,
-    Authorized,
-    Ctx,
-    Field,
-    InputType,
-    Mutation,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
-import { File } from '../../../../entities/file/entity';
+import { Args, Field, InputType, Mutation, Resolver } from '@nestjs/graphql';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { FilePermissionType } from '../../../../enums/FilePermissionType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import { ensureAuthorizedUser } from '../../utils/utils';
+import { File } from '../../../../mikro-orm/entities/file/entity';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 
 @InputType()
 class RenameFileInput {
@@ -25,25 +14,27 @@ class RenameFileInput {
     public newScreenname!: string;
 }
 
-@Resolver()
+@Resolver(() => [String])
 export class RenameFilesResolver {
+    public constructor(private readonly mikroOrmService: MikroOrmService) {}
+
     @Mutation(() => [String])
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
+    @Auth(ENTRY)
     public async renameFiles(
-        @Arg('input', () => [RenameFileInput]) input: RenameFileInput[],
-        @Ctx() context: ResolverContext,
+        @Args('input', { type: () => [RenameFileInput] }) input: RenameFileInput[],
+        @AuthData() auth: AuthDataType,
     ): Promise<string[]> {
+        const em = await this.mikroOrmService.forkEmForMain();
         const result: string[] = [];
-        const user = ensureAuthorizedUser(context);
+        const userUid = auth.user.userUid;
         for (const elem of input) {
-            const file = await context.em.findOne(File, { filename: elem.filename });
+            const file = await em.findOne(File, { filename: elem.filename });
             if (file == null) {
                 continue;
             }
             const createdByUserUid = await file.createdBy.loadProperty('userUid');
             if (
-                createdByUserUid !== user.userUid &&
+                createdByUserUid !== userUid &&
                 file.renamePermission !== FilePermissionType.Entry
             ) {
                 continue;
@@ -51,7 +42,7 @@ export class RenameFilesResolver {
             file.screenname = elem.newScreenname;
             result.push(elem.filename);
         }
-        await context.em.flush();
+        await em.flush();
         return result;
     }
 }

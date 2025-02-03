@@ -1,9 +1,10 @@
 import {
-    PieceLogFragment,
-    RoomPrivateMessageFragment,
-    RoomPublicMessageFragment,
-    RoomSoundEffectFragment,
-} from '@flocon-trpg/typed-document-node';
+    PieceLogFragmentDoc,
+    RoomPrivateMessageFragmentDoc,
+    RoomPublicMessageFragmentDoc,
+    RoomSoundEffectFragmentDoc,
+} from '@flocon-trpg/graphql-documents';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import {
     CustomMessage,
     Message,
@@ -14,6 +15,11 @@ import {
     publicMessage,
     soundEffect,
 } from './roomMessageTypes';
+
+type RoomPrivateMessageFragment = ResultOf<typeof RoomPrivateMessageFragmentDoc>;
+type RoomPublicMessageFragment = ResultOf<typeof RoomPublicMessageFragmentDoc>;
+type PieceLogFragment = ResultOf<typeof PieceLogFragmentDoc>;
+type RoomSoundEffectFragment = ResultOf<typeof RoomSoundEffectFragmentDoc>;
 
 export class MessageSet<TCustomMessage> {
     #customMessages: CustomMessage<TCustomMessage>[] = [];

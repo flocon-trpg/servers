@@ -1,21 +1,11 @@
-import {
-    Args,
-    ArgsType,
-    Authorized,
-    Ctx,
-    Field,
-    Mutation,
-    PubSub,
-    PubSubEngine,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
-import { RoomPrvMsg, RoomPubMsg } from '../../../../entities/roomMessage/entity';
+import { Args, ArgsType, Field, Mutation, Resolver } from '@nestjs/graphql';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { EditMessageFailureType } from '../../../../enums/EditMessageFailureType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import { RoomPrvMsg, RoomPubMsg } from '../../../../mikro-orm/entities/roomMessage/entity';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import {
     EditMessageResult,
     RoomPrivateMessageUpdate,
@@ -24,9 +14,7 @@ import {
 import {
     createRoomPrivateMessageUpdate,
     createRoomPublicMessageUpdate,
-    ensureAuthorizedUser,
     findRoomAndMyParticipant,
-    publishRoomEvent,
 } from '../../utils/utils';
 
 @ArgsType()
@@ -48,19 +36,17 @@ const isDeleted = (entity: RoomPubMsg | RoomPrvMsg): boolean => {
     return entity.updatedText == null;
 };
 
-@Resolver()
+@Resolver(() => EditMessageResult)
 export class EditMessageResolver {
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly pubSubService: PubSubService,
+    ) {}
+
     // CONSIDER: 例えば'1d100'などダイスを振るメッセージでも現在はedit可能だが、editされてもinitTextなどを参照すれば問題ない。ただしロジックが少しややこしくなるので、そのようなケースはeditを拒否するように仕様変更したほうがいいのかも？
-    @Mutation(() => EditMessageResult)
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
-    public async editMessage(
-        @Args() args: EditMessageArgs,
-        @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine,
-    ): Promise<EditMessageResult> {
-        const em = context.em;
-        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+    async #editMessageCore(args: EditMessageArgs, auth: AuthDataType): Promise<EditMessageResult> {
+        const em = await this.mikroOrmService.forkEmForMain();
+        const authorizedUserUid = auth.user.userUid;
         const findResult = await findRoomAndMyParticipant({
             em,
             userUid: authorizedUserUid,
@@ -95,7 +81,7 @@ export class EditMessageResolver {
             await em.flush();
 
             const payloadValue: RoomPublicMessageUpdate = createRoomPublicMessageUpdate(publicMsg);
-            await publishRoomEvent(pubSub, {
+            this.pubSubService.roomEvent.next({
                 type: 'messageUpdatePayload',
                 sendTo: findResult.participantIds(),
                 roomId: room.id,
@@ -124,7 +110,7 @@ export class EditMessageResolver {
 
             const payloadValue: RoomPrivateMessageUpdate =
                 createRoomPrivateMessageUpdate(privateMsg);
-            await publishRoomEvent(pubSub, {
+            this.pubSubService.roomEvent.next({
                 type: 'messageUpdatePayload',
                 sendTo: findResult.participantIds(),
                 roomId: room.id,
@@ -138,5 +124,14 @@ export class EditMessageResolver {
         return {
             failureType: EditMessageFailureType.MessageNotFound,
         };
+    }
+
+    @Mutation(() => EditMessageResult)
+    @Auth(ENTRY)
+    public async editMessage(
+        @Args() args: EditMessageArgs,
+        @AuthData() auth: AuthDataType,
+    ): Promise<EditMessageResult> {
+        return await lockByRoomId(args.roomId, async () => await this.#editMessageCore(args, auth));
     }
 }

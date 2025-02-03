@@ -1,10 +1,9 @@
-import { RoomPrivateMessageFragment, RoomPublicMessageFragment } from '@flocon-trpg/typed-document-node';
 import { Message, RoomMessage } from './roomMessageTypes';
 export declare class MessageSet<TCustomMessage> {
     #private;
     add(message: Message<TCustomMessage>): void;
-    getPrivateMessage(messageId: string): RoomPrivateMessageFragment | undefined;
-    getPublicMessage(messageId: string): RoomPublicMessageFragment | undefined;
+    getPrivateMessage(messageId: string): import("@flocon-trpg/graphql-documents/dist/cjs/graphql-codegen/graphql").RoomPrivateMessageFragment | undefined;
+    getPublicMessage(messageId: string): import("@flocon-trpg/graphql-documents/dist/cjs/graphql-codegen/graphql").RoomPublicMessageFragment | undefined;
     get(message: RoomMessage): RoomMessage | undefined;
     values(): Generator<Message<TCustomMessage>, any, any>;
 }

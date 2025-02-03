@@ -1,7 +1,10 @@
-import { RoomEventSubscription, WritingMessageStatusType } from '@flocon-trpg/typed-document-node';
+import { RoomEventDoc, WritingMessageStatusType } from '@flocon-trpg/graphql-documents';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import { Observable, interval } from 'rxjs';
 import { BehaviorEvent } from '../rxjs/behaviorEvent';
 import { ReadonlyBehaviorEvent } from '../rxjs/readonlyBehaviorEvent';
+
+type RoomEventSubscription = ResultOf<typeof RoomEventDoc>['result'];
 
 type WritingMessageStatusResultSource = {
     prev?: WritingMessageStatusType;
@@ -12,9 +15,7 @@ type WritingMessageStatusResultSource = {
 export const subscribeWritingMessageStatus = ({
     subscription,
 }: {
-    subscription: Observable<
-        Pick<NonNullable<RoomEventSubscription['roomEvent']>, 'writingMessageStatus'>
-    >;
+    subscription: Observable<Pick<NonNullable<RoomEventSubscription>, 'writingMessageStatus'>>;
 }) => {
     const map = new Map<string, WritingMessageStatusResultSource>();
     const convertMap = (source: Map<string, WritingMessageStatusResultSource>) => {

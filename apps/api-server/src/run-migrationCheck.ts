@@ -1,11 +1,10 @@
-import { migrateByNpmScript } from './migrate';
-import { AppConsole } from './utils/appConsole';
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { MigrationService } from './migration/migration.service';
 
-migrateByNpmScript('check').catch((err: Error) => {
-    AppConsole.fatal({
-        en: 'migration-check failed. ',
-        ja: 'マイグレーションのチェックに失敗しました。',
-        errorObject: err,
-    });
-    process.exit(1);
-});
+async function main() {
+    const app = await NestFactory.create(AppModule);
+    const migrationService = app.get(MigrationService);
+    await migrationService.doMigrationCheck();
+}
+void main();

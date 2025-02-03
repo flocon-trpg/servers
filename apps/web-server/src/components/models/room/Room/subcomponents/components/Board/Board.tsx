@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import * as Icons from '@ant-design/icons';
 import { $free, OmitVersion, State, boardTemplate, pieceTemplate } from '@flocon-trpg/core';
-import { FilePath, FileSourceType } from '@flocon-trpg/typed-document-node';
+import { FileSourceType } from '@flocon-trpg/graphql-documents';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { Message, publicMessage } from '@flocon-trpg/web-server-utils';
 import { useTransition } from '@react-spring/konva';
@@ -16,6 +16,7 @@ import * as ReactKonva from 'react-konva';
 import { Subject, debounceTime } from 'rxjs';
 import { CombinedError } from 'urql';
 import useConstant from 'use-constant';
+import { FilePath } from '../../../../../../../utils/file/filePath';
 import { boardContextMenuAtom } from '../../atoms/boardContextMenuAtom/boardContextMenuAtom';
 import { boardPopoverEditorAtom } from '../../atoms/boardPopoverEditorAtom/boardPopoverEditorAtom';
 import { boardTooltipAtom } from '../../atoms/boardTooltipAtom/boardTooltipAtom';

@@ -27,3 +27,4 @@ dist-ssr
 *.tsbuildinfo
 
 *storybook.log
+dist.api-server

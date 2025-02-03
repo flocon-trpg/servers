@@ -63,7 +63,6 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
         y: number;
     }>;
 }, "strip", z.ZodTypeAny, {
-    type: "create";
     value: {
         $v: 2;
         $r: 1;
@@ -93,10 +92,10 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
         x: number;
         y: number;
     };
+    type: "create";
     $v: 2;
     $r: 1;
 }, {
-    type: "create";
     value: {
         $v: 2;
         $r: 1;
@@ -126,6 +125,7 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
         x: number;
         y: number;
     };
+    type: "create";
     $v: 2;
     $r: 1;
 }>, z.ZodObject<{
@@ -190,7 +190,6 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
         y: number;
     }>;
 }, "strip", z.ZodTypeAny, {
-    type: "delete";
     value: {
         $v: 2;
         $r: 1;
@@ -220,10 +219,10 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
         x: number;
         y: number;
     };
+    type: "delete";
     $v: 2;
     $r: 1;
 }, {
-    type: "delete";
     value: {
         $v: 2;
         $r: 1;
@@ -253,6 +252,7 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
         x: number;
         y: number;
     };
+    type: "delete";
     $v: 2;
     $r: 1;
 }>, z.ZodIntersection<z.ZodIntersection<z.ZodObject<{

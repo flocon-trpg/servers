@@ -23,7 +23,6 @@ import { Route as RoomsIndexImport } from './routes/rooms/index';
 import { Route as TextTosImport } from './routes/text/tos';
 import { Route as TextPrivacypolicyImport } from './routes/text/privacy_policy';
 import { Route as TextEnvImport } from './routes/text/env';
-import { Route as TestsPingpongImport } from './routes/tests/pingpong';
 import { Route as RoomsCreateImport } from './routes/rooms/create';
 
 // Create Virtual Routes
@@ -98,12 +97,6 @@ const TextEnvRoute = TextEnvImport.update({
     getParentRoute: () => rootRoute,
 } as any);
 
-const TestsPingpongRoute = TestsPingpongImport.update({
-    id: '/tests/pingpong',
-    path: '/tests/pingpong',
-    getParentRoute: () => rootRoute,
-} as any);
-
 const RoomsCreateRoute = RoomsCreateImport.update({
     id: '/rooms/create',
     path: '/rooms/create',
@@ -163,13 +156,6 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof RoomsCreateImport;
             parentRoute: typeof rootRoute;
         };
-        '/tests/pingpong': {
-            id: '/tests/pingpong';
-            path: '/tests/pingpong';
-            fullPath: '/tests/pingpong';
-            preLoaderRoute: typeof TestsPingpongImport;
-            parentRoute: typeof rootRoute;
-        };
         '/text/env': {
             id: '/text/env';
             path: '/text/env';
@@ -218,7 +204,6 @@ export interface FileRoutesByFullPath {
     '/signin': typeof SigninRoute;
     '/tos': typeof TosRoute;
     '/rooms/create': typeof RoomsCreateRoute;
-    '/tests/pingpong': typeof TestsPingpongRoute;
     '/text/env': typeof TextEnvRoute;
     '/text/privacy_policy': typeof TextPrivacypolicyRoute;
     '/text/tos': typeof TextTosRoute;
@@ -234,7 +219,6 @@ export interface FileRoutesByTo {
     '/signin': typeof SigninRoute;
     '/tos': typeof TosRoute;
     '/rooms/create': typeof RoomsCreateRoute;
-    '/tests/pingpong': typeof TestsPingpongRoute;
     '/text/env': typeof TextEnvRoute;
     '/text/privacy_policy': typeof TextPrivacypolicyRoute;
     '/text/tos': typeof TextTosRoute;
@@ -251,7 +235,6 @@ export interface FileRoutesById {
     '/signin': typeof SigninRoute;
     '/tos': typeof TosRoute;
     '/rooms/create': typeof RoomsCreateRoute;
-    '/tests/pingpong': typeof TestsPingpongRoute;
     '/text/env': typeof TextEnvRoute;
     '/text/privacy_policy': typeof TextPrivacypolicyRoute;
     '/text/tos': typeof TextTosRoute;
@@ -269,7 +252,6 @@ export interface FileRouteTypes {
         | '/signin'
         | '/tos'
         | '/rooms/create'
-        | '/tests/pingpong'
         | '/text/env'
         | '/text/privacy_policy'
         | '/text/tos'
@@ -284,7 +266,6 @@ export interface FileRouteTypes {
         | '/signin'
         | '/tos'
         | '/rooms/create'
-        | '/tests/pingpong'
         | '/text/env'
         | '/text/privacy_policy'
         | '/text/tos'
@@ -299,7 +280,6 @@ export interface FileRouteTypes {
         | '/signin'
         | '/tos'
         | '/rooms/create'
-        | '/tests/pingpong'
         | '/text/env'
         | '/text/privacy_policy'
         | '/text/tos'
@@ -316,7 +296,6 @@ export interface RootRouteChildren {
     SigninRoute: typeof SigninRoute;
     TosRoute: typeof TosRoute;
     RoomsCreateRoute: typeof RoomsCreateRoute;
-    TestsPingpongRoute: typeof TestsPingpongRoute;
     TextEnvRoute: typeof TextEnvRoute;
     TextPrivacypolicyRoute: typeof TextPrivacypolicyRoute;
     TextTosRoute: typeof TextTosRoute;
@@ -332,7 +311,6 @@ const rootRouteChildren: RootRouteChildren = {
     SigninRoute: SigninRoute,
     TosRoute: TosRoute,
     RoomsCreateRoute: RoomsCreateRoute,
-    TestsPingpongRoute: TestsPingpongRoute,
     TextEnvRoute: TextEnvRoute,
     TextPrivacypolicyRoute: TextPrivacypolicyRoute,
     TextTosRoute: TextTosRoute,
@@ -357,7 +335,6 @@ export const routeTree = rootRoute
         "/signin",
         "/tos",
         "/rooms/create",
-        "/tests/pingpong",
         "/text/env",
         "/text/privacy_policy",
         "/text/tos",
@@ -385,9 +362,6 @@ export const routeTree = rootRoute
     },
     "/rooms/create": {
       "filePath": "rooms/create.tsx"
-    },
-    "/tests/pingpong": {
-      "filePath": "tests/pingpong.tsx"
     },
     "/text/env": {
       "filePath": "text/env.tsx"

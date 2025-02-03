@@ -1,21 +1,11 @@
 import { DualKeyMap } from '@flocon-trpg/utils';
-import {
-    Arg,
-    Authorized,
-    Ctx,
-    Field,
-    InputType,
-    Mutation,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
-import { File } from '../../../../entities/file/entity';
-import { FileTag } from '../../../../entities/fileTag/entity';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import { ensureAuthorizedUser } from '../../utils/utils';
+import { Args, Field, InputType, Mutation, Resolver } from '@nestjs/graphql';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
+import { File } from '../../../../mikro-orm/entities/file/entity';
+import { FileTag } from '../../../../mikro-orm/entities/fileTag/entity';
+import { User } from '../../../../mikro-orm/entities/user/entity';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 
 // addとremoveは、fileTagのidを指定することでそのタグが追加/削除される。
 @InputType()
@@ -36,18 +26,19 @@ class EditFileTagsInput {
     public actions!: EditFileTagActionInput[];
 }
 
-@Resolver()
+@Resolver(() => Boolean)
 export class EditFileTagsResolver {
+    public constructor(private readonly mikroOrmService: MikroOrmService) {}
+
     @Mutation(() => Boolean, {
         deprecationReason: 'Use screenname to group files by folders instead.',
     })
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
+    @Auth(ENTRY)
     public async editFileTags(
-        @Arg('input') input: EditFileTagsInput,
-        @Ctx() context: ResolverContext,
+        @Args('input') input: EditFileTagsInput,
+        @AuthData() auth: AuthDataType,
     ): Promise<boolean> {
-        const user = ensureAuthorizedUser(context);
+        const em = await this.mikroOrmService.forkEmForMain();
         const map = new DualKeyMap<string, string, number>();
         input.actions.forEach(action => {
             action.add.forEach(a => {
@@ -66,15 +57,15 @@ export class EditFileTagsResolver {
                     continue;
                 }
                 if (fileEntity == null) {
-                    fileEntity = await context.em.findOne(File, {
+                    fileEntity = await em.findOne(File, {
                         filename,
-                        createdBy: { userUid: user.userUid },
+                        createdBy: { userUid: auth.user.userUid },
                     });
                 }
                 if (fileEntity == null) {
                     break;
                 }
-                const fileTag = await context.em.findOne(FileTag, { id: fileTagId });
+                const fileTag = await em.findOne(FileTag, { id: fileTagId });
                 if (fileTag == null) {
                     continue;
                 }
@@ -87,7 +78,7 @@ export class EditFileTagsResolver {
                 }
             }
         }
-        await context.em.flush();
+        await em.flush();
         return true;
     }
 }
