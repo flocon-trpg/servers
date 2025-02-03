@@ -23,7 +23,7 @@
         "@commitlint/cli": "19.6.1",
         "@commitlint/config-conventional": "19.6.0",
         "@flocon-trpg/prettier-config": "workspace:^",
-        "husky": "8.0.3",
+        "husky": "9.1.7",
         "prettier": "3.4.2",
         "sort-package-json": "2.14.0"
     },
