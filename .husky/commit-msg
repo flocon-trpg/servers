@@ -1,5 +1,2 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
 echo "OK. husky is installed."
 npx --no-install commitlint --edit $1

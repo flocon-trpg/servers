@@ -10,7 +10,7 @@
         "build": "yarn workspaces foreach --all -p --topological-dev run build:self",
         "format": "yarn lint --fix && yarn prettier && yarn sort-package-json",
         "gen": "yarn workspaces foreach --all -p run gen",
-        "install-husky": "husky install",
+        "postinstall": "husky",
         "lint": "yarn workspaces foreach --all -p run lint",
         "prettier": "yarn prettier:base --write --cache && yarn workspaces foreach --all -p run prettier",
         "prettier:base": "prettier \"**/*.{json,yml,md}\"",
@@ -23,7 +23,7 @@
         "@commitlint/cli": "19.6.1",
         "@commitlint/config-conventional": "19.6.0",
         "@flocon-trpg/prettier-config": "workspace:^",
-        "husky": "8.0.3",
+        "husky": "9.1.7",
         "prettier": "3.4.2",
         "sort-package-json": "2.14.0"
     },
