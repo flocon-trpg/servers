@@ -104,7 +104,7 @@
         "@tanstack/router-plugin": "1.98.6",
         "@testing-library/dom": "10.4.0",
         "@testing-library/react": "16.2.0",
-        "@types/color": "3.0.6",
+        "@types/color": "4.2.0",
         "@types/color-name": "1.1.5",
         "@types/howler": "2.2.12",
         "@types/html-escaper": "3.0.2",
