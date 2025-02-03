@@ -3,7 +3,7 @@ import { recordToArray } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import { maxBy } from 'es-toolkit';
 import { produce } from 'immer';
-import { PerformRollCallFailureType } from '@/enums/PerformRollCallFailureType';
+import { PerformRollCallFailureType } from '../../../../enums/PerformRollCallFailureType';
 
 const maxRollCallHistoryCount = 3;
 const minimumTimeWindow = 60_000;

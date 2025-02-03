@@ -1,7 +1,7 @@
-import { Room } from '../entities/room/entity';
-import { isBookmarked } from '../entities/room/isBookmarked';
-import { role } from '../entities/room/role';
 import { RoomAsListItem } from '../graphql/objects/room';
+import { Room } from '../mikro-orm/entities/room/entity';
+import { isBookmarked } from '../mikro-orm/entities/room/isBookmarked';
+import { role } from '../mikro-orm/entities/room/role';
 
 export const stateToGraphQL = async ({
     roomEntity,
@@ -12,6 +12,7 @@ export const stateToGraphQL = async ({
 }): Promise<RoomAsListItem> => {
     return {
         ...roomEntity,
+        roomId: roomEntity.id,
         createdAt: roomEntity.createdAt?.getTime(),
         updatedAt: roomEntity.completeUpdatedAt?.getTime(),
         requiresPlayerPassword: roomEntity.playerPasswordHash != null,

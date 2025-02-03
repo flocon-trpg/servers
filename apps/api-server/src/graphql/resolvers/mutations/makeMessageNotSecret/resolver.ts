@@ -1,28 +1,16 @@
-import {
-    Args,
-    ArgsType,
-    Authorized,
-    Ctx,
-    Field,
-    Mutation,
-    PubSub,
-    PubSubEngine,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
-import { RoomPrvMsg, RoomPubMsg } from '../../../../entities/roomMessage/entity';
+import { Args, ArgsType, Field, Mutation, Resolver } from '@nestjs/graphql';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { MakeMessageNotSecretFailureType } from '../../../../enums/MakeMessageNotSecretFailureType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import { RoomPrvMsg, RoomPubMsg } from '../../../../mikro-orm/entities/roomMessage/entity';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import { MakeMessageNotSecretResult } from '../../../objects/roomMessage';
 import {
     createRoomPrivateMessageUpdate,
     createRoomPublicMessageUpdate,
-    ensureAuthorizedUser,
     findRoomAndMyParticipant,
-    publishRoomEvent,
 } from '../../utils/utils';
 
 @ArgsType()
@@ -34,18 +22,19 @@ class MessageIdArgs {
     public messageId!: string;
 }
 
-@Resolver()
+@Resolver(() => MakeMessageNotSecretResult)
 export class MakeMessageNotSecretResolver {
-    @Mutation(() => MakeMessageNotSecretResult)
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
-    public async makeMessageNotSecret(
-        @Args() args: MessageIdArgs,
-        @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine,
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly pubSubService: PubSubService,
+    ) {}
+
+    async #makeMessageNotSecretCore(
+        args: MessageIdArgs,
+        auth: AuthDataType,
     ): Promise<MakeMessageNotSecretResult> {
-        const em = context.em;
-        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+        const em = await this.mikroOrmService.forkEmForMain();
+        const authorizedUserUid = auth.user.userUid;
         const findResult = await findRoomAndMyParticipant({
             em,
             userUid: authorizedUserUid,
@@ -80,7 +69,7 @@ export class MakeMessageNotSecretResolver {
             await em.flush();
 
             const payloadValue = createRoomPublicMessageUpdate(publicMsg);
-            await publishRoomEvent(pubSub, {
+            this.pubSubService.roomEvent.next({
                 type: 'messageUpdatePayload',
                 sendTo: findResult.participantIds(),
                 roomId: room.id,
@@ -108,7 +97,7 @@ export class MakeMessageNotSecretResolver {
             await em.flush();
 
             const payloadValue = createRoomPrivateMessageUpdate(privateMsg);
-            await publishRoomEvent(pubSub, {
+            this.pubSubService.roomEvent.next({
                 type: 'messageUpdatePayload',
                 sendTo: findResult.participantIds(),
                 roomId: room.id,
@@ -122,5 +111,17 @@ export class MakeMessageNotSecretResolver {
         return {
             failureType: MakeMessageNotSecretFailureType.MessageNotFound,
         };
+    }
+
+    @Mutation(() => MakeMessageNotSecretResult)
+    @Auth(ENTRY)
+    public async makeMessageNotSecret(
+        @Args() args: MessageIdArgs,
+        @AuthData() auth: AuthDataType,
+    ): Promise<MakeMessageNotSecretResult> {
+        return await lockByRoomId(
+            args.roomId,
+            async () => await this.#makeMessageNotSecretCore(args, auth),
+        );
     }
 }

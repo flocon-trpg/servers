@@ -1,6 +1,11 @@
-import { RoomMessageEventFragment, RoomMessages } from '@flocon-trpg/typed-document-node';
+import { GetMessagesDoc, RoomEventDoc } from '@flocon-trpg/graphql-documents';
+import { ResultOf } from '@graphql-typed-document-node/core';
 import { PrivateChannelSet } from './privateChannelSet';
 import { PrivateChannelSets } from './privateChannelSets';
+
+type RoomEventSubscriptionFragment = ResultOf<typeof RoomEventDoc>['result'];
+type RoomMessageEvent = NonNullable<RoomEventSubscriptionFragment['roomMessageEvent']>;
+type RoomMessages = ResultOf<typeof GetMessagesDoc>['result'];
 
 type PublicChannel = {
     name: string | null;
@@ -18,7 +23,7 @@ export class RoomChannels {
         return this.#privateChannels;
     }
 
-    public onEvent(action: RoomMessageEventFragment): boolean {
+    public onEvent(action: RoomMessageEvent): boolean {
         switch (action.__typename) {
             case 'RoomPrivateMessage': {
                 const privateChannels = this.#privateChannels.clone();
@@ -45,8 +50,8 @@ export class RoomChannels {
         }
     }
 
-    public onQuery(roomMessages: RoomMessages) {
-        const events: RoomMessageEventFragment[] = [];
+    public onQuery(roomMessages: Extract<RoomMessages, { __typename?: 'RoomMessages' }>) {
+        const events: RoomMessageEvent[] = [];
 
         // CONSIDER: __typenameをnon-undefinedにしてgraphql.tsを生成し、Spread構文を不要にするほうが綺麗なコードになりそう
         roomMessages.publicMessages.forEach(msg => {

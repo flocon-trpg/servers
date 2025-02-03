@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from 'type-graphql';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { ParticipantRoleType } from '../../enums/ParticipantRoleType';
 
 @ObjectType()
@@ -12,12 +12,12 @@ export class RoomGetState {
     @Field({ description: 'この部屋の作成者。Firebase AuthenticationのUserUidで表現される。' })
     public createdBy!: string;
 
-    @Field({ description: 'since v0.7.2', nullable: true })
+    @Field({ nullable: true })
     public createdAt?: number;
 
     @Field({
-        description: `データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。
-since v0.7.2`,
+        description:
+            'データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。',
         nullable: true,
     })
     public updatedAt?: number;
@@ -25,11 +25,11 @@ since v0.7.2`,
     @Field({ description: 'room.state をJSON化したもの' })
     public stateJson!: string;
 
-    @Field({ description: 'since v0.7.2' })
+    @Field()
     public isBookmarked!: boolean;
 
     // Participantでない場合はnullish
-    @Field(() => ParticipantRoleType, { description: 'since v0.7.2', nullable: true })
+    @Field(() => ParticipantRoleType, { nullable: true })
     public role?: ParticipantRoleType | undefined;
 }
 
@@ -64,17 +64,17 @@ export class RoomOperation {
 @ObjectType()
 export class RoomAsListItem {
     @Field(() => ID)
-    public id!: string;
+    public roomId!: string;
 
     @Field()
     public name!: string;
 
-    @Field({ description: 'since v0.7.2', nullable: true })
+    @Field({ nullable: true })
     public createdAt?: number;
 
     @Field({
-        description: `データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。
-since v0.7.2`,
+        description:
+            'データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。',
         nullable: true,
     })
     public updatedAt?: number;
@@ -88,10 +88,10 @@ since v0.7.2`,
     @Field()
     public requiresSpectatorPassword!: boolean;
 
-    @Field({ description: 'since v0.7.2' })
+    @Field()
     public isBookmarked!: boolean;
 
     // Participantでない場合はnullish
-    @Field(() => ParticipantRoleType, { description: 'since v0.7.2', nullable: true })
+    @Field(() => ParticipantRoleType, { nullable: true })
     public role?: ParticipantRoleType | undefined;
 }

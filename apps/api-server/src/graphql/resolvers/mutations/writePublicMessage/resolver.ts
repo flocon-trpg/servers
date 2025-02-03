@@ -7,27 +7,18 @@ import {
     client,
     isCharacterOwner,
 } from '@flocon-trpg/core';
-import { Reference, ref } from '@mikro-orm/core';
-import { MaxLength } from 'class-validator';
-import {
-    Args,
-    ArgsType,
-    Authorized,
-    Ctx,
-    Field,
-    Mutation,
-    PubSub,
-    PubSubEngine,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
-import { RoomPubCh, RoomPubMsg } from '../../../../entities/roomMessage/entity';
+import { ref } from '@mikro-orm/core';
+import { Args, ArgsType, Field, Mutation, Resolver } from '@nestjs/graphql';
+import { MaxLength, ValidateIf } from 'class-validator';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
 import { FileSourceTypeModule } from '../../../../enums/FileSourceType';
 import { WriteRoomPublicMessageFailureType } from '../../../../enums/WriteRoomPublicMessageFailureType';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import { RoomPubCh, RoomPubMsg } from '../../../../mikro-orm/entities/roomMessage/entity';
+import { User } from '../../../../mikro-orm/entities/user/entity';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
+import { PubSubService } from '../../../../pub-sub/pub-sub.service';
+import { lockByRoomId } from '../../../../utils/asyncLock';
 import {
     RoomMessageSyntaxErrorType,
     RoomPublicMessage,
@@ -39,10 +30,8 @@ import { SendTo } from '../../types';
 import {
     analyzeTextAndSetToEntity,
     createRoomPublicMessage,
-    ensureAuthorizedUser,
     findRoomAndMyParticipant,
     fixTextColor,
-    publishRoomEvent,
 } from '../../utils/utils';
 
 type CharacterState = State<typeof characterTemplate>;
@@ -58,6 +47,7 @@ class WritePublicMessageArgs {
 
     @Field({ nullable: true })
     @MaxLength(50)
+    @ValidateIf((_, value) => value != null)
     public textColor?: string;
 
     @Field()
@@ -68,6 +58,7 @@ class WritePublicMessageArgs {
 
     @Field({ nullable: true })
     @MaxLength(1_000)
+    @ValidateIf((_, value) => value != null)
     public customName?: string;
 
     @Field({ nullable: true, description: 'BCDiceのgameType。' })
@@ -101,17 +92,18 @@ const checkChannelKey = (channelKey: string, isSpectator: boolean) => {
 
 @Resolver()
 export class WritePublicMessageResolver {
-    @Mutation(() => WriteRoomPublicMessageResult)
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(3))
-    public async writePublicMessage(
-        @Args() args: WritePublicMessageArgs,
-        @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine,
+    public constructor(
+        private readonly mikroOrmService: MikroOrmService,
+        private readonly pubSubService: PubSubService,
+    ) {}
+
+    async #writePublicMessageCore(
+        args: WritePublicMessageArgs,
+        auth: AuthDataType,
     ): Promise<typeof WriteRoomPublicMessageResult> {
         const channelKey = args.channelKey;
-        const em = context.em;
-        const authorizedUser = ensureAuthorizedUser(context);
+        const em = await this.mikroOrmService.forkEmForMain();
+        const authorizedUser = await em.findOneOrFail(User, { userUid: auth.user.userUid });
         const findResult = await findRoomAndMyParticipant({
             em,
             userUid: authorizedUser.userUid,
@@ -205,7 +197,19 @@ export class WritePublicMessageResolver {
             value: result,
         };
 
-        await publishRoomEvent(pubSub, payload);
+        this.pubSubService.roomEvent.next(payload);
         return result;
+    }
+
+    @Mutation(() => WriteRoomPublicMessageResult)
+    @Auth(ENTRY)
+    public async writePublicMessage(
+        @Args() args: WritePublicMessageArgs,
+        @AuthData() auth: AuthDataType,
+    ): Promise<typeof WriteRoomPublicMessageResult> {
+        return await lockByRoomId(
+            args.roomId,
+            async () => await this.#writePublicMessageCore(args, auth),
+        );
     }
 }

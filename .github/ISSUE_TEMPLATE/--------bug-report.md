@@ -34,13 +34,13 @@ Steps to reproduce the behavior(just an example):
 
 ## 環境/Environment
 
--   Flocon API サーバーのバージョン/Version of Flocon API Server [e.g. v0.6.1-beta.2]
--   設置方法/How you deployed [e.g. Heroku Free, Ubuntu Server 20.04 on Google Compute Engine E2-micro without using Docker]
+- Flocon API サーバーのバージョン/Version of Flocon API Server [e.g. v0.6.1-beta.2]
+- 設置方法/How you deployed [e.g. Heroku Free, Ubuntu Server 20.04 on Google Compute Engine E2-micro without using Docker]
 
 Web サーバーにも関わる内容であれば以下の環境も記述してください。/ If the bug is related to the Web server, please fill the following information, too.
 
--   Flocon Web サーバーのバージョン/Version of Flocon Web Server [e.g. v0.6.1-beta.2]
--   ブラウザ/Browser [e.g. chrome, safari]
+- Flocon Web サーバーのバージョン/Version of Flocon Web Server [e.g. v0.6.1-beta.2]
+- ブラウザ/Browser [e.g. chrome, safari]
 
 ## 補足事項/Additional context
 

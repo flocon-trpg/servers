@@ -34,6 +34,6 @@ digraph graph_name {
 }
 ```
 
--   operate: ユーザーによる state の変更の要求
--   begin post: API サーバーに operation を送信し、応答待ちの状態に入る
--   end post: API サーバーから応答を受け取る
+- operate: ユーザーによる state の変更の要求
+- begin post: API サーバーに operation を送信し、応答待ちの状態に入る
+- end post: API サーバーから応答を受け取る

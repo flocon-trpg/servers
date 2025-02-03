@@ -2,7 +2,6 @@ import {
     State,
     UpOperation,
     admin,
-    anonymous,
     client,
     diff,
     participantTemplate,
@@ -12,23 +11,20 @@ import {
 } from '@flocon-trpg/core';
 import { recordToArray } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
-import { Loaded, Reference, ref } from '@mikro-orm/core';
+import { Loaded, ref } from '@mikro-orm/core';
 import bcrypt from 'bcrypt';
 import Color from 'color';
 import safeCompare from 'safe-compare';
-import { PubSubEngine } from 'type-graphql';
-import { EntryPasswordConfig, ServerConfig, plain } from '../../../config/types';
-import * as Room$MikroORM from '../../../entities/room/entity';
-import { RoomPrvMsg, RoomPubMsg } from '../../../entities/roomMessage/entity';
-import { User } from '../../../entities/user/entity';
-import { getUserIfEntry } from '../../../entities/user/getUserIfEntry';
 import { GlobalRoom } from '../../../entities-graphql/room';
 import {
     DicePieceLog as DicePieceLogNameSpace,
     StringPieceLog as StringPieceLogNameSpace,
 } from '../../../entities-graphql/roomMessage';
-import { BaasType } from '../../../enums/BaasType';
-import { DecodedIdToken, EM, ResolverContext } from '../../../types';
+import * as Room$MikroORM from '../../../mikro-orm/entities/room/entity';
+import { RoomPrvMsg, RoomPubMsg } from '../../../mikro-orm/entities/roomMessage/entity';
+import { User } from '../../../mikro-orm/entities/user/entity';
+import { EntryPasswordConfig, plain } from '../../../server-config/server-config.service';
+import { EM } from '../../../types';
 import { RoomOperation } from '../../objects/room';
 import {
     CharacterValueForMessage,
@@ -50,7 +46,6 @@ import {
     UpdatedText,
 } from '../../objects/roomMessage';
 import { RoomEventPayload } from '../subsciptions/roomEvent/payload';
-import { ROOM_EVENT } from '../subsciptions/roomEvent/topics';
 import { Context, analyze } from './messageAnalyzer';
 
 type RoomState = State<typeof roomTemplate>;
@@ -61,42 +56,6 @@ export const RoomNotFound = 'RoomNotFound';
 export const IdOperation = 'IdOperation';
 export const NotSignIn = 'NotSignIn';
 export const AnonymousAccount = 'AnonymousAccount';
-
-export const checkSignIn = (context: ResolverContext): DecodedIdToken | typeof NotSignIn => {
-    if (context.decodedIdToken == null || context.decodedIdToken.isError) {
-        return NotSignIn;
-    }
-    return context.decodedIdToken.value;
-};
-
-export const checkSignInAndNotAnonymous = (
-    context: ResolverContext,
-): DecodedIdToken | typeof NotSignIn | typeof AnonymousAccount => {
-    const decodedIdToken = checkSignIn(context);
-    if (decodedIdToken === NotSignIn) {
-        return NotSignIn;
-    }
-    if (decodedIdToken.firebase.sign_in_provider === anonymous) {
-        return AnonymousAccount;
-    }
-    return decodedIdToken;
-};
-
-export const checkEntry = async ({
-    em,
-    userUid,
-    baasType,
-    serverConfig,
-    noFlush,
-}: {
-    em: EM;
-    userUid: string;
-    baasType: BaasType;
-    serverConfig: ServerConfig;
-    noFlush?: boolean;
-}): Promise<boolean> => {
-    return (await getUserIfEntry({ em, userUid, baasType, serverConfig, noFlush })) != null;
-};
 
 class FindRoomAndMyParticipantResult {
     public constructor(
@@ -132,23 +91,6 @@ export const findRoomAndMyParticipant = async ({
     return new FindRoomAndMyParticipantResult(room, state, me);
 };
 
-export const ensureUserUid = (context: ResolverContext): string => {
-    const decodedIdToken = checkSignIn(context);
-    if (decodedIdToken === NotSignIn) {
-        throw new Error('Not sign in. "@Attribute()" might be missing.');
-    }
-    return decodedIdToken.uid;
-};
-
-export const ensureAuthorizedUser = (context: ResolverContext): User => {
-    if (context.authorizedUser == null) {
-        throw new Error(
-            'authorizedUser was not found. "@Attribute(ENTRY or ADMIN)" might be missing.',
-        );
-    }
-    return context.authorizedUser;
-};
-
 export const comparePassword = async (
     plainPassword: string,
     config: EntryPasswordConfig,
@@ -170,10 +112,6 @@ export const bcryptCompareNullable = async (
         return false;
     }
     return await bcrypt.compare(plainPassword, hash);
-};
-
-export const publishRoomEvent = async (pubSub: PubSubEngine, payload: RoomEventPayload) => {
-    await pubSub.publish(ROOM_EVENT, payload);
 };
 
 export const deleteSecretValues = (

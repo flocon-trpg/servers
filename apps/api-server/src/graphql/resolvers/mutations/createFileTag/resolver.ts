@@ -1,20 +1,10 @@
 import { Reference } from '@mikro-orm/core';
-import {
-    Arg,
-    Authorized,
-    Ctx,
-    Field,
-    Mutation,
-    ObjectType,
-    Resolver,
-    UseMiddleware,
-} from 'type-graphql';
-import { FileTag as FileTagEntity } from '../../../../entities/fileTag/entity';
-import { ResolverContext } from '../../../../types';
-import { ENTRY } from '../../../../utils/roles';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import { ensureAuthorizedUser } from '../../utils/utils';
+import { Args, Field, Mutation, ObjectType, Resolver } from '@nestjs/graphql';
+import { Auth, ENTRY } from '../../../../auth/auth.decorator';
+import { AuthData, AuthDataType } from '../../../../auth/auth.guard';
+import { FileTag as FileTagEntity } from '../../../../mikro-orm/entities/fileTag/entity';
+import { User } from '../../../../mikro-orm/entities/user/entity';
+import { MikroOrmService } from '../../../../mikro-orm/mikro-orm.service';
 
 @ObjectType()
 export class FileTag {
@@ -25,27 +15,33 @@ export class FileTag {
     public name!: string;
 }
 
-@Resolver()
+@Resolver(() => FileTag)
 export class CreateFileTagResolver {
+    public constructor(private readonly mikroOrmService: MikroOrmService) {}
+
     @Mutation(() => FileTag, {
         nullable: true,
         deprecationReason: 'Use screenname to group files by folders instead.',
     })
-    @Authorized(ENTRY)
-    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
+    @Auth(ENTRY)
     public async createFileTag(
-        @Ctx() context: ResolverContext,
-        @Arg('tagName') tagName: string,
+        @Args('tagName') tagName: string,
+        @AuthData() auth: AuthDataType,
     ): Promise<FileTag | null> {
         const maxTagsCount = 10;
 
-        const user = ensureAuthorizedUser(context);
-        const tagsCount = await context.em.count(FileTagEntity, { user });
+        const em = await this.mikroOrmService.forkEmForMain();
+        const user = auth.user;
+        const tagsCount = await em.count(FileTagEntity, { user: { userUid: user.userUid } });
         if (maxTagsCount <= tagsCount) {
             return null;
         }
-        const newFileTag = context.em.create(FileTagEntity, { name: tagName, user: user });
-        await context.em.persistAndFlush(newFileTag);
+        const newFileTag = em.create(FileTagEntity, {
+            name: tagName,
+            user: Reference.createFromPK(User, [user.userUid]),
+        });
+        // `em.create` calls `em.persist` automatically, so flush is enough - https://mikro-orm.io/docs/guide/relationships#creating-entity-graph
+        await em.flush();
         return {
             id: newFileTag.id,
             name: newFileTag.name,
