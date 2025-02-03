@@ -110,9 +110,9 @@ flyctl launch
 :::info
 Windows で `Error name argument or flag must be specified when not running interactively` というメッセージが出る場合は、次のいずれかの方法で回避できます。
 
--   [Windows ターミナル](https://apps.microsoft.com/store/detail/windows-terminal/9N0DX20HK701) をインストールして、Windows ターミナルから PowerShell を起動して実行する。
--   WSL を利用する。
-    :::
+- [Windows ターミナル](https://apps.microsoft.com/store/detail/windows-terminal/9N0DX20HK701) をインストールして、Windows ターミナルから PowerShell を起動して実行する。
+- WSL を利用する。
+  :::
 
 `App Name (leave blank to use an auto-generated name)`というメッセージが表示されるので好きな App Name を入力します。自動生成でよければ空白でも構いません。
 
@@ -196,8 +196,8 @@ processes = []
 
 API サーバーの設定をします。設定には環境変数を用います。fly.io では、環境変数のセットは次の 2 つのいずれかの方法で行うことができます。併用することもできます。
 
--   `fly.toml`に記述する
--   `flyctl secrets set`コマンドを利用する
+- `fly.toml`に記述する
+- `flyctl secrets set`コマンドを利用する
 
 どちらを使っても動作自体に支障はありませんが、fly.io では [慎重に扱うべき値は`flyctl secrets set`を使うことを推奨しています](https://fly.io/docs/reference/secrets/)。ただし、このチュートリアルで扱う値は、すべて`fly.toml`で設定して構いません[^4]。
 
@@ -352,7 +352,7 @@ Apps 一覧が表示されるので、デプロイした app を選択します�
 
 ## 備考
 
--   [Heroku から fly.io への Migration 機能](https://fly.io/docs/rails/getting-started/migrate-from-heroku/) は Flocon では使えないようです。
+- [Heroku から fly.io への Migration 機能](https://fly.io/docs/rails/getting-started/migrate-from-heroku/) は Flocon では使えないようです。
 
 [^1]: PowerShell を推奨している理由は、flyctl のインストールには PowerShell が必要なのと、コマンドプロンプトでは cd コマンドでドライブをまたぐ場合は`/d`スイッチが必要であり説明が少し複雑になってしまうのを避けるためです。
 

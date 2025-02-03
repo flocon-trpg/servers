@@ -152,8 +152,8 @@ API サーバー内蔵アップローダーのファイルを保存するパス�
 
 bcrypt のハッシュ値は様々な方法で生成できます。どの方法を用いても構いません。Flocon では次の 2 つの方法を提供しています。
 
--   [https://tools.flocon.app/bcrypt](https://tools.flocon.app/bcrypt) で生成する。最も手軽ですが、このページには [npm の bcryptjs パッケージ](https://www.npmjs.com/package/bcryptjs) を使っているため、API サーバーに使用している [bcrypt パッケージ](https://www.npmjs.com/package/bcrypt)では認識できないハッシュ値が生成される可能性があります。その場合は、日本語などを用いない、もしくはパスワードを短くすることで解決できる可能性があります。
--   [Flocon のソースコード](https://github.com/flocon-trpg/servers)に付属している`bcrypt-interactive`スクリプトを利用する。`apps/api-server`ディレクトリで `yarn run bcrypt-interactive`を実行すると、bcrypt ハッシュ値生成プログラムが起動します。[bcrypt パッケージ](https://www.npmjs.com/package/bcrypt) が使われますが、事前に Node.js と yarn のインストールおよび、`yarn install` コマンドを実行して数百 MB のファイルをダウンロードする必要があります。
+- [https://tools.flocon.app/bcrypt](https://tools.flocon.app/bcrypt) で生成する。最も手軽ですが、このページには [npm の bcryptjs パッケージ](https://www.npmjs.com/package/bcryptjs) を使っているため、API サーバーに使用している [bcrypt パッケージ](https://www.npmjs.com/package/bcrypt)では認識できないハッシュ値が生成される可能性があります。その場合は、日本語などを用いない、もしくはパスワードを短くすることで解決できる可能性があります。
+- [Flocon のソースコード](https://github.com/flocon-trpg/servers)に付属している`bcrypt-interactive`スクリプトを利用する。`apps/api-server`ディレクトリで `yarn run bcrypt-interactive`を実行すると、bcrypt ハッシュ値生成プログラムが起動します。[bcrypt パッケージ](https://www.npmjs.com/package/bcrypt) が使われますが、事前に Node.js と yarn のインストールおよび、`yarn install` コマンドを実行して数百 MB のファイルをダウンロードする必要があります。
 
 ## FIREBASE_ADMIN_SECRET (省略可){#FIREBASE_ADMIN_SECRET}
 
@@ -241,8 +241,8 @@ const firebaseConfig = {
 
 `true` をセットすることで、Heroku に適したモードで API サーバーが稼働します。具体的には、次のような挙動になります。
 
--   API サーバー v0.7.7 以下ならば、`DATABASE_URL`という環境変数がある場合、データベースの URL として利用されます（v0.7.8 以上ならば `HEROKU`が`true`でなくとも[DATABASE_URL](#DATABASE_URL)を使用できます）。
--   Heroku Postgres に対応した方法でデータベースに接続されます。
+- API サーバー v0.7.7 以下ならば、`DATABASE_URL`という環境変数がある場合、データベースの URL として利用されます（v0.7.8 以上ならば `HEROKU`が`true`でなくとも[DATABASE_URL](#DATABASE_URL)を使用できます）。
+- Heroku Postgres に対応した方法でデータベースに接続されます。
 
 ## LOG_FORMAT (省略可) (v0.7.10 で追加){#LOG_FORMAT}
 

@@ -8,8 +8,8 @@
     "main": "index.mjs",
     "scripts": {
         "prettier": "yarn prettier:base --write --cache",
-        "prettier-check": "yarn prettier:base --check",
-        "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\" \"index.mjs\""
+        "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\" \"index.mjs\"",
+        "prettier-check": "yarn prettier:base --check"
     },
     "devDependencies": {
         "@eslint/js": "9.19.0",

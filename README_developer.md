@@ -36,8 +36,8 @@ Flocon
 
 (Netlify や fly.io にデプロイする場合は必要ありません)
 
--   yarn のインストール(corepack を有効化している場合は、corepack によって自動的にインストールされます)
--   Node.js v18, v20 のいずれかのインストール
+- yarn のインストール(corepack を有効化している場合は、corepack によって自動的にインストールされます)
+- Node.js v18, v20 のいずれかのインストール
 
 ## husky のインストール
 
@@ -117,8 +117,8 @@ yarn run storybook
 
 テストの実行方法には次の 2 つがあります。
 
--   Github Actions（[act は services に対応していない](https://github.com/nektos/act/issues/173)ため使えません）
--   ローカルで実行
+- Github Actions（[act は services に対応していない](https://github.com/nektos/act/issues/173)ため使えません）
+- ローカルで実行
 
 このドキュメントではローカルで実行する方法を説明します。
 
@@ -170,10 +170,10 @@ Flocon のテストには、Redis を使用したテストも含まれます。�
 
 ※ 現在採用しているフローおよびブランチ名は暫定です。
 
--   `main`: 開発ブランチです。Flocon の TypeScript ソースコードからコンパイルされた JavaScript コードは含まれていません(`.gitignore` に含まれている `dist/` によって git からは無視されます)。
--   `main-build`: `main` ブランチと似ていますが、コンパイルされた JavaScript コードが含まれている点が異なります。`main` ブランチに push があった場合、GitHub Actions によって自動的にビルドされた後に `main-build` ブランチにも push されます。手動で `main-build` ブランチに直接 push することは通常はありません。
--   `prerelease/v*.*.*`: 重要度の高いバグ修正を含んだリリースの前段階となるブランチです。\* には数値等が入ります。必ずしも存在するとは限りません。コンパイルされた JavaScript コードが含まれます。通常は `main-build` ブランチから pull request が作成され、merge されます。
--   `release`: リリース済みのコード置き場です。コンパイルされた JavaScript コードが含まれます。通常は `prerelease/v*.*.*` もしくは `main-build` ブランチから pull request が作成され、merge されます。
+- `main`: 開発ブランチです。Flocon の TypeScript ソースコードからコンパイルされた JavaScript コードは含まれていません(`.gitignore` に含まれている `dist/` によって git からは無視されます)。
+- `main-build`: `main` ブランチと似ていますが、コンパイルされた JavaScript コードが含まれている点が異なります。`main` ブランチに push があった場合、GitHub Actions によって自動的にビルドされた後に `main-build` ブランチにも push されます。手動で `main-build` ブランチに直接 push することは通常はありません。
+- `prerelease/v*.*.*`: 重要度の高いバグ修正を含んだリリースの前段階となるブランチです。\* には数値等が入ります。必ずしも存在するとは限りません。コンパイルされた JavaScript コードが含まれます。通常は `main-build` ブランチから pull request が作成され、merge されます。
+- `release`: リリース済みのコード置き場です。コンパイルされた JavaScript コードが含まれます。通常は `prerelease/v*.*.*` もしくは `main-build` ブランチから pull request が作成され、merge されます。
 
 ### リリースまでの流れ
 

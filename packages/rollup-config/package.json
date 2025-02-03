@@ -9,8 +9,8 @@
         "build:self": "tsc",
         "lint": "eslint \"**/*.ts\" --cache",
         "prettier": "yarn prettier:base --write --cache",
-        "prettier-check": "yarn prettier:base --check",
         "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\"",
+        "prettier-check": "yarn prettier:base --check",
         "test": "jest --passWithNoTests",
         "test-ci": "jest --passWithNoTests --ci --coverage"
     },
