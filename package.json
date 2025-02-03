@@ -20,12 +20,12 @@
         "test-ci": "yarn workspaces foreach --all -p run test-ci"
     },
     "devDependencies": {
-        "@commitlint/cli": "19.5.0",
-        "@commitlint/config-conventional": "19.5.0",
+        "@commitlint/cli": "19.6.1",
+        "@commitlint/config-conventional": "19.6.0",
         "@flocon-trpg/prettier-config": "workspace:^",
         "husky": "8.0.3",
-        "prettier": "3.3.3",
-        "sort-package-json": "2.10.1"
+        "prettier": "3.4.2",
+        "sort-package-json": "2.14.0"
     },
-    "packageManager": "yarn@4.5.1"
+    "packageManager": "yarn@4.6.0"
 }
