@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 import { existsSync } from 'fs';
 import { writeFile } from 'fs/promises';
+import { confirm, password, select } from '@inquirer/prompts';
 import bcrypt from 'bcrypt';
-import { prompt } from 'inquirer';
 
 // このコードはts-nodeで実行されるが、Rollup等は使われないため、TypeScriptのpathsを解決できない。そのため、./src内の他のコードをimportすると実行時にエラーが出る可能性があるので注意。
 
@@ -19,19 +19,13 @@ const startApp = async () => {
 
     let lang: Lang;
     {
-        const name = 'name';
-        const p = await prompt<{ [name]: string }>([
-            {
-                type: 'list',
-                name,
-                message: 'Choose your language',
-                choices: [
-                    { name: 'English', value: en },
-                    { name: 'Japanese', value: ja },
-                ],
-            },
-        ]);
-        const result = p[name];
+        const result = await select({
+            message: 'Choose your language',
+            choices: [
+                { name: 'English', value: en },
+                { name: 'Japanese', value: ja },
+            ],
+        });
         switch (result) {
             case en:
                 lang = result;
@@ -56,16 +50,11 @@ const startApp = async () => {
                 break;
         }
 
-        const name = 'overwriteConfirm';
-        const result = await prompt<{ [name]: boolean }>([
-            {
-                type: 'confirm',
-                name,
-                message,
-                default: false,
-            },
-        ]);
-        if (result[name] !== true) {
+        const result = await confirm({
+            message,
+            default: false,
+        });
+        if (result !== true) {
             return;
         }
     }
@@ -82,18 +71,12 @@ const startApp = async () => {
                 break;
         }
 
-        const name = 'password';
-        const result = await prompt<{ [name]: string }>([
-            {
-                type: 'password',
-                name,
-                message,
-                mask: '*',
-            },
-        ]);
-        const password = result[name];
+        const passwordText = await password({
+            message,
+            mask: true,
+        });
         const rounds = 10;
-        hash = await bcrypt.hash(password, rounds);
+        hash = await bcrypt.hash(passwordText, rounds);
     }
 
     {
