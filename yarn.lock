@@ -5267,7 +5267,7 @@ __metadata:
     "@testing-library/dom": "npm:10.4.0"
     "@testing-library/react": "npm:16.2.0"
     "@types/color": "npm:3.0.6"
-    "@types/color-name": "npm:1.1.5"
+    "@types/color-name": "npm:2.0.0"
     "@types/howler": "npm:2.2.12"
     "@types/html-escaper": "npm:3.0.2"
     "@types/react": "npm:18.3.18"
@@ -5285,7 +5285,7 @@ __metadata:
     classnames: "npm:^2.3.1"
     clipboard-copy: "npm:^4.0.1"
     color: "npm:4.2.3"
-    color-name: "npm:1.1.4"
+    color-name: "npm:2.0.0"
     dayjs: "npm:^1.11.7"
     dotenv: "npm:16.4.7"
     es-toolkit: "npm:^1.25.2"
@@ -9171,10 +9171,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/color-name@npm:*, @types/color-name@npm:1.1.5":
-  version: 1.1.5
-  resolution: "@types/color-name@npm:1.1.5"
-  checksum: 10/47600afcd1dbd7c668103ccaed912acd97760336dbb9fb08bdb34be004daa1f06a336183b51d44852e4460fe8b336347c7f5af330160c755f6a8fb4fa19e6bc0
+"@types/color-name@npm:*, @types/color-name@npm:2.0.0":
+  version: 2.0.0
+  resolution: "@types/color-name@npm:2.0.0"
+  checksum: 10/341d46645757c859ff1b6533d07f9c04e674e90ed44e63d38dcda20fd6dcf96289cb2c45f0137102bd8761dc691d239d107e18d4377df2784139c01bab36fc9f
   languageName: node
   linkType: hard
 
@@ -12614,7 +12614,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"color-name@npm:1.1.4, color-name@npm:^1.0.0, color-name@npm:~1.1.4":
+"color-name@npm:2.0.0":
+  version: 2.0.0
+  resolution: "color-name@npm:2.0.0"
+  checksum: 10/10a1addae41de2987d6b90dbd3cfade266c2e6f680ce21749911df4493b4fae07654862c6b5358bdd13e155461acb4eedaa5e0ba172bf13542cdcca10866cf2b
+  languageName: node
+  linkType: hard
+
+"color-name@npm:^1.0.0, color-name@npm:~1.1.4":
   version: 1.1.4
   resolution: "color-name@npm:1.1.4"
   checksum: 10/b0445859521eb4021cd0fb0cc1a75cecf67fceecae89b63f62b201cca8d345baf8b952c966862a9d9a2632987d4f6581f0ec8d957dfacece86f0a7919316f610
