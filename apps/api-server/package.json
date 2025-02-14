@@ -26,6 +26,7 @@
         "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/jest/bin/jest --runInBand",
         "test:e2e": "jest --config ./test/jest-e2e.json",
         "test:watch": "jest --watch",
+        "tc": "tsc --watch --noEmit",
         "test-ci": "jest --ci --coverage --runInBand",
         "migration-check": "node dist/run-migrationCheck.js",
         "migration-create": "node dist/run-migrationCreate.js",

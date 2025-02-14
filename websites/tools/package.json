@@ -11,6 +11,7 @@
         "lint": "eslint .",
         "preview": "vite preview",
         "prettier": "yarn prettier:base --write --cache",
+        "tc": "tsc --watch --noEmit",
         "prettier-check": "yarn prettier:base --check",
         "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\""
     },

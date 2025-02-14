@@ -18,6 +18,7 @@
         "prettier": "yarn prettier:base --write --cache",
         "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\"",
         "prettier-check": "yarn prettier:base --check",
+        "tc": "tsc --watch --noEmit",
         "test": "jest --passWithNoTests",
         "test-ci": "jest --passWithNoTests --ci --coverage"
     },

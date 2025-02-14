@@ -16,6 +16,7 @@
         "prettier:base": "prettier \"**/*.{json,yml,md}\"",
         "prettier-check": "yarn prettier:base --check && yarn workspaces foreach --all -p run prettier-check",
         "sort-package-json": "sort-package-json \"package.json\" \"apps/*/package.json\" \"packages/*/package.json\"",
+        "tc": "yarn workspaces foreach --all -pi --jobs=unlimited run tc",
         "test": "yarn workspaces foreach --all -p run test",
         "test-ci": "yarn workspaces foreach --all -p run test-ci"
     },
