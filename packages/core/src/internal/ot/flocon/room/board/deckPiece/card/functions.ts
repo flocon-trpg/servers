@@ -4,7 +4,7 @@ import { isIdRecord } from '../../../../../record';
 import { RequestedBy, admin, client, restrict } from '../../../../../requestedBy';
 import * as ReplaceOperation from '../../../../../util/replaceOperation';
 import { ServerTransform } from '../../../../../util/type';
-import { areRevealedByEqual, back, backButRevealedOnce, face, template } from './types';
+import { template } from './types';
 
 export const toClientState =
     (
@@ -14,7 +14,9 @@ export const toClientState =
     ) =>
     (source: State<typeof template>): State<typeof template> => {
         let includeFace: boolean;
-        if (source.revealStatus.type === back) {
+        if (source.isRevealed) {
+            includeFace = true;
+        } else {
             switch (requestedBy.type) {
                 case restrict:
                     includeFace = false;
@@ -23,16 +25,10 @@ export const toClientState =
                     includeFace = true;
                     break;
                 case client: {
-                    if (revealedTo.revealedTo.includes(requestedBy.userUid)) {
-                        includeFace = true;
-                        break;
-                    }
-                    includeFace = source.revealStatus.type !== back;
+                    includeFace = revealedTo.revealedTo.includes(requestedBy.userUid);
                     break;
                 }
             }
-        } else {
-            includeFace = true;
         }
         return {
             ...source,
@@ -68,8 +64,7 @@ export const serverTransform =
         });
 
         // 表面の画像を変更する処理。ただし、admin でない場合、カードが表でないときは変更は拒否する。
-        // CONSIDER: 現時点では表面の変更を許可する条件が revealStatus === face である。backButRevealedOnce のときも許可することも考えたが、ユーザーがブラウザで画像変更を試してみて、変更できるかどうかで表になったことがあるかどうかを確認できるという不正を防ぐために拒否としている。だが、backButRevealedOnce である画像の表面のデータはどのみちブラウザに存在するため、それによる不正が可能なのにこの画像変更による不正のみに対処するのは少し違和感がある。
-        if (isAdmin || stateAfterServerOperation.revealStatus.type === face) {
+        if (isAdmin || stateAfterServerOperation.isRevealed) {
             twoWayOperation.face = ReplaceOperation.serverTransform({
                 first: serverOperation?.face,
                 second: clientOperation.face,
@@ -77,60 +72,24 @@ export const serverTransform =
             });
         }
 
-        twoWayOperation.revealStatus = (() => {
-            if (clientOperation.revealStatus == null) {
+        twoWayOperation.isRevealed = (() => {
+            if (clientOperation.isRevealed == null) {
                 return undefined;
             }
             const xform = () =>
                 ReplaceOperation.serverTransform({
-                    first: serverOperation?.revealStatus,
-                    second: clientOperation.revealStatus,
-                    prevState: stateBeforeServerOperation.revealStatus,
+                    first: serverOperation?.isRevealed,
+                    second: clientOperation.isRevealed,
+                    prevState: stateBeforeServerOperation.isRevealed,
                 });
-            if (
-                stateAfterServerOperation.revealStatus.type === back &&
-                clientOperation.revealStatus.newValue.type === backButRevealedOnce
-            ) {
-                return undefined;
-            }
-
             if (isAdmin) {
                 return xform();
             }
 
-            switch (stateAfterServerOperation.revealStatus.type) {
-                case face: {
-                    if (clientOperation.revealStatus.newValue.type !== backButRevealedOnce) {
-                        return undefined;
-                    }
-                    if (
-                        !areRevealedByEqual(
-                            stateAfterServerOperation.revealStatus.revealedBy,
-                            clientOperation.revealStatus.newValue.revealedBy,
-                        )
-                    ) {
-                        return undefined;
-                    }
-                    return xform();
-                }
-                case back: {
-                    // admin 以外は、(back 以外から)back に変更することはできない
-                    return undefined;
-                }
-                case backButRevealedOnce: {
-                    if (clientOperation.revealStatus.newValue.type !== face) {
-                        return undefined;
-                    }
-                    if (
-                        !areRevealedByEqual(
-                            stateAfterServerOperation.revealStatus.revealedBy,
-                            clientOperation.revealStatus.newValue.revealedBy,
-                        )
-                    ) {
-                        return undefined;
-                    }
-                    return xform();
-                }
+            if (stateAfterServerOperation.isRevealed) {
+                return xform();
+            } else {
+                return undefined;
             }
         })();
 

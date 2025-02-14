@@ -420,10 +420,7 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
                                     },
                                 },
                                 name: 'card-1-name',
-                                revealStatus: {
-                                    type: 'face',
-                                    revealedBy: { type: 'revealedAtCreate' },
-                                },
+                                isRevealed: true,
                             },
                             'card-2-key': {
                                 $v: 1,
@@ -447,10 +444,7 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
                                     },
                                 },
                                 name: 'card-1-name',
-                                revealStatus: {
-                                    type: 'face',
-                                    revealedBy: { type: 'client', userUid: anotherPlayerUserUid },
-                                },
+                                isRevealed: true,
                             },
                         },
                         revealedTo: [],
@@ -494,10 +488,7 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
                                     },
                                 },
                                 name: 'card-1-name',
-                                revealStatus: {
-                                    type: 'face',
-                                    revealedBy: { type: 'client', userUid: myUserUid },
-                                },
+                                isRevealed: true,
                             },
                             'card-2-key': {
                                 $v: 1,
@@ -521,10 +512,7 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
                                     },
                                 },
                                 name: 'card-1-name',
-                                revealStatus: {
-                                    type: 'face',
-                                    revealedBy: { type: 'client', userUid: anotherPlayerUserUid },
-                                },
+                                isRevealed: true,
                             },
                         },
                         revealedTo: [],

@@ -16,7 +16,7 @@ export const create = (
                     $v: 1,
                     $r: 1,
                     face: card.value.face,
-                    revealStatus: card.value.revealStatus,
+                    isRevealed: card.value.isRevealed,
                     groupId: card.value.groupId,
                     name: card.value.name,
                     description: card.value.description,
