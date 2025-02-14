@@ -5,47 +5,7 @@ import {
     createReplaceValueTemplate,
     createTextValueTemplate,
 } from '../../../../../generator/types';
-import { client } from '../../../../../requestedBy';
 import { cardImageValue } from '../../../../cardImage/types';
-
-export const face = 'face';
-export const back = 'back';
-// ユーザーが sortKey を変更、つまりカードを移動したときに、他のユーザーと競合したり autoOptimizeSortKey が実行されることによって想定と異なる位置にカードが移動することがある。そのため、backButRevealedOnce が定義されていないと想定外の位置に移動していないかどうかをチェックできない。一回も表面になったことのないカードの場合はもし想定外の位置に移動しても問題ないためチェックする必要がない(faceとbackButRevealedOnceのカードをチェックするだけでよい)。
-/**
- * いったん表向きになったものの、その後裏面になった状態。この状態の場合は、表面は誰でも見ることができます。
- *
- * シャッフル等によりカードの key が変更された場合は `back` になり、表面も再び非公開に戻ります。
- */
-export const backButRevealedOnce = 'backButRevealedOnce';
-export const revealedAtCreate = 'revealedAtCreate';
-
-// 最初に公開されたユーザーを表す。2回目以降に公開したユーザーは記録されない。
-const revealedBy = z.union([
-    z.object({ type: z.literal(client), userUid: z.string() }),
-    z.object({ type: z.literal(revealedAtCreate) }),
-]);
-
-export const revealStatus = z.union([
-    z.object({ type: z.literal(face), revealedBy }),
-    z.object({ type: z.literal(back) }),
-    z.object({ type: z.literal(backButRevealedOnce), revealedBy }),
-]);
-
-export const areRevealedByEqual = (
-    x: z.TypeOf<typeof revealedBy>,
-    y: z.TypeOf<typeof revealedBy>,
-): boolean => {
-    if (x.type !== y.type) {
-        return false;
-    }
-    if (x.type === client) {
-        if (y.type !== client) {
-            return false;
-        }
-        return x.userUid === y.userUid;
-    }
-    return true;
-};
 
 export const statTemplateValue = {
     /**
@@ -69,9 +29,9 @@ export const statTemplateValue = {
     /**
      * 表向きになっているかどうかを表します。表向きの場合は全員に公開されます。
      *
-     * `face` の場合は、表向きになっていることを表します。`back` の場合は、裏向きでありなおかつ1回も表向きになっていないことを表します。`backButRevealedOnce` の場合は、現在は裏向きですが表向きになったことがあることを表します。`backButRevealedOnce` のカードは、シャッフルなどによって `back` に変わります。`back` のとき、クライアントには face の値を nullish にして渡されます(ただし `revealTo` で指定されたユーザーは nullish になりません)。
      */
-    revealStatus: createReplaceValueTemplate(revealStatus),
+    // 当初は boolean ではなく `face` と `back` と `backButRevealed` という 3 つの状態を持たせて、`face` と `backButRevealed` のときは誰が表向きにしたかどうかの情報を持たせるようにすることも考えた。この 3 状態の方法だと不正検知がしやすいというメリットがある。だが、`revealedTo` による一部ユーザーに対する公開に関しては同様の不正検知機能は持っていない（ログを使わずに単純なやり方で持たせる方法も思いつかない）ため、片方だけに不正検知機能を持たせるのではなく両方ともログ等の別の方法を用いて不正検知を行うことにした。
+    isRevealed: createReplaceValueTemplate(z.boolean()),
 };
 
 export const templateValue = {

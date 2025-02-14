@@ -28,7 +28,7 @@ export const useFindCardImage = (
             return targetCard;
         }
         const isTopCardFace =
-            targetCard.value.value.revealStatus.type === 'face' ||
+            targetCard.value.value.isRevealed ||
             (myUserUid != null && state.revealedTo.includes(myUserUid));
         const imageResult = isTopCardFace ? face : back;
         if (imageResult.isError) {

@@ -48,7 +48,7 @@ export const shuffleDeck = ({
         deckPiece.cards = shuffled.value;
         if (mode === 'server') {
             recordForEach(deckPiece.cards, card => {
-                card.revealStatus = { type: 'back' };
+                card.isRevealed = false;
             });
         }
         return;
