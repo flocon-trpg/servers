@@ -1,6 +1,6 @@
 import { Auth } from '@firebase/auth';
 import { FirebaseStorage } from '@firebase/storage';
-import { State as S, UpOperation as U, apply, roomTemplate, toOtError } from '@flocon-trpg/core';
+import { State as S, roomTemplate } from '@flocon-trpg/core';
 import { createTestRoomClient } from '@flocon-trpg/sdk';
 import { produce } from 'immer';
 import { useSetAtom } from 'jotai';
@@ -25,14 +25,12 @@ import {
     mockWebConfig,
 } from '../mocks';
 import { FirebaseUserState } from '../utils/firebase/firebaseUserState';
-import { Recipe, SetAction } from '../utils/types';
+import { Recipe } from '../utils/types';
 import { setMockUserConfig } from '@/atoms/userConfigAtom/userConfigAtom';
 import { NotificationType } from '@/components/models/room/Room/subcomponents/components/Notification/Notification';
 import { RoomClientContextValue } from '@/contexts/RoomClientContext';
 
 type RoomState = S<typeof roomTemplate>;
-type UpOperation = U<typeof roomTemplate>;
-const $apply = apply(roomTemplate);
 
 const roomId = 'dummy-room-id';
 
