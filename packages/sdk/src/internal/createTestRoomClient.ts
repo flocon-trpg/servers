@@ -1,3 +1,4 @@
+import { State, UpOperation, apply, roomTemplate, toOtError } from '@flocon-trpg/core';
 import {
     WritingMessageStatusInputType,
     WritingMessageStatusType,
@@ -7,9 +8,13 @@ import { RoomClient } from './createRoomClient';
 import { GraphQLStatusEventEmitter } from './roomClient/graphqlClient';
 import { RoomConnectionsManager } from './roomClient/roomConnections';
 import { GetMessagesQueryStatus } from './roomClient/roomMessages';
-import { RoomState } from './roomClient/roomState';
+import { RoomState, SetAction } from './roomClient/roomState';
 import { BehaviorEvent } from './rxjs/behaviorEvent';
 import { ReadonlyBehaviorEvent } from './rxjs/readonlyBehaviorEvent';
+
+type JoinedRoomState = State<typeof roomTemplate>;
+type JoinedRoomStateUpOperation = UpOperation<typeof roomTemplate>;
+const applyJoinedRoomState = apply(roomTemplate);
 
 const createTestRoomClientSource = <TCustomMessage, TGraphQLError>() => {
     const roomMessageClient = new RoomMessagesClient<TCustomMessage>();
@@ -64,10 +69,47 @@ export const createTestRoomClient = <TCustomMessage, TGraphQLError>(callback: {
         unsubscribe: () => callback.unsubscribe && callback.unsubscribe(source),
     };
 
+    type RoomStateForTestRoomClient =
+        | Exclude<RoomState<TGraphQLError>, { type: 'joined' }>
+        | {
+              type: 'joined';
+              state: JoinedRoomState;
+          };
+
     return {
         roomClient,
         source: {
             ...source,
+            roomState: {
+                next(newState: RoomStateForTestRoomClient) {
+                    if (newState.type !== 'joined') {
+                        source.roomState.next(newState);
+                        return;
+                    }
+                    let currentState = newState.state;
+                    function next() {
+                        source.roomState.next({
+                            type: 'joined',
+                            state: currentState,
+                            setState,
+                            setStateByApply,
+                        });
+                    }
+                    function setState(action: SetAction<JoinedRoomState>) {
+                        currentState = typeof action === 'function' ? action(currentState) : action;
+                        next();
+                    }
+                    function setStateByApply(operation: JoinedRoomStateUpOperation) {
+                        const r = applyJoinedRoomState({ state: currentState, operation });
+                        if (r.isError) {
+                            throw toOtError(r.error);
+                        }
+                        currentState = r.value;
+                        next();
+                    }
+                    next();
+                },
+            },
             clientStatus: {
                 next: (update: Parameters<typeof source.clientStatus.next>[0]) =>
                     source.clientStatus.next(update),

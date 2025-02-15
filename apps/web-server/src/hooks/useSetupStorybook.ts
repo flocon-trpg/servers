@@ -135,28 +135,10 @@ export const useSetupStorybook = ({
     ]);
 
     React.useEffect(() => {
-        let roomState = room;
-        function next() {
-            testRoomClient.source.roomState.next({
-                type: 'joined',
-                state: room,
-                setState,
-                setStateByApply,
-            });
-        }
-        function setState(action: SetAction<RoomState>) {
-            roomState = typeof action === 'function' ? action(roomState) : action;
-            next();
-        }
-        function setStateByApply(operation: UpOperation) {
-            const r = $apply({ state: roomState, operation });
-            if (r.isError) {
-                throw toOtError(r.error);
-            }
-            roomState = r.value;
-            next();
-        }
-        next();
+        testRoomClient.source.roomState.next({
+            type: 'joined',
+            state: room,
+        });
     }, [testRoomClient.source.roomState, room]);
 
     React.useEffect(() => {
