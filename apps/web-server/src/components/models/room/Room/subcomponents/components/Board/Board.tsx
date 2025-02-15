@@ -2,7 +2,7 @@
 import * as Icons from '@ant-design/icons';
 import { $free, OmitVersion, State, boardTemplate, pieceTemplate } from '@flocon-trpg/core';
 import { FileSourceType } from '@flocon-trpg/graphql-documents';
-import { keyNames, recordToArray } from '@flocon-trpg/utils';
+import { keyNames, mapToRecord, recordToArray } from '@flocon-trpg/utils';
 import { Message, publicMessage } from '@flocon-trpg/web-server-utils';
 import { useTransition } from '@react-spring/konva';
 import { Button, Dropdown, Menu, Popover } from 'antd';
@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import { useSetAtom } from 'jotai/react';
 import { KonvaEventObject } from 'konva/lib/Node';
 import { Vector2d } from 'konva/lib/types';
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import * as ReactKonva from 'react-konva';
 import { Subject, debounceTime } from 'rxjs';
 import { CombinedError } from 'urql';
@@ -23,6 +23,7 @@ import { boardTooltipAtom } from '../../atoms/boardTooltipAtom/boardTooltipAtom'
 import { useBoards } from '../../hooks/useBoards';
 import { useCharacterPieces } from '../../hooks/useCharacterPieces';
 import { useCharacters } from '../../hooks/useCharacters';
+import { useDeckPieces } from '../../hooks/useDeckPieces';
 import { useDicePieces } from '../../hooks/useDicePieces';
 import { useImagePieces } from '../../hooks/useImagePieces';
 import { useIsMyCharacter } from '../../hooks/useIsMyCharacter';
@@ -33,13 +34,11 @@ import { useRoomId } from '../../hooks/useRoomId';
 import { useShapePieces } from '../../hooks/useShapePieces';
 import { useStringPieces } from '../../hooks/useStringPieces';
 import {
-    DragEndResult,
     PixelPosition,
     isCursorOnPixelRect,
     isCursorOnState,
+    setDragResultToPieceState,
     stateToPixelRect,
-    toCellPosition,
-    toCellSize,
 } from '../../utils/positionAndSizeAndRect';
 import { MouseOverOn } from '../../utils/types';
 import { boardEditorModalAtom } from '../BoardEditorModal/BoardEditorModal';
@@ -50,6 +49,7 @@ import {
     DiceOrShapeOrStringPiece,
     shapePiece,
 } from './subcomponents/components/CanvasOrDiceOrStringPiece/CanvasOrDiceOrStringPiece';
+import { DeckPiece } from './subcomponents/components/DeckPiece/DeckPiece';
 import { ImagePiece } from './subcomponents/components/ImagePiece/ImagePiece';
 import {
     custom,
@@ -77,44 +77,12 @@ import { BoardType } from '@/utils/types';
 import { defaultTriggerSubMenuAction } from '@/utils/variables';
 
 type BoardState = OmitVersion<State<typeof boardTemplate>>;
-type PieceState = OmitVersion<State<typeof pieceTemplate>>;
-
-const setDragEndResultToPieceState = ({
-    e,
-    piece,
-    board,
-}: {
-    e: DragEndResult;
-    piece: PieceState;
-    board: BoardState;
-}): void => {
-    if (piece.isCellMode) {
-        if (e.newPosition != null) {
-            const position = toCellPosition({ pixelPosition: e.newPosition, cellConfig: board });
-            piece.cellX = position.cellX;
-            piece.cellY = position.cellY;
-        }
-        if (e.newSize != null) {
-            const size = toCellSize({ pixelSize: e.newSize, cellConfig: board });
-            piece.cellW = size.cellW;
-            piece.cellH = size.cellH;
-        }
-    } else {
-        if (e.newPosition != null) {
-            piece.x = e.newPosition.x;
-            piece.y = e.newPosition.y;
-        }
-        if (e.newSize != null) {
-            piece.w = e.newSize.w;
-            piece.h = e.newSize.h;
-        }
-    }
-};
 
 // コードを書く際に関数内で例えば character という名前の変数を定義したい場面が多々あるため、衝突しないように末尾に Type をつけている。
 const backgroundType = 'background';
 const characterType = 'character';
 const portraitType = 'portrait';
+const deckPieceType = 'deckPiece';
 const dicePieceType = 'dicePiece';
 const stringPieceType = 'stringPiece';
 const imagePieceType = 'imagePiece';
@@ -134,6 +102,7 @@ type SelectedPieceId =
           type:
               | typeof shapePiece
               | typeof dicePieceType
+              | typeof deckPieceType
               | typeof imagePieceType
               | typeof stringPieceType;
           pieceId: string;
@@ -191,6 +160,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const roomId = useRoomId();
     const participants = useParticipants();
     const shapePieces = useShapePieces(boardId);
+    const deckPieces = useDeckPieces(boardId);
     const dicePieces = useDicePieces(boardId);
     const numberPieces = useStringPieces(boardId);
     const imagePieces = useImagePieces(boardId);
@@ -374,7 +344,11 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                 if (characterPiece == null) {
                                     return;
                                 }
-                                setDragEndResultToPieceState({ e, piece: characterPiece, board });
+                                setDragResultToPieceState({
+                                    e,
+                                    piece: characterPiece,
+                                    cellConfig: board,
+                                });
                             });
                         }}
                     />
@@ -516,11 +490,55 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             if (imagePiece == null) {
                                 return;
                             }
-                            setDragEndResultToPieceState({ e, piece: imagePiece, board });
+                            setDragResultToPieceState({ e, piece: imagePiece, cellConfig: board });
                         });
                     }}
                 />
             );
+        });
+
+        const deckPieceRecord = mapToRecord(deckPieces ?? new Map<never, never>());
+        const deckPieceElements = [...(deckPieces ?? [])].map(([pieceId, piece]) => {
+            const props: ComponentProps<typeof DeckPiece> = {
+                ...stateToPixelRect({ cellConfig: board, state: piece }),
+                label: boardConfig.showDicePieceLabel ? piece.name : undefined,
+                opacity: 1,
+                states: deckPieceRecord,
+                stateId: pieceId,
+                boardId: boardId,
+                draggable: !piece.isPositionLocked,
+                resizable: !piece.isPositionLocked,
+                listening: true,
+                isSelected:
+                    selectedPieceId?.type === 'deckPiece' && selectedPieceId.pieceId === pieceId,
+                onClick: () => {
+                    unsetPopoverEditor();
+                    setSelectedPieceId({
+                        type: 'deckPiece',
+                        pieceId,
+                    });
+                },
+                onDblClick: e => {
+                    setBoardPopoverEditor({
+                        pageX: e.evt.pageX,
+                        pageY: e.evt.pageY,
+                        clickOn: { type: 'deckPiece', piece, pieceId, boardId },
+                    });
+                },
+                onMouseEnter: () =>
+                    (mouseOverOnRef.current = { type: 'deckPiece', piece, pieceId, boardId }),
+                onMouseLeave: () => (mouseOverOnRef.current = { type: 'background' }),
+                onDeckPiecesChange: deckPieces => {
+                    setRoomState(roomState => {
+                        const board = roomState.boards?.[boardId];
+                        if (board == null) {
+                            return;
+                        }
+                        board.deckPieces = deckPieces;
+                    });
+                },
+            };
+            return <DeckPiece {...props} key={pieceId} />;
         });
 
         const dicePieceElements = [...(dicePieces ?? [])].map(([pieceId, piece]) => {
@@ -562,7 +580,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             if (dicePiece == null) {
                                 return;
                             }
-                            setDragEndResultToPieceState({ e, piece: dicePiece, board });
+                            setDragResultToPieceState({ e, piece: dicePiece, cellConfig: board });
                         });
                     }}
                 />
@@ -606,7 +624,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         if (shapePiece == null) {
                             return;
                         }
-                        setDragEndResultToPieceState({ e, piece: shapePiece, board });
+                        setDragResultToPieceState({ e, piece: shapePiece, cellConfig: board });
                     });
                 }}
             />
@@ -661,7 +679,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             if (stringPiece == null) {
                                 return;
                             }
-                            setDragEndResultToPieceState({ e, piece: stringPiece, board });
+                            setDragResultToPieceState({ e, piece: stringPiece, cellConfig: board });
                         });
                     }}
                 />
@@ -675,6 +693,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     {shapePieceElements}
                     {dicePieceElements}
                     {stringPieceElements}
+                    {deckPieceElements}
                     {portraitPositionElements}
                     {characterPieceElements}
                 </ReactKonva.Layer>

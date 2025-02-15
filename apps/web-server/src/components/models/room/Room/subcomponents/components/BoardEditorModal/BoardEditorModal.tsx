@@ -59,6 +59,8 @@ const defaultBoard: BoardState = {
     backgroundImage: undefined,
     backgroundImageZoom: 1,
 
+    cardGroups: {},
+    deckPieces: {},
     dicePieces: {},
     imagePieces: {},
     shapePieces: {},

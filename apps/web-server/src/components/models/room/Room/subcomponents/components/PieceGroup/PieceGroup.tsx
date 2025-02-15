@@ -4,9 +4,10 @@ import { KonvaEventObject, NodeConfig } from 'konva/lib/Node';
 import React, { PropsWithChildren } from 'react';
 import * as ReactKonva from 'react-konva';
 import { KonvaNodeEvents } from 'react-konva';
-import { DragEndResult, PixelPosition, PixelSize } from '../../utils/positionAndSizeAndRect';
+import { DragResult, PixelPosition, PixelRect } from '../../utils/positionAndSizeAndRect';
 import { NameLabel } from '../Board/subcomponents/components/ImagePiece/subcomponents/NameLabel';
 import { AnimatedGroupAsAnyProps } from '@/components/ui/AnimatedKonvaAsAnyProps/AnimatedKonvaAsAnyProps';
+import { useLongPress } from '@/hooks/useLongPress';
 
 const minimalImageSize = 10;
 
@@ -16,13 +17,26 @@ export type PieceGroupProps = {
     resizable: boolean;
     listening: boolean;
     label: string | undefined;
-    onDragEnd?: (resize: DragEndResult) => void;
+    longPress?:
+        | {
+              enable: true;
+              /** 長押しを開始するまでの時間を指定します。*/
+              threshold?: number;
+          }
+        | undefined;
+    /** リサイズもしくは移動されたときにトリガーされます。現時点ではリサイズと移動が同時に発生することはありませんが、将来そのような仕様になった場合に対応できるように、リサイズと移動の両方の結果が同時に渡されます。 */
+    onDragEnd?: (e: DragResult) => void;
     onClick?: () => void;
     onDblClick?: (e: KonvaEventObject<MouseEvent>) => void;
     onMouseEnter?: () => void;
     onMouseLeave?: () => void;
-} & PixelPosition &
-    PixelSize;
+    onResizeStart?: () => void;
+    onResizeEnd?: () => void;
+    onMoveStart?: () => void;
+    onMove?: (e: { newPosition: PixelPosition }) => void;
+    /** クリック長押しの状態の変更を通知します。`longPress?.enable === true` のときにのみ利用可能です。`longPress?.enable !== true` のときの動作は保証されないため利用しないでください。 */
+    onLongPressChange?: (isLongPressing: boolean) => void;
+} & PixelRect;
 
 export const PieceGroup: React.FC<PropsWithChildren<PieceGroupProps>> = ({
     isSelected,
@@ -30,11 +44,17 @@ export const PieceGroup: React.FC<PropsWithChildren<PieceGroupProps>> = ({
     resizable,
     listening,
     label,
+    longPress,
     onDragEnd: onDragEndProp,
     onClick,
     onDblClick,
     onMouseEnter,
     onMouseLeave,
+    onResizeStart,
+    onResizeEnd,
+    onMoveStart,
+    onMove,
+    onLongPressChange,
     x,
     y,
     w,
@@ -62,6 +82,18 @@ export const PieceGroup: React.FC<PropsWithChildren<PieceGroupProps>> = ({
     const groupRef = React.useRef<Konva.Group | null>(null);
     const transformerRef = React.useRef<Konva.Transformer | null>(null);
 
+    const [isLongPressing, setIsLongPressing] = React.useState(false);
+    const longPressEvent = useLongPress(
+        isLongPressing => {
+            setIsLongPressing(isLongPressing);
+            onLongPressChange && onLongPressChange(isLongPressing);
+        },
+        {
+            cancelOnMovement: true,
+            threshold: longPress?.threshold,
+        },
+    );
+
     React.useEffect(() => {
         if (!isSelected) {
             return;
@@ -79,6 +111,7 @@ export const PieceGroup: React.FC<PropsWithChildren<PieceGroupProps>> = ({
 
     const onDragStart = () => {
         suppressSpringRef.current = true;
+        onMoveStart && onMoveStart();
     };
 
     const onDragEnd = (e: KonvaEventObject<unknown>) => {
@@ -100,6 +133,21 @@ export const PieceGroup: React.FC<PropsWithChildren<PieceGroupProps>> = ({
         }
     };
 
+    const onDragMove = (e: KonvaEventObject<unknown>) => {
+        if (!draggable) {
+            return;
+        }
+        const x = e.target.x();
+        const y = e.target.y();
+        onMove &&
+            onMove({
+                newPosition: {
+                    x,
+                    y,
+                },
+            });
+    };
+
     const konvaGroupStyle: NodeConfig & KonvaNodeEvents = {
         width: w,
         height: h,
@@ -117,19 +165,30 @@ export const PieceGroup: React.FC<PropsWithChildren<PieceGroupProps>> = ({
         onDragEnd: e => onDragEnd(e),
         onTouchStart: () => onDragStart(),
         onTouchEnd: e => onDragEnd(e),
+        onDragMove: e => {
+            longPressEvent.onDragMove(e.evt);
+            onDragMove(e);
+        },
+        onTouchMove: e => onDragMove(e),
+        onMouseDown: e => {
+            longPressEvent.onMouseDown(e.evt);
+        },
+        onMouseUp: () => {
+            longPressEvent.onMouseUp();
+        },
         onMouseEnter: () => {
-            if (onMouseEnter == null) {
-                return;
-            }
-            onMouseEnter();
+            onMouseEnter && onMouseEnter();
         },
         onMouseLeave: () => {
-            if (onMouseLeave == null) {
-                return;
-            }
-            onMouseLeave();
+            longPressEvent.onMouseLeave();
+            onMouseLeave && onMouseLeave();
+        },
+        onTransformStart: () => {
+            onResizeStart && onResizeStart();
         },
         onTransformEnd: () => {
+            onResizeEnd && onResizeEnd();
+
             // transformer is changing scale of the node
             // and NOT its width or height
             // but in the store we have only width and height
@@ -167,6 +226,11 @@ export const PieceGroup: React.FC<PropsWithChildren<PieceGroupProps>> = ({
             <AnimatedGroupAsAnyProps {...springStyle} {...konvaGroupStyle} ref={groupRef}>
                 {children}
                 <NameLabel x={0} y={0} w={w} h={h} text={label} />
+
+                {/* 仮の要素 */}
+                {longPress?.enable === true && isLongPressing && (
+                    <ReactKonva.Rect x={0} y={0} w={w} h={h} text={label} fill="red" />
+                )}
             </AnimatedGroupAsAnyProps>
             {isSelected && (
                 <ReactKonva.Transformer

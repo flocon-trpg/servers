@@ -55,7 +55,7 @@ class WritingMessageStatus {
 
 @ObjectType()
 class RoomEvent {
-    // 現状は、2つ以上同時にnon-nullish|trueになることはない。
+    // 現時点では、2つ以上同時にnon-nullish|trueになることはない。
 
     @Field(() => RoomOperation, { nullable: true })
     public roomOperation?: RoomOperation;
