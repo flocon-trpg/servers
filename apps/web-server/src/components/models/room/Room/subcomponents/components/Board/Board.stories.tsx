@@ -109,7 +109,7 @@ const backgroundActiveBoardProps: Props = {
 const meta = {
     title: 'models/room/Room/Board',
     component: Default,
-    args: { myParticipantRole: 'Player', boardProps: boardEditorProps, removeActiveBoard: true },
+    args: { myParticipantRole: 'Player', boardProps: boardEditorProps, removeActiveBoard: false },
     parameters: {
         chromatic: { delay: 1000 },
     },
