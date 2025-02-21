@@ -14,7 +14,9 @@ import * as StringPiece from './stringPiece/types';
 
 export const template = createObjectValueTemplate(
     {
-        backgroundImage: createReplaceValueTemplate(maybe(filePathValue)),
+        backgroundImage: createReplaceValueTemplate(filePathValue.optional()),
+        // 例えば1ならば1倍、2ならば2倍。web-serverのユーザー設定にzoomがあるがそちらと計算方法が異なるので注意。
+        // TODO: backgroundImageZoom ではなく backgroundImageScale 等にしておけばわかりやすかったか。
         backgroundImageZoom: createReplaceValueTemplate(z.number()),
         cellColumnCount: createReplaceValueTemplate(z.number()),
         cellHeight: createReplaceValueTemplate(z.number()),
