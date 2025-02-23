@@ -1,5 +1,4 @@
 import { env } from '@flocon-trpg/core';
-import { Result } from '@kizahasi/result';
 import { Meta } from '@storybook/react';
 import { useSetAtom } from 'jotai';
 import React from 'react';
