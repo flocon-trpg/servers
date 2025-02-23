@@ -52,6 +52,8 @@ export namespace Fixtures {
             cellOffsetY: 0,
             cellRowCount: 0,
             cellWidth: 0,
+            cardGroups: {},
+            deckPieces: {},
             dicePieces: {},
             imagePieces: {},
             name: '',
@@ -155,6 +157,7 @@ export namespace Fixtures {
         publicChannel8Name: '',
         publicChannel9Name: '',
         publicChannel10Name: '',
+        stats: { $v: 1, $r: 1, boards: {} },
     };
 
     export const complexDbState: State<typeof roomDbTemplate> = {
@@ -194,6 +197,10 @@ export namespace Fixtures {
                 cellOffsetY: 10,
                 cellRowCount: 10,
                 cellWidth: 10,
+                // TODO: 適当な値を入れる
+                cardGroups: {},
+                // TODO: 適当な値を入れる
+                deckPieces: {},
                 dicePieces: {
                     DICE_PIECE_KEY: {
                         $v: 2,
@@ -462,5 +469,7 @@ export namespace Fixtures {
                 role: 'Player',
             },
         },
+        // 適当な値を入れる
+        stats: { $v: 1, $r: 1, boards: {} },
     };
 }

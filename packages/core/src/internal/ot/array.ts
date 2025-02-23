@@ -41,7 +41,7 @@ export const $index = '$index';
  * ```
  */
 /*
-配列の表現方法には { $key: string, ...otherProperties }[] と Record<string, { $index: number; ...otherProperties }> の2種類が考えられたが、後者を採用している。
+配列の表現方法には { $key: string, ...otherProperties }[] と Record<string, { $index: number; ...otherProperties }> の2種類が考えられるが、後者を採用している。
 前者はデータをエクスポートした際にテキストエディタで比較的編集しやすいというメリットがある。ただし、replace と update の2種類だけでは、要素が移動した際に要素を丸ごと delete と insert する必要があるため Operation の容量がかさばるという問題点がある。move のような Operation も定義すれば解決すると思われるが、手間がかかる。いっぽう、後者の方法だと $index を変更するだけで済むため容量がかさばる問題は存在せず、既存の Record の Operational Transformation のシステムに乗っかれるというメリットがある。よって単純化を重視して後者を採用した。
 */
 export const indexObjectTemplateValue = {
@@ -86,7 +86,7 @@ export const indexObjectsToArray = <T extends IndexObjectState>(
         groupBy$index.delete(i.toString());
         if (groupValue == null || groupValue.length !== 1) {
             return Result.error(
-                `Just one element where index is ${i} should exist, but there are ${
+                `Just one element which index is ${i} should exist, but there are ${
                     groupValue?.length ?? 0
                 } such elements.`,
             );

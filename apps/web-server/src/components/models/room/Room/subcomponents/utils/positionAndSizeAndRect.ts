@@ -26,7 +26,7 @@ export type PixelSize = {
     h: number;
 };
 
-export type DragEndResult = {
+export type DragResult = {
     readonly newPosition?: PixelPosition;
     readonly newSize?: PixelSize;
 };
@@ -202,5 +202,37 @@ export const applyCompositeRect = ({
 }): void => {
     for (const key of ['x', 'y', 'w', 'h', 'cellX', 'cellY', 'cellW', 'cellH'] as const) {
         state[key] = operation[key];
+    }
+};
+
+export const setDragResultToPieceState = ({
+    e,
+    piece,
+    cellConfig,
+}: {
+    e: DragResult;
+    piece: PieceState;
+    cellConfig: CellConfig;
+}): void => {
+    if (piece.isCellMode) {
+        if (e.newPosition != null) {
+            const position = toCellPosition({ pixelPosition: e.newPosition, cellConfig });
+            piece.cellX = position.cellX;
+            piece.cellY = position.cellY;
+        }
+        if (e.newSize != null) {
+            const size = toCellSize({ pixelSize: e.newSize, cellConfig });
+            piece.cellW = size.cellW;
+            piece.cellH = size.cellH;
+        }
+    } else {
+        if (e.newPosition != null) {
+            piece.x = e.newPosition.x;
+            piece.y = e.newPosition.y;
+        }
+        if (e.newSize != null) {
+            piece.w = e.newSize.w;
+            piece.h = e.newSize.h;
+        }
     }
 };

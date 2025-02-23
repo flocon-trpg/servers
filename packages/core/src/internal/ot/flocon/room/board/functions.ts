@@ -4,6 +4,7 @@ import { isIdRecord } from '../../../record';
 import * as RecordOperation from '../../../recordOperation';
 import {
     RequestedBy,
+    admin,
     anyValue,
     canChangeCharacterValue,
     canChangeOwnerParticipantId,
@@ -14,6 +15,10 @@ import * as TextOperation from '../../../textOperation';
 import * as ReplaceOperation from '../../../util/replaceOperation';
 import { ServerTransform, TwoWayError } from '../../../util/type';
 import * as Room from '../types';
+import * as CardGroup from './cardGroup/functions';
+import * as CardGroupTypes from './cardGroup/types';
+import * as DeckPiece from './deckPiece/functions';
+import * as DeckPieceTypes from './deckPiece/types';
 import * as DicePiece from './dicePiece/functions';
 import * as DicePieceTypes from './dicePiece/types';
 import * as ImagePiece from './imagePiece/functions';
@@ -29,6 +34,14 @@ export const toClientState =
     (source: State<typeof template>): State<typeof template> => {
         return {
             ...source,
+            deckPieces: RecordOperation.toClientState<
+                State<typeof DeckPieceTypes.template>,
+                State<typeof DeckPieceTypes.template>
+            >({
+                serverState: source.deckPieces,
+                isPrivate: () => false,
+                toClientState: ({ state }) => DeckPiece.toClientState(requestedBy)(state),
+            }),
             dicePieces: RecordOperation.toClientState<
                 State<typeof DicePieceTypes.template>,
                 State<typeof DicePieceTypes.template>
@@ -123,6 +136,60 @@ export const serverTransform =
                     ownerParticipantId: state.ownerParticipantId ?? anyValue,
                 }),
         };
+
+        // 空のグループ、言い換えるとカードのないグループは存在できるほうが、グループ作成の方法などにおいて UI 的にわかりやすいと思うので、空のグループを自動削除する機能はつけていない
+        const cardGroups = RecordOperation.serverTransform<
+            State<typeof CardGroupTypes.template>,
+            State<typeof CardGroupTypes.template>,
+            TwoWayOperation<typeof CardGroupTypes.template>,
+            UpOperation<typeof CardGroupTypes.template>,
+            TwoWayError
+        >({
+            first: serverOperation?.cardGroups,
+            second: clientOperation.cardGroups,
+            stateBeforeFirst: stateBeforeServerOperation.cardGroups ?? {},
+            stateAfterFirst: stateAfterServerOperation.cardGroups ?? {},
+            innerTransform: ({ first, second, prevState, nextState }) =>
+                CardGroup.serverTransform({
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {},
+        });
+        if (cardGroups.isError) {
+            return cardGroups;
+        }
+
+        const deckPieces = RecordOperation.serverTransform<
+            State<typeof DeckPieceTypes.template>,
+            State<typeof DeckPieceTypes.template>,
+            TwoWayOperation<typeof DeckPieceTypes.template>,
+            UpOperation<typeof DeckPieceTypes.template>,
+            TwoWayError
+        >({
+            first: serverOperation?.deckPieces,
+            second: clientOperation.deckPieces,
+            stateBeforeFirst: stateBeforeServerOperation.deckPieces ?? {},
+            stateAfterFirst: stateAfterServerOperation.deckPieces ?? {},
+            innerTransform: ({ first, second, prevState, nextState }) =>
+                DeckPiece.serverTransform(requestedBy)({
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {
+                cancelCreate: () => requestedBy.type !== admin,
+                cancelRemove: () => requestedBy.type !== admin,
+            },
+        });
+        if (deckPieces.isError) {
+            return deckPieces;
+        }
 
         const dicePieces = RecordOperation.serverTransform<
             State<typeof DicePieceTypes.template>,
@@ -233,6 +300,7 @@ export const serverTransform =
         const twoWayOperation: TwoWayOperation<typeof template> = {
             $v: 2,
             $r: 1,
+            deckPieces: deckPieces.value,
             dicePieces: dicePieces.value,
             imagePieces: imagePieces.value,
             shapePieces: shapePieces.value,

@@ -10,18 +10,18 @@ import { createMockUrqlClientForLayout } from '@/mocks/createMockUrqlClientForLa
 type RoomState = S<typeof roomTemplate>;
 
 export const Default: React.FC<{
-    myParticipantRole: ParticipantRole;
     boardProps: Props;
-    removeActiveBoard: boolean;
-}> = ({ boardProps, myParticipantRole, removeActiveBoard }) => {
+    myParticipantRole: ParticipantRole;
+    removeActiveBoardId: boolean;
+}> = ({ boardProps, myParticipantRole, removeActiveBoardId }) => {
     const updateRoom = React.useMemo(() => {
-        if (removeActiveBoard) {
+        if (removeActiveBoardId) {
             return (room: RoomState) => {
                 room.activeBoardId = undefined;
             };
         }
         return undefined;
-    }, [removeActiveBoard]);
+    }, [removeActiveBoardId]);
     const { roomClientContextValue } = useSetupStorybook({
         room: {
             myParticipantRole,
@@ -40,9 +40,14 @@ export const Default: React.FC<{
     );
 };
 
+const boardWidth = 800;
+const boardHeight = 600;
+const canvasWidth = boardWidth;
+const canvasHeight = boardHeight;
+
 const boardEditorProps: Props = {
-    canvasWidth: 500,
-    canvasHeight: 400,
+    canvasWidth,
+    canvasHeight,
     type: 'boardEditor',
     boardEditorPanelId: 'dummy-boardEditorPanelId',
     config: {
@@ -51,7 +56,7 @@ const boardEditorProps: Props = {
             [defaultBoardId]: {
                 offsetX: 0,
                 offsetY: 0,
-                zoom: 1,
+                zoom: 0,
                 showGrid: true,
                 gridLineTension: 1,
                 gridLineColor: 'red',
@@ -66,22 +71,22 @@ const boardEditorProps: Props = {
         isMinimized: false,
         x: 0,
         y: 0,
-        width: 500,
-        height: 400,
+        width: boardWidth,
+        height: boardHeight,
         zIndex: 1,
     },
 };
 
 const activeBoardProps: Props = {
-    canvasWidth: 500,
-    canvasHeight: 400,
+    canvasWidth,
+    canvasHeight,
     type: 'activeBoard',
     isBackground: false,
     config: {
         board: {
             offsetX: 0,
             offsetY: 0,
-            zoom: 1,
+            zoom: 0,
             showGrid: true,
             gridLineTension: 1,
             gridLineColor: 'red',
@@ -95,8 +100,8 @@ const activeBoardProps: Props = {
         isMinimized: false,
         x: 0,
         y: 0,
-        width: 500,
-        height: 400,
+        width: boardWidth,
+        height: boardHeight,
         zIndex: 1,
     },
 };
@@ -109,7 +114,7 @@ const backgroundActiveBoardProps: Props = {
 const meta = {
     title: 'models/room/Room/Board',
     component: Default,
-    args: { myParticipantRole: 'Player', boardProps: boardEditorProps, removeActiveBoard: false },
+    args: { myParticipantRole: 'Player', boardProps: boardEditorProps, removeActiveBoardId: false },
     parameters: {
         chromatic: { delay: 1000 },
     },
@@ -141,13 +146,13 @@ export const BackgroundActiveBoard: Story = {
 export const ActiveBoardNotFound: Story = {
     args: {
         boardProps: activeBoardProps,
-        removeActiveBoard: true,
+        removeActiveBoardId: true,
     },
 };
 
 export const BackgroundActiveBoardNotFound: Story = {
     args: {
         boardProps: backgroundActiveBoardProps,
-        removeActiveBoard: true,
+        removeActiveBoardId: true,
     },
 };

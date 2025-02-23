@@ -76,6 +76,38 @@ type CreateRoomSuccessResult {
   roomId: String!
 }
 
+type CustomDeckTemplate {
+  createdAt: Float
+  deletePermission: PermissionType!
+
+  """サーバーで管理されているID。ソートすると作成した時系列順になる。"""
+  id: ID!
+  listPermission: PermissionType!
+  updatePermission: PermissionType!
+
+  """
+  DeckTemplateのState。@flocon-trpg/coreのstate(deckTemplateTemplate).parse(...)でdecodeできる。
+  """
+  valueJson: String!
+}
+
+type CustomDeckTemplateAsListItem {
+  createdAt: Float
+  deletePermission: PermissionType!
+
+  """サーバーで管理されているID。ソートすると作成した時系列順になる。"""
+  id: ID!
+  listPermission: PermissionType!
+  updatePermission: PermissionType!
+}
+
+type DefaultDeckTemplate {
+  """
+  DeckTemplateのState。@flocon-trpg/coreのstate(deckTemplateTemplate).parse(...)でdecodeできる。
+  """
+  valueJson: String!
+}
+
 enum DeleteMessageFailureType {
   MessageDeleted
   MessageNotFound
@@ -191,6 +223,18 @@ type GetAvailableGameSystemsResult {
   value: [AvailableGameSystem!]!
 }
 
+union GetCustomDeckTemplatesListResult = GetCustomDeckTemplatesListSuccessResult
+
+type GetCustomDeckTemplatesListSuccessResult {
+  deckTemplates: [CustomDeckTemplateAsListItem!]!
+}
+
+union GetDefaultDeckTemplatesListResult = GetDefaultDeckTemplatesListSuccessResult
+
+type GetDefaultDeckTemplatesListSuccessResult {
+  deckTemplates: [DefaultDeckTemplate!]!
+}
+
 input GetFilesInput {
   """
   FileTagのidを指定することで、指定したタグが付いているファイルのみを抽出して表示する。例えばidがx,yの3つのタグが付いているファイルは、[]や[x]や[x,y]と指定した場合にマッチするが、[x,y,z]と指定された場合は除外される。
@@ -273,7 +317,11 @@ union GetRoomMessagesResult = GetRoomMessagesFailureResult | RoomMessages
 union GetRoomResult = GetJoinedRoomResult | GetNonJoinedRoomResult | GetRoomFailureResult
 
 type GetRoomsListFailureResult {
-  failureType: GetRoomFailureType!
+  failureType: GetRoomsListFailureType!
+}
+
+enum GetRoomsListFailureType {
+  UnknownError
 }
 
 union GetRoomsListResult = GetRoomsListFailureResult | GetRoomsListSuccessResult
@@ -324,8 +372,15 @@ type Mutation {
   answerRollCall(answer: Boolean!, rollCallId: String!, roomId: String!): AnswerRollCallResult!
   changeParticipantName(newName: String!, roomId: String!): ChangeParticipantNameResult!
   closeRollCall(rollCallId: String!, roomId: String!): CloseRollCallResult!
+  createCustomDeckTemplate(
+    """
+    DeckTemplateのState。@flocon-trpg/coreのstate(deckTemplateTemplate).parse(...)でdecodeできる。
+    """
+    valueJson: String!
+  ): CustomDeckTemplate!
   createFileTag(tagName: String!): FileTag @deprecated(reason: "Use screenname to group files by folders instead.")
   createRoom(input: CreateRoomInput!): CreateRoomResult!
+  deleteDeckTemplate(deckTemplateId: String!): Boolean!
   deleteFileTag(tagId: String!): Boolean! @deprecated(reason: "Use screenname to group files by folders instead.")
   deleteFiles(filenames: [String!]!): [String!]!
   deleteMessage(messageId: String!, roomId: String!): DeleteMessageResult!
@@ -350,6 +405,14 @@ type Mutation {
   renameFiles(input: [RenameFileInput!]!): [String!]!
   resetMessages(roomId: String!): ResetRoomMessagesResult!
   updateBookmark(newValue: Boolean!, roomId: String!): UpdateBookmarkResult!
+  updateDeckTemplate(
+    deckTemplateId: String!
+
+    """
+    DeckTemplateのState。@flocon-trpg/coreのstate(deckTemplateTemplate).decode(...)でdecodeできる。
+    """
+    valueJson: String!
+  ): UpdateDeckTemplateResult!
 
   """この Mutation を直接実行することは非推奨です。代わりに @flocon-trpg/sdk を用いてください。"""
   updateWritingMessageStatus(newStatus: WritingMessageStatusInputType!, roomId: String!): Boolean!
@@ -432,6 +495,11 @@ type PerformRollCallResult {
   failureType: PerformRollCallFailureType
 }
 
+enum PermissionType {
+  Entry
+  Private
+}
+
 type PieceLog {
   createdAt: Float!
   logType: PieceLogType!
@@ -474,6 +542,9 @@ type PromoteResult {
 
 type Query {
   getAvailableGameSystems: GetAvailableGameSystemsResult!
+  getCustomDeckTemplate(id: String!): CustomDeckTemplate
+  getCustomDeckTemplatesList: GetCustomDeckTemplatesListResult!
+  getDefaultDeckTemplatesList: GetDefaultDeckTemplatesListResult!
   getDiceHelpMessage(gameSystemId: String!): String
   getFiles(input: GetFilesInput!): GetFilesResult!
   getLog(roomId: String!): GetRoomLogResult!
@@ -587,11 +658,11 @@ type RoomMessagesReset {
 }
 
 type RoomOperation {
-  """operateRoomを呼んだ人物。promoteなどの結果の場合はnullishになる。"""
+  """operateRoomを実行した人物。promoteなどの結果の場合はnullishになる。"""
   operatedBy: OperatedBy
   revisionTo: Float!
 
-  """room.upOperationをJSONにしたもの。idならばnullish。"""
+  """RoomのUpOperationをJSONにした値。"""
   valueJson: String!
 }
 
@@ -729,6 +800,20 @@ union UpdateBookmarkResult = UpdateBookmarkFailureResult | UpdateBookmarkSuccess
 type UpdateBookmarkSuccessResult {
   currentValue: Boolean!
   prevValue: Boolean!
+}
+
+type UpdateDeckTemplateFailureResult {
+  failureType: UpdateDeckTemplateFailureType!
+}
+
+enum UpdateDeckTemplateFailureType {
+  NotFound
+}
+
+union UpdateDeckTemplateResult = UpdateDeckTemplateFailureResult | UpdateDeckTemplateSuccessResult
+
+type UpdateDeckTemplateSuccessResult {
+  currentValue: CustomDeckTemplate!
 }
 
 type UpdatedText {

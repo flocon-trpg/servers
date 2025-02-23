@@ -1,5 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { ParticipantRoleType } from '../../enums/ParticipantRoleType';
+import { OperatedBy } from './operatedBy';
 
 @ObjectType()
 export class RoomGetState {
@@ -33,15 +34,6 @@ export class RoomGetState {
     public role?: ParticipantRoleType | undefined;
 }
 
-@ObjectType()
-class OperatedBy {
-    @Field()
-    public userUid!: string;
-
-    @Field()
-    public clientId!: string;
-}
-
 export const roomOperation = 'RoomOperation';
 
 @ObjectType()
@@ -53,11 +45,11 @@ export class RoomOperation {
 
     @Field(() => OperatedBy, {
         nullable: true,
-        description: 'operateRoomを呼んだ人物。promoteなどの結果の場合はnullishになる。',
+        description: 'operateRoomを実行した人物。promoteなどの結果の場合はnullishになる。',
     })
     public operatedBy?: OperatedBy;
 
-    @Field({ description: 'room.upOperationをJSONにしたもの。idならばnullish。' })
+    @Field({ description: 'RoomのUpOperationをJSONにした値。' })
     public valueJson!: string;
 }
 

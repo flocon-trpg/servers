@@ -8,6 +8,7 @@ import {
     Property,
 } from '@mikro-orm/core';
 import { BaasType } from '../../../enums/BaasType';
+import { DeckTemplate } from '../deckTemplate/entity';
 import { File } from '../file/entity';
 import { FileTag } from '../fileTag/entity';
 import { Participant } from '../participant/entity';
@@ -43,6 +44,9 @@ export class User {
 
     @OneToMany(() => FileTag, x => x.user, { orphanRemoval: true })
     public fileTags = new Collection<FileTag>(this);
+
+    @OneToMany(() => DeckTemplate, x => x.createdBy, { orphanRemoval: true })
+    public deckTemplates = new Collection<DeckTemplate>(this);
 
     @OneToMany(() => RoomPubMsg, x => x.createdBy, { orphanRemoval: true })
     public roomPubMsgs = new Collection<RoomPubMsg>(this);
