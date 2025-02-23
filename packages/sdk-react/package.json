@@ -24,7 +24,7 @@
     "dependencies": {
         "@flocon-trpg/sdk": "workspace:^",
         "@graphql-typed-document-node/core": "^3.2.0",
-        "react": "^18.0.0",
+        "react": "^19.0.0",
         "react-use": "^17.3.1",
         "use-memo-one": "^1.1.2"
     },
@@ -36,7 +36,7 @@
         "@testing-library/dom": "10.4.0",
         "@testing-library/react": "16.2.0",
         "@types/jest": "29.5.14",
-        "@types/react-dom": "18.3.5",
+        "@types/react-dom": "19.0.4",
         "eslint": "9.19.0",
         "eslint-config-prettier": "9.1.0",
         "eslint-plugin-import": "2.31.0",
@@ -45,7 +45,7 @@
         "jest": "29.7.0",
         "jest-environment-jsdom": "29.7.0",
         "prettier": "3.4.2",
-        "react-dom": "18.3.1",
+        "react-dom": "19.0.0",
         "rimraf": "5.0.10",
         "rollup": "4.32.1",
         "ts-jest": "29.2.5",
