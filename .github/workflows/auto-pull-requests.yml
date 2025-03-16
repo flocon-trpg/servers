@@ -27,7 +27,7 @@ jobs:
             - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: 20.x
+                  node-version: 22.x
                   cache: yarn
 
             - run: git config --local user.email "auto-pull-requests.yml[bot]@example.com" # fake user email for pushing build
