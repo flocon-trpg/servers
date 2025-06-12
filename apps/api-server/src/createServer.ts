@@ -334,8 +334,8 @@ export const createServer = async ({
                     .toFile(thumbPath)
                     .then(() => true)
                     .catch((err: Error) => {
-                        // 画像かどうかに関わらず全てのファイルをsharpに渡すため、mp3などといった画像でないファイルの場合はほぼ確実にここに来る。そのため、warnなどではなくそれよりlevelの低いdebugを使っている。
-                        loggerRef.debug(err);
+                        // 型エラーが出るので応急処置的にコメントアウト。なお、最新バージョンではこの問題は解決されているためコメントアウトは不要。
+                        // loggerRef.debug(err);
                         return false;
                     });
                 const permissionType =
