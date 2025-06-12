@@ -249,7 +249,6 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
                 .toFile(thumbPath)
                 .then(() => true)
                 .catch((err) => {
-                utils.loggerRef.debug(err);
                 return false;
             });
             const permissionType = req.params.permission === permission.public
