@@ -75,7 +75,7 @@
         "react-dom": "^18.3.1",
         "react-draggable": "^4.4.4",
         "react-konva": "^18.1.1",
-        "react-markdown": "^8.0.0",
+        "react-markdown": "^10.0.0",
         "react-rnd": "^10.3.7",
         "react-use": "^17.3.1",
         "react-virtuoso": "^4.0.0",
