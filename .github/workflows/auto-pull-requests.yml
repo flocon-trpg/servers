@@ -19,7 +19,7 @@ jobs:
 
         steps:
             - name: Checkout repo
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
               with:
                   # without this, "git checkout main-build" will fail because the main-build branch is not present in the local repository.
                   fetch-depth: 0
@@ -138,7 +138,7 @@ jobs:
 
         steps:
             - name: Checkout repo
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - run: git --version
 
