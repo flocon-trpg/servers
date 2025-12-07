@@ -31,7 +31,7 @@
         "antd": "^5.21.6",
         "bcryptjs": "^2.4.3",
         "clsx": "^2.0.0",
-        "docusaurus-plugin-image-zoom": "^2.0.0",
+        "docusaurus-plugin-image-zoom": "^3.0.0",
         "jotai": "^2.10.1",
         "prism-react-renderer": "^2.3.0",
         "react": "^18.0.0",
