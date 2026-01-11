@@ -4745,7 +4745,7 @@ __metadata:
     "@types/fs-extra": "npm:11.0.4"
     "@types/inquirer": "npm:8.2.10"
     "@types/jest": "npm:29.5.14"
-    "@types/multer": "npm:1.4.12"
+    "@types/multer": "npm:2.0.0"
     "@types/node": "npm:20.17.16"
     "@types/safe-compare": "npm:1.1.2"
     "@types/supertest": "npm:6.0.2"
@@ -9807,12 +9807,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/multer@npm:1.4.12":
-  version: 1.4.12
-  resolution: "@types/multer@npm:1.4.12"
+"@types/multer@npm:2.0.0":
+  version: 2.0.0
+  resolution: "@types/multer@npm:2.0.0"
   dependencies:
     "@types/express": "npm:*"
-  checksum: 10/3d2b32da58ddd67f972d4ef1021492f78d65f33f936b6fb25dd461bb6cc7b03bfd1de1a11562c4310680dac8054e4398038db51767a0ffbf1fe62457b3706e95
+  checksum: 10/87ddd5b39fd572b1d98f84908738eed9fef53fc20628bff066d43b3bcf70481f51010a997554ed65c97121e7b8fe44b59a24cd68ccf59c3d7c64bbffb8c5a127
   languageName: node
   linkType: hard
 
@@ -27064,14 +27064,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"signal-exit@npm:^4.0.1":
-  version: 4.0.1
-  resolution: "signal-exit@npm:4.0.1"
-  checksum: 10/3d345d3a6c3ed533aa8107f8fab73257cf8ddacd0a297c00d0fd3c960a9802900e3cbc518076254ee4ab99ef253b059929d6bf907c5fbc805fdc8a186d900bc0
-  languageName: node
-  linkType: hard
-
-"signal-exit@npm:^4.1.0":
+"signal-exit@npm:^4.0.1, signal-exit@npm:^4.1.0":
   version: 4.1.0
   resolution: "signal-exit@npm:4.1.0"
   checksum: 10/c9fa63bbbd7431066174a48ba2dd9986dfd930c3a8b59de9c29d7b6854ec1c12a80d15310869ea5166d413b99f041bfa3dd80a7947bcd44ea8e6eb3ffeabfa1f
