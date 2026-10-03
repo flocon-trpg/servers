@@ -74,7 +74,7 @@
         "react-dnd-html5-backend": "^16.0.0",
         "react-dom": "^18.3.1",
         "react-draggable": "^4.4.4",
-        "react-konva": "^18.1.1",
+        "react-konva": "^19.0.0",
         "react-markdown": "^8.0.0",
         "react-rnd": "^10.3.7",
         "react-use": "^17.3.1",
